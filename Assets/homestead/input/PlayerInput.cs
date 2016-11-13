@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class PlayerInput : MonoBehaviour {
 
     public Transform tubePrefab;
-    public UnityStandardAssets.Characters.FirstPerson.FirstPersonController FPSController;
+    public CustomFPSController FPSController;
 
     private UnityStandardAssets.Vehicles.Car.CarUserControl CarController;
     private Collider selectedAirlock1;
