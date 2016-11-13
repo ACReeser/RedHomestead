@@ -2,13 +2,14 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using RedHomestead.Rovers;
 
 public class PlayerInput : MonoBehaviour {
 
     public Transform tubePrefab;
     public CustomFPSController FPSController;
-
-    private UnityStandardAssets.Vehicles.Car.CarUserControl CarController;
+    
+    private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1;
     private List<Transform> createdTubes = new List<Transform>();
     private bool playerIsOnFoot = true;
@@ -74,7 +75,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
-                        ToggleVehicle(hitInfo.collider.transform.GetComponent<UnityStandardAssets.Vehicles.Car.CarUserControl>());
+                        ToggleVehicle(hitInfo.collider.transform.GetComponent<RoverInput>());
                     }
                     else
                     {
@@ -98,13 +99,13 @@ public class PlayerInput : MonoBehaviour {
         }
 	}
 
-    private void ToggleVehicle(UnityStandardAssets.Vehicles.Car.CarUserControl carControl)
+    private void ToggleVehicle(RoverInput roverInput)
     {
-        if (carControl == null && CarController != null)
+        if (roverInput == null && DrivingRoverInput != null)
         {
             playerIsOnFoot = true;
-            CarController.enabled = false;
-            FPSController.transform.position = CarController.transform.Find("Exit").transform.position;
+            DrivingRoverInput.enabled = false;
+            FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
             FPSController.transform.SetParent(null);
             FPSController.SuspendInput = false;
         }
@@ -112,9 +113,9 @@ public class PlayerInput : MonoBehaviour {
         {
             playerIsOnFoot = false;
             //FPSController.enabled = false;
-            CarController = carControl;
-            CarController.enabled = true;
-            FPSController.transform.SetParent(CarController.transform.Find("Enter").transform);
+            DrivingRoverInput = roverInput;
+            DrivingRoverInput.enabled = true;
+            FPSController.transform.SetParent(DrivingRoverInput.transform.Find("Enter").transform);
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;
             FPSController.SuspendInput = true;

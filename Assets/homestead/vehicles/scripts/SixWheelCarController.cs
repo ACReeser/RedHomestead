@@ -2,7 +2,8 @@
 using System.Collections;
 using UnityStandardAssets.Vehicles.Car;
 
-public class SixWheelCarController : MonoBehaviour {
+namespace RedHomestead.Rovers
+{
     internal enum CarDriveType
     {
         FrontWheelDrive,
@@ -16,7 +17,7 @@ public class SixWheelCarController : MonoBehaviour {
         KPH
     }
 
-    public class CarController : MonoBehaviour
+    public class SixWheelCarController : MonoBehaviour
     {
         [SerializeField]
         private CarDriveType m_CarDriveType = CarDriveType.FourWheelDrive;

@@ -520,8 +520,8 @@ GameObject:
   - 4: {fileID: 454542}
   - 54: {fileID: 5467522}
   - 65: {fileID: 6593432}
-  - 114: {fileID: 11400480}
-  - 114: {fileID: 11488772}
+  - 114: {fileID: 11448244}
+  - 114: {fileID: 11446826}
   m_Layer: 8
   m_Name: playerRover
   m_TagString: rover
@@ -3774,17 +3774,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
---- !u!114 &11400480
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 152072}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96468c245ae8e0d4f8f1c7a7b8b0542e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &11415188
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3837,20 +3826,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SkidTrailPrefab: {fileID: 400000, guid: 4b6aa99de5d21424eab6ae279f31475b, type: 2}
   skidParticles: {fileID: 0}
---- !u!114 &11473580
+--- !u!114 &11446826
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 126262}
-  m_Enabled: 1
+  m_GameObject: {fileID: 152072}
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c62479c3465024b48b42983b1b2eeaaf, type: 3}
+  m_Script: {fileID: 11500000, guid: 27b535a3de2a7524d87a507bc9be17de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SkidTrailPrefab: {fileID: 400000, guid: 4b6aa99de5d21424eab6ae279f31475b, type: 2}
-  skidParticles: {fileID: 0}
---- !u!114 &11488772
+--- !u!114 &11448244
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -3858,7 +3845,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 152072}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ea65b38d485c374caa584a03f1de571, type: 3}
+  m_Script: {fileID: 11500000, guid: f20f1bff4a2e30d40a4785f2eb6f32de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_CarDriveType: 2
@@ -3889,7 +3876,20 @@ MonoBehaviour:
   m_Topspeed: 100
   m_RevRangeBoundary: 1
   m_SlipLimit: 0.3
-  m_BrakeTorque: 0
+  m_BrakeTorque: 100
+--- !u!114 &11473580
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 126262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c62479c3465024b48b42983b1b2eeaaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SkidTrailPrefab: {fileID: 400000, guid: 4b6aa99de5d21424eab6ae279f31475b, type: 2}
+  skidParticles: {fileID: 0}
 --- !u!114 &11488788
 MonoBehaviour:
   m_ObjectHideFlags: 1
