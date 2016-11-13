@@ -34,9 +34,20 @@ public class GuiBridge : MonoBehaviour {
         Description = "Drive Rover",
         Key = "E"
     };
+    public static PromptInfo PickupHint = new PromptInfo()
+    {
+        Description = "Pick up",
+        Key = "E"
+    };
+    internal static PromptInfo DropHint = new PromptInfo()
+    {
+        Description = "Drop",
+        Key = "E"
+    };
 
     public RectTransform PromptPanel;
     public Text PromptKey, PromptDescription;
+
 
     internal PromptInfo CurrentPrompt { get; set; }
 

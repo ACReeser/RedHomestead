@@ -10,7 +10,7 @@ public class PlayerInput : MonoBehaviour {
     public CustomFPSController FPSController;
     
     private RoverInput DrivingRoverInput;
-    private Collider selectedAirlock1;
+    private Collider selectedAirlock1, carriedObject;
     private List<Transform> createdTubes = new List<Transform>();
     private bool playerIsOnFoot = true;
     private bool playerInVehicle
@@ -44,7 +44,32 @@ public class PlayerInput : MonoBehaviour {
         {
             if (hitInfo.collider != null)
             {
-                if (hitInfo.collider.gameObject.CompareTag("bulkhead"))
+                if (hitInfo.collider.gameObject.CompareTag("movable"))
+                {
+                    if (carriedObject == null)
+                    {
+                        if (doInteract)
+                        {
+                            PickUpObject(hitInfo);
+                        }
+                        else
+                        {
+                            newPrompt = GuiBridge.PickupHint;
+                        }
+                    }
+                    else
+                    {
+                        if (doInteract)
+                        {
+                            DropObject();
+                        }
+                        else
+                        {
+                            newPrompt = GuiBridge.DropHint;
+                        }
+                    }
+                }
+                else if (hitInfo.collider.gameObject.CompareTag("bulkhead"))
                 {
                     if (doInteract)
                     {
@@ -88,6 +113,10 @@ public class PlayerInput : MonoBehaviour {
                 selectedAirlock1 = null;
             }
         }
+        else if (carriedObject != null)
+        {
+            DropObject();
+        }
 
         if (newPrompt == null)
         {
@@ -98,6 +127,20 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void PickUpObject(RaycastHit hitInfo)
+    {
+        carriedObject = hitInfo.collider;
+        carriedObject.GetComponent<Rigidbody>().useGravity = false;
+        carriedObject.transform.SetParent(this.transform);
+    }
+
+    private void DropObject()
+    {
+        carriedObject.GetComponent<Rigidbody>().useGravity = true;
+        carriedObject.transform.SetParent(null);
+        carriedObject = null;
+    }
 
     private void ToggleVehicle(RoverInput roverInput)
     {
