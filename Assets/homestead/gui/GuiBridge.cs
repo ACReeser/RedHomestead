@@ -52,9 +52,9 @@ public class GuiBridge : MonoBehaviour {
         Key = "E"
     };
 
-    public RectTransform PromptPanel, ConstructionPanel;
-    public Text PromptKey, PromptDescription, ConstructionHeader;
-    public RectTransform[] ConstructionRequirements;
+    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel;
+    public Text PromptKey, PromptDescription, ConstructionHeader, ModeText;
+    public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -66,7 +66,7 @@ public class GuiBridge : MonoBehaviour {
         TogglePromptPanel(false);
         this.ConstructionPanel.gameObject.SetActive(false);
         ConstructionRequirementsText = new Text[ConstructionRequirements.Length];
-
+        this.SetConstructionGroup(-2);
         int i = 0;
         foreach(RectTransform t in ConstructionRequirements)
         {
@@ -142,5 +142,82 @@ public class GuiBridge : MonoBehaviour {
                 //if it's timed, let it time out
             }
         }
+    }
+
+    public enum ConstructionGroup { None = -2, Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
+    public static Dictionary<ConstructionGroup, Module[]> Groupmap = new Dictionary<ConstructionGroup, Module[]>()
+    {
+        {
+            ConstructionGroup.Power,
+            new Module[]
+            {
+                Module.SolarPanelSmall
+            }
+        },
+        {
+            ConstructionGroup.Extraction,
+            new Module[]
+            {
+                Module.AtmosphereMiner
+            }
+        },
+        {
+            ConstructionGroup.Storage,
+            new Module[]
+            {
+                Module.OxygenTank
+            }
+        },
+    };
+
+    private ConstructionGroup selectedGroup;
+    public void SetConstructionGroup(int index)
+    {
+        ConstructionGroup newGroup = (ConstructionGroup)index;
+        selectedGroup = newGroup;
+        ConstructionModulesPanel.gameObject.SetActive(newGroup != ConstructionGroup.None);
+
+        if (selectedGroup == ConstructionGroup.None)
+        {
+            
+        }
+        else if (index > -1)
+        {
+            Module[] lists = Groupmap[selectedGroup];
+            for (int i = 0; i < this.ConstructionModuleButtons.Length; i++)
+            {
+                if (i < lists.Length)
+                {
+                    this.ConstructionModuleButtons[i].gameObject.SetActive(true);
+                    this.ConstructionModuleButtons[i].transform.GetChild(0).GetComponent<Text>().text = lists[i].ToString();
+                }
+                else
+                {
+                    this.ConstructionModuleButtons[i].gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    internal void RefreshMode()
+    {
+        switch(PlayerInput.Instance.Mode)
+        {
+            case PlayerInput.InputMode.Default:
+                this.ModeText.text = "Switch to Planning";
+                break;
+            case PlayerInput.InputMode.Planning:
+                this.ModeText.text = "Stop Planning";
+                this.SetConstructionGroup(-1);
+                break;
+        }
+
+    }
+
+    public void SelectConstructionPlan(int index)
+    {
+        Module planModule = (Module)index;
+        PlayerInput.Instance.PlannedModule = planModule;
+        this.selectedGroup = ConstructionGroup.None;
     }
 }

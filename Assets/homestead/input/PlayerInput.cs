@@ -3,12 +3,17 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Rovers;
+using RedHomestead.Construction;
 
 public class PlayerInput : MonoBehaviour {
-
+    public enum InputMode { Default, Planning }
+    public static PlayerInput Instance;
     public Transform tubePrefab;
     public CustomFPSController FPSController;
-    
+
+    internal Module PlannedModule = Module.Unspecified;
+    internal InputMode Mode = InputMode.Default;
+
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, carriedObject;
     private List<Transform> createdTubes = new List<Transform>();
@@ -19,6 +24,11 @@ public class PlayerInput : MonoBehaviour {
         {
             return !playerIsOnFoot;
         }
+    }
+
+    void Awake()
+    {
+        Instance = this;
     }
 
 	// Update is called once per frame
@@ -34,6 +44,11 @@ public class PlayerInput : MonoBehaviour {
             {
                 ToggleVehicle(null);
             }
+        }
+
+        if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            CycleMode();
         }
 
         bool doInteract = Input.GetKeyUp(KeyCode.E);
@@ -143,6 +158,28 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void CycleMode()
+    {
+        //todo: fix lazy code
+        if (Mode == InputMode.Default)
+            Mode = InputMode.Planning;
+        else
+            Mode = InputMode.Default;
+
+        if (Mode == InputMode.Planning)
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        GuiBridge.Instance.RefreshMode();
+    }
 
     private void PickUpObject(RaycastHit hitInfo)
     {
