@@ -175,7 +175,8 @@ public class GuiBridge : MonoBehaviour {
     {
         ConstructionGroup newGroup = (ConstructionGroup)index;
         selectedGroup = newGroup;
-        ConstructionModulesPanel.gameObject.SetActive(newGroup != ConstructionGroup.None);
+        ConstructionGroupPanel.gameObject.SetActive(index > -2);
+        ConstructionModulesPanel.gameObject.SetActive(index > -1);
 
         if (selectedGroup == ConstructionGroup.None)
         {
@@ -205,6 +206,7 @@ public class GuiBridge : MonoBehaviour {
         {
             case PlayerInput.InputMode.Default:
                 this.ModeText.text = "Switch to Planning";
+                this.SetConstructionGroup(-2);
                 break;
             case PlayerInput.InputMode.Planning:
                 this.ModeText.text = "Stop Planning";

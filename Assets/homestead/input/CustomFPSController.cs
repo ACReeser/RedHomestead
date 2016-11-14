@@ -74,6 +74,9 @@ public class CustomFPSController : MonoBehaviour
         m_Jumping = false;
         m_AudioSource = GetComponent<AudioSource>();
         m_MouseLook.Init(transform, m_Camera.transform);
+
+        //alex
+        m_MouseLook.UpdateCursorLock();
     }
 
 
@@ -151,7 +154,8 @@ public class CustomFPSController : MonoBehaviour
         ProgressStepCycle(speed);
         UpdateCameraPosition(speed);
 
-        m_MouseLook.UpdateCursorLock();
+        //alex
+        //m_MouseLook.UpdateCursorLock();
     }
 
 
