@@ -7,7 +7,7 @@ public class TerrainColliderToggle : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.name == "FPSController")
+        if (other.gameObject.CompareTag("Player"))
         {
             Physics.IgnoreCollision(other, TerrainCollider, true);
         }
@@ -15,7 +15,7 @@ public class TerrainColliderToggle : MonoBehaviour {
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.name == "FPSController")
+        if (other.gameObject.CompareTag("Player"))
         {
             Physics.IgnoreCollision(other, TerrainCollider, false);
         }

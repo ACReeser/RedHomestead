@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: MarsSkybox
-  m_Shader: {fileID: 106, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _SUNDISK_HIGH_QUALITY
+  m_Name: ScifiCrate_wafer
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: _METALLICGLOSSMAP _NORMALMAP
   m_LightmapFlags: 5
-  m_CustomRenderQueue: 1000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -19,26 +19,19 @@ Material:
         first:
           name: _MainTex
         second:
-          m_Texture: {fileID: 0}
+          m_Texture: {fileID: 2800000, guid: 173827a3e001c284f8f5f9026d191098, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _BumpMap
         second:
-          m_Texture: {fileID: 0}
+          m_Texture: {fileID: 2800000, guid: e0f8516ad81ac004cac3a012cc4b68bd, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _DetailNormalMap
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _Tex
         second:
           m_Texture: {fileID: 0}
           m_Scale: {x: 1, y: 1}
@@ -54,7 +47,7 @@ Material:
         first:
           name: _OcclusionMap
         second:
-          m_Texture: {fileID: 0}
+          m_Texture: {fileID: 2800000, guid: 53ba10a86594097448d6cb36effdb050, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -82,7 +75,21 @@ Material:
         first:
           name: _MetallicGlossMap
         second:
+          m_Texture: {fileID: 2800000, guid: 02c387f6d9fa85645bd348e461d44850, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _SpecGlossMap
+        second:
           m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Cube
+        second:
+          m_Texture: {fileID: 8900000, guid: 84a2bf72f34910b49bc9ad3b9e195e89, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:
@@ -100,8 +107,12 @@ Material:
         second: 0.5
       data:
         first:
+          name: _Shininess
+        second: 1
+      data:
+        first:
           name: _Parallax
-        second: 0.02
+        second: 0.04142857
       data:
         first:
           name: _ZWrite
@@ -136,42 +147,26 @@ Material:
         second: 0
       data:
         first:
-          name: _Exposure
-        second: 5.1012464
-      data:
-        first:
-          name: _SunDisk
-        second: 2
-      data:
-        first:
-          name: _SunSize
-        second: 0.03
-      data:
-        first:
-          name: _AtmosphereThickness
-        second: 0.33
-      data:
-        first:
-          name: _Rotation
+          name: _EmissionScaleUI
         second: 0
     m_Colors:
       data:
         first:
           name: _EmissionColor
-        second: {r: 0, g: 0, b: 0, a: 1}
+        second: {r: 0, g: 0, b: 0, a: 0}
       data:
         first:
           name: _Color
         second: {r: 1, g: 1, b: 1, a: 1}
       data:
         first:
-          name: _GroundColor
-        second: {r: 0.4044118, g: 0.09203854, b: 0, a: 1}
+          name: _SpecColor
+        second: {r: 0.60294116, g: 0.60294116, b: 0.60294116, a: 1}
       data:
         first:
-          name: _SkyTint
-        second: {r: 1, g: 0.5999999, b: 0, a: 1}
+          name: _EmissionColorUI
+        second: {r: 1, g: 1, b: 1, a: 1}
       data:
         first:
-          name: _Tint
-        second: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
+          name: _ReflectColor
+        second: {r: 0.29487458, g: 0.37168893, b: 0.39705884, a: 0.5019608}

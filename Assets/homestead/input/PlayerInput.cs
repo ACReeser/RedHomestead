@@ -106,6 +106,22 @@ public class PlayerInput : MonoBehaviour {
                     {
                         newPrompt = GuiBridge.DriveRoverPrompt;
                     }
+                } 
+                else if (hitInfo.collider.CompareTag("constructionzone"))
+                {
+                    ConstructionZone zone = hitInfo.collider.GetComponent<ConstructionZone>();
+
+                    if (zone != null && carriedObject == null && zone.CanConstruct)
+                    {
+                        if (doInteract)
+                        {
+                            zone.WorkOnConstruction();
+                        }
+                        else
+                        {
+                            newPrompt = GuiBridge.ConstructHint;
+                        }
+                    }
                 }
             }
             else if (doInteract && selectedAirlock1 == null)

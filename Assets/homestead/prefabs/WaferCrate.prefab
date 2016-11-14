@@ -10,9 +10,9 @@ GameObject:
   - 4: {fileID: 452690}
   - 65: {fileID: 6566112}
   - 54: {fileID: 5485110}
-  - 114: {fileID: 11441604}
+  - 114: {fileID: 11495448}
   m_Layer: 8
-  m_Name: SteelCrate
+  m_Name: WaferCrate
   m_TagString: movable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -42,7 +42,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 153706}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 731.14, y: 0.604, z: 1001.52}
+  m_LocalPosition: {x: 732.07715, y: 0.597, z: 999.0012}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 476934}
@@ -70,7 +70,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: 961bb83c410a1a34496cd8e6807b0abb, type: 2}
+  - {fileID: 2100000, guid: cca0a809c5796894c9197975e56e9b42, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 0
@@ -120,7 +120,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.05, y: 1.05, z: 1.05}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &11441604
+--- !u!114 &11495448
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5198b3fa1ce61ec4ba1d6a5846fa77a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ResourceType: 0
+  ResourceType: 1
   Quantity: 1
 --- !u!1001 &100100000
 Prefab:
@@ -139,7 +139,11 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: ResourceType
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 153706}

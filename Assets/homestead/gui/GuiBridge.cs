@@ -2,6 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 using System;
+using RedHomestead.Construction;
+using System.Collections.Generic;
 
 public class PromptInfo
 {
@@ -44,10 +46,17 @@ public class GuiBridge : MonoBehaviour {
         Description = "Drop",
         Key = "E"
     };
+    internal static PromptInfo ConstructHint = new PromptInfo()
+    {
+        Description = "Construct",
+        Key = "E"
+    };
 
-    public RectTransform PromptPanel;
-    public Text PromptKey, PromptDescription;
+    public RectTransform PromptPanel, ConstructionPanel;
+    public Text PromptKey, PromptDescription, ConstructionHeader;
+    public RectTransform[] ConstructionRequirements;
 
+    internal Text[] ConstructionRequirementsText;
 
     internal PromptInfo CurrentPrompt { get; set; }
 
@@ -55,6 +64,15 @@ public class GuiBridge : MonoBehaviour {
     {
         Instance = this;
         TogglePromptPanel(false);
+        this.ConstructionPanel.gameObject.SetActive(false);
+        ConstructionRequirementsText = new Text[ConstructionRequirements.Length];
+
+        int i = 0;
+        foreach(RectTransform t in ConstructionRequirements)
+        {
+            ConstructionRequirementsText[i] = t.GetChild(0).GetComponent<Text>();
+            i++;
+        }
     }
 
     private void TogglePromptPanel(bool isActive)
@@ -73,6 +91,33 @@ public class GuiBridge : MonoBehaviour {
         {
             StartCoroutine(HidePromptAfter(prompt.Duration));
         }
+    }
+
+    //todo: just pass constructionZone, it's less params
+    internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Resource, int> hasCount, Module toBeBuilt)
+    {
+        this.ConstructionPanel.gameObject.SetActive(true);
+        this.ConstructionHeader.text = "Building a " + toBeBuilt.ToString();
+
+        for (int i = 0; i < this.ConstructionRequirements.Length; i++)
+        {
+            if (i < requiresList.Count)
+            {
+                ResourceEntry resourceEntry = requiresList[i];
+                string output = resourceEntry.Type.ToString() + ": " + hasCount[resourceEntry.Type] + "/" + resourceEntry.Count;
+                this.ConstructionRequirementsText[i].text = output;
+                this.ConstructionRequirements[i].gameObject.SetActive(true);
+            }
+            else
+            {
+                this.ConstructionRequirements[i].gameObject.SetActive(false);
+            }
+        }
+    }
+
+    internal void HideConstruction()
+    {
+        this.ConstructionPanel.gameObject.SetActive(false);
     }
 
     private IEnumerator HidePromptAfter(float duration)
