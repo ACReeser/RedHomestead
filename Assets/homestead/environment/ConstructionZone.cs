@@ -7,9 +7,13 @@ using System.Linq;
 
 namespace RedHomestead.Construction
 {
-    public enum Module { Unspecified = -1, SolarPanelSmall,
+    public enum Module { Unspecified = -1,
+        SolarPanelSmall,
         AtmosphereMiner,
-        OxygenTank
+        OxygenTank,
+        Workspace,
+        Habitat,
+        Smelter
     }
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
     public enum Resource { Steel, SiliconWafers, Aluminium }

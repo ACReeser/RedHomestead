@@ -54,6 +54,8 @@ public class GuiBridge : MonoBehaviour {
 
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText;
+    public Button[] ConstructionGroupButtons;
+    public Text[] ConstructionGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
 
     internal Text[] ConstructionRequirementsText;
@@ -144,9 +146,28 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    public void CycleConstruction(int delta)
+    {
+        //negative means up the list
+        if ((delta < 0 && currentlySelectedGroup > ConstructionGroup.Habitation) ||
+        //positive means down the list
+            (delta > 0 && currentlySelectedGroup < ConstructionGroup.Storage))
+        {
+            ConstructionGroupButtons[(int)currentlySelectedGroup + delta].onClick.Invoke();
+        }
+    }
+
     public enum ConstructionGroup { None = -2, Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
     public static Dictionary<ConstructionGroup, Module[]> Groupmap = new Dictionary<ConstructionGroup, Module[]>()
     {
+        {
+            ConstructionGroup.Habitation,
+            new Module[]
+            {
+                Module.Habitat,
+                Module.Workspace
+            }
+        },
         {
             ConstructionGroup.Power,
             new Module[]
@@ -162,6 +183,13 @@ public class GuiBridge : MonoBehaviour {
             }
         },
         {
+            ConstructionGroup.Refinement,
+            new Module[]
+            {
+                Module.Smelter
+            }
+        },
+        {
             ConstructionGroup.Storage,
             new Module[]
             {
@@ -170,21 +198,25 @@ public class GuiBridge : MonoBehaviour {
         },
     };
 
-    private ConstructionGroup selectedGroup;
+    private ConstructionGroup currentlySelectedGroup = ConstructionGroup.None;
     public void SetConstructionGroup(int index)
     {
         ConstructionGroup newGroup = (ConstructionGroup)index;
-        selectedGroup = newGroup;
+        currentlySelectedGroup = newGroup;
         ConstructionGroupPanel.gameObject.SetActive(index > -2);
         ConstructionModulesPanel.gameObject.SetActive(index > -1);
 
-        if (selectedGroup == ConstructionGroup.None)
+        if (currentlySelectedGroup == ConstructionGroup.None)
         {
-            
+            //noop
+        }
+        else if (currentlySelectedGroup == ConstructionGroup.Undecided)
+        {
+            RefreshButtonKeyHints();
         }
         else if (index > -1)
         {
-            Module[] lists = Groupmap[selectedGroup];
+            Module[] lists = Groupmap[currentlySelectedGroup];
             for (int i = 0; i < this.ConstructionModuleButtons.Length; i++)
             {
                 if (i < lists.Length)
@@ -197,6 +229,21 @@ public class GuiBridge : MonoBehaviour {
                     this.ConstructionModuleButtons[i].gameObject.SetActive(false);
                 }
             }
+
+            RefreshButtonKeyHints();
+        }
+    }
+
+    private void RefreshButtonKeyHints()
+    {
+        for (int i = 0; i < this.ConstructionGroupHints.Length; i++)
+        {
+            bool previousHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup - 1;
+            bool nextHint = currentlySelectedGroup < ConstructionGroup.Storage && i == (int)currentlySelectedGroup + 1;
+            //bool exitHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup;
+            print(nextHint);
+            this.ConstructionGroupHints[i].transform.parent.gameObject.SetActive(previousHint || nextHint);
+            this.ConstructionGroupHints[i].text = previousHint ? "Q" : nextHint ? "Z" : "";
         }
     }
 
@@ -220,6 +267,6 @@ public class GuiBridge : MonoBehaviour {
     {
         Module planModule = (Module)index;
         PlayerInput.Instance.PlannedModule = planModule;
-        this.selectedGroup = ConstructionGroup.None;
+        this.currentlySelectedGroup = ConstructionGroup.None;
     }
 }

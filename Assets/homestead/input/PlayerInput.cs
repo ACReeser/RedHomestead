@@ -51,6 +51,18 @@ public class PlayerInput : MonoBehaviour {
             CycleMode();
         }
 
+        if (Mode == InputMode.Planning)
+        {
+            if (Input.GetKeyUp(KeyCode.Q))
+            {
+                GuiBridge.Instance.CycleConstruction(-1);
+            }
+            else if (Input.GetKeyUp(KeyCode.Z))
+            {
+                GuiBridge.Instance.CycleConstruction(1);
+            }
+        }
+
         bool doInteract = Input.GetKeyUp(KeyCode.E);
         PromptInfo newPrompt = null;
 
