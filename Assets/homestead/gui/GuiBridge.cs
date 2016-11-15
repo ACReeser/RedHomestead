@@ -52,8 +52,8 @@ public class GuiBridge : MonoBehaviour {
         Key = "E"
     };
 
-    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel;
-    public Text PromptKey, PromptDescription, ConstructionHeader, ModeText;
+    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel;
+    public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
@@ -266,7 +266,9 @@ public class GuiBridge : MonoBehaviour {
     public void SelectConstructionPlan(int index)
     {
         Module planModule = (Module)index;
-        PlayerInput.Instance.PlannedModule = planModule;
-        this.currentlySelectedGroup = ConstructionGroup.None;
+        this.PlacingPanel.gameObject.SetActive(true);
+        this.PlacingText.text = planModule.ToString();
+        PlayerInput.Instance.PlanModule(planModule);
+        this.SetConstructionGroup((int)ConstructionGroup.None);
     }
 }

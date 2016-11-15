@@ -10,10 +10,12 @@ public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
     public Transform tubePrefab;
     public CustomFPSController FPSController;
+    public Transform ConstructionZonePrefab, SmallSolarFarmPrefab;
 
     internal Module PlannedModule = Module.Unspecified;
     internal InputMode Mode = InputMode.Default;
 
+    private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, carriedObject;
     private List<Transform> createdTubes = new List<Transform>();
@@ -25,6 +27,7 @@ public class PlayerInput : MonoBehaviour {
             return !playerIsOnFoot;
         }
     }
+    private Transform PlannedModuleVisualization;
 
     void Awake()
     {
@@ -51,22 +54,40 @@ public class PlayerInput : MonoBehaviour {
             CycleMode();
         }
 
+        RaycastHit hitInfo;
         if (Mode == InputMode.Planning)
         {
-            if (Input.GetKeyUp(KeyCode.Q))
+            if (PlannedModule == Module.Unspecified)
             {
-                GuiBridge.Instance.CycleConstruction(-1);
+                if (Input.GetKeyUp(KeyCode.Q))
+                {
+                    GuiBridge.Instance.CycleConstruction(-1);
+                }
+                else if (Input.GetKeyUp(KeyCode.Z))
+                {
+                    GuiBridge.Instance.CycleConstruction(1);
+                }
             }
-            else if (Input.GetKeyUp(KeyCode.Z))
+
+            if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
             {
-                GuiBridge.Instance.CycleConstruction(1);
+                if (hitInfo.collider != null)
+                {
+                    if (hitInfo.collider.CompareTag("terrain"))
+                    {
+                        if (Mode == InputMode.Planning && PlannedModuleVisualization != null)
+                        {
+                            print("terrain");
+                            PlannedModuleVisualization.position = hitInfo.point;
+                        }
+                    }
+                }
             }
         }
 
         bool doInteract = Input.GetKeyUp(KeyCode.E);
         PromptInfo newPrompt = null;
 
-        RaycastHit hitInfo;
         if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
         {
             if (hitInfo.collider != null)
@@ -188,6 +209,13 @@ public class PlayerInput : MonoBehaviour {
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            if (this.PlannedModuleVisualization != null)
+            {
+                this.VisualizationCache[this.PlannedModule] = this.PlannedModuleVisualization;
+                this.PlannedModuleVisualization.gameObject.SetActive(false);
+                this.PlannedModuleVisualization = null;
+            }
+            this.PlannedModule = Module.Unspecified;
         }
 
         GuiBridge.Instance.RefreshMode();
@@ -240,9 +268,23 @@ public class PlayerInput : MonoBehaviour {
         newTube.position = midpoint;
         newTube.LookAt(selectedAirlock1.transform);
         newTube.localScale = new Vector3(newTube.localScale.x, newTube.localScale.y, (distanceBetween / 2f) + .2f);
-        print(distanceBetween);
         createdTubes.Add(newTube);
         collider.gameObject.SetActive(false);
         selectedAirlock1.gameObject.SetActive(false);
+    }
+
+    internal void PlanModule(Module planModule)
+    {
+        this.PlannedModule = planModule;
+
+        if (VisualizationCache.ContainsKey(planModule))
+        {
+            PlannedModuleVisualization = VisualizationCache[planModule];
+            PlannedModuleVisualization.gameObject.SetActive(true);
+        }
+        else
+        {
+            PlannedModuleVisualization = GameObject.Instantiate<Transform>(this.SmallSolarFarmPrefab);
+        }
     }
 }
