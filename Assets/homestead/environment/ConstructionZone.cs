@@ -36,10 +36,17 @@ namespace RedHomestead.Construction
         //todo: disallow duplicate resource types by using another dict instead of a list
         public static Dictionary<Module, List<ResourceEntry>> Map = new Dictionary<Module, List<ResourceEntry>>()
         {
-            { Module.SolarPanelSmall, new List<ResourceEntry>()
+            {
+                Module.SolarPanelSmall, new List<ResourceEntry>()
                 {
                     new ResourceEntry(2, Resource.Steel),
                     new ResourceEntry(4, Resource.SiliconWafers)
+                }
+            },
+            {
+                Module.OxygenTank, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(8, Resource.Steel)
                 }
             }
         };

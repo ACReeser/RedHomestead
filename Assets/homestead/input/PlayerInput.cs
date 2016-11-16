@@ -23,9 +23,10 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// The prefab for a construction zone
     /// </summary>
-    public Transform ConstructionZonePrefab, 
+    public Transform ConstructionZonePrefab,
         //one of these for each module does NOT scale
-        SmallSolarFarmPrefab;
+        SmallSolarFarmPrefab,
+        OxygenTank;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
@@ -236,11 +237,20 @@ public class PlayerInput : MonoBehaviour {
 
         ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
         zone.UnderConstruction = PlannedModule;
-        zone.ModulePrefab = SmallSolarFarmPrefab;
-        
+        zone.ModulePrefab = GetPlannedModulePrefab();
+
         zone.InitializeRequirements();
-        
+
         CycleMode();
+    }
+
+    private Transform GetPlannedModulePrefab()
+    {
+        if (PlannedModule == Module.OxygenTank)
+        {
+            return OxygenTank;
+        }
+        return SmallSolarFarmPrefab;
     }
 
     private void CycleMode()
@@ -334,7 +344,7 @@ public class PlayerInput : MonoBehaviour {
         }
         else
         {
-            PlannedModuleVisualization = GameObject.Instantiate<Transform>(this.SmallSolarFarmPrefab);
+            PlannedModuleVisualization = GameObject.Instantiate<Transform>(GetPlannedModulePrefab());
             VisualizationCache[planModule] = PlannedModuleVisualization;
             RecurseDisableColliderSetTranslucentRenderer(PlannedModuleVisualization);
         }        

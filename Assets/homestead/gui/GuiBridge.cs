@@ -308,7 +308,7 @@ public class GuiBridge : MonoBehaviour {
     /// <param name="index"></param>
     public void SelectConstructionPlan(int index)
     {
-        Module planModule = (Module)index;
+        Module planModule = Groupmap[currentlySelectedGroup][index];
         this.PlacingPanel.gameObject.SetActive(true);
         this.PlacingText.text = planModule.ToString();
         PlayerInput.Instance.PlanModule(planModule);
