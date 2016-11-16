@@ -51,6 +51,12 @@ public class GuiBridge : MonoBehaviour {
         Description = "Construct",
         Key = "E"
     };
+    internal static PromptInfo PlanConstructionZoneHint = new PromptInfo()
+    {
+        Description = "Begin Construction Here",
+        Key = "E"
+    };
+
 
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText;
@@ -199,6 +205,7 @@ public class GuiBridge : MonoBehaviour {
     };
 
     private ConstructionGroup currentlySelectedGroup = ConstructionGroup.None;
+
     public void SetConstructionGroup(int index)
     {
         ConstructionGroup newGroup = (ConstructionGroup)index;
@@ -241,7 +248,7 @@ public class GuiBridge : MonoBehaviour {
             bool previousHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup - 1;
             bool nextHint = currentlySelectedGroup < ConstructionGroup.Storage && i == (int)currentlySelectedGroup + 1;
             //bool exitHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup;
-            print(nextHint);
+            
             this.ConstructionGroupHints[i].transform.parent.gameObject.SetActive(previousHint || nextHint);
             this.ConstructionGroupHints[i].text = previousHint ? "Q" : nextHint ? "Z" : "";
         }
@@ -254,6 +261,7 @@ public class GuiBridge : MonoBehaviour {
             case PlayerInput.InputMode.Default:
                 this.ModeText.text = "Switch to Planning";
                 this.SetConstructionGroup(-2);
+                this.PlacingPanel.gameObject.SetActive(false);
                 break;
             case PlayerInput.InputMode.Planning:
                 this.ModeText.text = "Stop Planning";

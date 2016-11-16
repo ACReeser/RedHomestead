@@ -11,6 +11,7 @@ public class PlayerInput : MonoBehaviour {
     public Transform tubePrefab;
     public CustomFPSController FPSController;
     public Transform ConstructionZonePrefab, SmallSolarFarmPrefab;
+    public Material translucentPlanningMat;
 
     internal Module PlannedModule = Module.Unspecified;
     internal InputMode Mode = InputMode.Default;
@@ -54,6 +55,8 @@ public class PlayerInput : MonoBehaviour {
             CycleMode();
         }
 
+        PromptInfo newPrompt = null;
+        bool doInteract = Input.GetKeyUp(KeyCode.E);
         RaycastHit hitInfo;
         if (Mode == InputMode.Planning)
         {
@@ -77,18 +80,22 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (Mode == InputMode.Planning && PlannedModuleVisualization != null)
                         {
-                            print("terrain");
                             PlannedModuleVisualization.position = hitInfo.point;
+
+                            if (doInteract)
+                            {
+                                PlaceConstructionHere(hitInfo.point);
+                            }
+                            else
+                            {
+                                newPrompt = GuiBridge.PlanConstructionZoneHint;
+                            }
                         }
                     }
                 }
             }
         }
-
-        bool doInteract = Input.GetKeyUp(KeyCode.E);
-        PromptInfo newPrompt = null;
-
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+        else if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
         {
             if (hitInfo.collider != null)
             {
@@ -192,6 +199,19 @@ public class PlayerInput : MonoBehaviour {
         }
 	}
 
+    private void PlaceConstructionHere(Vector3 point)
+    {
+        Transform zoneT = (Transform)GameObject.Instantiate(ConstructionZonePrefab, PlannedModuleVisualization.position, PlannedModuleVisualization.rotation);
+
+        ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
+        zone.UnderConstruction = PlannedModule;
+        zone.ModulePrefab = SmallSolarFarmPrefab;
+        
+        zone.InitializeRequirements();
+        
+        CycleMode();
+    }
+
     private void CycleMode()
     {
         //todo: fix lazy code
@@ -211,7 +231,6 @@ public class PlayerInput : MonoBehaviour {
             Cursor.visible = false;
             if (this.PlannedModuleVisualization != null)
             {
-                this.VisualizationCache[this.PlannedModule] = this.PlannedModuleVisualization;
                 this.PlannedModuleVisualization.gameObject.SetActive(false);
                 this.PlannedModuleVisualization = null;
             }
@@ -285,6 +304,24 @@ public class PlayerInput : MonoBehaviour {
         else
         {
             PlannedModuleVisualization = GameObject.Instantiate<Transform>(this.SmallSolarFarmPrefab);
+            VisualizationCache[planModule] = PlannedModuleVisualization;
+            RecurseDisableColliderSetTranslucentRenderer(PlannedModuleVisualization);
+        }        
+    }
+
+    private void RecurseDisableColliderSetTranslucentRenderer(Transform parent)
+    {
+        foreach (Transform child in parent)
+        {
+            Collider c = child.GetComponent<Collider>();
+            if (c != null)
+                c.enabled = false;
+
+            Renderer r = child.GetComponent<Renderer>();
+            if (r != null)
+                r.material = translucentPlanningMat;
+
+            RecurseDisableColliderSetTranslucentRenderer(child);
         }
     }
 }
