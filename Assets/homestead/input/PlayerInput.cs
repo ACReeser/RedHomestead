@@ -94,6 +94,22 @@ public class PlayerInput : MonoBehaviour {
                 {
                     GuiBridge.Instance.CycleConstruction(1);
                 }
+                else if (Input.GetKeyUp(KeyCode.Alpha1))
+                {
+                    GuiBridge.Instance.SelectConstructionPlan(0);
+                }
+                else if (Input.GetKeyUp(KeyCode.Alpha2))
+                {
+                    GuiBridge.Instance.SelectConstructionPlan(1);
+                }
+                else if (Input.GetKeyUp(KeyCode.Alpha3))
+                {
+                    GuiBridge.Instance.SelectConstructionPlan(2);
+                }
+                else if (Input.GetKeyUp(KeyCode.Alpha4))
+                {
+                    GuiBridge.Instance.SelectConstructionPlan(3);
+                }
             }
 
             if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
