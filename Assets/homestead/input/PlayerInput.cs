@@ -5,17 +5,40 @@ using System.Collections.Generic;
 using RedHomestead.Rovers;
 using RedHomestead.Construction;
 
+/// <summary>
+/// Responsible for raycasting, modes, and gameplay input
+/// </summary>
 public class PlayerInput : MonoBehaviour {
     public enum InputMode { Default, Planning }
     public static PlayerInput Instance;
+
+    /// <summary>
+    /// Tube prefab to be created when linking bulkheads
+    /// </summary>
     public Transform tubePrefab;
+    /// <summary>
+    /// the FPS input script (usually on the parent transform)
+    /// </summary>
     public CustomFPSController FPSController;
-    public Transform ConstructionZonePrefab, SmallSolarFarmPrefab;
+    /// <summary>
+    /// The prefab for a construction zone
+    /// </summary>
+    public Transform ConstructionZonePrefab, 
+        //one of these for each module does NOT scale
+        SmallSolarFarmPrefab;
+    /// <summary>
+    /// the material to put on module prefabs
+    /// when planning where to put them on the ground
+    /// </summary>
     public Material translucentPlanningMat;
 
     internal Module PlannedModule = Module.Unspecified;
     internal InputMode Mode = InputMode.Default;
 
+    /// <summary>
+    /// Visualization == transparent preview of module to be built
+    /// Cache == only create 1 of each type of module because creation is expensive
+    /// </summary>
     private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, carriedObject;
@@ -80,6 +103,9 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (Mode == InputMode.Planning && PlannedModuleVisualization != null)
                         {
+                            //TODO: raycast 3 more times (other 3 corners)
+                            //then take the average height between them
+                            //and invalidate the placement if it passes some threshold
                             PlannedModuleVisualization.position = hitInfo.point;
 
                             if (doInteract)
@@ -184,11 +210,16 @@ public class PlayerInput : MonoBehaviour {
                 selectedAirlock1 = null;
             }
         }
+        //if we raycast, and DO NOT hit our carried object, it has gotten moved because of physics
+        //so drop it!
         else if (carriedObject != null)
         {
             DropObject();
         }
 
+        //if we were hovering or doing something that has a prompt
+        //we will have a newPrompt
+        //if we don't
         if (newPrompt == null)
         {
             GuiBridge.Instance.HidePrompt();

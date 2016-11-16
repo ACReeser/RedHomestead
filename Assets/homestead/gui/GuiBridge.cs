@@ -5,6 +5,9 @@ using System;
 using RedHomestead.Construction;
 using System.Collections.Generic;
 
+/// <summary>
+/// Information for things like "[E] Pick Up"
+/// </summary>
 public class PromptInfo
 {
     public string Key { get; set; }
@@ -12,9 +15,15 @@ public class PromptInfo
     public float Duration { get; set; }
 }
 
+/// <summary>
+/// Scripting interface for all GUI elements
+/// syncs PlayerInput state to UI
+/// has internal state for showing prompts and panels
+/// </summary>
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
+    //hints and prompts for actions
     public static PromptInfo StartBulkheadBridgeHint = new PromptInfo()
     {
         Description = "Select bulkhead to connect",
@@ -104,9 +113,11 @@ public class GuiBridge : MonoBehaviour {
     //todo: just pass constructionZone, it's less params
     internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Resource, int> hasCount, Module toBeBuilt)
     {
+        //show the name of the thing being built
         this.ConstructionPanel.gameObject.SetActive(true);
         this.ConstructionHeader.text = "Building a " + toBeBuilt.ToString();
 
+        //show a list of resources gathered / resources required
         for (int i = 0; i < this.ConstructionRequirements.Length; i++)
         {
             if (i < requiresList.Count)
@@ -152,6 +163,10 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// cycle the selected construction group button up or down
+    /// </summary>
+    /// <param name="delta"></param>
     public void CycleConstruction(int delta)
     {
         //negative means up the list
@@ -163,7 +178,16 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Top level groups that organize modules
+    /// "None" means no groups should show
+    /// "Undecided" means groups can show but no group is selected
+    /// TODO: remove None and Undecided into their own booleans ShowingGroups and HasGroupSelected
+    /// </summary>
     public enum ConstructionGroup { None = -2, Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
+    /// <summary>
+    /// from group to list of modules
+    /// </summary>
     public static Dictionary<ConstructionGroup, Module[]> Groupmap = new Dictionary<ConstructionGroup, Module[]>()
     {
         {
@@ -241,6 +265,10 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// to the left of the group names there are hints for which key to use to move to that group
+    /// this shows and hides those
+    /// </summary>
     private void RefreshButtonKeyHints()
     {
         for (int i = 0; i < this.ConstructionGroupHints.Length; i++)
@@ -254,6 +282,9 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// syncs player input mode
+    /// </summary>
     internal void RefreshMode()
     {
         switch(PlayerInput.Instance.Mode)
@@ -271,6 +302,10 @@ public class GuiBridge : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// called when a specific module is selected to plan
+    /// </summary>
+    /// <param name="index"></param>
     public void SelectConstructionPlan(int index)
     {
         Module planModule = (Module)index;

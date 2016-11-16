@@ -83,6 +83,8 @@ public class ConstructionZone : MonoBehaviour {
                 RequiredResourceMask[i] = required.Type;
                 i++;
             }
+
+            //todo: move the pylons and tape to match the width/length of the module to be built
         }
     }
 
@@ -159,17 +161,28 @@ public class ConstructionZone : MonoBehaviour {
     public void Complete()
     {
         //todo: move player out of the way
+        //actually, we _should_ only be able to complete construction when the player
+        //is outside the zone looking in, so maybe not
+        
         GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
         if (CurrentZone == this)
         {
             CurrentZone = null;
             GuiBridge.Instance.HideConstruction();
         }
+
         //todo: make this more efficient
+        //what this code is doing:
+        //only destroying those entries in the ResourceList that are required to build the Module
+        //so you can't put in 100 steel to something that requires 10 and lose 90 excess steel
         Dictionary<Resource, int> deletedCount = new Dictionary<Resource, int>();
         for(int i = this.ResourceList.Count - 1; i >= 0; i--)
         {
             ResourceComponent component = this.ResourceList[i];
+            //tell the component it isn't in a construction zone
+            //just in case it will live through the rest of this method
+            //(this frees it for use in another zone)
+            component.IsInConstructionZone = false;
 
             if (RequiredResourceMask.Contains(component.ResourceType))
             {
@@ -187,6 +200,7 @@ public class ConstructionZone : MonoBehaviour {
                 }
             }
         }
+
         Destroy(this.gameObject);
     }
 }
