@@ -15,7 +15,7 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// Tube prefab to be created when linking bulkheads
     /// </summary>
-    public Transform tubePrefab;
+    public Transform tubePrefab, gasPipePrefab;
     /// <summary>
     /// the FPS input script (usually on the parent transform)
     /// </summary>
@@ -42,9 +42,11 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
     private RoverInput DrivingRoverInput;
-    private Collider selectedAirlock1, carriedObject;
+    private Collider selectedAirlock1, selectedGasValve, carriedObject;
     private List<Transform> createdTubes = new List<Transform>();
+    private List<Transform> createdPipes = new List<Transform>();
     private bool playerIsOnFoot = true;
+
     private bool playerInVehicle
     {
         get
@@ -169,30 +171,11 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.gameObject.CompareTag("bulkhead"))
                 {
-                    if (doInteract)
-                    {
-                        if (selectedAirlock1 == null)
-                        {
-                            selectedAirlock1 = hitInfo.collider;
-                            newPrompt = GuiBridge.EndBulkheadBridgeHint;
-                        }
-                        else if (selectedAirlock1 != hitInfo.collider)
-                        {
-                            PlaceTube(hitInfo.collider);
-                            newPrompt = GuiBridge.BulkheadBridgeCompletedPrompt;
-                        }
-                    }
-                    else
-                    {
-                        if (selectedAirlock1 == null)
-                        {
-                            newPrompt = GuiBridge.StartBulkheadBridgeHint;
-                        }
-                        else if (selectedAirlock1 != hitInfo.collider)
-                        {
-                            newPrompt = GuiBridge.EndBulkheadBridgeHint;
-                        }
-                    }
+                    newPrompt = OnBulkhead(newPrompt, doInteract, hitInfo);
+                }
+                else if (hitInfo.collider.gameObject.CompareTag("valve"))
+                {
+                    newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
                 }
                 else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
@@ -222,9 +205,16 @@ public class PlayerInput : MonoBehaviour {
                     }
                 }
             }
-            else if (doInteract && selectedAirlock1 == null)
+            else if (doInteract)
             {
-                selectedAirlock1 = null;
+                if (selectedAirlock1 != null)
+                {
+                    selectedAirlock1 = null;
+                }
+                if (selectedGasValve != null)
+                {
+                    selectedGasValve = null;
+                }
             }
         }
         //if we raycast, and DO NOT hit our carried object, it has gotten moved because of physics
@@ -246,6 +236,50 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
+    {
+        return OnLinkable(doInteract, hitInfo, selectedAirlock1, value => selectedAirlock1 = value, PlaceTube, GuiBridge.BulkheadBridgePrompts);
+    }
+
+    private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
+    {
+        return OnLinkable(doInteract, hitInfo, selectedGasValve, value => selectedGasValve = value, PlaceGasPipe, GuiBridge.GasPipePrompts);
+    }
+
+    private static PromptInfo OnLinkable(bool doInteract, RaycastHit hitInfo, Collider savedLinkEnd, Action<Collider> SetSaved, Action<Collider> OnLinkPlaced, LinkablePrompts promptGroup )
+    {
+        PromptInfo newPrompt = null;
+
+        if (doInteract)
+        {
+            if (savedLinkEnd == null)
+            {
+                SetSaved(hitInfo.collider);
+                //maybe not this? maybe null?
+                //maybe a prompt instead of a hint
+                newPrompt = promptGroup.HoverWhenOneSelected;
+            }
+            else if (savedLinkEnd != hitInfo.collider)
+            {
+                OnLinkPlaced(hitInfo.collider);
+                newPrompt = promptGroup.WhenCompleted;
+            }
+        }
+        else
+        {
+            if (savedLinkEnd == null)
+            {
+                newPrompt = promptGroup.HoverWhenNoneSelected;
+            }
+            else if (savedLinkEnd != hitInfo.collider)
+            {
+                newPrompt = promptGroup.HoverWhenOneSelected;
+            }
+        }
+
+        return newPrompt;
+    }
 
     private void PlaceConstructionHere(Vector3 point)
     {
@@ -336,17 +370,31 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceTube(Collider collider)
     {
-        float distanceBetween = Vector3.Distance(selectedAirlock1.transform.position, collider.transform.position);
+        PlaceRuntimeLinkingObject(selectedAirlock1, collider, tubePrefab, createdTubes, true, .2f);
+    }
 
-        Vector3 midpoint = Vector3.Lerp(selectedAirlock1.transform.position, collider.transform.position, 0.5f);
-        Transform newTube = GameObject.Instantiate<Transform>(tubePrefab);
+    private void PlaceGasPipe(Collider collider)
+    {
+        PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
+    }
+
+    private static void PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
+    {
+        float distanceBetween = Vector3.Distance(firstObject.transform.position, otherObject.transform.position);
+
+        Vector3 midpoint = Vector3.Lerp(firstObject.transform.position, otherObject.transform.position, 0.5f);
+        Transform newTube = GameObject.Instantiate<Transform>(linkingObjectPrefab);
 
         newTube.position = midpoint;
-        newTube.LookAt(selectedAirlock1.transform);
-        newTube.localScale = new Vector3(newTube.localScale.x, newTube.localScale.y, (distanceBetween / 2f) + .2f);
-        createdTubes.Add(newTube);
-        collider.gameObject.SetActive(false);
-        selectedAirlock1.gameObject.SetActive(false);
+        newTube.LookAt(otherObject.transform);
+        newTube.localScale = new Vector3(newTube.localScale.x, newTube.localScale.y, (distanceBetween / 2f) + extraScale);
+        addToList.Add(newTube);
+
+        if (hideObjectEnds)
+        {
+            firstObject.gameObject.SetActive(false);
+            otherObject.gameObject.SetActive(false);
+        }
     }
 
     internal void PlanModule(Module planModule)

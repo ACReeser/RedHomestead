@@ -15,6 +15,14 @@ public class PromptInfo
     public float Duration { get; set; }
 }
 
+public struct LinkablePrompts
+{
+    public PromptInfo HoverWhenNoneSelected;
+    public PromptInfo HoverWhenOneSelected;
+    public PromptInfo WhenCompleted;
+}
+
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -37,6 +45,22 @@ public class GuiBridge : MonoBehaviour {
     public static PromptInfo BulkheadBridgeCompletedPrompt = new PromptInfo()
     {
         Description = "Bulkheads connected",
+        Key = "E",
+        Duration = 1500
+    };
+    public static PromptInfo StartGasPipeHint = new PromptInfo()
+    {
+        Description = "Select gas valve to connect",
+        Key = "E"
+    };
+    public static PromptInfo EndGasPipeHint = new PromptInfo()
+    {
+        Description = "Connect gas pipe",
+        Key = "E"
+    };
+    public static PromptInfo GasPipeCompletedPrompt = new PromptInfo()
+    {
+        Description = "Gas Pipe connected",
         Key = "E",
         Duration = 1500
     };
@@ -65,6 +89,19 @@ public class GuiBridge : MonoBehaviour {
         Description = "Begin Construction Here",
         Key = "E"
     };
+    internal static LinkablePrompts BulkheadBridgePrompts = new LinkablePrompts()
+    {
+        HoverWhenNoneSelected = StartBulkheadBridgeHint,
+        HoverWhenOneSelected = EndBulkheadBridgeHint,
+        WhenCompleted = BulkheadBridgeCompletedPrompt
+    };
+    internal static LinkablePrompts GasPipePrompts = new LinkablePrompts()
+    {
+        HoverWhenNoneSelected = StartGasPipeHint,
+        HoverWhenOneSelected = EndGasPipeHint,
+        WhenCompleted = GasPipeCompletedPrompt
+    };
+
 
 
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel;
