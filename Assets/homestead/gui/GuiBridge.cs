@@ -64,6 +64,22 @@ public class GuiBridge : MonoBehaviour {
         Key = "E",
         Duration = 1500
     };
+    public static PromptInfo StartPowerPlugHint = new PromptInfo()
+    {
+        Description = "Select power socket to connect",
+        Key = "E"
+    };
+    public static PromptInfo EndPowerPlugHint = new PromptInfo()
+    {
+        Description = "Connect power",
+        Key = "E"
+    };
+    public static PromptInfo PowerPlugCompletedPrompt = new PromptInfo()
+    {
+        Description = "Power connected",
+        Key = "E",
+        Duration = 1500
+    };
     public static PromptInfo DriveRoverPrompt = new PromptInfo()
     {
         Description = "Drive Rover",
@@ -100,6 +116,12 @@ public class GuiBridge : MonoBehaviour {
         HoverWhenNoneSelected = StartGasPipeHint,
         HoverWhenOneSelected = EndGasPipeHint,
         WhenCompleted = GasPipeCompletedPrompt
+    };
+    internal static LinkablePrompts PowerPlugPrompts = new LinkablePrompts()
+    {
+        HoverWhenNoneSelected = StartPowerPlugHint,
+        HoverWhenOneSelected = EndPowerPlugHint,
+        WhenCompleted = PowerPlugCompletedPrompt
     };
 
 

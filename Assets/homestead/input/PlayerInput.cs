@@ -15,7 +15,7 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// Tube prefab to be created when linking bulkheads
     /// </summary>
-    public Transform tubePrefab, gasPipePrefab;
+    public Transform tubePrefab, gasPipePrefab, powerlinePrefab;
     /// <summary>
     /// the FPS input script (usually on the parent transform)
     /// </summary>
@@ -42,9 +42,10 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
     private RoverInput DrivingRoverInput;
-    private Collider selectedAirlock1, selectedGasValve, carriedObject;
+    private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket, carriedObject;
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
+    private List<Transform> createdPowerlines = new List<Transform>();
     private bool playerIsOnFoot = true;
 
     private bool playerInVehicle
@@ -173,6 +174,10 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnBulkhead(newPrompt, doInteract, hitInfo);
                 }
+                else if (hitInfo.collider.gameObject.CompareTag("powerplug"))
+                {
+                    newPrompt = OnPowerPlug(newPrompt, doInteract, hitInfo);
+                }
                 else if (hitInfo.collider.gameObject.CompareTag("valve"))
                 {
                     newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
@@ -236,6 +241,11 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private PromptInfo OnPowerPlug(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
+    {
+        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => selectedPowerSocket = value, PlacePowerPlug, GuiBridge.PowerPlugPrompts);
+    }
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
@@ -376,6 +386,11 @@ public class PlayerInput : MonoBehaviour {
     private void PlaceGasPipe(Collider collider)
     {
         PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
+    }
+
+    private void PlacePowerPlug(Collider collider)
+    {
+        PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
     }
 
     private static void PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
