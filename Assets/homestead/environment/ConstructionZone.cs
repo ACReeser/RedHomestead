@@ -9,10 +9,12 @@ namespace RedHomestead.Construction
 {
     public enum Module { Unspecified = -1,
         SolarPanelSmall,
-        AtmosphereMiner,
-        OxygenTank,
+        SabatierReactor,
+        SmallGasTank,
+        LargeGasTank,
         Workspace,
         Habitat,
+        OreExtractor,
         Smelter
     }
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
@@ -44,9 +46,27 @@ namespace RedHomestead.Construction
                 }
             },
             {
-                Module.OxygenTank, new List<ResourceEntry>()
+                Module.LargeGasTank, new List<ResourceEntry>()
                 {
                     new ResourceEntry(8, Resource.Steel)
+                }
+            },
+            {
+                Module.SmallGasTank, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Resource.Steel)
+                }
+            },
+            {
+                Module.SabatierReactor, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Resource.Steel)
+                }
+            },
+            {
+                Module.OreExtractor, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Resource.Steel)
                 }
             }
         };

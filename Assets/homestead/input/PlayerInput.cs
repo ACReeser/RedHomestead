@@ -26,7 +26,10 @@ public class PlayerInput : MonoBehaviour {
     public Transform ConstructionZonePrefab,
         //one of these for each module does NOT scale
         SmallSolarFarmPrefab,
-        OxygenTank;
+        SmallGasTankPrefab,
+        OxygenTank,
+        SabatierPrefab,
+        OreExtractorPrefab;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
@@ -307,11 +310,24 @@ public class PlayerInput : MonoBehaviour {
 
     private Transform GetPlannedModulePrefab()
     {
-        if (PlannedModule == Module.OxygenTank)
+        switch(PlannedModule)
         {
-            return OxygenTank;
+            //storage
+            case Module.SmallGasTank:
+                return SmallGasTankPrefab;
+            case Module.LargeGasTank:
+                return OxygenTank;
+            //extraction
+            case Module.SabatierReactor:
+                return SabatierPrefab;
+            case Module.OreExtractor:
+                return OreExtractorPrefab;
+            //power
+            case Module.SolarPanelSmall:
+                return SmallSolarFarmPrefab;
+            default:
+                return SmallSolarFarmPrefab;
         }
-        return SmallSolarFarmPrefab;
     }
 
     private void CycleMode()

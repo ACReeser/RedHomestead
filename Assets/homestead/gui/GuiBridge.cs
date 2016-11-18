@@ -268,7 +268,8 @@ public class GuiBridge : MonoBehaviour {
             ConstructionGroup.Extraction,
             new Module[]
             {
-                Module.AtmosphereMiner
+                Module.SabatierReactor,
+                Module.OreExtractor,
             }
         },
         {
@@ -282,7 +283,8 @@ public class GuiBridge : MonoBehaviour {
             ConstructionGroup.Storage,
             new Module[]
             {
-                Module.OxygenTank
+                Module.SmallGasTank,
+                Module.LargeGasTank
             }
         },
     };
