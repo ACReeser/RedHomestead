@@ -273,6 +273,7 @@ public class PlayerInput : MonoBehaviour {
             else if (savedLinkEnd != hitInfo.collider)
             {
                 OnLinkPlaced(hitInfo.collider);
+                SetSaved(null);
                 newPrompt = promptGroup.WhenCompleted;
             }
         }
@@ -391,6 +392,9 @@ public class PlayerInput : MonoBehaviour {
     private void PlacePowerPlug(Collider collider)
     {
         PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
+
+        collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+        selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
     }
 
     private static void PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
