@@ -4,7 +4,7 @@ using System;
 
 public class SunOrbit : MonoBehaviour {
     public Material Skybox;
-    public Light GlobalLight, Headlamp1, Headlamp2;
+    public Light GlobalLight;
 
     internal float SecondsPerTick = 1f;
     internal float SecondsPerHour = 5f;
@@ -44,13 +44,13 @@ public class SunOrbit : MonoBehaviour {
             Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, (CurrentHour) / 12f));
         }
 
-        if (CurrentHour > 6 && CurrentHour < 18 && Headlamp1.enabled)
+        if (CurrentHour > 6 && CurrentHour < 18 && PlayerInput.Instance.Headlamp1.enabled)
         {
-            Headlamp1.enabled = Headlamp2.enabled = false;
+            PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = false;
         }
-        else if (CurrentHour > 18 && !Headlamp1.enabled)
+        else if (CurrentHour > 18 && !PlayerInput.Instance.Headlamp1.enabled)
         {
-            Headlamp1.enabled = Headlamp2.enabled = true;
+            PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
         }
     }
 }
