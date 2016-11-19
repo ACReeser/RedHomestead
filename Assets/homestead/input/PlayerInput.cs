@@ -465,7 +465,21 @@ public class PlayerInput : MonoBehaviour {
 
             Renderer r = child.GetComponent<Renderer>();
             if (r != null)
-                r.material = translucentPlanningMat;
+            {
+                if (r.materials != null && r.materials.Length > 1)
+                {
+                    var newMats = new Material[r.materials.Length];
+                    for (int i = 0; i < r.materials.Length; i++)
+                    {
+                        newMats[i] = translucentPlanningMat;
+                    }
+                    r.materials = newMats;
+                }
+                else
+                {
+                    r.material = translucentPlanningMat;
+                }
+            }
 
             RecurseDisableColliderSetTranslucentRenderer(child);
         }
