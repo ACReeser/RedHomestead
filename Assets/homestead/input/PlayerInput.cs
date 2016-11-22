@@ -91,6 +91,7 @@ public class PlayerInput : MonoBehaviour {
             Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
         }
 
+
         PromptInfo newPrompt = null;
         bool doInteract = Input.GetKeyUp(KeyCode.E);
         RaycastHit hitInfo;
@@ -121,6 +122,18 @@ public class PlayerInput : MonoBehaviour {
                 else if (Input.GetKeyUp(KeyCode.Alpha4))
                 {
                     GuiBridge.Instance.SelectConstructionPlan(3);
+                }
+            }
+
+            if (PlannedModuleVisualization != null)
+            {
+                if (Input.GetMouseButton(0))
+                {
+                    PlannedModuleVisualization.Rotate(Vector3.up * 90 * Time.deltaTime);
+                }
+                else if (Input.GetMouseButton(1))
+                {
+                    PlannedModuleVisualization.Rotate(-Vector3.up * 90 * Time.deltaTime);
                 }
             }
 
