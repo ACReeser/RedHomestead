@@ -12,6 +12,7 @@ public class PlayerInput : MonoBehaviour {
     public enum InputMode { Default, Planning }
     public static PlayerInput Instance;
 
+    public Camera FlowCamera;
     public Light Headlamp1, Headlamp2;
     /// <summary>
     /// Tube prefab to be created when linking bulkheads
@@ -89,6 +90,11 @@ public class PlayerInput : MonoBehaviour {
         if (Input.GetKeyUp(KeyCode.F))
         {
             Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
+        }
+
+        if (Input.GetKeyUp(KeyCode.V))
+        {
+            FlowCamera.enabled = !FlowCamera.enabled;
         }
 
 

@@ -51,6 +51,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &160608
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 474800}
+  - 20: {fileID: 2090158}
+  m_Layer: 0
+  m_Name: FlowCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &176266
 GameObject:
   m_ObjectHideFlags: 1
@@ -60,7 +76,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 429462}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: HeadlampHarness
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -121,6 +137,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 429462}
+  - {fileID: 474800}
   m_Father: {fileID: 408964}
   m_RootOrder: 0
 --- !u!4 &429462
@@ -137,6 +154,18 @@ Transform:
   - {fileID: 476376}
   m_Father: {fileID: 423614}
   m_RootOrder: 0
+--- !u!4 &474800
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 160608}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 423614}
+  m_RootOrder: 1
 --- !u!4 &476376
 Transform:
   m_ObjectHideFlags: 1
@@ -173,7 +202,41 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 4294966783
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+  m_StereoMirrorMode: 0
+--- !u!20 &2090158
+Camera:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 160608}
+  m_Enabled: 0
+  serializedVersion: 2
+  m_ClearFlags: 3
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0.019607844}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: 1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 512
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -464,6 +527,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ccc3c24a2ce84d40a4f94a5a3b98d08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  FlowCamera: {fileID: 2090158}
   Headlamp1: {fileID: 10888764}
   Headlamp2: {fileID: 10817006}
   tubePrefab: {fileID: 463720, guid: 9d86cff3e08476b4389c61101a0f06dd, type: 2}
