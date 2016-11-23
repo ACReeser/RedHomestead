@@ -237,6 +237,15 @@ public class PlayerInput : MonoBehaviour {
                         }
                     }
                 }
+                else if (hitInfo.collider.gameObject.name == "door")
+                {
+                    if (doInteract)
+                    {
+                        var anim = hitInfo.collider.transform.parent.GetComponent<Animator>();
+                        anim.SetBool("open", !anim.GetBool("open"));
+
+                    }
+                }
             }
             else if (doInteract)
             {
