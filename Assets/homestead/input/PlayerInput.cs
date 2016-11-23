@@ -237,13 +237,40 @@ public class PlayerInput : MonoBehaviour {
                         }
                     }
                 }
-                else if (hitInfo.collider.gameObject.name == "door")
+                else if (hitInfo.collider.CompareTag("door"))
+                {
+                    if (hitInfo.collider.gameObject.name == Airlock.OpenDoorName)
+                    {
+                        if (doInteract)
+                        {
+                            Airlock.ToggleDoor(hitInfo.collider.transform);
+                        }
+                        else
+                        {
+                            newPrompt = GuiBridge.DoorHint;
+                        }
+                    }
+                    else
+                    {
+                        newPrompt = GuiBridge.DoorLockedHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("button"))
                 {
                     if (doInteract)
                     {
-                        var anim = hitInfo.collider.transform.parent.GetComponent<Animator>();
-                        anim.SetBool("open", !anim.GetBool("open"));
-
+                        if (hitInfo.collider.name == "depressurize")
+                        {
+                            hitInfo.collider.transform.parent.GetComponent<Airlock>().Depressurize();
+                        }
+                        else if (hitInfo.collider.name == "pressurize")
+                        {
+                            hitInfo.collider.transform.parent.GetComponent<Airlock>().Pressurize();
+                        }
+                    }
+                    else
+                    {
+                        newPrompt = GuiBridge.GenericButtonHint;
                     }
                 }
             }

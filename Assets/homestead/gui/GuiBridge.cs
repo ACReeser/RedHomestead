@@ -100,6 +100,21 @@ public class GuiBridge : MonoBehaviour {
         Description = "Construct",
         Key = "E"
     };
+    internal static PromptInfo DoorHint = new PromptInfo()
+    {
+        Description = "Open Door",
+        Key = "E"
+    };
+    internal static PromptInfo DoorLockedHint = new PromptInfo()
+    {
+        Description = "Door Locked",
+        Key = null
+    };
+    internal static PromptInfo GenericButtonHint = new PromptInfo()
+    {
+        Description = "Press Button",
+        Key = "E"
+    };
     internal static PromptInfo PlanConstructionZoneHint = new PromptInfo()
     {
         Description = "Begin Construction Here",
@@ -159,6 +174,8 @@ public class GuiBridge : MonoBehaviour {
     public void ShowPrompt(PromptInfo prompt)
     {
         PromptKey.text = prompt.Key;
+        PromptKey.transform.parent.gameObject.SetActive(prompt.Key != null);
+
         PromptDescription.text = prompt.Description;
         TogglePromptPanel(true);
         CurrentPrompt = prompt;
