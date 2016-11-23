@@ -42,6 +42,7 @@ public class Airlock : MonoBehaviour {
         {
             IsPressurized = true;
             RefreshState();
+            SurvivalTimer.Instance.UseHabitatResources();
         }
     }
 
@@ -52,6 +53,7 @@ public class Airlock : MonoBehaviour {
         {
             IsPressurized = false;
             RefreshState();
+            SurvivalTimer.Instance.UsePackResources();
         }
     }
 

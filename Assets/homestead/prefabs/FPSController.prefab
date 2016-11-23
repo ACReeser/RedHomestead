@@ -94,6 +94,7 @@ GameObject:
   - 81: {fileID: 8152440}
   - 45: {fileID: 4574634}
   - 114: {fileID: 11493248}
+  - 114: {fileID: 11499320}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: MainCamera
@@ -543,6 +544,20 @@ MonoBehaviour:
   OreExtractorPrefab: {fileID: 425088, guid: 1bc0cbbd20e62cf43907750ec56cb76d, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
+--- !u!114 &11499320
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 194682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f21fe95cc96f32429d5202251e9c62e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OxygenAmount: 100
+  OxygenMaximumAmount: 100
+  OxygenConsumptionPerSecond: 0.1
 --- !u!143 &14362950
 CharacterController:
   m_ObjectHideFlags: 1

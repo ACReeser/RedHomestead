@@ -555,4 +555,10 @@ public class PlayerInput : MonoBehaviour {
             RecurseDisableColliderSetTranslucentRenderer(child);
         }
     }
+
+    public void KillPlayer()
+    {
+        GuiBridge.Instance.ShowKillMenu();
+        this.enabled = false;
+    }
 }

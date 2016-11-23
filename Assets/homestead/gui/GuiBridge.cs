@@ -141,11 +141,12 @@ public class GuiBridge : MonoBehaviour {
 
 
 
-    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel;
+    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
+    public Image OxygenBar;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -391,5 +392,20 @@ public class GuiBridge : MonoBehaviour {
         this.PlacingText.text = planModule.ToString();
         PlayerInput.Instance.PlanModule(planModule);
         this.SetConstructionGroup((int)ConstructionGroup.None);
+    }
+
+    internal void ShowKillMenu()
+    {
+        KilledPanel.transform.gameObject.SetActive(true);
+    }
+
+    public void Restart()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    internal void RefreshOxygenBar(float percentage)
+    {
+        this.OxygenBar.fillAmount = percentage;
     }
 }
