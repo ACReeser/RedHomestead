@@ -8,6 +8,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 491350}
+  - 114: {fileID: 11488376}
   m_Layer: 0
   m_Name: solarpanel
   m_TagString: Untagged
@@ -197,7 +198,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 114136}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 730.4116, y: 0, z: 1009.3495}
+  m_LocalPosition: {x: 727.15, y: 0, z: 1018.52}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 431642}
@@ -339,6 +340,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.7, y: 2.7, z: 0.2}
   m_Center: {x: 0, y: -3.53, z: -3.72}
+--- !u!114 &11488376
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 114136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 029fdd3da1fe7404a8130e6b374e1eff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PowerIndicator: {fileID: 0}
+  Efficiency: 0.22
+  GrossSolarWattagePerTick: 20
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

@@ -428,6 +428,13 @@ public class PlayerInput : MonoBehaviour {
     private void PlaceGasPipe(Collider collider)
     {
         PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
+
+        ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
+        if (g1 != null && g2 != null)
+        {
+            g1.LinkToModule(g2);
+            g2.LinkToModule(g1);
+        }
     }
 
     private void PlacePowerPlug(Collider collider)
@@ -436,6 +443,15 @@ public class PlayerInput : MonoBehaviour {
 
         collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
         selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
+
+        ModuleGameplay g1 = selectedPowerSocket.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
+        if (g1 != null && g2 != null)
+        {
+            if (g1.HasPower || g2.HasPower)
+            {
+                g1.HasPower = g2.HasPower = true;
+            }
+        }
     }
 
     private static void PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
