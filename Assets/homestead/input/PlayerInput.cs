@@ -559,6 +559,9 @@ public class PlayerInput : MonoBehaviour {
     public void KillPlayer()
     {
         GuiBridge.Instance.ShowKillMenu();
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
+        FPSController.enabled = false;
         this.enabled = false;
     }
 }
