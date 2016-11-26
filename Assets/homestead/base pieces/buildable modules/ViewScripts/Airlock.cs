@@ -23,10 +23,10 @@ public class Airlock : MonoBehaviour {
         OuterAnimator = OuterDoor.parent.GetComponent<Animator>();
         InnerAnimator = InnerDoor.parent.GetComponent<Animator>();
 
-        RefreshState();
+        RefreshDoorAndLightState();
 	}
 
-    private void RefreshState()
+    private void RefreshDoorAndLightState()
     {
         OuterDoor.name = IsPressurized ? "lockeddoor" : OpenDoorName;
         InnerDoor.name = IsPressurized ? OpenDoorName : "lockeddoor";
@@ -41,8 +41,9 @@ public class Airlock : MonoBehaviour {
         if (OuterDoorSealed && !IsPressurized)
         {
             IsPressurized = true;
-            RefreshState();
+            RefreshDoorAndLightState();
             SurvivalTimer.Instance.UseHabitatResources();
+            OutsideVisuals.ToggleAllParticles(false);
         }
     }
 
@@ -52,8 +53,9 @@ public class Airlock : MonoBehaviour {
         if (InnerDoorSealed && IsPressurized)
         {
             IsPressurized = false;
-            RefreshState();
+            RefreshDoorAndLightState();
             SurvivalTimer.Instance.UsePackResources();
+            OutsideVisuals.ToggleAllParticles(true);
         }
     }
 
