@@ -48,6 +48,7 @@ public class PlayerInput : MonoBehaviour {
     private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket, carriedObject;
+    private Compound selectedCompound = Compound.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
     private List<Transform> createdPowerlines = new List<Transform>();
@@ -206,7 +207,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnPowerPlug(newPrompt, doInteract, hitInfo);
                 }
-                else if (hitInfo.collider.gameObject.CompareTag("valve"))
+                else if (IsGasValve(hitInfo.collider))
                 {
                     newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
                 }
@@ -306,6 +307,16 @@ public class PlayerInput : MonoBehaviour {
         }
 	}
 
+    private bool IsGasValve(Collider collider)
+    {
+        return collider.CompareTag("valve") ||
+            collider.CompareTag("hydrogenvalve") ||
+            collider.CompareTag("oxygenvalve") ||
+            collider.CompareTag("methanevalve") ||
+            collider.CompareTag("watervalve") ||
+            collider.CompareTag("carbondioxidevalve");
+    }
+
     private PromptInfo OnPowerPlug(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
         return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => selectedPowerSocket = value, PlacePowerPlug, GuiBridge.PowerPlugPrompts);
@@ -318,7 +329,78 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedGasValve, value => selectedGasValve = value, PlaceGasPipe, GuiBridge.GasPipePrompts);
+        Compound other = GetCompoundFromValve(hitInfo.collider);
+
+        if (selectedCompound != Compound.Unspecified)
+        {
+            if (!CompoundsMatch(selectedCompound, other))
+            {
+                return GuiBridge.InvalidPipeHint;
+            }
+        }
+
+        return OnLinkable(doInteract, hitInfo, selectedGasValve, value => {
+                selectedGasValve = value;
+                selectedCompound = other;
+            print("selected " +selectedCompound.ToString());
+            }, PlaceGasPipe, GuiBridge.GasPipePrompts);
+    }
+
+    private static bool CompoundsMatch(Compound selectedCompound, Compound other)
+    {
+        if (selectedCompound == Compound.Unspecified &&
+            other == Compound.Unspecified)
+        {
+            return true;
+        }
+        else if (selectedCompound != Compound.Unspecified &&
+            other == Compound.Unspecified)
+        {
+            return true;
+        }
+        else
+        {
+            return selectedCompound == other;
+        }
+    }
+
+    private static Compound GetCompoundFromValve(Collider collider)
+    {
+        switch (collider.tag)
+        {
+            case "oxygenvalve":
+                return Compound.Oxygen;
+            case "hydrogenvalve":
+                return Compound.Hydrogen;
+            case "methanevalve":
+                return Compound.Methane;
+            case "carbondioxidevalve":
+                return Compound.CarbonDioxide;
+            case "watervalve":
+                return Compound.Water;
+            default:
+                return Compound.Unspecified;
+        }
+    }
+
+    //todo: move out of this class
+    public static string GetValveFromCompound(Compound c)
+    {
+        switch (c)
+        {
+            case Compound.Oxygen:
+                return "oxygenvalve";
+            case Compound.Hydrogen:
+                return "hydrogenvalve";
+            case Compound.Methane:
+                return "methanevalve";
+            case Compound.CarbonDioxide:
+                return "carbondioxidevalve";
+            case Compound.Water:
+                return "watervalve";
+            default:
+                return "valve";
+        }
     }
 
     private static PromptInfo OnLinkable(bool doInteract, RaycastHit hitInfo, Collider savedLinkEnd, Action<Collider> SetSaved, Action<Collider> OnLinkPlaced, LinkablePrompts promptGroup )
@@ -470,6 +552,10 @@ public class PlayerInput : MonoBehaviour {
         {
             g1.LinkToModule(g2);
             g2.LinkToModule(g1);
+            if (g2 is GasStorage)
+            {
+                (g2 as GasStorage).SpecifyCompound(selectedCompound);
+            }
         }
     }
 
@@ -477,6 +563,7 @@ public class PlayerInput : MonoBehaviour {
     {
         PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
 
+        //turn on "plug" cylinders
         collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
         selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
 

@@ -62,6 +62,7 @@ public abstract class Sink : ModuleGameplay
         return Get(c) != null;
     }
 
+    public abstract void SpecifyCompound(Compound c);
     public abstract ResourceContainer Get(Compound c);
     public abstract void Equalize();
 }
@@ -145,7 +146,7 @@ public abstract class MultipleResourceConverter : Converter
     public Dictionary<Compound, ResourceContainer> Holding = new Dictionary<Compound, ResourceContainer>();
 }
 
-public enum Compound { Hydrogen, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water }
+public enum Compound { Unspecified = -1, Hydrogen, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water }
 
 public class ResourceContainer
 {

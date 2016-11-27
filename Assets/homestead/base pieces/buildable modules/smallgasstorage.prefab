@@ -336,7 +336,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 0}
-  SinkType: 0
+  SinkType: -1
   MeshFilter: {fileID: 3367382}
   CompoundUVSet:
   - {fileID: 4300008, guid: 427211e584bc24748883b1437fb7a460, type: 3}
@@ -351,7 +351,11 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: SinkType
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 184912}

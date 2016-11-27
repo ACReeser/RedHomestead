@@ -120,6 +120,11 @@ public class GuiBridge : MonoBehaviour {
         Description = "Begin Construction Here",
         Key = "E"
     };
+    internal static PromptInfo InvalidPipeHint = new PromptInfo()
+    {
+        Description = "Invalid connection",
+        Key = null
+    };
     internal static LinkablePrompts BulkheadBridgePrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartBulkheadBridgeHint,
