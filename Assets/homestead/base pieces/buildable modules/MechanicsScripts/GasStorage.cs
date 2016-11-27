@@ -23,11 +23,8 @@ public class GasStorage : SingleResourceSink {
 
     private void SyncMeshToCompoundType()
     {
-        if (SinkType != Compound.Unspecified)
-        {
-            RefreshMeshToCompound();
-            SetValveTagsToCompound(this.transform);
-        }
+        RefreshMeshToCompound();
+        SetValveTagsToCompound(this.transform);
     }
 
     //todo: bug
@@ -47,9 +44,11 @@ public class GasStorage : SingleResourceSink {
 
     private void RefreshMeshToCompound()
     {
-        if (CompoundUVSet[(int)this.SinkType] != null)
+        //unspecified == -1, so add 1 to get 0 based array index of meshes
+        int index = ((int)this.SinkType) + 1;
+        if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
         {
-            this.MeshFilter.mesh = CompoundUVSet[(int)this.SinkType];
+            this.MeshFilter.mesh = CompoundUVSet[index];
         }
     }
 

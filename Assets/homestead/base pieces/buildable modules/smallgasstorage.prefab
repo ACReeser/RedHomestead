@@ -75,7 +75,7 @@ GameObject:
   - 23: {fileID: 2309444}
   - 65: {fileID: 6530926}
   m_Layer: 0
-  m_Name: smalloxygen
+  m_Name: meshrenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -263,7 +263,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 159100}
-  m_Mesh: {fileID: 4300040, guid: dcd76687f11349747848f8c2453be7af, type: 3}
+  m_Mesh: {fileID: 4300002, guid: dd3fe2d26a8637c488604b24f75c208c, type: 3}
 --- !u!65 &6530926
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -339,6 +339,7 @@ MonoBehaviour:
   SinkType: -1
   MeshFilter: {fileID: 3367382}
   CompoundUVSet:
+  - {fileID: 4300002, guid: dd3fe2d26a8637c488604b24f75c208c, type: 3}
   - {fileID: 4300008, guid: 427211e584bc24748883b1437fb7a460, type: 3}
   - {fileID: 4300040, guid: dcd76687f11349747848f8c2453be7af, type: 3}
   - {fileID: 0}
