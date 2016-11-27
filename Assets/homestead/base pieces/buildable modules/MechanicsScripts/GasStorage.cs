@@ -18,7 +18,10 @@ public class GasStorage : SingleResourceSink {
     // Use this for initialization
     void Start()
     {
-
+        if(CompoundUVSet[(int)this.SinkType] != null)
+        {
+            this.MeshFilter.mesh = CompoundUVSet[(int)this.SinkType];
+        }
     }
 
     // Update is called once per frame
