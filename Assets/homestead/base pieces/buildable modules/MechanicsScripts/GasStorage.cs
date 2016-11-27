@@ -67,7 +67,7 @@ public class GasStorage : SingleResourceSink {
         }
         else
         {
-            throw new InvalidOperationException("cannot set compound to this type");
+            print("cannot set this storage to compound type "+c.ToString());
         }
     }
 }

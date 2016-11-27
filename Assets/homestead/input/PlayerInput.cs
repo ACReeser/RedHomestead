@@ -339,11 +339,18 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        return OnLinkable(doInteract, hitInfo, selectedGasValve, value => {
-                selectedGasValve = value;
+        return OnLinkable(doInteract, hitInfo, selectedGasValve, value => 
+        {
+            selectedGasValve = value;
+
+            if (value == null)
+                //todo: bug this actually should be nullable
+                selectedCompound = Compound.Unspecified;
+            else 
                 selectedCompound = other;
+
             print("selected " +selectedCompound.ToString());
-            }, PlaceGasPipe, GuiBridge.GasPipePrompts);
+        }, PlaceGasPipe, GuiBridge.GasPipePrompts);
     }
 
     private static bool CompoundsMatch(Compound selectedCompound, Compound other)
@@ -545,7 +552,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceGasPipe(Collider collider)
     {
-        PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
+        Transform newPipe = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
 
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
@@ -557,6 +564,9 @@ public class PlayerInput : MonoBehaviour {
                 (g2 as GasStorage).SpecifyCompound(selectedCompound);
             }
         }
+
+        Pipe pipeScript = newPipe.GetComponent<Pipe>();
+        pipeScript.PipeType = selectedCompound;
     }
 
     private void PlacePowerPlug(Collider collider)
@@ -577,7 +587,7 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private static void PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
+    private static Transform PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
     {
         float distanceBetween = Vector3.Distance(firstObject.transform.position, otherObject.transform.position);
 
@@ -594,6 +604,8 @@ public class PlayerInput : MonoBehaviour {
             firstObject.gameObject.SetActive(false);
             otherObject.gameObject.SetActive(false);
         }
+
+        return newTube;
     }
 
     internal void PlanModule(Module planModule)
@@ -617,25 +629,29 @@ public class PlayerInput : MonoBehaviour {
     {
         foreach (Transform child in parent)
         {
-            Collider c = child.GetComponent<Collider>();
-            if (c != null)
-                c.enabled = false;
-
-            Renderer r = child.GetComponent<Renderer>();
-            if (r != null)
+            //only default layer
+            if (child.gameObject.layer == 0)
             {
-                if (r.materials != null && r.materials.Length > 1)
+                Collider c = child.GetComponent<Collider>();
+                if (c != null)
+                    c.enabled = false;
+
+                Renderer r = child.GetComponent<Renderer>();
+                if (r != null)
                 {
-                    var newMats = new Material[r.materials.Length];
-                    for (int i = 0; i < r.materials.Length; i++)
+                    if (r.materials != null && r.materials.Length > 1)
                     {
-                        newMats[i] = translucentPlanningMat;
+                        var newMats = new Material[r.materials.Length];
+                        for (int i = 0; i < r.materials.Length; i++)
+                        {
+                            newMats[i] = translucentPlanningMat;
+                        }
+                        r.materials = newMats;
                     }
-                    r.materials = newMats;
-                }
-                else
-                {
-                    r.material = translucentPlanningMat;
+                    else
+                    {
+                        r.material = translucentPlanningMat;
+                    }
                 }
             }
 
