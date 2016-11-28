@@ -20,6 +20,7 @@ Standard Assets are installed from Assets > Import Package
 The following assets will need to be added from the Asset store, since they are not source controlled:
 
  1. [Scifi Crate](https://www.assetstore.unity3d.com/en/#!/content/21965)
+ 2. [Yughues Free Stylized Foliages](https://www.assetstore.unity3d.com/en/#!/content/13392)
  
 ##Blender
 
