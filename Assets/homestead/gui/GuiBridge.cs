@@ -42,6 +42,7 @@ public class GuiBridge : MonoBehaviour {
         Description = "Connect bulkheads",
         Key = "E"
     };
+
     public static PromptInfo BulkheadBridgeCompletedPrompt = new PromptInfo()
     {
         Description = "Bulkheads connected",
@@ -115,6 +116,11 @@ public class GuiBridge : MonoBehaviour {
         Description = "Press Button",
         Key = "E"
     };
+    internal static PromptInfo DrinkWaterHint = new PromptInfo()
+    {
+        Description = "Drink Water",
+        Key = "E"
+    };
     internal static PromptInfo PlanConstructionZoneHint = new PromptInfo()
     {
         Description = "Begin Construction Here",
@@ -151,7 +157,7 @@ public class GuiBridge : MonoBehaviour {
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image OxygenBar;
+    public Image OxygenBar, WaterBar;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -412,5 +418,10 @@ public class GuiBridge : MonoBehaviour {
     internal void RefreshOxygenBar(float percentage)
     {
         this.OxygenBar.fillAmount = percentage;
+    }
+
+    internal void RefreshWaterBar(float percentage)
+    {
+        this.WaterBar.fillAmount = percentage;
     }
 }

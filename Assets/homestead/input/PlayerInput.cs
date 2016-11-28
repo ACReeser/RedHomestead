@@ -274,6 +274,17 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = GuiBridge.GenericButtonHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("water"))
+                {
+                    if (doInteract)
+                    {
+                        SurvivalTimer.Instance.FillWater();
+                    }
+                    else
+                    {
+                        newPrompt = GuiBridge.DrinkWaterHint;
+                    }
+                }
             }
             else if (doInteract)
             {
