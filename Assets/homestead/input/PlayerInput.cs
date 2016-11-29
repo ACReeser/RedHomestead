@@ -62,6 +62,8 @@ public class PlayerInput : MonoBehaviour {
         }
     }
     private Transform PlannedModuleVisualization;
+    private Transform lastHobbitHoleTransform;
+    private HobbitHole lastHobbitHole;
 
     void Awake()
     {
@@ -254,6 +256,29 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         newPrompt = GuiBridge.DoorLockedHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("cavernwall"))
+                {
+                    if (doInteract)
+                    {
+                        if (hitInfo.collider.transform.parent == lastHobbitHoleTransform)
+                        {
+                            lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition);
+                        }
+                        else
+                        {
+                            HobbitHole hh = hitInfo.collider.transform.parent.GetComponent<HobbitHole>();
+
+                            if (hh != null)
+                                lastHobbitHole = hh;
+
+                            lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition);
+                        }
+                    }
+                    else
+                    {
+                        //prompt
                     }
                 }
                 else if (hitInfo.collider.CompareTag("button"))

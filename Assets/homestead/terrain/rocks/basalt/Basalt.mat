@@ -6,13 +6,12 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: flowlabels
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _ALPHATEST_ON _EMISSION
-  m_LightmapFlags: 1
-  m_CustomRenderQueue: 2450
-  stringTagMap:
-    RenderType: TransparentCutout
+  m_Name: Basalt
+  m_Shader: {fileID: 45, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: _NORMALMAP _PARALLAXMAP _SPECGLOSSMAP
+  m_LightmapFlags: 5
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
@@ -20,14 +19,14 @@ Material:
         first:
           name: _MainTex
         second:
-          m_Texture: {fileID: 2800000, guid: b801d4b7718cb8b46ba22e02200cd665, type: 3}
-          m_Scale: {x: 2, y: 1}
+          m_Texture: {fileID: 2800000, guid: 6467b6c0ca443154a8ba491ffa32fd16, type: 3}
+          m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
           name: _BumpMap
         second:
-          m_Texture: {fileID: 0}
+          m_Texture: {fileID: 2800000, guid: 9c2924e443e76354f82210dab41b7fa1, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -41,7 +40,7 @@ Material:
         first:
           name: _ParallaxMap
         second:
-          m_Texture: {fileID: 0}
+          m_Texture: {fileID: 2800000, guid: 9540713226b3c28499a731ab23661e16, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
@@ -55,8 +54,8 @@ Material:
         first:
           name: _EmissionMap
         second:
-          m_Texture: {fileID: 2800000, guid: b801d4b7718cb8b46ba22e02200cd665, type: 3}
-          m_Scale: {x: 2, y: 1}
+          m_Texture: {fileID: 0}
+          m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
       data:
         first:
@@ -79,6 +78,13 @@ Material:
           m_Texture: {fileID: 0}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _SpecGlossMap
+        second:
+          m_Texture: {fileID: 2800000, guid: 1d45c8b273911b14e8229946096d1c6a, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
     m_Floats:
       data:
         first:
@@ -95,7 +101,7 @@ Material:
       data:
         first:
           name: _Parallax
-        second: 0.02
+        second: 0.05
       data:
         first:
           name: _ZWrite
@@ -103,11 +109,11 @@ Material:
       data:
         first:
           name: _Glossiness
-        second: 0
+        second: 0.822
       data:
         first:
           name: _BumpScale
-        second: 1
+        second: 1.5
       data:
         first:
           name: _OcclusionStrength
@@ -123,7 +129,7 @@ Material:
       data:
         first:
           name: _Mode
-        second: 1
+        second: 0
       data:
         first:
           name: _Metallic
@@ -132,8 +138,12 @@ Material:
       data:
         first:
           name: _EmissionColor
-        second: {r: 1, g: 1, b: 1, a: 1}
+        second: {r: 0, g: 0, b: 0, a: 1}
       data:
         first:
           name: _Color
-        second: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+        second: {r: 1, g: 1, b: 1, a: 1}
+      data:
+        first:
+          name: _SpecColor
+        second: {r: 0.2, g: 0.2, b: 0.2, a: 1}
