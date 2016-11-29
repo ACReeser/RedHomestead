@@ -9,7 +9,8 @@ public class Airlock : MonoBehaviour {
 
     public Material LightOff, GreenLight, RedLight;
     public MeshRenderer PressurizedLight, DepressurizedLight;
-    
+    public Collider TerrainCollider;
+
     public Transform OuterDoor, InnerDoor;
     public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
@@ -44,6 +45,16 @@ public class Airlock : MonoBehaviour {
             RefreshDoorAndLightState();
             SurvivalTimer.Instance.UseHabitatResources();
             OutsideVisuals.ToggleAllParticles(false);
+            SetPlayerTerrainCollision(true);
+        }
+    }
+
+    private void SetPlayerTerrainCollision(bool doIgnore)
+    {
+        if (TerrainCollider != null)
+        {
+            //todo: cache collider
+            Physics.IgnoreCollision(PlayerInput.Instance.FPSController.GetComponent<Collider>(), TerrainCollider, doIgnore);
         }
     }
 
@@ -56,6 +67,7 @@ public class Airlock : MonoBehaviour {
             RefreshDoorAndLightState();
             SurvivalTimer.Instance.UsePackResources();
             OutsideVisuals.ToggleAllParticles(true);
+            SetPlayerTerrainCollision(false);
         }
     }
 
