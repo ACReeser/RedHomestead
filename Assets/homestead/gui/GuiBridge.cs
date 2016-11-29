@@ -157,7 +157,7 @@ public class GuiBridge : MonoBehaviour {
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image OxygenBar, WaterBar;
+    public Image OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -423,5 +423,31 @@ public class GuiBridge : MonoBehaviour {
     internal void RefreshWaterBar(float percentage)
     {
         this.WaterBar.fillAmount = percentage;
+    }
+
+    internal void RefreshFoodBar(float percentage)
+    {
+        this.FoodBar.fillAmount = percentage;
+    }
+
+    internal void RefreshRadiationBar(float percentage)
+    {
+        this.RadBar.fillAmount = percentage;
+    }
+
+    internal void RefreshPowerBar(float powerPercentage, float heatPercentage)
+    {
+        this.PowerImage.enabled = (powerPercentage > 0f);
+        this.HotImage.enabled = (powerPercentage <= 0f) && (heatPercentage > .5f);
+        this.ColdImage.enabled = (powerPercentage <= 0f) && (heatPercentage <= .5f);
+
+        if (this.PowerImage.enabled)
+        {
+            this.PowerBar.fillAmount = powerPercentage;
+        }
+        else
+        {
+            this.PowerBar.fillAmount = heatPercentage;
+        }
     }
 }
