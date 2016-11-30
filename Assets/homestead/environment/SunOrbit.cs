@@ -23,13 +23,17 @@ public class SunOrbit : MonoBehaviour {
             yield return new WaitForSeconds(SecondsPerTick);
         }
     }
+    private bool morningMilestone, eveningMilestone;
 
     // Update is called once per frame
     void Update () {
         CurrentHour += Time.deltaTime / SecondsPerHour;
 
         if (CurrentHour > 24f)
+        {
             CurrentHour = 24f - CurrentHour;
+            morningMilestone = eveningMilestone = false;
+        }
 
         GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * (CurrentHour / 24)), 0, 0);
         
@@ -44,13 +48,17 @@ public class SunOrbit : MonoBehaviour {
             Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, (CurrentHour) / 12f));
         }
 
-        if (CurrentHour > 6 && CurrentHour < 18 && PlayerInput.Instance.Headlamp1.enabled)
+        if (CurrentHour > 6 && !morningMilestone)
         {
-            PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = false;
+            morningMilestone = true;
+            if (PlayerInput.Instance.Headlamp1.enabled)
+                PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = false;
         }
-        else if (CurrentHour > 18 && !PlayerInput.Instance.Headlamp1.enabled)
+        else if (CurrentHour > 18 && !eveningMilestone)
         {
-            PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
+            eveningMilestone = true;
+            if (!PlayerInput.Instance.Headlamp1.enabled)
+                PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
         }
     }
 }
