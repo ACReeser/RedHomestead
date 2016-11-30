@@ -377,14 +377,18 @@ public class GuiBridge : MonoBehaviour {
     /// </summary>
     internal void RefreshMode()
     {
-        switch(PlayerInput.Instance.Mode)
+        switch(PlayerInput.Instance.CurrentMode)
         {
-            case PlayerInput.InputMode.Default:
+            case PlayerInput.PlanningMode.Default:
                 this.ModeText.text = "Switch to Planning";
                 this.SetConstructionGroup(-2);
                 this.PlacingPanel.gameObject.SetActive(false);
                 break;
-            case PlayerInput.InputMode.Planning:
+            case PlayerInput.PlanningMode.Exterior:
+                this.ModeText.text = "Stop Planning";
+                this.SetConstructionGroup(-1);
+                break;
+            case PlayerInput.PlanningMode.Interiors:
                 this.ModeText.text = "Stop Planning";
                 this.SetConstructionGroup(-1);
                 break;

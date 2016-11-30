@@ -46,6 +46,7 @@ public class Airlock : MonoBehaviour {
             SurvivalTimer.Instance.UseHabitatResources();
             OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
+            PlayerInput.Instance.AvailableMode = PlayerInput.PlanningMode.Interiors;
         }
     }
 
@@ -68,6 +69,7 @@ public class Airlock : MonoBehaviour {
             SurvivalTimer.Instance.UsePackResources();
             OutsideVisuals.ToggleAllParticles(true);
             SetPlayerTerrainCollision(false);
+            PlayerInput.Instance.AvailableMode = PlayerInput.PlanningMode.Exterior;
         }
     }
 

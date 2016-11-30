@@ -9,7 +9,7 @@ using RedHomestead.Construction;
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
 public class PlayerInput : MonoBehaviour {
-    public enum InputMode { Default, Planning }
+    public enum PlanningMode { Default, Exterior, Interiors }
     public static PlayerInput Instance;
 
     public Camera FlowCamera;
@@ -39,7 +39,8 @@ public class PlayerInput : MonoBehaviour {
     public Material translucentPlanningMat;
 
     internal Module PlannedModule = Module.Unspecified;
-    internal InputMode Mode = InputMode.Default;
+    internal PlanningMode CurrentMode = PlanningMode.Default;
+    internal PlanningMode AvailableMode = PlanningMode.Exterior;
 
     /// <summary>
     /// Visualization == transparent preview of module to be built
@@ -104,7 +105,7 @@ public class PlayerInput : MonoBehaviour {
         PromptInfo newPrompt = null;
         bool doInteract = Input.GetKeyUp(KeyCode.E);
         RaycastHit hitInfo;
-        if (Mode == InputMode.Planning)
+        if (CurrentMode == PlanningMode.Exterior)
         {
             if (PlannedModule == Module.Unspecified)
             {
@@ -152,7 +153,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (hitInfo.collider.CompareTag("terrain"))
                     {
-                        if (Mode == InputMode.Planning && PlannedModuleVisualization != null)
+                        if (CurrentMode == PlanningMode.Exterior && PlannedModuleVisualization != null)
                         {
                             //TODO: raycast 3 more times (other 3 corners)
                             //then take the average height between them
@@ -519,26 +520,34 @@ public class PlayerInput : MonoBehaviour {
     private void CycleMode()
     {
         //todo: fix lazy code
-        if (Mode == InputMode.Default)
-            Mode = InputMode.Planning;
+        if (CurrentMode == PlanningMode.Default)
+            CurrentMode = this.AvailableMode;
         else
-            Mode = InputMode.Default;
+            CurrentMode = PlanningMode.Default;
 
-        if (Mode == InputMode.Planning)
+        switch(CurrentMode)
         {
-            Cursor.lockState = CursorLockMode.Confined;
-            Cursor.visible = true;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            if (this.PlannedModuleVisualization != null)
-            {
-                this.PlannedModuleVisualization.gameObject.SetActive(false);
-                this.PlannedModuleVisualization = null;
-            }
-            this.PlannedModule = Module.Unspecified;
+            case PlanningMode.Exterior:
+                FlowCamera.cullingMask = 1 << 10;
+                FlowCamera.enabled = true;
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+                break;
+            case PlanningMode.Default:
+                FlowCamera.enabled = false;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                if (this.PlannedModuleVisualization != null)
+                {
+                    this.PlannedModuleVisualization.gameObject.SetActive(false);
+                    this.PlannedModuleVisualization = null;
+                }
+                this.PlannedModule = Module.Unspecified;
+                break;
+            case PlanningMode.Interiors:
+                FlowCamera.cullingMask = 1 << 10;
+                FlowCamera.enabled = true;
+                break;
         }
 
         GuiBridge.Instance.RefreshMode();
