@@ -6,32 +6,42 @@ public class SunOrbit : MonoBehaviour {
     public Material Skybox;
     public Light GlobalLight;
 
-    internal float SecondsPerTick = 1f;
-    internal float SecondsPerHour = 5f;
+    //internal float SecondsPerTick = 1f;
+    internal float GameSecondsPerMartianHour = 5f;
+    internal float GameSecondsPerMartianMinute = 1 / 4f;//5 / ((24 * 60) + 40) / 60f;
 
     internal float CurrentHour = 0;
+    internal float CurrentMinute = 0;
 
 	// Use this for initialization
 	void Start () {
         //StartCoroutine(SunTick());
 	}
 
-    private IEnumerator SunTick()
-    {
-        while(this.isActiveAndEnabled)
-        {
-            yield return new WaitForSeconds(SecondsPerTick);
-        }
-    }
+    //private IEnumerator SunTick()
+    //{
+    //    while(this.isActiveAndEnabled)
+    //    {
+    //        yield return new WaitForSeconds(SecondsPerTick);
+    //    }
+    //}
+
     private bool morningMilestone, eveningMilestone;
 
     // Update is called once per frame
     void Update () {
-        CurrentHour += Time.deltaTime / SecondsPerHour;
+        CurrentMinute += Time.deltaTime / GameSecondsPerMartianMinute;
 
-        if (CurrentHour > 24f)
+        if (CurrentMinute > 60f)
         {
-            CurrentHour = 24f - CurrentHour;
+            CurrentHour++;
+            CurrentMinute = 60f - CurrentMinute;
+        }
+
+        if (CurrentHour > 24 && CurrentMinute > 40f)
+        {
+            CurrentHour = 0;
+            CurrentMinute = 40 - CurrentMinute;
             morningMilestone = eveningMilestone = false;
         }
 
@@ -60,5 +70,7 @@ public class SunOrbit : MonoBehaviour {
             if (!PlayerInput.Instance.Headlamp1.enabled)
                 PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
         }
+
+        GuiBridge.Instance.TimeText.text = String.Format("M{0}:{1}", Math.Truncate(CurrentHour), Math.Truncate(CurrentMinute));
     }
 }

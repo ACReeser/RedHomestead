@@ -153,7 +153,7 @@ public class GuiBridge : MonoBehaviour {
 
 
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel;
-    public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText;
+    public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
