@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using RedHomestead.Construction;
 
 public abstract class ModuleGameplay : MonoBehaviour
 {
@@ -150,10 +151,17 @@ public enum Compound { Unspecified = -1, Hydrogen, Oxygen, CarbonMonoxide, Carbo
 
 public class ResourceContainer
 {
-    public Compound CompoundResourceType;
+    public ResourceContainer() { }
+    public ResourceContainer(float initialAmount)
+    {
+        this.Amount = initialAmount;
+    }
+
+    public Compound SimpleCompoundType;
+    public Resource ComplexResourceType;
 
     public float TotalCapacity = 1f;
-    private float Amount;
+    protected float Amount;
     public float UtilizationPercentage
     {
         get
@@ -164,6 +172,11 @@ public class ResourceContainer
             return Amount / TotalCapacity;
         }
     }
+    public string UtilizationPercentageString()
+    {
+        return (int)(UtilizationPercentage * 100) + "%";
+    }
+
     public float AvailableCapacity
     {
         get
@@ -221,4 +234,19 @@ public class ResourceContainer
             }
         }
     }
+}
+
+public class SumContainer : ResourceContainer
+{
+    public float LastTickRateOfChange;
+    public float CurrentAmount
+    {
+        get
+        {
+            return Amount;
+        }
+    }
+
+    public SumContainer() { }
+    public SumContainer(float initialAmount): base(initialAmount) { }
 }

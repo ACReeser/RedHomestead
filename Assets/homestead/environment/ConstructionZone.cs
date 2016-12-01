@@ -18,7 +18,7 @@ namespace RedHomestead.Construction
         Smelter
     }
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
-    public enum Resource { Steel, SiliconWafers, Aluminium }
+    public enum Resource { Steel, SiliconWafers, Aluminium, Biomass, PreparedMeal, MealPowder, MealShake }
 
     public class ResourceEntry
     {
