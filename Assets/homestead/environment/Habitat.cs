@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Construction;
 
-public class Habitat //: MultipleResourceConverter
+public class Habitat : MonoBehaviour //: MultipleResourceConverter
 {
 
     private float _CurrentPowerRequirements = 1f;

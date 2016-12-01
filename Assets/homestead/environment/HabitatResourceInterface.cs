@@ -48,12 +48,12 @@ public class HabitatResourceInterface : MonoBehaviour {
             container = LinkedHab.BasicResourceTotals[DisplayCompound];
         }
 
-        DisplayOut.text = string.Format("{0}: {1}% {2}/{3}\n{4}{5}/{6}",
+        DisplayOut.text = string.Format("{0}: {1} {2}/{3}\n{4}{5} {6}",
             HeaderText,
             container.UtilizationPercentageString(),
             container.CurrentAmount,
             container.TotalCapacity,
-            container.LastTickRateOfChange > 0 ? "+" : "-",
+            container.LastTickRateOfChange == 0 ? " " : container.LastTickRateOfChange > 0 ? "+" : "-",
             container.LastTickRateOfChange,
             "g/s" //todo: make human readable with large/small quants and scales
             );
