@@ -71,6 +71,6 @@ public class SunOrbit : MonoBehaviour {
                 PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
         }
 
-        GuiBridge.Instance.TimeText.text = String.Format("M{0}:{1}", Math.Truncate(CurrentHour), Math.Truncate(CurrentMinute));
+        GuiBridge.Instance.TimeText.text = String.Format("M{0}:{1}", ((int)Math.Truncate(CurrentHour)).ToString("D2"), ((int)Math.Truncate(CurrentMinute)).ToString("D2"));
     }
 }

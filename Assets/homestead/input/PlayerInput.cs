@@ -166,7 +166,7 @@ public class PlayerInput : MonoBehaviour {
                             }
                             else
                             {
-                                newPrompt = GuiBridge.PlanConstructionZoneHint;
+                                newPrompt = Prompts.PlanConstructionZoneHint;
                             }
                         }
                     }
@@ -187,7 +187,7 @@ public class PlayerInput : MonoBehaviour {
                         }
                         else
                         {
-                            newPrompt = GuiBridge.PickupHint;
+                            newPrompt = Prompts.PickupHint;
                         }
                     }
                     else
@@ -198,7 +198,7 @@ public class PlayerInput : MonoBehaviour {
                         }
                         else
                         {
-                            newPrompt = GuiBridge.DropHint;
+                            newPrompt = Prompts.DropHint;
                         }
                     }
                 }
@@ -222,7 +222,7 @@ public class PlayerInput : MonoBehaviour {
                     }
                     else
                     {
-                        newPrompt = GuiBridge.DriveRoverPrompt;
+                        newPrompt = Prompts.DriveRoverPrompt;
                     }
                 } 
                 else if (hitInfo.collider.CompareTag("constructionzone"))
@@ -237,7 +237,7 @@ public class PlayerInput : MonoBehaviour {
                         }
                         else
                         {
-                            newPrompt = GuiBridge.ConstructHint;
+                            newPrompt = Prompts.ConstructHint;
                         }
                     }
                 }
@@ -251,12 +251,12 @@ public class PlayerInput : MonoBehaviour {
                         }
                         else
                         {
-                            newPrompt = GuiBridge.DoorHint;
+                            newPrompt = Prompts.DoorHint;
                         }
                     }
                     else
                     {
-                        newPrompt = GuiBridge.DoorLockedHint;
+                        newPrompt = Prompts.DoorLockedHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("cavernwall"))
@@ -297,7 +297,7 @@ public class PlayerInput : MonoBehaviour {
                     }
                     else
                     {
-                        newPrompt = GuiBridge.GenericButtonHint;
+                        newPrompt = Prompts.GenericButtonHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("water"))
@@ -308,7 +308,17 @@ public class PlayerInput : MonoBehaviour {
                     }
                     else
                     {
-                        newPrompt = GuiBridge.DrinkWaterHint;
+                        newPrompt = Prompts.DrinkWaterHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("foodprep"))
+                {
+                    if (doInteract)
+                    {
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.FoodPrepHint;
                     }
                 }
             }
@@ -356,12 +366,12 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnPowerPlug(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => selectedPowerSocket = value, PlacePowerPlug, GuiBridge.PowerPlugPrompts);
+        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => selectedPowerSocket = value, PlacePowerPlug, Prompts.PowerPlugPrompts);
     }
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedAirlock1, value => selectedAirlock1 = value, PlaceTube, GuiBridge.BulkheadBridgePrompts);
+        return OnLinkable(doInteract, hitInfo, selectedAirlock1, value => selectedAirlock1 = value, PlaceTube, Prompts.BulkheadBridgePrompts);
     }
 
     private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
@@ -372,7 +382,7 @@ public class PlayerInput : MonoBehaviour {
         {
             if (!CompoundsMatch(selectedCompound, other))
             {
-                return GuiBridge.InvalidPipeHint;
+                return Prompts.InvalidPipeHint;
             }
         }
 
@@ -387,7 +397,7 @@ public class PlayerInput : MonoBehaviour {
                 selectedCompound = other;
 
             print("selected " +selectedCompound.ToString());
-        }, PlaceGasPipe, GuiBridge.GasPipePrompts);
+        }, PlaceGasPipe, Prompts.GasPipePrompts);
     }
 
     private static bool CompoundsMatch(Compound selectedCompound, Compound other)
