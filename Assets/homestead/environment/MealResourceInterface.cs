@@ -13,7 +13,7 @@ public class MealResourceInterface : HabitatResourceInterface {
 
         string days = "1";
 
-        DisplayOut.text = string.Format("Meals: {0}days\nBiomass: {1}/{2}\nPrepared: {3}/{4}\nPowdered: {5}/{6}\nShakes: {7}/{8}",
+        DisplayOut.text = string.Format("Meals: {0} day{9}\nBiomass:    {1}/{2}\nPrepared:  {3}/{4}\nPowdered: {5}/{6}\nShakes:      {7}/{8}",
             days,    
             bioC.CurrentAmount,
             bioC.TotalCapacity,
@@ -22,7 +22,8 @@ public class MealResourceInterface : HabitatResourceInterface {
             powderC.CurrentAmount,
             powderC.TotalCapacity,
             shakeC.CurrentAmount,
-            shakeC.TotalCapacity
+            shakeC.TotalCapacity,
+            (days == "1") ? "" : "s"
             );
     }
 }

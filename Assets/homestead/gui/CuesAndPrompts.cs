@@ -124,6 +124,11 @@ public static class Prompts {
         Description = "Invalid connection",
         Key = null
     };
+    internal static PromptInfo ExcavateHint = new PromptInfo()
+    {
+        Description = "Excavate",
+        Key = "E"
+    };
     internal static LinkablePrompts BulkheadBridgePrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartBulkheadBridgeHint,

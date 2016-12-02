@@ -279,7 +279,7 @@ public class PlayerInput : MonoBehaviour {
                     }
                     else
                     {
-                        //prompt
+                        newPrompt = Prompts.ExcavateHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("button"))
