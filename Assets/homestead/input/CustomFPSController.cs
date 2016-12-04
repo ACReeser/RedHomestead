@@ -12,6 +12,8 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private bool m_IsWalking;
     [SerializeField]
+    public bool m_IsOnLadder;
+    [SerializeField]
     private float m_WalkSpeed;
     [SerializeField]
     private float m_RunSpeed;
