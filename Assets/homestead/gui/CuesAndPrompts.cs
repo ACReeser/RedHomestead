@@ -147,4 +147,18 @@ public static class Prompts {
         HoverWhenOneSelected = EndPowerPlugHint,
         WhenCompleted = PowerPlugCompletedPrompt
     };
+
+    internal static PromptInfo MealOrganicEatHint = new PromptInfo()
+    {
+        Description = "Eat Meal",
+        Key = "E"
+    };
+
+    internal static PromptInfo MealPreparedEatHint = MealOrganicEatHint;
+
+    internal static PromptInfo MealShakeEatHint = new PromptInfo()
+    {
+        Description = "Drink Meal",
+        Key = "E"
+    };
 }

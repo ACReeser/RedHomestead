@@ -321,6 +321,18 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.FoodPrepHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("mealorganic"))
+                {
+                    newPrompt = OnFoodHover(doInteract, Prompts.MealOrganicEatHint, MealType.Organic);               
+                }
+                else if (hitInfo.collider.CompareTag("mealprepared"))
+                {
+                    newPrompt = OnFoodHover(doInteract, Prompts.MealPreparedEatHint, MealType.Prepared);
+                }
+                else if (hitInfo.collider.CompareTag("mealshake"))
+                {
+                    newPrompt = OnFoodHover(doInteract, Prompts.MealShakeEatHint, MealType.Shake);
+                }
             }
             else if (doInteract)
             {
@@ -353,6 +365,19 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private PromptInfo OnFoodHover(bool doInteract, PromptInfo eatHint, MealType mealType)
+    {
+        if (doInteract)
+        {
+            SurvivalTimer.Instance.EatFood(mealType);
+            return null;
+        }
+        else
+        {
+            return eatHint;
+        }
+    }
 
     private bool IsGasValve(Collider collider)
     {

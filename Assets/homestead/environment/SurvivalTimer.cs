@@ -27,7 +27,22 @@ public class SingleSurvivalResource : SurvivalResource
         CurrentAmount = MaximumAmount;
         this.UpdateUI(1f);
     }
+    /// <summary>
+    /// external call to UI code, float parameter is percentage of resource, 0-1f
+    /// </summary>
     internal Action<float> UpdateUI;
+
+    internal void Increment(float amount)
+    {
+        CurrentAmount += amount;
+
+        if (CurrentAmount > MaximumAmount)
+            CurrentAmount = MaximumAmount;
+        else if (CurrentAmount < 0)
+            CurrentAmount = 0f;
+
+        this.UpdateUI(CurrentAmount / MaximumAmount);
+    }
 }
 
 public class DoubleSurvivalResource : SurvivalResource
@@ -72,7 +87,9 @@ public class SurvivalTimer : MonoBehaviour {
     };
     public SingleSurvivalResource Food = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = .025f
+        ConsumptionPerSecond = .025f * 240f,
+        MaximumAmount = 2400,
+        CurrentAmount = 2400
     };
     public DoubleSurvivalResource Power = new DoubleSurvivalResource();
 
@@ -149,13 +166,29 @@ public class SurvivalTimer : MonoBehaviour {
         Water.ResetToMaximum();
     }
 
-    internal void EatFood()
+    internal void EatFood(MealType meal)
     {
-        Food.ResetToMaximum();
+        Food.Increment(meal.GetCalories());
     }
 
     internal void UsePackResources()
     {
         UsingPackResources = true;
+    }
+}
+
+public enum MealType { Prepared = 0, Organic, Shake }
+
+public static class MealTypeExtensions
+{
+    public static float GetCalories(this MealType meal)
+    {
+        switch (meal)
+        {
+            case MealType.Shake:
+                return 600f;
+            default:
+                return 1200f;
+        }
     }
 }
