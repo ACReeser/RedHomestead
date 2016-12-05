@@ -311,6 +311,25 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.DrinkWaterHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("ladder"))
+                {
+                    if (doInteract && !FPSController.m_IsTransitioningLadder)
+                    {
+                        if (FPSController.m_IsOnLadder)
+                            FPSController.GetOffLadder();
+                        else
+                        {
+                            FPSController.GetOnLadder(hitInfo.collider.transform.GetChild(0).position);
+                        }
+                    }
+                    else
+                    {
+                        if (FPSController.m_IsOnLadder)
+                            newPrompt = Prompts.LadderOffHint;
+                        else
+                            newPrompt = Prompts.LadderOnHint;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("foodprep"))
                 {
                     if (doInteract)
@@ -351,6 +370,17 @@ public class PlayerInput : MonoBehaviour {
         else if (carriedObject != null)
         {
             DropObject();
+        }
+        else if (FPSController.m_IsOnLadder)
+        {
+            if (doInteract)
+            {
+                FPSController.GetOffLadder();
+            }
+            else
+            {
+                newPrompt = Prompts.LadderOffHint;
+            }
         }
 
         //if we were hovering or doing something that has a prompt

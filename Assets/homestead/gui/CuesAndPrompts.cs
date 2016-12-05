@@ -148,6 +148,18 @@ public static class Prompts {
         WhenCompleted = PowerPlugCompletedPrompt
     };
 
+    internal static PromptInfo LadderOnHint = new PromptInfo()
+    {
+        Description = "Mount Ladder",
+        Key = "E"
+    };
+
+    internal static PromptInfo LadderOffHint = new PromptInfo()
+    {
+        Description = "Dismount Ladder",
+        Key = "E"
+    };
+
     internal static PromptInfo MealOrganicEatHint = new PromptInfo()
     {
         Description = "Eat Meal",

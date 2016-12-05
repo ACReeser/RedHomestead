@@ -8,7 +8,7 @@ public class SunOrbit : MonoBehaviour {
 
     //internal float SecondsPerTick = 1f;
     internal float GameSecondsPerMartianHour = 5f;
-    internal float GameSecondsPerMartianMinute = 1 / 4f;//5 / ((24 * 60) + 40) / 60f;
+    internal const float GameSecondsPerMartianMinute = 1 / 4f;//5 / ((24 * 60) + 40) / 60f;
 
     internal float CurrentHour = 0;
     internal float CurrentMinute = 0;

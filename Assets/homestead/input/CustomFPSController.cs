@@ -12,7 +12,7 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private bool m_IsWalking;
     [SerializeField]
-    public bool m_IsOnLadder;
+    public bool m_IsOnLadder, m_IsTransitioningLadder, m_PostTransitionLadderState;
     [SerializeField]
     private float m_WalkSpeed;
     [SerializeField]
@@ -52,6 +52,11 @@ public class CustomFPSController : MonoBehaviour
     private float m_YRotation;
     private Vector2 m_Input;
     private Vector3 m_MoveDir = Vector3.zero;
+
+    private Vector3 moveToLadderPos, moveFromLadderPos;
+    private float ladderMoveTime = 0f;
+    private const float ladderMoveDuration = .25f;
+
     private CharacterController m_CharacterController;
     private CollisionFlags m_CollisionFlags;
     private bool m_PreviouslyGrounded;
@@ -94,6 +99,7 @@ public class CustomFPSController : MonoBehaviour
 
         if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
         {
+            //land
             StartCoroutine(m_JumpBob.DoBobCycle());
             PlayLandingSound();
             m_MoveDir.y = 0f;
@@ -120,41 +126,65 @@ public class CustomFPSController : MonoBehaviour
     {
         float speed;
         GetInput(out speed);
-        // always move along the camera forward as it is the direction that it being aimed at
-        Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
 
-        // get a normal for the surface that is being touched to move along it
-        RaycastHit hitInfo;
-        Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
-                            m_CharacterController.height / 2f, ~0, QueryTriggerInteraction.Ignore);
-        desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
-
-        m_MoveDir.x = desiredMove.x * speed;
-        m_MoveDir.z = desiredMove.z * speed;
-
-
-        if (m_CharacterController.isGrounded)
+        if (m_IsTransitioningLadder || m_IsOnLadder)
         {
-            m_MoveDir.y = -m_StickToGroundForce;
-
-            if (m_Jump)
+            if (m_IsTransitioningLadder)
             {
-                m_MoveDir.y = m_JumpSpeed;
-                PlayJumpSound();
-                m_Jump = false;
-                m_Jumping = true;
+                this.transform.position = Vector3.Lerp(moveFromLadderPos, moveToLadderPos, ladderMoveTime / ladderMoveDuration);
+
+                ladderMoveTime += Time.fixedDeltaTime;
+
+                if (ladderMoveTime > ladderMoveDuration)
+                {
+                    this.transform.position = moveToLadderPos;
+                    m_IsTransitioningLadder = false;
+                    m_IsOnLadder = m_PostTransitionLadderState;
+                }
+            }
+            else
+            {
+                m_CharacterController.Move(new Vector3(0, m_Input.y, 0) * Time.fixedDeltaTime * speed / 2f);
             }
         }
         else
         {
-            m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+            // always move along the camera forward as it is the direction that it being aimed at
+            Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
+
+            // get a normal for the surface that is being touched to move along it
+            RaycastHit hitInfo;
+            Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
+                                m_CharacterController.height / 2f, ~0, QueryTriggerInteraction.Ignore);
+            desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
+
+            m_MoveDir.x = desiredMove.x * speed;
+            m_MoveDir.z = desiredMove.z * speed;
+
+
+            if (m_CharacterController.isGrounded)
+            {
+                m_MoveDir.y = -m_StickToGroundForce;
+
+                if (m_Jump)
+                {
+                    m_MoveDir.y = m_JumpSpeed;
+                    PlayJumpSound();
+                    m_Jump = false;
+                    m_Jumping = true;
+                }
+            }
+            else
+            {
+                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+            }
+
+            if (!SuspendInput)
+                m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+
+            ProgressStepCycle(speed);
+            UpdateCameraHeadBob(speed);
         }
-
-        if (!SuspendInput)
-            m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
-
-        ProgressStepCycle(speed);
-        UpdateCameraPosition(speed);
 
         //alex
         //m_MouseLook.UpdateCursorLock();
@@ -204,7 +234,7 @@ public class CustomFPSController : MonoBehaviour
     }
 
 
-    private void UpdateCameraPosition(float speed)
+    private void UpdateCameraHeadBob(float speed)
     {
         Vector3 newCameraPosition;
         if (!m_UseHeadBob)
@@ -286,6 +316,39 @@ public class CustomFPSController : MonoBehaviour
             return;
         }
         body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
+    }
+
+    public void GetOnLadder(Vector3 ladderPos)
+    {
+        if (m_IsOnLadder || m_IsTransitioningLadder)
+        {
+            print("can't get on ladder now");
+            return;
+        }
+        else
+        {
+            this.moveFromLadderPos = this.transform.position;
+            this.moveToLadderPos = new Vector3(ladderPos.x, this.transform.position.y, ladderPos.z);
+            this.m_PostTransitionLadderState = true;
+            this.m_IsTransitioningLadder = true;
+            this.ladderMoveTime = 0;
+        }
+    }
+
+    public void GetOffLadder()
+    {
+        if (m_IsOnLadder || m_IsTransitioningLadder)
+        {
+            this.moveFromLadderPos = this.transform.position;
+            this.moveToLadderPos = this.transform.TransformPoint(Vector3.back);
+            this.ladderMoveTime = 0;
+            this.m_PostTransitionLadderState = false;
+            this.m_IsTransitioningLadder = true;
+        }
+        else
+        {
+            return;
+        }
     }
 }
 
