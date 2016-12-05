@@ -14,7 +14,7 @@ using System.Collections.Generic;
 /// </summary>
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
-    
+
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
@@ -32,9 +32,9 @@ public class GuiBridge : MonoBehaviour {
         TogglePromptPanel(false);
         this.ConstructionPanel.gameObject.SetActive(false);
         ConstructionRequirementsText = new Text[ConstructionRequirements.Length];
-        this.SetConstructionGroup(-2);
+        this.SetConstructionPlanningMode(false);
         int i = 0;
-        foreach(RectTransform t in ConstructionRequirements)
+        foreach (RectTransform t in ConstructionRequirements)
         {
             ConstructionRequirementsText[i] = t.GetChild(0).GetComponent<Text>();
             i++;
@@ -99,13 +99,13 @@ public class GuiBridge : MonoBehaviour {
 
     public void HidePrompt()
     {
-        if(CurrentPrompt != null)
+        if (CurrentPrompt != null)
         {
             //if it's manually turned on and off, hide it
             if (CurrentPrompt.Duration <= 0f)
             {
                 TogglePromptPanel(false);
-                CurrentPrompt = null;                
+                CurrentPrompt = null;
             }
             else
             {
@@ -135,11 +135,12 @@ public class GuiBridge : MonoBehaviour {
     /// "Undecided" means groups can show but no group is selected
     /// TODO: remove None and Undecided into their own booleans ShowingGroups and HasGroupSelected
     /// </summary>
-    public enum ConstructionGroup { None = -2, Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
+    public enum ConstructionGroup { Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
+
     /// <summary>
     /// from group to list of modules
     /// </summary>
-    public static Dictionary<ConstructionGroup, Module[]> Groupmap = new Dictionary<ConstructionGroup, Module[]>()
+    public static Dictionary<ConstructionGroup, Module[]> ConstructionGroupmap = new Dictionary<ConstructionGroup, Module[]>()
     {
         {
             ConstructionGroup.Habitation,
@@ -181,26 +182,36 @@ public class GuiBridge : MonoBehaviour {
         },
     };
 
-    private ConstructionGroup currentlySelectedGroup = ConstructionGroup.None;
+    public bool IsConstructingModule { get; private set; }
+
+    private ConstructionGroup currentlySelectedGroup = ConstructionGroup.Undecided;
+
+    public void SetConstructionPlanningMode(bool state)
+    {
+        IsConstructingModule = state;
+        RefreshConstructionPanelVisibility();
+    }
+
+    private void RefreshConstructionPanelVisibility()
+    {
+        ConstructionGroupPanel.gameObject.SetActive(IsConstructingModule);
+        ConstructionModulesPanel.gameObject.SetActive(IsConstructingModule && (int)currentlySelectedGroup > -1);
+    }
 
     public void SetConstructionGroup(int index)
     {
         ConstructionGroup newGroup = (ConstructionGroup)index;
         currentlySelectedGroup = newGroup;
-        ConstructionGroupPanel.gameObject.SetActive(index > -2);
-        ConstructionModulesPanel.gameObject.SetActive(index > -1);
 
-        if (currentlySelectedGroup == ConstructionGroup.None)
-        {
-            //noop
-        }
-        else if (currentlySelectedGroup == ConstructionGroup.Undecided)
+        SetConstructionPlanningMode(true);
+
+        if (currentlySelectedGroup == ConstructionGroup.Undecided)
         {
             RefreshButtonKeyHints();
         }
         else if (index > -1)
         {
-            Module[] lists = Groupmap[currentlySelectedGroup];
+            Module[] lists = ConstructionGroupmap[currentlySelectedGroup];
             for (int i = 0; i < this.ConstructionModuleButtons.Length; i++)
             {
                 if (i < lists.Length)
@@ -244,7 +255,7 @@ public class GuiBridge : MonoBehaviour {
         {
             case PlayerInput.PlanningMode.Default:
                 this.ModeText.text = "Switch to Planning";
-                this.SetConstructionGroup(-2);
+                this.SetConstructionPlanningMode(false);
                 this.PlacingPanel.gameObject.SetActive(false);
                 break;
             case PlayerInput.PlanningMode.Exterior:
@@ -265,11 +276,11 @@ public class GuiBridge : MonoBehaviour {
     /// <param name="index"></param>
     public void SelectConstructionPlan(int index)
     {
-        Module planModule = Groupmap[currentlySelectedGroup][index];
+        Module planModule = ConstructionGroupmap[currentlySelectedGroup][index];
         this.PlacingPanel.gameObject.SetActive(true);
         this.PlacingText.text = planModule.ToString();
         PlayerInput.Instance.PlanModule(planModule);
-        this.SetConstructionGroup((int)ConstructionGroup.None);
+        this.SetConstructionPlanningMode(false);
     }
 
     internal void ShowKillMenu()
@@ -317,4 +328,47 @@ public class GuiBridge : MonoBehaviour {
             this.PowerBar.fillAmount = heatPercentage;
         }
     }
+
+
+    /// <summary>
+    /// Top level groups that organize floorplans
+    /// </summary>
+    public enum FloorplanGroup { Undecided = -1, Floor, Edge, Corner }
+
+    /// <summary>
+    /// Second level groups that organize floorplans
+    /// </summary>
+    public enum FloorplanSubGroup { Solid, Mesh, Door, Window, SingleColumn, DoubleColumn }
+
+    public enum FloorplanMaterial { Rock, Concrete, Plastic, Steel }
+
+    public static Dictionary<FloorplanGroup, FloorplanSubGroup[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, FloorplanSubGroup[]>()
+    {
+        {
+            FloorplanGroup.Floor,
+            new FloorplanSubGroup[]
+            {
+                FloorplanSubGroup.Solid,
+                FloorplanSubGroup.Mesh
+            }
+        },
+        {
+            FloorplanGroup.Edge,
+            new FloorplanSubGroup[]
+            {
+                FloorplanSubGroup.Solid,
+                FloorplanSubGroup.Window,
+                FloorplanSubGroup.Door,
+                FloorplanSubGroup.SingleColumn,
+                FloorplanSubGroup.DoubleColumn
+            }
+        },
+        {
+            FloorplanGroup.Corner,
+            new FloorplanSubGroup[]
+            {
+                FloorplanSubGroup.SingleColumn
+            }
+        }
+    };
 }
