@@ -87,7 +87,7 @@ public class SurvivalTimer : MonoBehaviour {
     };
     public SingleSurvivalResource Food = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = 2400 / ((24 * 60) + 40 ) * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = 2400 / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
         MaximumAmount = 2400,
         CurrentAmount = 2400
     };

@@ -5,10 +5,17 @@ using System;
 public class SunOrbit : MonoBehaviour {
     public Material Skybox;
     public Light GlobalLight;
-    
-    internal float GameSecondsPerMartianHour = 5f;
-    internal static float MartianMinutesPerDay = (24 * 60) + 40;
-    internal const float GameSecondsPerMartianMinute = 1 / 4f;//5 / ((24 * 60) + 40) / 60f;
+
+    public Transform DuskAndDawnOnlyParent;
+
+    internal const float MartianMinutesPerDay = (24 * 60) + 40;
+    internal const float MartianSecondsPerDay = MartianMinutesPerDay * 60;
+    internal const float GameMinutesPerGameDay = 20;
+    internal const float GameSecondsPerGameDay = GameMinutesPerGameDay * 60;
+
+    internal const float MartianSecondsPerGameSecond = MartianSecondsPerDay / GameSecondsPerGameDay;
+
+    internal const float GameSecondsPerMartianMinute = GameSecondsPerGameDay / MartianSecondsPerDay * 60;
 
     internal float CurrentHour = 0;
     internal float CurrentMinute = 0;
@@ -17,11 +24,11 @@ public class SunOrbit : MonoBehaviour {
 	void Start () {
 	}
 
-    private bool morningMilestone, eveningMilestone;
+    private bool dawnMilestone, duskMilestone, dawnEnded, duskEnded;
 
     // Update is called once per frame
     void Update () {
-        CurrentMinute += Time.deltaTime / GameSecondsPerMartianMinute;
+        CurrentMinute += Time.deltaTime * GameSecondsPerMartianMinute;
 
         if (CurrentMinute > 60f)
         {
@@ -33,7 +40,7 @@ public class SunOrbit : MonoBehaviour {
         {
             CurrentHour = 0;
             CurrentMinute = 40 - CurrentMinute;
-            morningMilestone = eveningMilestone = false;
+            dawnMilestone = duskMilestone = dawnEnded = duskEnded = false;
         }
 
         float percentOfDay = ((CurrentHour * 60) + CurrentMinute) / MartianMinutesPerDay;
@@ -51,19 +58,61 @@ public class SunOrbit : MonoBehaviour {
             Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, percentOfDay));
         }
 
-        if (CurrentHour > 6 && !morningMilestone)
+        if (CurrentHour > 6 && !dawnMilestone)
         {
-            morningMilestone = true;
-            if (PlayerInput.Instance.Headlamp1.enabled)
-                PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = false;
+            dawnMilestone = true;
+            Dawn(true);
         }
-        else if (CurrentHour > 18 && !eveningMilestone)
+        else if (CurrentHour > 7 && !dawnEnded)
         {
-            eveningMilestone = true;
-            if (!PlayerInput.Instance.Headlamp1.enabled)
-                PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
+            dawnEnded = true;
+            Dawn(false);
+        }
+        else if (CurrentHour > 18 && !duskMilestone)
+        {
+            duskMilestone = true;
+            Dusk(true);
+        }
+        else if (CurrentHour > 18 && !duskEnded)
+        {
+            duskEnded = true;
+            Dusk(false);
         }
 
         GuiBridge.Instance.TimeText.text = String.Format("M{0}:{1}", ((int)Math.Truncate(CurrentHour)).ToString("D2"), ((int)Math.Truncate(CurrentMinute)).ToString("D2"));
+    }
+
+    private void Dawn(bool isStart)
+    {
+        if (isStart)
+        {
+            if (PlayerInput.Instance.Headlamp1.enabled)
+                PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = false;
+        }
+
+        ToggleDuskDawnParticleSystems(isStart);
+    }
+
+    private void Dusk(bool isStart)
+    {
+        if (isStart)
+        {
+            if (!PlayerInput.Instance.Headlamp1.enabled)
+                PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
+        }
+        ToggleDuskDawnParticleSystems(isStart);
+    }
+    
+    private void ToggleDuskDawnParticleSystems(bool isStart)
+    {
+        foreach (Transform t in DuskAndDawnOnlyParent)
+        {
+            var ps = t.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                var emission = ps.emission;
+                emission.enabled = isStart;
+            }
+        }
     }
 }
