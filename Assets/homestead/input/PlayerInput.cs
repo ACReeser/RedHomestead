@@ -65,6 +65,10 @@ public class PlayerInput : MonoBehaviour {
     private Transform PlannedModuleVisualization;
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
+    public enum Direction { North, East, South, West }
+
+    private Direction CurrentPlanningDirection;
+
 
     void Awake()
     {
@@ -610,7 +614,7 @@ public class PlayerInput : MonoBehaviour {
                 this.PlannedModule = Module.Unspecified;
                 break;
             case PlanningMode.Interiors:
-                FlowCamera.cullingMask = 1 << 10;
+                FlowCamera.cullingMask = 1 << 9;
                 FlowCamera.enabled = true;
                 break;
         }

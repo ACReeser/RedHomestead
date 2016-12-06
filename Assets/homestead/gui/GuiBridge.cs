@@ -32,7 +32,7 @@ public class GuiBridge : MonoBehaviour {
         TogglePromptPanel(false);
         this.ConstructionPanel.gameObject.SetActive(false);
         ConstructionRequirementsText = new Text[ConstructionRequirements.Length];
-        this.SetConstructionPlanningMode(false);
+        this.RefreshPlanningUI();
         int i = 0;
         foreach (RectTransform t in ConstructionRequirements)
         {
@@ -181,21 +181,14 @@ public class GuiBridge : MonoBehaviour {
             }
         },
     };
-
-    public bool IsConstructingModule { get; private set; }
+    
 
     private ConstructionGroup currentlySelectedGroup = ConstructionGroup.Undecided;
 
-    public void SetConstructionPlanningMode(bool state)
+    public void RefreshPlanningUI()
     {
-        IsConstructingModule = state;
-        RefreshConstructionPanelVisibility();
-    }
-
-    private void RefreshConstructionPanelVisibility()
-    {
-        ConstructionGroupPanel.gameObject.SetActive(IsConstructingModule);
-        ConstructionModulesPanel.gameObject.SetActive(IsConstructingModule && (int)currentlySelectedGroup > -1);
+        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior);
+        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior && (int)currentlySelectedGroup > -1);
     }
 
     public void SetConstructionGroup(int index)
@@ -203,7 +196,7 @@ public class GuiBridge : MonoBehaviour {
         ConstructionGroup newGroup = (ConstructionGroup)index;
         currentlySelectedGroup = newGroup;
 
-        SetConstructionPlanningMode(true);
+        RefreshPlanningUI();
 
         if (currentlySelectedGroup == ConstructionGroup.Undecided)
         {
@@ -255,7 +248,6 @@ public class GuiBridge : MonoBehaviour {
         {
             case PlayerInput.PlanningMode.Default:
                 this.ModeText.text = "Switch to Planning";
-                this.SetConstructionPlanningMode(false);
                 this.PlacingPanel.gameObject.SetActive(false);
                 break;
             case PlayerInput.PlanningMode.Exterior:
@@ -268,6 +260,7 @@ public class GuiBridge : MonoBehaviour {
                 break;
         }
 
+        this.RefreshPlanningUI();
     }
 
     /// <summary>
@@ -280,7 +273,7 @@ public class GuiBridge : MonoBehaviour {
         this.PlacingPanel.gameObject.SetActive(true);
         this.PlacingText.text = planModule.ToString();
         PlayerInput.Instance.PlanModule(planModule);
-        this.SetConstructionPlanningMode(false);
+        this.RefreshPlanningUI();
     }
 
     internal void ShowKillMenu()
