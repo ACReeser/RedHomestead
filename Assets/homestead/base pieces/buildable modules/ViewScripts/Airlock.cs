@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 public class Airlock : MonoBehaviour {
-    public const string OpenDoorName = "opendoor";
+    public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
     public static Dictionary<Transform, Airlock> DoorToAirlock = new Dictionary<Transform, Airlock>();
 
     public Material LightOff, GreenLight, RedLight;
@@ -29,8 +29,8 @@ public class Airlock : MonoBehaviour {
 
     private void RefreshDoorAndLightState()
     {
-        OuterDoor.name = IsPressurized ? "lockeddoor" : OpenDoorName;
-        InnerDoor.name = IsPressurized ? OpenDoorName : "lockeddoor";
+        OuterDoor.name = IsPressurized ? LockedDoorName : ClosedDoorName;
+        InnerDoor.name = IsPressurized ? ClosedDoorName : LockedDoorName;
 
         PressurizedLight.material = IsPressurized ? GreenLight : LightOff;
         DepressurizedLight.material = IsPressurized ? LightOff : RedLight;
@@ -80,6 +80,7 @@ public class Airlock : MonoBehaviour {
             if (IsPressurized)
             {
                 InnerDoorSealed = !InnerDoorSealed;
+                InnerDoor.name = InnerDoorSealed ? ClosedDoorName : OpenDoorName;
                 //if we're sealing it, go backwards
                 InnerAnimator.SetFloat("speed", InnerDoorSealed ? -1f : 1f); 
                 InnerAnimator.SetBool("open", !InnerDoorSealed);
@@ -90,6 +91,7 @@ public class Airlock : MonoBehaviour {
             if (!IsPressurized)
             {
                 OuterDoorSealed = !OuterDoorSealed;
+                OuterDoor.name = OuterDoorSealed ? ClosedDoorName : OpenDoorName;
                 //if we're sealing it, go backwards
                 OuterAnimator.SetFloat("speed", OuterDoorSealed ? -1f : 1f);
                 OuterAnimator.SetBool("open", !OuterDoorSealed);

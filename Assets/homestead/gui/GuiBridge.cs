@@ -18,7 +18,7 @@ public class GuiBridge : MonoBehaviour {
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
-    public Text[] ConstructionGroupHints;
+    public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
     public Image OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
 
@@ -182,13 +182,15 @@ public class GuiBridge : MonoBehaviour {
         },
     };
     
-
     private ConstructionGroup currentlySelectedGroup = ConstructionGroup.Undecided;
 
     public void RefreshPlanningUI()
     {
         ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior);
-        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior && (int)currentlySelectedGroup > -1);
+        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior && currentlySelectedGroup != ConstructionGroup.Undecided);
+
+        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Interiors);
+        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Interiors && selectedFloorplanGroup != FloorplanGroup.Undecided);
     }
 
     public void SetConstructionGroup(int index)
@@ -334,6 +336,10 @@ public class GuiBridge : MonoBehaviour {
     public enum FloorplanSubGroup { Solid, Mesh, Door, Window, SingleColumn, DoubleColumn }
 
     public enum FloorplanMaterial { Rock, Concrete, Plastic, Steel }
+
+    private FloorplanGroup selectedFloorplanGroup;
+    private FloorplanSubGroup selectedFloorplanSubgroup;
+    private FloorplanMaterial selectedFloorplanMaterial;
 
     public static Dictionary<FloorplanGroup, FloorplanSubGroup[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, FloorplanSubGroup[]>()
     {

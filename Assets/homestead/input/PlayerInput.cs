@@ -247,20 +247,23 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("door"))
                 {
-                    if (hitInfo.collider.gameObject.name == Airlock.OpenDoorName)
+                    switch (hitInfo.collider.gameObject.name)
                     {
-                        if (doInteract)
-                        {
-                            Airlock.ToggleDoor(hitInfo.collider.transform);
-                        }
-                        else
-                        {
-                            newPrompt = Prompts.DoorHint;
-                        }
-                    }
-                    else
-                    {
-                        newPrompt = Prompts.DoorLockedHint;
+                        case Airlock.LockedDoorName:
+                            newPrompt = Prompts.DoorLockedHint;
+                            break;
+                        case Airlock.OpenDoorName:
+                            if (doInteract)
+                                Airlock.ToggleDoor(hitInfo.collider.transform);
+                            else
+                                newPrompt = Prompts.CloseDoorHint;
+                            break;
+                        case Airlock.ClosedDoorName:
+                            if (doInteract)
+                                Airlock.ToggleDoor(hitInfo.collider.transform);
+                            else
+                                newPrompt = Prompts.OpenDoorHint;
+                            break;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("cavernwall"))

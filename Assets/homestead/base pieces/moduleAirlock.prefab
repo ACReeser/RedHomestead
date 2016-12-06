@@ -76,7 +76,7 @@ GameObject:
   - 23: {fileID: 2332152}
   - 65: {fileID: 6527918}
   m_Layer: 8
-  m_Name: door
+  m_Name: closeddoor
   m_TagString: door
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143,8 +143,9 @@ GameObject:
   - 33: {fileID: 3317606}
   - 23: {fileID: 2383438}
   - 65: {fileID: 6585488}
+  - 114: {fileID: 11435640}
   m_Layer: 8
-  m_Name: door
+  m_Name: closeddoor
   m_TagString: door
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -278,6 +279,7 @@ GameObject:
   - 33: {fileID: 3318948}
   - 64: {fileID: 6470188}
   - 23: {fileID: 2316748}
+  - 108: {fileID: 10895534}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -295,12 +297,13 @@ GameObject:
   - 4: {fileID: 496928}
   - 33: {fileID: 3344736}
   - 23: {fileID: 2350276}
+  - 114: {fileID: 11464328}
   m_Layer: 0
   m_Name: airlockBulk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &181010
 GameObject:
@@ -508,8 +511,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 149818}
-  m_LocalRotation: {x: 0, y: 0.58961934, z: 0, w: 0.80768126}
-  m_LocalPosition: {x: 703.86, y: 2.808, z: 1011.92}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071067}
+  m_LocalPosition: {x: -0, y: 0, z: -3.696}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_Children:
   - {fileID: 454990}
@@ -1124,6 +1127,51 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!108 &10895534
+Light:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 168974}
+  m_Enabled: 1
+  serializedVersion: 6
+  m_Type: 2
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 1
+  m_Range: 4.65
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_BounceIntensity: 1
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+  m_AreaSize: {x: 1, y: 1}
+--- !u!114 &11435640
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 144438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf22c9eb6eb263d4cb698d352ec23cf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  queue: 1500
 --- !u!114 &11437076
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1140,11 +1188,24 @@ MonoBehaviour:
   RedLight: {fileID: 2100000, guid: 5d8c4213e3b19af4ba759e1c38495b90, type: 2}
   PressurizedLight: {fileID: 2388362}
   DepressurizedLight: {fileID: 2367006}
+  TerrainCollider: {fileID: 0}
   OuterDoor: {fileID: 474006}
   InnerDoor: {fileID: 401144}
   IsPressurized: 0
   OuterDoorSealed: 1
   InnerDoorSealed: 1
+--- !u!114 &11464328
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 174880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf22c9eb6eb263d4cb698d352ec23cf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  queue: 1500
 --- !u!136 &13601342
 CapsuleCollider:
   m_ObjectHideFlags: 1

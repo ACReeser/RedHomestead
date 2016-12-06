@@ -89,9 +89,14 @@ public static class Prompts {
         Description = "Construct",
         Key = "E"
     };
-    internal static PromptInfo DoorHint = new PromptInfo()
+    internal static PromptInfo OpenDoorHint = new PromptInfo()
     {
         Description = "Open Door",
+        Key = "E"
+    };
+    internal static PromptInfo CloseDoorHint = new PromptInfo()
+    {
+        Description = "Close Door",
         Key = "E"
     };
     internal static PromptInfo DoorLockedHint = new PromptInfo()

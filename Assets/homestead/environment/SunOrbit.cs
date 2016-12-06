@@ -36,7 +36,7 @@ public class SunOrbit : MonoBehaviour {
             morningMilestone = eveningMilestone = false;
         }
 
-        float percentOfDay = CurrentMinute / MartianMinutesPerDay;
+        float percentOfDay = ((CurrentHour * 60) + CurrentMinute) / MartianMinutesPerDay;
 
         GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
         
