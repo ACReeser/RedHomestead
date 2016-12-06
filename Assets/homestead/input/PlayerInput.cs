@@ -9,7 +9,7 @@ using RedHomestead.Construction;
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
 public class PlayerInput : MonoBehaviour {
-    public enum PlanningMode { Default, Exterior, Interiors }
+    public enum PlanningMode { None, Exterior, Interiors }
     public static PlayerInput Instance;
 
     public Camera FlowCamera;
@@ -39,7 +39,7 @@ public class PlayerInput : MonoBehaviour {
     public Material translucentPlanningMat;
 
     internal Module PlannedModule = Module.Unspecified;
-    internal PlanningMode CurrentMode = PlanningMode.Default;
+    internal PlanningMode CurrentMode = PlanningMode.None;
     internal PlanningMode AvailableMode = PlanningMode.Exterior;
 
     /// <summary>
@@ -589,21 +589,19 @@ public class PlayerInput : MonoBehaviour {
     private void CycleMode()
     {
         //todo: fix lazy code
-        if (CurrentMode == PlanningMode.Default)
+        if (CurrentMode == PlanningMode.None)
             CurrentMode = this.AvailableMode;
         else
-            CurrentMode = PlanningMode.Default;
+            CurrentMode = PlanningMode.None;
 
         switch(CurrentMode)
         {
             case PlanningMode.Exterior:
-                FlowCamera.cullingMask = 1 << 10;
-                FlowCamera.enabled = true;
+                FlowCamera.cullingMask = 1 << 9;
                 Cursor.lockState = CursorLockMode.Confined;
                 Cursor.visible = true;
                 break;
-            case PlanningMode.Default:
-                FlowCamera.enabled = false;
+            case PlanningMode.None:
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 if (this.PlannedModuleVisualization != null)
@@ -614,11 +612,11 @@ public class PlayerInput : MonoBehaviour {
                 this.PlannedModule = Module.Unspecified;
                 break;
             case PlanningMode.Interiors:
-                FlowCamera.cullingMask = 1 << 9;
-                FlowCamera.enabled = true;
+                FlowCamera.cullingMask = 1 << 10;
                 break;
         }
 
+        FlowCamera.enabled = (CurrentMode != PlanningMode.None);
         GuiBridge.Instance.RefreshMode();
     }
 

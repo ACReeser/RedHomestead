@@ -15,7 +15,7 @@ using System.Collections.Generic;
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel;
+    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints;
@@ -246,7 +246,7 @@ public class GuiBridge : MonoBehaviour {
     {
         switch(PlayerInput.Instance.CurrentMode)
         {
-            case PlayerInput.PlanningMode.Default:
+            case PlayerInput.PlanningMode.None:
                 this.ModeText.text = "Switch to Planning";
                 this.PlacingPanel.gameObject.SetActive(false);
                 break;

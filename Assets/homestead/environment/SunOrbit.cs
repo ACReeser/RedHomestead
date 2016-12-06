@@ -5,9 +5,9 @@ using System;
 public class SunOrbit : MonoBehaviour {
     public Material Skybox;
     public Light GlobalLight;
-
-    //internal float SecondsPerTick = 1f;
+    
     internal float GameSecondsPerMartianHour = 5f;
+    internal static float MartianMinutesPerDay = (24 * 60) + 40;
     internal const float GameSecondsPerMartianMinute = 1 / 4f;//5 / ((24 * 60) + 40) / 60f;
 
     internal float CurrentHour = 0;
@@ -15,16 +15,7 @@ public class SunOrbit : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        //StartCoroutine(SunTick());
 	}
-
-    //private IEnumerator SunTick()
-    //{
-    //    while(this.isActiveAndEnabled)
-    //    {
-    //        yield return new WaitForSeconds(SecondsPerTick);
-    //    }
-    //}
 
     private bool morningMilestone, eveningMilestone;
 
@@ -45,17 +36,19 @@ public class SunOrbit : MonoBehaviour {
             morningMilestone = eveningMilestone = false;
         }
 
-        GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * (CurrentHour / 24)), 0, 0);
+        float percentOfDay = CurrentMinute / MartianMinutesPerDay;
+
+        GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
         
         if (CurrentHour > 12f)
         {
-            GlobalLight.intensity = Mathfx.Hermite(1, 0f, (CurrentHour - 12f) / 12f);
-            Skybox.SetFloat("_Exposure", Mathfx.Hermite(8, 0f, (CurrentHour - 12f) / 12f));
+            GlobalLight.intensity = Mathfx.Hermite(1, 0f, percentOfDay);
+            Skybox.SetFloat("_Exposure", Mathfx.Hermite(8, 0f, percentOfDay));
         }
         else
         {
-            GlobalLight.intensity = Mathfx.Hermite(0, 1f, CurrentHour / 12f);
-            Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, (CurrentHour) / 12f));
+            GlobalLight.intensity = Mathfx.Hermite(0, 1f, percentOfDay);
+            Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, percentOfDay));
         }
 
         if (CurrentHour > 6 && !morningMilestone)
