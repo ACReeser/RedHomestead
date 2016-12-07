@@ -3,29 +3,23 @@ using System.Collections;
 using RedHomestead.Construction;
 using System;
 
-public class HabitatResourceInterface : MonoBehaviour {
-    public Habitat LinkedHab;
-
+public class HabitatResourceInterface : HabitatModule
+{
     public TextMesh DisplayOut;
     public Resource DisplayResource;
     public Compound DisplayCompound = Compound.Unspecified;
     public string HeaderText = "";
 
     private bool useResource;
-	// Use this for initialization
-	void Start () {
-        if (LinkedHab == null)
-            LinkedHab = transform.root.GetComponent<Habitat>();
 
-        if (LinkedHab == null)
+	// Use this for initialization
+	protected override void OnStart () {
+        if (LinkedHab != null)
         {
-            UnityEngine.Debug.LogWarning("Hab resource interface not linked!");
-            this.enabled = false;
-        }
-        else
-        {
+            //todo- change to event-based
             OnResourceChange();
         }
+
         useResource = (DisplayCompound == Compound.Unspecified);
 	}
 	

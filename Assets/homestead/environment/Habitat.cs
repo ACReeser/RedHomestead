@@ -112,4 +112,14 @@ public class Habitat : MonoBehaviour //: MultipleResourceConverter
     {
 
     }
+
+    public void PrepareBiomassToPreparedMeal()
+    {
+
+    }
+
+    public void PreparePowderToShake()
+    {
+
+    }
 }
