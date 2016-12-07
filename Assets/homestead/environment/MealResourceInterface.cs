@@ -1,29 +1,50 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Construction;
+using System;
 
 public class MealResourceInterface : HabitatResourceInterface {
+    public Transform RationMeals, OrganicMeals, ShakeMeals, ShakePowders;
+    
+    protected override void OnResourceChange()
+    {
+        ShowPantry(RationMeals, LinkedHab.ComplexResourceTotals[Resource.RationMeal]);
+        ShowPantry(OrganicMeals, LinkedHab.ComplexResourceTotals[Resource.OrganicMeal]);
+        ShowPantry(ShakePowders, LinkedHab.ComplexResourceTotals[Resource.MealPowder]);
+        ShowPantry(ShakeMeals, LinkedHab.ComplexResourceTotals[Resource.MealShake]);
+    }
+
+    private void ShowPantry(Transform visualizationRoot, SumContainer sumContainer)
+    {
+        for (int i = 0; i < visualizationRoot.childCount; i++)
+        {
+            visualizationRoot.GetChild(i).gameObject.SetActive(sumContainer.CurrentAmount >= i + 1);
+        }
+    }
 
     protected override void DoDisplay()
     {
         SumContainer bioC = LinkedHab.ComplexResourceTotals[Resource.Biomass];
-        SumContainer prepC = LinkedHab.ComplexResourceTotals[Resource.PreparedMeal];
+        SumContainer organicC = LinkedHab.ComplexResourceTotals[Resource.OrganicMeal];
+        SumContainer rationC = LinkedHab.ComplexResourceTotals[Resource.RationMeal];
         SumContainer powderC = LinkedHab.ComplexResourceTotals[Resource.MealPowder];
         SumContainer shakeC = LinkedHab.ComplexResourceTotals[Resource.MealShake];
 
         string days = "1";
 
-        DisplayOut.text = string.Format("Meals: {0} day{9}\nBiomass:    {1}/{2}\nPrepared:  {3}/{4}\nPowdered: {5}/{6}\nShakes:      {7}/{8}",
+        DisplayOut.text = string.Format("Meals: {0} day{9}\nBiomass:    {1}/{2}\nOrganic:  {3}/{4}\nRation:  {10}/{11}\nPowdered: {5}/{6}\nShakes:      {7}/{8}",
             days,    
             bioC.CurrentAmount,
             bioC.TotalCapacity,
-            prepC.CurrentAmount,
-            prepC.TotalCapacity,
+            organicC.CurrentAmount,
+            organicC.TotalCapacity,
             powderC.CurrentAmount,
             powderC.TotalCapacity,
             shakeC.CurrentAmount,
             shakeC.TotalCapacity,
-            (days == "1") ? "" : "s"
+            (days == "1") ? "" : "s",
+            rationC.CurrentAmount,
+            rationC.TotalCapacity
             );
     }
 }

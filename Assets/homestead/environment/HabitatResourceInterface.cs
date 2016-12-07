@@ -15,12 +15,16 @@ public class HabitatResourceInterface : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         if (LinkedHab == null)
-            LinkedHab = transform.parent.GetComponent<Habitat>();
+            LinkedHab = transform.root.GetComponent<Habitat>();
 
         if (LinkedHab == null)
         {
             UnityEngine.Debug.LogWarning("Hab resource interface not linked!");
             this.enabled = false;
+        }
+        else
+        {
+            OnResourceChange();
         }
         useResource = (DisplayCompound == Compound.Unspecified);
 	}
@@ -33,6 +37,11 @@ public class HabitatResourceInterface : MonoBehaviour {
     protected virtual void DoDisplay()
     {
         DisplaySingleContainer();
+    }
+
+    protected virtual void OnResourceChange()
+    {
+
     }
 
     private void DisplaySingleContainer()

@@ -62,23 +62,29 @@ public class Habitat : MonoBehaviour //: MultipleResourceConverter
             LastTickRateOfChange = 0,
             TotalCapacity = 0
         };
-        ComplexResourceTotals[Resource.PreparedMeal] = new SumContainer(10f)
+        ComplexResourceTotals[Resource.OrganicMeal] = new SumContainer(10f)
         {
-            ComplexResourceType = Resource.PreparedMeal,
+            ComplexResourceType = Resource.OrganicMeal,
             LastTickRateOfChange = 0,
-            TotalCapacity = 20f
+            TotalCapacity = 18f
+        };
+        ComplexResourceTotals[Resource.RationMeal] = new SumContainer(10f)
+        {
+            ComplexResourceType = Resource.RationMeal,
+            LastTickRateOfChange = 0,
+            TotalCapacity = 18f
         };
         ComplexResourceTotals[Resource.MealPowder] = new SumContainer(20f)
         {
             ComplexResourceType = Resource.MealPowder,
             LastTickRateOfChange = 0,
-            TotalCapacity = 20f
+            TotalCapacity = 36f
         };
         ComplexResourceTotals[Resource.MealShake] = new SumContainer(6f)
         {
             ComplexResourceType = Resource.MealShake,
             LastTickRateOfChange = 0,
-            TotalCapacity = 20f
+            TotalCapacity = 36f
         };
     }
 	
