@@ -47,6 +47,9 @@ public class PlayerInput : MonoBehaviour {
     /// Cache == only create 1 of each type of module because creation is expensive
     /// </summary>
     private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
+    //todo: same kind of cache for floorplan
+    private Dictionary<Transform, Transform> FloorplanVisCache = new Dictionary<Transform, Transform>();
+
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket, carriedObject;
     private Compound selectedCompound = Compound.Unspecified;
@@ -62,7 +65,7 @@ public class PlayerInput : MonoBehaviour {
             return !playerIsOnFoot;
         }
     }
-    private Transform PlannedModuleVisualization;
+    private Transform PlannedModuleVisualization, PlannedFloorplanVisualization;
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
     public enum Direction { North, East, South, West }
@@ -108,76 +111,115 @@ public class PlayerInput : MonoBehaviour {
 
         PromptInfo newPrompt = null;
         bool doInteract = Input.GetKeyUp(KeyCode.E);
-        RaycastHit hitInfo;
-        if (CurrentMode == PlanningMode.Exterior)
+
+        switch (CurrentMode)
         {
-            if (PlannedModule == Module.Unspecified)
-            {
-                if (Input.GetKeyUp(KeyCode.Q))
-                {
-                    GuiBridge.Instance.CycleConstruction(-1);
-                }
-                else if (Input.GetKeyUp(KeyCode.Z))
-                {
-                    GuiBridge.Instance.CycleConstruction(1);
-                }
-                else if (Input.GetKeyUp(KeyCode.Alpha1))
-                {
-                    GuiBridge.Instance.SelectConstructionPlan(0);
-                }
-                else if (Input.GetKeyUp(KeyCode.Alpha2))
-                {
-                    GuiBridge.Instance.SelectConstructionPlan(1);
-                }
-                else if (Input.GetKeyUp(KeyCode.Alpha3))
-                {
-                    GuiBridge.Instance.SelectConstructionPlan(2);
-                }
-                else if (Input.GetKeyUp(KeyCode.Alpha4))
-                {
-                    GuiBridge.Instance.SelectConstructionPlan(3);
-                }
-            }
+            case PlanningMode.None:
+                HandleDefaultInput(ref newPrompt, doInteract);
+                break;
+            case PlanningMode.Exterior:
+                HandleExteriorPlanningInput(ref newPrompt, doInteract);
+                break;
+            case PlanningMode.Interiors:
+                HandleInteriorPlanningInput(ref newPrompt, doInteract);
+                break;
+        }
 
-            if (PlannedModuleVisualization != null)
-            {
-                if (Input.GetMouseButton(0))
-                {
-                    PlannedModuleVisualization.Rotate(Vector3.up * 90 * Time.deltaTime);
-                }
-                else if (Input.GetMouseButton(1))
-                {
-                    PlannedModuleVisualization.Rotate(-Vector3.up * 90 * Time.deltaTime);
-                }
-            }
+        //if we were hovering or doing something that has a prompt
+        //we will have a newPrompt
+        //if we don't
+        if (newPrompt == null)
+        {
+            GuiBridge.Instance.HidePrompt();
+        }
+        else
+        {
+            GuiBridge.Instance.ShowPrompt(newPrompt);
+        }
+	}
 
-            if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+    private void HandleInteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetMouseButtonUp(0))
+        {
+            CurrentPlanningDirection = CurrentPlanningDirection - 1;
+            if (CurrentPlanningDirection < 0)
+                CurrentPlanningDirection = Direction.West;
+        }
+        else if (Input.GetMouseButtonUp(1))
+        {
+            CurrentPlanningDirection = CurrentPlanningDirection + 1;
+
+            if (CurrentPlanningDirection > Direction.West)
+                CurrentPlanningDirection = Direction.North;
+        }
+
+        if (Input.GetKeyUp(KeyCode.T))
+        {
+            Material mat;
+            Transform prefab = FloorplanBridge.Instance.GetPrefab(out mat);
+            if (prefab != null)
             {
-                if (hitInfo.collider != null)
+                PlannedFloorplanVisualization = GameObject.Instantiate(prefab);
+            }
+        }
+
+        RaycastHit hitInfo;
+        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.gameObject.CompareTag("cavern"))
                 {
-                    if (hitInfo.collider.CompareTag("terrain"))
+                    if (doInteract)
                     {
-                        if (CurrentMode == PlanningMode.Exterior && PlannedModuleVisualization != null)
+                        PlaceFloorplanHere(hitInfo.collider);
+                    }
+                    else
+                    {
+                        if (PlannedFloorplanVisualization != null)
                         {
-                            //TODO: raycast 3 more times (other 3 corners)
-                            //then take the average height between them
-                            //and invalidate the placement if it passes some threshold
-                            PlannedModuleVisualization.position = hitInfo.point;
-
-                            if (doInteract)
-                            {
-                                PlaceConstructionHere(hitInfo.point);
-                            }
-                            else
-                            {
-                                newPrompt = Prompts.PlanConstructionZoneHint;
-                            }
+                            PlannedFloorplanVisualization.position = hitInfo.collider.transform.parent.position;
+                            PlannedFloorplanVisualization.localRotation = CurrentPlanningDirectionToQuaternion();
                         }
                     }
                 }
             }
         }
-        else if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+    }
+
+
+    private static Quaternion eastQ = Quaternion.Euler(0, 90, 0);
+    private static Quaternion southQ = Quaternion.Euler(0, 180, 0);
+    private static Quaternion westQ = Quaternion.Euler(0, 270, 0);
+
+    private Quaternion CurrentPlanningDirectionToQuaternion()
+    {
+        switch (CurrentPlanningDirection)
+        {
+            case Direction.North:
+                return Quaternion.identity;
+            case Direction.East:
+                return eastQ;
+            case Direction.South:
+                return southQ;
+            case Direction.West:
+                return westQ;
+        }
+
+        return Quaternion.identity;
+    }
+
+    private void PlaceFloorplanHere(Collider place)
+    {
+        Destroy(PlannedFloorplanVisualization.gameObject);
+        PlannedFloorplanVisualization = null;
+    }
+
+    private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        RaycastHit hitInfo;
+        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
         {
             if (hitInfo.collider != null)
             {
@@ -228,7 +270,7 @@ public class PlayerInput : MonoBehaviour {
                     {
                         newPrompt = Prompts.DriveRoverPrompt;
                     }
-                } 
+                }
                 else if (hitInfo.collider.CompareTag("constructionzone"))
                 {
                     ConstructionZone zone = hitInfo.collider.GetComponent<ConstructionZone>();
@@ -349,7 +391,7 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("mealorganic"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealOrganicEatHint, MealType.Organic);               
+                    newPrompt = OnFoodHover(doInteract, Prompts.MealOrganicEatHint, MealType.Organic);
                 }
                 else if (hitInfo.collider.CompareTag("mealprepared"))
                 {
@@ -389,19 +431,77 @@ public class PlayerInput : MonoBehaviour {
                 newPrompt = Prompts.LadderOffHint;
             }
         }
+    }
 
-        //if we were hovering or doing something that has a prompt
-        //we will have a newPrompt
-        //if we don't
-        if (newPrompt == null)
+    private void HandleExteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        RaycastHit hitInfo;
+        if (PlannedModule == Module.Unspecified)
         {
-            GuiBridge.Instance.HidePrompt();
+            if (Input.GetKeyUp(KeyCode.Q))
+            {
+                GuiBridge.Instance.CycleConstruction(-1);
+            }
+            else if (Input.GetKeyUp(KeyCode.Z))
+            {
+                GuiBridge.Instance.CycleConstruction(1);
+            }
+            else if (Input.GetKeyUp(KeyCode.Alpha1))
+            {
+                GuiBridge.Instance.SelectConstructionPlan(0);
+            }
+            else if (Input.GetKeyUp(KeyCode.Alpha2))
+            {
+                GuiBridge.Instance.SelectConstructionPlan(1);
+            }
+            else if (Input.GetKeyUp(KeyCode.Alpha3))
+            {
+                GuiBridge.Instance.SelectConstructionPlan(2);
+            }
+            else if (Input.GetKeyUp(KeyCode.Alpha4))
+            {
+                GuiBridge.Instance.SelectConstructionPlan(3);
+            }
         }
-        else
+
+        if (PlannedModuleVisualization != null)
         {
-            GuiBridge.Instance.ShowPrompt(newPrompt);
+            if (Input.GetMouseButton(0))
+            {
+                PlannedModuleVisualization.Rotate(Vector3.up * 90 * Time.deltaTime);
+            }
+            else if (Input.GetMouseButton(1))
+            {
+                PlannedModuleVisualization.Rotate(-Vector3.up * 90 * Time.deltaTime);
+            }
         }
-	}
+
+        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.CompareTag("terrain"))
+                {
+                    if (CurrentMode == PlanningMode.Exterior && PlannedModuleVisualization != null)
+                    {
+                        //TODO: raycast 3 more times (other 3 corners)
+                        //then take the average height between them
+                        //and invalidate the placement if it passes some threshold
+                        PlannedModuleVisualization.position = hitInfo.point;
+
+                        if (doInteract)
+                        {
+                            PlaceConstructionHere(hitInfo.point);
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.PlanConstructionZoneHint;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private PromptInfo OnFoodHover(bool doInteract, PromptInfo eatHint, MealType mealType)
     {

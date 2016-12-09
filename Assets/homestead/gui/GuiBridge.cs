@@ -324,22 +324,9 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
-
-    /// <summary>
-    /// Top level groups that organize floorplans
-    /// </summary>
-    public enum FloorplanGroup { Undecided = -1, Floor, Edge, Corner }
-
-    /// <summary>
-    /// Second level groups that organize floorplans
-    /// </summary>
-    public enum FloorplanSubGroup { Solid, Mesh, Door, Window, SingleColumn, DoubleColumn }
-
-    public enum FloorplanMaterial { Rock, Concrete, Plastic, Steel }
-
-    private FloorplanGroup selectedFloorplanGroup;
-    private FloorplanSubGroup selectedFloorplanSubgroup;
-    private FloorplanMaterial selectedFloorplanMaterial;
+    public FloorplanGroup selectedFloorplanGroup = FloorplanGroup.Undecided;
+    public FloorplanSubGroup selectedFloorplanSubgroup;
+    public FloorplanMaterial selectedFloorplanMaterial;
 
     public static Dictionary<FloorplanGroup, FloorplanSubGroup[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, FloorplanSubGroup[]>()
     {
