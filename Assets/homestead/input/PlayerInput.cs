@@ -156,11 +156,23 @@ public class PlayerInput : MonoBehaviour {
 
         if (Input.GetKeyUp(KeyCode.T))
         {
+            DisableAndForgetFloorplanVisualization();
+            CycleSubGroup();
             Material mat;
             Transform prefab = FloorplanBridge.Instance.GetPrefab(out mat);
             if (prefab != null)
             {
-                PlannedFloorplanVisualization = GameObject.Instantiate(prefab);
+                if (FloorplanVisCache.ContainsKey(prefab))
+                {
+                    PlannedFloorplanVisualization = FloorplanVisCache[prefab];
+                    PlannedFloorplanVisualization.gameObject.SetActive(true);
+                }
+                else
+                {
+                    Transform t = GameObject.Instantiate(prefab);
+                    FloorplanVisCache[prefab] = t;
+                    PlannedFloorplanVisualization = t;
+                }
             }
         }
 
@@ -188,6 +200,40 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
+    private void CycleSubGroup()
+    {
+        if (GuiBridge.Instance.selectedFloorplanGroup == FloorplanGroup.Undecided)
+        {
+            GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
+            GuiBridge.Instance.selectedFloorplanSubgroup = GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
+        }
+        else
+        {
+            int nextSubGroup = (int)GuiBridge.Instance.selectedFloorplanSubgroup + 1;
+            if (nextSubGroup >= GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup].Length)
+            {
+                CycleGroup();
+            }
+            else
+            {
+                GuiBridge.Instance.selectedFloorplanSubgroup = (FloorplanSubGroup)nextSubGroup;
+            }
+        }
+    }
+
+    private void CycleGroup()
+    {
+        int nextGroup = (int)GuiBridge.Instance.selectedFloorplanGroup + 1;
+        if (nextGroup >= GuiBridge.FloorplanGroupmap.Keys.Count)
+        {
+            GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
+        }
+        else
+        {
+            GuiBridge.Instance.selectedFloorplanGroup = (FloorplanGroup)nextGroup;
+            GuiBridge.Instance.selectedFloorplanSubgroup = GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
+        }
+    }
 
     private static Quaternion eastQ = Quaternion.Euler(0, 90, 0);
     private static Quaternion southQ = Quaternion.Euler(0, 180, 0);
@@ -212,8 +258,17 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceFloorplanHere(Collider place)
     {
-        Destroy(PlannedFloorplanVisualization.gameObject);
-        PlannedFloorplanVisualization = null;
+        GameObject.Instantiate<Transform>(PlannedFloorplanVisualization);
+        //DisableAndForgetFloorplanVisualization();
+    }
+
+    private void DisableAndForgetFloorplanVisualization()
+    {
+        if (PlannedFloorplanVisualization != null)
+        {
+            PlannedFloorplanVisualization.gameObject.SetActive(false);
+            PlannedFloorplanVisualization = null;
+        }
     }
 
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
@@ -707,11 +762,8 @@ public class PlayerInput : MonoBehaviour {
             case PlanningMode.None:
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
-                if (this.PlannedModuleVisualization != null)
-                {
-                    this.PlannedModuleVisualization.gameObject.SetActive(false);
-                    this.PlannedModuleVisualization = null;
-                }
+                DisableAndForgetFloorplanVisualization();
+                DisableAndForgetModuleVisualization();
                 this.PlannedModule = Module.Unspecified;
                 break;
             case PlanningMode.Interiors:
@@ -721,6 +773,15 @@ public class PlayerInput : MonoBehaviour {
 
         FlowCamera.enabled = (CurrentMode != PlanningMode.None);
         GuiBridge.Instance.RefreshMode();
+    }
+
+    private void DisableAndForgetModuleVisualization()
+    {
+        if (this.PlannedModuleVisualization != null)
+        {
+            this.PlannedModuleVisualization.gameObject.SetActive(false);
+            this.PlannedModuleVisualization = null;
+        }
     }
 
     private void PickUpObject(RaycastHit hitInfo)
