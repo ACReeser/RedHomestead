@@ -173,6 +173,7 @@ public class PlayerInput : MonoBehaviour {
                     FloorplanVisCache[prefab] = t;
                     PlannedFloorplanVisualization = t;
                 }
+                PlannedFloorplanVisualization.GetChild(0).GetComponent<Renderer>().material = mat;
             }
         }
 
@@ -258,8 +259,19 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceFloorplanHere(Collider place)
     {
-        GameObject.Instantiate<Transform>(PlannedFloorplanVisualization);
+        Transform t = GameObject.Instantiate<Transform>(PlannedFloorplanVisualization);
+        t.SetParent(place.transform.parent);
+        t.localEulerAngles = Round(t.localEulerAngles);
         //DisableAndForgetFloorplanVisualization();
+    }
+
+    private Vector3 Round(Vector3 localEulerAngles)
+    {
+        localEulerAngles.x = Mathf.Round(localEulerAngles.x / 90) * 90;
+        localEulerAngles.y = Mathf.Round(localEulerAngles.y / 90) * 90;
+        localEulerAngles.z = Mathf.Round(localEulerAngles.z / 90) * 90;
+
+        return localEulerAngles;
     }
 
     private void DisableAndForgetFloorplanVisualization()
