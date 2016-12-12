@@ -17,7 +17,7 @@ public class SunOrbit : MonoBehaviour {
 
     internal const float GameSecondsPerMartianMinute = GameSecondsPerGameDay / MartianSecondsPerDay * 60;
 
-    internal float CurrentHour = 0;
+    internal float CurrentHour = 9;
     internal float CurrentMinute = 0;
 
 	// Use this for initialization

@@ -82,7 +82,7 @@ public class Airlock : MonoBehaviour {
                 InnerDoorSealed = !InnerDoorSealed;
                 InnerDoor.name = InnerDoorSealed ? ClosedDoorName : OpenDoorName;
                 //if we're sealing it, go backwards
-                InnerAnimator.SetFloat("speed", InnerDoorSealed ? -1f : 1f); 
+                //InnerAnimator.SetFloat("speed", InnerDoorSealed ? -1f : 1f); 
                 InnerAnimator.SetBool("open", !InnerDoorSealed);
             }
         }
@@ -93,7 +93,7 @@ public class Airlock : MonoBehaviour {
                 OuterDoorSealed = !OuterDoorSealed;
                 OuterDoor.name = OuterDoorSealed ? ClosedDoorName : OpenDoorName;
                 //if we're sealing it, go backwards
-                OuterAnimator.SetFloat("speed", OuterDoorSealed ? -1f : 1f);
+                //OuterAnimator.SetFloat("speed", OuterDoorSealed ? -1f : 1f);
                 OuterAnimator.SetBool("open", !OuterDoorSealed);
             }
         }
