@@ -35,7 +35,6 @@ public class HabitatResourceInterface : HabitatModule
 
     protected virtual void OnResourceChange()
     {
-
     }
 
     private void DisplaySingleContainer()
