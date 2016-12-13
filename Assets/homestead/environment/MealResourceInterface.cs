@@ -30,7 +30,7 @@ public class MealResourceInterface : HabitatResourceInterface {
         SumContainer powderC = LinkedHab.ComplexResourceTotals[Resource.MealPowder];
         SumContainer shakeC = LinkedHab.ComplexResourceTotals[Resource.MealShake];
 
-        string days = "1";
+        string days = (Math.Truncate(100 * ((bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) / 2f + (powderC.CurrentAmount + shakeC.CurrentAmount) / 4f)) / 100).ToString();
 
         DisplayOut.text = string.Format("Meals: {0} day{9}\nBiomass:    {1}/{2}\nOrganic:  {3}/{4}\nRation:  {10}/{11}\nPowdered: {5}/{6}\nShakes:      {7}/{8}",
             days,    

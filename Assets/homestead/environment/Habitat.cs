@@ -115,11 +115,19 @@ public class Habitat : MonoBehaviour //: MultipleResourceConverter
 
     public void PrepareBiomassToPreparedMeal()
     {
-
+        if (ComplexResourceTotals[Resource.Biomass].CurrentAmount > 0 && ComplexResourceTotals[Resource.OrganicMeal].AvailableCapacity >= 1f)
+        {
+            ComplexResourceTotals[Resource.Biomass].Pull(1f);
+            ComplexResourceTotals[Resource.OrganicMeal].Push(1f);
+        }
     }
 
     public void PreparePowderToShake()
     {
-
+        if (ComplexResourceTotals[Resource.MealPowder].CurrentAmount > 0 && ComplexResourceTotals[Resource.MealShake].AvailableCapacity >= 1f)
+        {
+            ComplexResourceTotals[Resource.MealPowder].Pull(1f);
+            ComplexResourceTotals[Resource.MealShake].Push(1f);
+        }
     }
 }

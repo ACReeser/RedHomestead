@@ -448,12 +448,23 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("foodprep"))
                 {
+                    //todo: refactor - weak link on name
+                    bool isPowder = hitInfo.collider.name == "powder";
+                    bool isBiomass = hitInfo.collider.name == "biomass";
+                    //todo: bug - shows prompts even when actions not available due to availability/storage limits
                     if (doInteract)
                     {
+                        if (isPowder)
+                            hitInfo.collider.transform.root.GetComponent<Habitat>().PreparePowderToShake();
+                        else if (isBiomass)
+                            hitInfo.collider.transform.root.GetComponent<Habitat>().PrepareBiomassToPreparedMeal();
                     }
                     else
                     {
-                        newPrompt = Prompts.FoodPrepHint;
+                        if (isPowder)
+                            newPrompt = Prompts.FoodPrepPowderHint;
+                        else if (isBiomass)
+                            newPrompt = Prompts.FoodPrepBiomassHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("mealorganic"))

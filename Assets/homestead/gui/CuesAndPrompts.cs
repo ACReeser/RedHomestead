@@ -114,9 +114,14 @@ public static class Prompts {
         Description = "Drink Water",
         Key = "E"
     };
-    internal static PromptInfo FoodPrepHint = new PromptInfo()
+    internal static PromptInfo FoodPrepPowderHint = new PromptInfo()
     {
-        Description = "Prepare Food",
+        Description = "Prepare Shake",
+        Key = "E"
+    };
+    internal static PromptInfo FoodPrepBiomassHint = new PromptInfo()
+    {
+        Description = "Prepare Meal",
         Key = "E"
     };
     internal static PromptInfo PlanConstructionZoneHint = new PromptInfo()

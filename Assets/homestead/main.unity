@@ -5607,7 +5607,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 366174600}
   - 114: {fileID: 366174601}
-  - 65: {fileID: 366174602}
   m_Layer: 0
   m_Name: FoodPrep
   m_TagString: Untagged
@@ -5629,6 +5628,8 @@ Transform:
   - {fileID: 417912102}
   - {fileID: 913528660}
   - {fileID: 665608655}
+  - {fileID: 1922695910}
+  - {fileID: 1835929752}
   m_Father: {fileID: 484247137}
   m_RootOrder: 7
 --- !u!114 &366174601
@@ -5646,18 +5647,6 @@ MonoBehaviour:
   PowderVisualization: {fileID: 913528660}
   BiomassVisualization: {fileID: 1651726138}
   BiomassStorageRoot: {fileID: 665608655}
---- !u!65 &366174602
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 366174599}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 2.68, y: 0.16, z: 1.22}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &386875516
 Prefab:
   m_ObjectHideFlags: 0
@@ -29309,6 +29298,46 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1830765913}
   m_Mesh: {fileID: 4300016, guid: f4a284b1ef46e084eba5ef6898172a9d, type: 3}
+--- !u!1 &1835929751
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1835929752}
+  - 65: {fileID: 1835929753}
+  m_Layer: 8
+  m_Name: powder
+  m_TagString: foodprep
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1835929752
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1835929751}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.667, y: 0, z: -0}
+  m_LocalScale: {x: 1.437194, y: 0.30346087, z: 1}
+  m_Children: []
+  m_Father: {fileID: 366174600}
+  m_RootOrder: 5
+--- !u!65 &1835929753
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1835929751}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!224 &1838997603 stripped
 RectTransform:
   m_PrefabParentObject: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268,
@@ -30792,6 +30821,46 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1918852770}
   m_Mesh: {fileID: 4300016, guid: f4a284b1ef46e084eba5ef6898172a9d, type: 3}
+--- !u!1 &1922695909
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 1922695910}
+  - 65: {fileID: 1922695911}
+  m_Layer: 8
+  m_Name: biomass
+  m_TagString: foodprep
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1922695910
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1922695909}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.75, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 0.30346087, z: 1}
+  m_Children: []
+  m_Father: {fileID: 366174600}
+  m_RootOrder: 4
+--- !u!65 &1922695911
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1922695909}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1929797126
 GameObject:
   m_ObjectHideFlags: 0
