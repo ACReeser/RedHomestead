@@ -15,7 +15,8 @@ namespace RedHomestead.Construction
         Workspace,
         Habitat,
         OreExtractor,
-        Smelter
+        Smelter,
+        SmallWaterTank
     }
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
     public enum Resource { Steel, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal }
@@ -53,6 +54,12 @@ namespace RedHomestead.Construction
             },
             {
                 Module.SmallGasTank, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Resource.Steel)
+                }
+            },
+            {
+                Module.SmallWaterTank, new List<ResourceEntry>()
                 {
                     new ResourceEntry(1, Resource.Steel)
                 }

@@ -58,7 +58,7 @@ public class GasStorage : SingleResourceSink {
 
     }
 
-    public override void SpecifyCompound(Compound c)
+    public void SpecifyCompound(Compound c)
     {
         if (this.SinkType == Compound.Unspecified)
         {

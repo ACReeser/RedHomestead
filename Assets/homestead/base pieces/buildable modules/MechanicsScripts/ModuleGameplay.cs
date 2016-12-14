@@ -63,7 +63,6 @@ public abstract class Sink : ModuleGameplay
         return Get(c) != null;
     }
 
-    public abstract void SpecifyCompound(Compound c);
     public abstract ResourceContainer Get(Compound c);
     public abstract void Equalize();
 }

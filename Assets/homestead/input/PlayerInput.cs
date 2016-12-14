@@ -29,6 +29,7 @@ public class PlayerInput : MonoBehaviour {
         //one of these for each module does NOT scale
         SmallSolarFarmPrefab,
         SmallGasTankPrefab,
+        SmallWaterTankPrefab,
         OxygenTank,
         SabatierPrefab,
         OreExtractorPrefab;
@@ -754,6 +755,8 @@ public class PlayerInput : MonoBehaviour {
                 return SmallGasTankPrefab;
             case Module.LargeGasTank:
                 return OxygenTank;
+            case Module.SmallWaterTank:
+                return SmallWaterTankPrefab;
             //extraction
             case Module.SabatierReactor:
                 return SabatierPrefab;

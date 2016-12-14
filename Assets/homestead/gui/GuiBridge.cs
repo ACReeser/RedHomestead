@@ -177,7 +177,8 @@ public class GuiBridge : MonoBehaviour {
             new Module[]
             {
                 Module.SmallGasTank,
-                Module.LargeGasTank
+                Module.LargeGasTank,
+                Module.SmallWaterTank
             }
         },
     };
