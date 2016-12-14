@@ -95,6 +95,7 @@ GameObject:
   - 45: {fileID: 4574634}
   - 114: {fileID: 11493248}
   - 114: {fileID: 11499320}
+  - 114: {fileID: 11437394}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: MainCamera
@@ -203,8 +204,8 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294966783
-  m_RenderingPath: -1
+    m_Bits: 4294965759
+  m_RenderingPath: 3
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -429,6 +430,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IsWalking: 0
+  m_IsOnLadder: 0
+  m_IsTransitioningLadder: 0
+  m_PostTransitionLadderState: 0
   m_WalkSpeed: 5
   m_RunSpeed: 10
   m_RunstepLenghten: 0.7
@@ -517,6 +521,25 @@ MonoBehaviour:
   m_JumpSound: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   m_LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   SuspendInput: 0
+--- !u!114 &11437394
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 194682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bd69a3d1df1d0e4383dd694418f8ab3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FloorPrefab: {fileID: 403102, guid: 9f51324f67ccf504a8af4e7275680364, type: 2}
+  MeshFloorPrefab: {fileID: 403102, guid: 9f51324f67ccf504a8af4e7275680364, type: 2}
+  WallPrefab: {fileID: 419304, guid: c69737d56bf3f5b4fbc10e5598288d1c, type: 2}
+  SingleCornerColumnPrefab: {fileID: 440040, guid: c5b821ef7c1776e49b83ad431ac841ac,
+    type: 2}
+  EdgeColumnPrefab: {fileID: 422066, guid: 634570a8188d5164daa8216c03d4fab6, type: 2}
+  DoorPrefab: {fileID: 413222, guid: 1442f73cacd4f9f4a8472e192b0ddc4b, type: 2}
+  ConcreteMaterial: {fileID: 2100000, guid: 34df2bd5a8fabc64cb08c0062b97798e, type: 2}
 --- !u!114 &11493248
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -539,8 +562,10 @@ MonoBehaviour:
     type: 2}
   SmallSolarFarmPrefab: {fileID: 491350, guid: 3dfa33079b916e641b7b3825e953557b, type: 2}
   SmallGasTankPrefab: {fileID: 469504, guid: 1c934b355be8daa4e913f21bc3468299, type: 2}
+  SmallWaterTankPrefab: {fileID: 470818, guid: 59c859395974f3145a510915a770b40e, type: 2}
   OxygenTank: {fileID: 499950, guid: c008327f633d6064d940c5527f99e5e4, type: 2}
   SabatierPrefab: {fileID: 497914, guid: c70a5d7b7c5035145a4c5912c508bace, type: 2}
+  SplitterPrefab: {fileID: 422740, guid: e88a4b7ccf4e1374aaf90d89264c3ca5, type: 2}
   OreExtractorPrefab: {fileID: 425088, guid: 1bc0cbbd20e62cf43907750ec56cb76d, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
@@ -555,9 +580,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f21fe95cc96f32429d5202251e9c62e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OxygenAmount: 100
-  OxygenMaximumAmount: 100
-  OxygenConsumptionPerSecond: 0.1
   UsingPackResources: 1
 --- !u!143 &14362950
 CharacterController:

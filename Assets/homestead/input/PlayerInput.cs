@@ -32,6 +32,7 @@ public class PlayerInput : MonoBehaviour {
         SmallWaterTankPrefab,
         OxygenTank,
         SabatierPrefab,
+        SplitterPrefab,
         OreExtractorPrefab;
     /// <summary>
     /// the material to put on module prefabs
@@ -757,6 +758,8 @@ public class PlayerInput : MonoBehaviour {
                 return OxygenTank;
             case Module.SmallWaterTank:
                 return SmallWaterTankPrefab;
+            case Module.Splitter:
+                return SplitterPrefab;
             //extraction
             case Module.SabatierReactor:
                 return SabatierPrefab;

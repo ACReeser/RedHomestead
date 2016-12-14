@@ -176,6 +176,7 @@ public class GuiBridge : MonoBehaviour {
             ConstructionGroup.Storage,
             new Module[]
             {
+                Module.Splitter,
                 Module.SmallGasTank,
                 Module.LargeGasTank,
                 Module.SmallWaterTank
