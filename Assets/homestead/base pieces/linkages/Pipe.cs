@@ -20,6 +20,8 @@ public class Pipe : MonoBehaviour {
         }
     }
 
+    internal Transform from, to;
+
     private void SetPipeType(Compound value)
     {
         _pipeType = value;

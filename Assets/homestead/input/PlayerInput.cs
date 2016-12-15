@@ -329,6 +329,10 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
                 }
+                else if (hitInfo.collider.gameObject.CompareTag("pipe"))
+                {
+                    newPrompt = OnExistingPipe(doInteract, hitInfo);
+                }
                 else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
                     if (doInteract)
@@ -513,6 +517,34 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
+    private PromptInfo OnExistingPipe(bool doInteract, RaycastHit hitInfo)
+    {
+        if (doInteract)
+        {
+            //pipe script is on parent object
+            Pipe pipeScript = hitInfo.collider.transform.parent.GetComponent<Pipe>();
+            ModuleGameplay from = pipeScript.from.root.GetComponent<ModuleGameplay>();
+            ModuleGameplay to = pipeScript.to.root.GetComponent<ModuleGameplay>();
+
+            if (from == null || to == null)
+            {
+                UnityEngine.Debug.LogWarning("Pipe not connected to two modules!");
+            }
+            else
+            {
+                from.UnlinkFromModule(to);
+                to.UnlinkFromModule(from);
+            }
+            //pipe root is on parent object
+            GameObject.Destroy(hitInfo.collider.transform.parent.gameObject);
+            return null;
+        }
+        else
+        {
+            return Prompts.ExistingPipeRemovalHint;
+        }
+    }
+
     private void HandleExteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
         RaycastHit hitInfo;
@@ -638,7 +670,6 @@ public class PlayerInput : MonoBehaviour {
             else 
                 selectedCompound = other;
 
-            print("selected " +selectedCompound.ToString());
         }, PlaceGasPipe, Prompts.GasPipePrompts);
     }
 
@@ -872,6 +903,8 @@ public class PlayerInput : MonoBehaviour {
 
         Pipe pipeScript = newPipe.GetComponent<Pipe>();
         pipeScript.PipeType = selectedCompound;
+        pipeScript.from = selectedGasValve.transform;
+        pipeScript.to = collider.transform;
     }
 
     private void PlacePowerPlug(Collider collider)

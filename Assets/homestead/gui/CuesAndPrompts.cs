@@ -183,4 +183,9 @@ public static class Prompts {
         Description = "Drink Meal",
         Key = "E"
     };
+    internal static PromptInfo ExistingPipeRemovalHint = new PromptInfo()
+    {
+        Description = "Remove Connection",
+        Key = "E"
+    };
 }

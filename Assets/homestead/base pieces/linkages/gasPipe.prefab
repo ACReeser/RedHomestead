@@ -10,9 +10,10 @@ GameObject:
   - 4: {fileID: 420820}
   - 33: {fileID: 3314906}
   - 23: {fileID: 2364136}
-  m_Layer: 0
+  - 65: {fileID: 6534748}
+  m_Layer: 8
   m_Name: pipe
-  m_TagString: Untagged
+  m_TagString: pipe
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -88,8 +89,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 116570}
   m_LocalRotation: {x: 0.5000001, y: 0.5, z: 0.5, w: 0.49999994}
-  m_LocalPosition: {x: 0, y: 0.75, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 0.25, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 437088}
   m_RootOrder: 1
@@ -115,8 +116,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 120628}
   m_LocalRotation: {x: 0.49999994, y: 0.49999985, z: -0.50000024, w: -0.5000001}
-  m_LocalPosition: {x: 0, y: 0.75, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 0.25, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 437088}
   m_RootOrder: 2
@@ -219,6 +220,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 120628}
   m_Mesh: {fileID: 4300014, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
+--- !u!65 &6534748
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 110124}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.02, y: 0.02, z: 0.02}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &11441454
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -257,7 +270,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 4300000, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
   - {fileID: 4300004, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
-  - {fileID: 0}
+  - {fileID: 4300008, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
   NorthFlowVisualizationUVSet:
   - {fileID: 4300016, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
   - {fileID: 4300016, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
@@ -265,7 +278,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 4300012, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
-  - {fileID: 0}
+  - {fileID: 4300026, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
   SouthFlowVisualizationUVSet:
   - {fileID: 4300018, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
   - {fileID: 4300018, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
@@ -273,7 +286,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 4300014, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
-  - {fileID: 0}
+  - {fileID: 4300024, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
 --- !u!114 &11477892
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -300,15 +313,43 @@ Prefab:
     m_Modifications:
     - target: {fileID: 0}
       propertyPath: m_LocalScale.x
-      value: 100
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_LocalScale.y
-      value: 100
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 0}
       propertyPath: m_LocalPosition.y
-      value: 0.75
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: CompoundUVSet.Array.data[6]
+      value: 
+      objectReference: {fileID: 4300008, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
+    - target: {fileID: 0}
+      propertyPath: NorthFlowVisualizationUVSet.Array.data[6]
+      value: 
+      objectReference: {fileID: 4300026, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
+    - target: {fileID: 0}
+      propertyPath: SouthFlowVisualizationUVSet.Array.data[6]
+      value: 
+      objectReference: {fileID: 4300024, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
+    - target: {fileID: 0}
+      propertyPath: NorthFlowVisualizationUVSet.Array.data[5]
+      value: 
+      objectReference: {fileID: 4300012, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
+    - target: {fileID: 0}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_TagString
+      value: pipe
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
