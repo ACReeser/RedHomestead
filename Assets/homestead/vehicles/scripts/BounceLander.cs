@@ -5,7 +5,7 @@ using System;
 public class BounceLander : MonoBehaviour
 {
     public ParticleSystem[] Rockets = new ParticleSystem[4];
-    public Transform airbagRoot, payloadCube, rocketRoot;
+    public Transform airbagRoot, payloadCube, rocketRoot, payloadRoot;
 
     // Use this for initialization
     void Start()
@@ -163,16 +163,38 @@ public class BounceLander : MonoBehaviour
     {
         if (this.IsInteractable)
         {
-            foreach (Transform t in airbagRoot)
-            {
-                t.gameObject.SetActive(false);
-            }
-            foreach (Transform t in rocketRoot)
-            {
-                t.gameObject.SetActive(false);
-            }
-            this.sphereCollider.enabled = false;
-            this.payloadCube.tag = "Untagged";
+            StartCoroutine(_Disassemble());
         }
+    }
+
+    private IEnumerator _Disassemble()
+    {
+        foreach (Transform t in airbagRoot)
+        {
+            t.gameObject.SetActive(false);
+            yield return new WaitForSeconds(.1f);
+        }
+        foreach (Transform t in rocketRoot)
+        {
+            t.gameObject.SetActive(false);
+            yield return new WaitForSeconds(.1f);
+        }
+        this.payloadCube.gameObject.SetActive(false);
+        yield return new WaitForSeconds(.1f);
+        this.rigid.isKinematic = true;
+        this.rigid.useGravity = false;
+        this.sphereCollider.enabled = false;
+        yield return new WaitForSeconds(.1f);
+        for (int i = payloadRoot.childCount - 1; i > -1; i--)
+        {
+            Transform t = payloadRoot.GetChild(i);
+            t.GetComponent<Collider>().enabled = true;
+            Rigidbody r = t.GetComponent<Rigidbody>();
+            r.isKinematic = false;
+            r.useGravity = true;
+            t.transform.parent = null;
+        }
+
+        GameObject.Destroy(this.gameObject);
     }
 }
