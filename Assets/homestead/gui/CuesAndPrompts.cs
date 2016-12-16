@@ -188,4 +188,9 @@ public static class Prompts {
         Description = "Remove Connection",
         Key = "E"
     };
+    internal static PromptInfo PayloadDisassembleHint = new PromptInfo()
+    {
+        Description = "Disassemble Lander",
+        Key = "E"
+    };
 }

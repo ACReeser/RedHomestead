@@ -2,26 +2,34 @@
 using System.Collections;
 using System;
 
-public class BounceLander : MonoBehaviour {
+public class BounceLander : MonoBehaviour
+{
     public ParticleSystem[] Rockets = new ParticleSystem[4];
+    public Transform airbagRoot, payloadCube, rocketRoot;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
+    // Use this for initialization
+    void Start()
+    {
+        this.rigid = GetComponent<Rigidbody>();
+        this.sphereCollider = GetComponent<SphereCollider>();
+    }
 
     private float lastAltimeter = 999f;
     private float secondsSinceLastAltimeterReading = 99f;
     private const float altimeterReadPeriod = .5f;
-    private const float pulseDuration = 2f;
+    private const float pulseDuration = 2.5f;
     private float pulseTime = 0f;
-    private const float minDistanceToFireRockets = 175f;
+    private const float minDistanceToFireRockets = 155f;
     private bool haveRocketsFired = false;
     private bool rocketsFiring = false;
     private ConstantForce cf;
+    private Rigidbody rigid;
+
+    public bool IsInteractable;
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
         if (haveRocketsFired)
         {
             if (rocketsFiring)
@@ -63,7 +71,7 @@ public class BounceLander : MonoBehaviour {
                 ToggleRockets(true);
             }
         }
-	}
+    }
 
     private void ToggleRockets(bool state)
     {
@@ -72,7 +80,7 @@ public class BounceLander : MonoBehaviour {
             print("firing rockets!");
             haveRocketsFired = true;
             this.cf = this.gameObject.AddComponent<ConstantForce>();
-            this.cf.relativeForce = Vector3.up * 18f;
+            this.cf.relativeForce = Vector3.up * 45f * rigid.mass;
             rocketsFiring = true;
         }
         else
@@ -82,7 +90,7 @@ public class BounceLander : MonoBehaviour {
             rocketsFiring = false;
         }
 
-        foreach(ParticleSystem sys in Rockets)
+        foreach (ParticleSystem sys in Rockets)
         {
             var emis = sys.emission;
             emis.enabled = rocketsFiring;
@@ -105,5 +113,66 @@ public class BounceLander : MonoBehaviour {
         }
 
         return -1;
+    }
+
+    private bool initialCollision = true;
+    void OnCollisionEnter(Collision collision)
+    {
+        Vector3 randomXZ = new Vector3(UnityEngine.Random.Range(-1f, 1f), 0f, UnityEngine.Random.Range(-1f, 1f));
+
+        if (initialCollision)
+        {
+            initialCollision = false;
+            //first bounce has a large random component
+            randomXZ *= 200f;
+            StartCoroutine(DeflateAfterTime());
+        }
+        else
+        {
+            randomXZ *= 50f;
+        }
+        this.rigid.AddForce(randomXZ, ForceMode.Impulse);
+    }
+
+    private const float deflateDuration = 2f;
+    private float deflateTime = 0f;
+    private SphereCollider sphereCollider;
+
+    private IEnumerator DeflateAfterTime()
+    {
+        yield return new WaitForSeconds(10f);
+
+        while (deflateTime < deflateDuration)
+        {
+            foreach(Transform t in airbagRoot)
+            {
+                t.localScale = Vector3.one * Mathf.Lerp(1f, .25f, deflateTime / deflateDuration);
+            }
+            deflateTime += Time.deltaTime;
+
+            sphereCollider.radius = Mathf.Lerp(2.75f, 2f, deflateTime / deflateDuration);
+
+            yield return new WaitForEndOfFrame();
+        }
+
+        this.payloadCube.tag = "airbagpayload";
+        this.IsInteractable = true;
+    }
+
+    internal void Disassemble()
+    {
+        if (this.IsInteractable)
+        {
+            foreach (Transform t in airbagRoot)
+            {
+                t.gameObject.SetActive(false);
+            }
+            foreach (Transform t in rocketRoot)
+            {
+                t.gameObject.SetActive(false);
+            }
+            this.sphereCollider.enabled = false;
+            this.payloadCube.tag = "Untagged";
+        }
     }
 }

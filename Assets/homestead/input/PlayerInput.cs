@@ -485,6 +485,23 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnFoodHover(doInteract, Prompts.MealShakeEatHint, MealType.Shake);
                 }
+                else if (hitInfo.collider.CompareTag("airbagpayload"))
+                {
+                    if (doInteract)
+                    {
+                        //bouncelander is on parent of interaction cube
+                        BounceLander landerScript = hitInfo.collider.transform.parent.GetComponent<BounceLander>();
+
+                        if (landerScript != null)
+                        {
+                            landerScript.Disassemble();
+                        }
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.PayloadDisassembleHint;
+                    }
+                }
             }
             else if (doInteract)
             {
