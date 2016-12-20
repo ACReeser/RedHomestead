@@ -14,12 +14,13 @@ public class BounceLander : MonoBehaviour
         this.sphereCollider = GetComponent<SphereCollider>();
     }
 
+    private const float InitialAltimeterReadPeriod = .5f;
+    private const float EveryFrameAltimeterReadCutin = 300f;
     private float lastAltimeter = 999f;
     private float secondsSinceLastAltimeterReading = 99f;
-    private const float altimeterReadPeriod = .5f;
-    private const float pulseDuration = 2.5f;
+    private const float PulseDuration = 2.5f;
     private float pulseTime = 0f;
-    private const float minDistanceToFireRockets = 155f;
+    private const float MinDistanceToFireRockets = 165f;
     private bool haveRocketsFired = false;
     private bool rocketsFiring = false;
     private ConstantForce cf;
@@ -34,7 +35,7 @@ public class BounceLander : MonoBehaviour
         {
             if (rocketsFiring)
             {
-                if (pulseTime > pulseDuration)
+                if (pulseTime > PulseDuration)
                 {
                     ToggleRockets(false);
                 }
@@ -52,7 +53,7 @@ public class BounceLander : MonoBehaviour
         {
             float altimeter = lastAltimeter;
 
-            if (secondsSinceLastAltimeterReading > altimeterReadPeriod)
+            if (altimeter < EveryFrameAltimeterReadCutin || secondsSinceLastAltimeterReading > InitialAltimeterReadPeriod)
             {
                 lastAltimeter = altimeter = GetRadarAltimetry();
                 secondsSinceLastAltimeterReading = 0;
@@ -66,7 +67,7 @@ public class BounceLander : MonoBehaviour
             {
                 //???
             }
-            else if (altimeter <= minDistanceToFireRockets)
+            else if (altimeter <= MinDistanceToFireRockets)
             {
                 ToggleRockets(true);
             }
@@ -108,7 +109,6 @@ public class BounceLander : MonoBehaviour
 
         if (Physics.Raycast(new Ray(transform.position, transform.TransformDirection(Vector3.down)), out rayHit))
         {
-            print(rayHit.collider.name + " at " + rayHit.distance);
             return rayHit.distance;
         }
 
@@ -131,7 +131,7 @@ public class BounceLander : MonoBehaviour
         {
             randomXZ *= 50f;
         }
-        this.rigid.AddForce(randomXZ, ForceMode.Impulse);
+        this.rigid.AddTorque(randomXZ, ForceMode.Impulse);
     }
 
     private const float deflateDuration = 2f;
