@@ -84,6 +84,7 @@ public class CustomFPSController : MonoBehaviour
 
         //alex
         m_MouseLook.UpdateCursorLock();
+        
     }
 
 
@@ -119,8 +120,11 @@ public class CustomFPSController : MonoBehaviour
         m_AudioSource.clip = m_LandSound;
         m_AudioSource.Play();
         m_NextStep = m_StepCycle + .5f;
+        PlaceBootprint();
+        PlaceBootprint();
     }
 
+    Vector3 currentHitNormal, currentHitPosition;
 
     private void FixedUpdate()
     {
@@ -157,6 +161,9 @@ public class CustomFPSController : MonoBehaviour
             Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
                                 m_CharacterController.height / 2f, ~0, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
+
+            currentHitNormal = hitInfo.normal;
+            currentHitPosition = hitInfo.point;
 
             m_MoveDir.x = desiredMove.x * speed;
             m_MoveDir.z = desiredMove.z * speed;
@@ -231,6 +238,8 @@ public class CustomFPSController : MonoBehaviour
         // move picked sound to index 0 so it's not picked next time
         m_FootstepSounds[n] = m_FootstepSounds[0];
         m_FootstepSounds[0] = m_AudioSource.clip;
+
+        PlaceBootprint();
     }
 
 
@@ -349,6 +358,23 @@ public class CustomFPSController : MonoBehaviour
         {
             return;
         }
+    }
+    
+    public SpriteRenderer[] bootSprites = new SpriteRenderer[8];
+
+    private bool isOnLeftBoot = true;
+    private int lastBootIndex = -1;
+
+    private void PlaceBootprint()
+    {
+        lastBootIndex++;
+        lastBootIndex %= bootSprites.Length;
+        
+        bootSprites[lastBootIndex].transform.position = currentHitPosition + currentHitNormal * .01f;
+        bootSprites[lastBootIndex].transform.rotation = this.transform.rotation * Quaternion.Euler(currentHitNormal + Vector3.right * 90);
+        bootSprites[lastBootIndex].flipX = !isOnLeftBoot;
+
+        isOnLeftBoot = !isOnLeftBoot;
     }
 }
 
