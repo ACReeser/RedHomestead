@@ -193,4 +193,14 @@ public static class Prompts {
         Description = "Disassemble Lander",
         Key = "E"
     };
+    internal static PromptInfo PlaceLightHint = new PromptInfo()
+    {
+        Description = "Place Light",
+        Key = "E"
+    };
+    internal static PromptInfo PlaceFloorplanHint = new PromptInfo()
+    {
+        Description = "Place Here",
+        Key = "E"
+    };
 }

@@ -10,6 +10,8 @@ using RedHomestead.Construction;
 /// </summary>
 public class PlayerInput : MonoBehaviour {
     public enum PlanningMode { None, Exterior, Interiors }
+
+    private const float InteractionRaycastDistance = 10f;
     public static PlayerInput Instance;
 
     public Camera FlowCamera;
@@ -33,7 +35,8 @@ public class PlayerInput : MonoBehaviour {
         OxygenTank,
         SabatierPrefab,
         SplitterPrefab,
-        OreExtractorPrefab;
+        OreExtractorPrefab,
+        InteriorLightPrefab;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
@@ -78,6 +81,7 @@ public class PlayerInput : MonoBehaviour {
             return !playerIsOnFoot;
         }
     }
+    
     private Transform PlannedModuleVisualization, PlannedFloorplanVisualization;
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
@@ -191,7 +195,7 @@ public class PlayerInput : MonoBehaviour {
         }
 
         RaycastHit hitInfo;
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
         {
             if (hitInfo.collider != null)
             {
@@ -207,7 +211,20 @@ public class PlayerInput : MonoBehaviour {
                         {
                             PlannedFloorplanVisualization.position = hitInfo.collider.transform.parent.position;
                             PlannedFloorplanVisualization.localRotation = CurrentPlanningDirectionToQuaternion();
+
+                            newPrompt = Prompts.PlaceFloorplanHint;
                         }
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("cavernstuff"))
+                {
+                    if (doInteract)
+                    {
+                        PlaceStuffHere(hitInfo.collider);
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.PlaceLightHint;
                     }
                 }
             }
@@ -278,6 +295,14 @@ public class PlayerInput : MonoBehaviour {
         //DisableAndForgetFloorplanVisualization();
     }
 
+    private void PlaceStuffHere(Collider place)
+    {
+        Transform t = GameObject.Instantiate<Transform>(InteriorLightPrefab);
+        t.SetParent(place.transform.parent);
+        t.localEulerAngles = Round(t.localEulerAngles);
+        t.localPosition = Vector3.down * .5f;
+    }
+
     private Vector3 Round(Vector3 localEulerAngles)
     {
         localEulerAngles.x = Mathf.Round(localEulerAngles.x / 90) * 90;
@@ -299,7 +324,7 @@ public class PlayerInput : MonoBehaviour {
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
         RaycastHit hitInfo;
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
         {
             if (hitInfo.collider != null)
             {
@@ -620,7 +645,7 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, 300f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
         {
             if (hitInfo.collider != null)
             {
