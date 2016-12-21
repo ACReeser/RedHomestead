@@ -49,6 +49,17 @@ public class PlayerInput : MonoBehaviour {
     /// Cache == only create 1 of each type of module because creation is expensive
     /// </summary>
     private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
+
+    internal void SetPressure(bool pressurized)
+    {
+        if (pressurized)
+            PlayerInput.Instance.AvailableMode = PlayerInput.PlanningMode.Interiors;
+        else
+            PlayerInput.Instance.AvailableMode = PlayerInput.PlanningMode.Exterior;
+
+        FPSController.PlaceBootprints = !pressurized;
+    }
+
     //todo: same kind of cache for floorplan
     private Dictionary<Transform, Transform> FloorplanVisCache = new Dictionary<Transform, Transform>();
 

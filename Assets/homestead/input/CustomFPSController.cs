@@ -365,16 +365,21 @@ public class CustomFPSController : MonoBehaviour
     private bool isOnLeftBoot = true;
     private int lastBootIndex = -1;
 
+    public bool PlaceBootprints = true;
+
     private void PlaceBootprint()
     {
-        lastBootIndex++;
-        lastBootIndex %= bootSprites.Length;
+        if (this.PlaceBootprints)
+        {
+            lastBootIndex++;
+            lastBootIndex %= bootSprites.Length;
         
-        bootSprites[lastBootIndex].transform.position = currentHitPosition + currentHitNormal * .01f;
-        bootSprites[lastBootIndex].transform.rotation = this.transform.rotation * Quaternion.Euler(currentHitNormal + Vector3.right * 90);
-        bootSprites[lastBootIndex].flipX = !isOnLeftBoot;
+            bootSprites[lastBootIndex].transform.position = currentHitPosition + currentHitNormal * .01f;
+            bootSprites[lastBootIndex].transform.rotation = this.transform.rotation * Quaternion.Euler(currentHitNormal + Vector3.right * 90);
+            bootSprites[lastBootIndex].flipX = !isOnLeftBoot;
 
-        isOnLeftBoot = !isOnLeftBoot;
+            isOnLeftBoot = !isOnLeftBoot;
+        }
     }
 }
 
