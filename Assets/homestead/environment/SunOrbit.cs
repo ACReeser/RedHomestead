@@ -22,9 +22,21 @@ public class SunOrbit : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        GetClockTextMeshes();
 	}
 
+    private void GetClockTextMeshes()
+    {
+        var clocks = GameObject.FindGameObjectsWithTag("clock");
+        this.Clocks = new TextMesh[clocks.Length];
+        for (int i = 0; i < clocks.Length; i++)
+        {
+            this.Clocks[i] = clocks[i].GetComponent<TextMesh>();
+        }
+    }
+
     private bool dawnMilestone, duskMilestone, dawnEnded, duskEnded;
+    private TextMesh[] Clocks;
 
     // Update is called once per frame
     void Update () {
@@ -79,7 +91,21 @@ public class SunOrbit : MonoBehaviour {
             Dusk(false);
         }
 
-        GuiBridge.Instance.TimeText.text = String.Format("M{0}:{1}", ((int)Math.Truncate(CurrentHour)).ToString("D2"), ((int)Math.Truncate(CurrentMinute)).ToString("D2"));
+        string textTime = String.Format("M{0}:{1}", ((int)Math.Truncate(CurrentHour)).ToString("D2"), ((int)Math.Truncate(CurrentMinute)).ToString("D2"));
+
+        GuiBridge.Instance.TimeText.text = textTime;
+        UpdateClocks(textTime);
+    }
+
+    private void UpdateClocks(string textTime)
+    {
+        if (this.Clocks != null)
+        {
+            for (int i = 0; i < this.Clocks.Length; i++)
+            {
+                this.Clocks[i].text = textTime;
+            }
+        }
     }
 
     private void Dawn(bool isStart)
