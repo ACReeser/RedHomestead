@@ -125,6 +125,19 @@ public class PlayerInput : MonoBehaviour {
             FlowCamera.enabled = !FlowCamera.enabled;
         }
 
+        if (Input.GetKeyUp(KeyCode.Comma))
+        {
+            Time.timeScale /= 4f;
+            Time.timeScale = Mathf.Max(1f, Time.timeScale);
+            print("slooww");
+        }
+        else if (Input.GetKeyUp(KeyCode.Period))
+        {
+            Time.timeScale *= 2f;
+            Time.timeScale = Mathf.Min(32f, Time.timeScale);
+            print("fstr");
+        }
+
 
         PromptInfo newPrompt = null;
         bool doInteract = Input.GetKeyUp(KeyCode.E);

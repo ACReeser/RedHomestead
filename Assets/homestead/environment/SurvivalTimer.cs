@@ -79,19 +79,25 @@ public class DoubleSurvivalResource : SurvivalResource
 
 public class SurvivalTimer : MonoBehaviour {
     public static SurvivalTimer Instance;
-    
-    public SingleSurvivalResource Oxygen = new SingleSurvivalResource();
+
+    public SingleSurvivalResource Oxygen = new SingleSurvivalResource()
+    {
+        ConsumptionPerSecond = .1f //100f / 60f * 4f * SunOrbit.GameSecondsPerMartianMinute,
+    };
     public SingleSurvivalResource Water = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = .05f
+        ConsumptionPerSecond = .1f //100f / 60f * 8f * SunOrbit.GameSecondsPerMartianMinute,
     };
     public SingleSurvivalResource Food = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = 2400 / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = 2400f / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
         MaximumAmount = 2400,
         CurrentAmount = 2400
     };
-    public DoubleSurvivalResource Power = new DoubleSurvivalResource();
+    public DoubleSurvivalResource Power = new DoubleSurvivalResource()
+    {
+        ConsumptionPerSecond = .1f //100f / 60f * 12f * SunOrbit.GameSecondsPerMartianMinute,
+    };
 
     public bool UsingPackResources = true;
 
