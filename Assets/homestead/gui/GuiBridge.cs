@@ -15,7 +15,7 @@ using System.Collections.Generic;
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel;
+    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
@@ -112,6 +112,11 @@ public class GuiBridge : MonoBehaviour {
                 //if it's timed, let it time out
             }
         }
+    }
+
+    internal void ToggleHelpMenu()
+    {
+        HelpPanel.gameObject.SetActive(!HelpPanel.gameObject.activeSelf);
     }
 
     /// <summary>

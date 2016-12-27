@@ -120,6 +120,11 @@ public class PlayerInput : MonoBehaviour {
             Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
         }
 
+        if (Input.GetKeyUp(KeyCode.F1))
+        {
+            GuiBridge.Instance.ToggleHelpMenu();
+        }
+
         if (Input.GetKeyUp(KeyCode.V))
         {
             FlowCamera.enabled = !FlowCamera.enabled;
