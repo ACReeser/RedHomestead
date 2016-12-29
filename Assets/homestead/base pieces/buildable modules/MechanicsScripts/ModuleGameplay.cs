@@ -71,6 +71,7 @@ public abstract class SingleResourceSink : Sink
 {
     public Compound SinkType;
     public ResourceContainer Container;
+    public SpriteRenderer flowAmountRenderer;
 
     public override ResourceContainer Get(Compound c)
     {
@@ -88,6 +89,9 @@ public abstract class SingleResourceSink : Sink
         {
             ResourceContainer rc = s.Get(SinkType);
         }
+
+        if (flowAmountRenderer != null)
+            flowAmountRenderer.transform.localScale = new Vector3(1, Container.UtilizationPercentage, 1);
     }
 
     public override void OnAdjacentChanged()
