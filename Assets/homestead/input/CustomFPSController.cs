@@ -80,11 +80,8 @@ public class CustomFPSController : MonoBehaviour
         m_NextStep = m_StepCycle / 2f;
         m_Jumping = false;
         m_AudioSource = GetComponent<AudioSource>();
-        m_MouseLook.Init(transform, m_Camera.transform);
-
         //alex
-        m_MouseLook.UpdateCursorLock();
-        
+        this.InitializeMouseLook();        
     }
 
 
@@ -380,6 +377,13 @@ public class CustomFPSController : MonoBehaviour
 
             isOnLeftBoot = !isOnLeftBoot;
         }
+    }
+
+    internal void InitializeMouseLook()
+    {
+        m_MouseLook.Init(transform, m_Camera.transform);
+
+        m_MouseLook.UpdateCursorLock();
     }
 }
 

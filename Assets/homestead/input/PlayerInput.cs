@@ -935,6 +935,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void ToggleVehicle(RoverInput roverInput)
     {
+        //exiting vehicle
         if (roverInput == null && DrivingRoverInput != null)
         {
             playerIsOnFoot = true;
@@ -943,7 +944,7 @@ public class PlayerInput : MonoBehaviour {
             FPSController.transform.SetParent(null);
             FPSController.SuspendInput = false;
         }
-        else
+        else //entering vehicle
         {
             playerIsOnFoot = false;
             //FPSController.enabled = false;
@@ -952,6 +953,7 @@ public class PlayerInput : MonoBehaviour {
             FPSController.transform.SetParent(DrivingRoverInput.transform.Find("Enter").transform);
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;
+            FPSController.InitializeMouseLook();
             FPSController.SuspendInput = true;
         }
     }
