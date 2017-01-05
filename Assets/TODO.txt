@@ -1,0 +1,245 @@
+﻿Exterior Module Required Functionality:
+[x] Rotate plans
+[x] Identity input vs output pipe
+[x] Identify type of pipe
+[x] Remove pipe
+
+Fluid Flow:
+[ ] Actually push fluids
+
+UX Improvement:
+[ ] Make storage module
+[ ] Make rover storage snap
+
+Resource Flow Visualization feature:
+[x] View input pipe hookups 
+[x] View output pipe hookups
+[x] View pipe flow (simple - add 2 animated planes that are on a separate layer that are scaled with pipe parent)
+[x] View storage amounts
+
+Basic Habitat resources and update
+[x] Habitat script
+[ ] Habitat solar panel on top of airlock or somewhere
+[x] Habitat main cylinder upright
+[x] Habitat battery with power display
+[x] Habitat water storage with display
+[x] Habitat air storage with display
+[x] Habitat food storage with display
+[x] Habitat food prep with prep/eat interaction
+[x] Habitat ladder to upper section
+[ ] Habitat bed
+[ ] Habitat windows
+
+Demo Goals:
+[ ] Start with hydrogen storage tanks + basic habitat
+[x] Construct Solar Panel
+[x] Construct Atmosphere Miner
+[x] Hook up miner to power
+[x] Hook up miner to hydrogen storage
+[x] Construct Water Tank 
+[ ] Hook up miner to water tank
+[ ] Hook up water tank to habitat
+=== can now make water for habitat, for hydrogen
+[x] Construct Methane Tank
+[x] Hook up miner to methane tank
+=== can now make methane for storage
+[x] Construct splitter
+[ ] split water line
+[ ] Construct Electrolyzer
+[ ] Hook up to water
+[ ] Hook up to power
+[ ] Hook up to habitat
+[ ] Hook up to hydrogen
+=== can now make oxygen for habitat, hydrogen back to storage
+[ ] Construct Fuel Cells
+[ ] Hook up fuel cells to oxygen
+[ ] Hook up fuel cells to hydrogen
+=== can now make extra power
+[ ] Identify iron ore deposit
+[ ] Construct Ore Miner
+[ ] Hook up Ore to power
+[ ] Construct Reduction Furnace
+[ ] Hook up reduction furnace to power
+[ ] Hook up reduction furnace to methane
+[ ] Hook up reduction furnace to oxygen
+[ ] Hook up ore miner to reduction furnace
+[ ] Construct Induction Furnace
+[ ] Hook up induction furnace to power
+[ ] Hook up induction furnace to reduction furnace
+=== can now make steel
+
+
+Better Workflow:
+how to have one mesh with multiple UVs?
+
+Features:
+
+Hobbit Holes
+[x] Airlock (w/ terrain collision toggle)
+[x] Simple Excavation
+[ ] Optimized Cavern walls
+[ ] Basic Floorplan
+    [ ] Floorplan planning mode UI/IO
+    [x] Snap Rotation
+	[ ] Resource requirements
+[ ] Functional Interior Design
+[ ] Habitat resources
+
+Exploration
+[ ] Rover charging around noon
+[ ] Power drain
+[ ] Notifications of radio beacons
+[ ] Crashes with salvage
+[ ] meteorites with rare elements
+
+Trading
+[ ] Credits (money) resource
+[ ] Periodic income
+[ ] Console with price listing
+[ ] Ability to buy materials
+[ ] Materials dropped off by rocket
+[ ] Ability to select materials to drop off
+[x] Materials dropped off by airbag
+
+Floorplan materials:
+//v1
+[x] Concrete
+[ ] Brick
+[ ] Metal
+//v2
+[ ] Plastic
+//v3
+[ ] Rock
+[ ] Glass
+
+Floorplan types:
+# Solid Floor
+# Mesh Floor (if applicable)
+== Edges ==
+# Full Wall
+# Half Wall Bottom
+# Half Wall Top
+# Half Wall Left
+# Half Wall Right
+# Curved Roof
+# Curved Roof Corner
+# Wall w/ door
+# Wall w/ window
+# Single Column
+# Double Column
+== Corners ==
+# Single Column
+
+Interiors:
+v1
+[ ] Bed
+    [x] Mesh
+    [ ] Sleep dialog (either for time, or start/stop)
+	[ ] Fast time during sleep
+	[ ] Wake when life threatening conditions
+[ ] Kitchen food prep
+    [x] Mesh
+    [x] Make shake
+	[x] Make organic meal
+    [ ] Hides/shows contents of shelf (biomass)
+    [ ] Resource change event hook
+    [ ] Hide meals and interaction when not available
+[ ] Kitchen storage
+    [x] Mesh
+    [x] Shows display
+    [x] Hides/shows contents of shelf
+    [ ] Resource change event hook
+[ ] Computer terminal
+[ ] Heater
+[ ] Bulk component storage (free, and store components for interiors/floorplans)
+[ ] Bulk water storage
+    [x] Mesh
+    [x] Mesh
+    [x] Shows display
+    [ ] Hides/shows contents via LEDs
+[ ] Bulk oxygen storage
+    [x] Mesh
+    [x] Shows display
+    [ ] Hides/shows contents of tank
+[ ] Battery
+    [ ] Mesh
+    [ ] Shows display
+    [ ] Hides/shows contents of shelf
+[ ] Kitchen table and chairs
+    [x] Mesh
+    [x] Eat all kinds of meals
+    [ ] Hide meals when not available
+v2
+[ ] Recreation (couches)
+[ ] Recreation (large tv)
+[ ] Map table
+v3
+[ ] Lab (geology) //most important!
+[ ] Lab (biology)
+[ ] Lab (chemistry)
+[ ] Engineering Workbench
+[ ] Medical (something with radiation?)
+
+
+Efficiency and Power Usage:
+Electrolysis of Water:
+Maximum theoretical efficiency 100%: 39.4 kilowatt-hours per kilogram of hydrogen, 12,749 joules per litre (and half as much Oxygen product)
+Alkaline catalysts: 43-67% efficient. call it 50%
+PEM catalysts: 65 - 70%; call it 70%
+additional electrical efficiency when paired with thermal input - maybe 15%?
+this is interesting when paired with sabatier reactor which releases heat
+
+Sabatier only requires large electrical power on cold start
+
+Integrate Sabatier/RWGS: 
+An optimized IMISPPS is projected to produce 1 kg/day of O2:CH4 propellant and have a mass of 50 kg with a methane purity of 98+% while consuming 700 W of electrical power.
+Read More: http://ascelibrary.org/doi/10.1061/%28ASCE%29AS.1943-5525.0000201
+
+MMRTG: 
+4.8kg of fissionable PuO2 , 110We, 9 MJ (2.5kWh) a day
+PuO2 is something like $10k a gram
+14 year service life
+Total assembly weighs 45kg
+
+TOPAZ:
+12 kg of UO2, 5 kWe
+3 year service life
+Total assembly weighs 320 kg
+
+SNAP-10A:
+12 kg of UO2, 500 We, 30 kWt
+1 year service life
+Total assembly weighs 950 kg
+
+SAFE: 
+? kg of UN, 100 kWe, 400 kWt
+Total assembly weighs 512 kg
+
+ASRG:
+1.2kg of PuO2, 130 We
+Efficiency: 26%
+14 year service life
+Total assembly weighs 32kg
+
+MHW-RTG:
+4.5kg of Pu-238, 157 We, 2.4kWt
+power halves every 88 years
+Total assembly weighs 38 kg
+
+Solar Panels:
+284 W insolation maximum, 1.8 kWh maximum
+triple junction ga-arsenide: 1.3 m2, generating 140w peak for 4h, or 2.1 MJ (.58 kWh) a day, or .9kWh
+1m2 peak of 108 W, .69 kWh
+efficiency around 38%
+
+single crystal: 22% efficiency
+1m2 peak of 63 W, .4 kWh
+
+polycrystalline: 16%
+1m2 peak of 45 W, .29 kWh
+
+amorphous: 14%
+1m2 peak of 40 W, .25 kWh
+
+X * .38 = .58
+X = .58 / .38
