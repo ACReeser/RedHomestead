@@ -2,6 +2,17 @@
 using System.Collections;
 using System;
 
+namespace RedHomestead
+{
+    public static class Constants
+    {
+        public const float KilogramsOxygenPerHour = 0.0972f;
+        public const float CaloriesPerDay = 2400;
+        public const float LitersOfWaterPerDay = 3f;
+    }
+}
+
+
 [Serializable]
 public abstract class SurvivalResource
 {
@@ -82,17 +93,21 @@ public class SurvivalTimer : MonoBehaviour {
 
     public SingleSurvivalResource Oxygen = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = .1f //100f / 60f * 4f * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = RedHomestead.Constants.KilogramsOxygenPerHour / 60 * SunOrbit.GameSecondsPerMartianMinute, //100f / 60f * 4f * SunOrbit.GameSecondsPerMartianMinute,
+        MaximumAmount = RedHomestead.Constants.KilogramsOxygenPerHour * 4f,
+        CurrentAmount = RedHomestead.Constants.KilogramsOxygenPerHour * 4f
     };
     public SingleSurvivalResource Water = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = .1f //100f / 60f * 8f * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = RedHomestead.Constants.LitersOfWaterPerDay / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute, //100f / 60f * 8f * SunOrbit.GameSecondsPerMartianMinute,
+        MaximumAmount = RedHomestead.Constants.LitersOfWaterPerDay / 2,
+        CurrentAmount = RedHomestead.Constants.LitersOfWaterPerDay / 2
     };
     public SingleSurvivalResource Food = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = 2400f / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
-        MaximumAmount = 2400,
-        CurrentAmount = 2400
+        ConsumptionPerSecond = RedHomestead.Constants.CaloriesPerDay / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
+        MaximumAmount = RedHomestead.Constants.CaloriesPerDay,
+        CurrentAmount = RedHomestead.Constants.CaloriesPerDay
     };
     public DoubleSurvivalResource Power = new DoubleSurvivalResource()
     {
