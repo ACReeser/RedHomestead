@@ -19,7 +19,15 @@ public abstract class SurvivalResource
     public float CurrentAmount = 100f;
     public float MaximumAmount = 100f;
     public float ConsumptionPerSecond = .1f;
+    public int HoursLeftHint
+    {
+        get
+        {
+            int hours = (int)Math.Ceiling(CurrentAmount / (ConsumptionPerSecond * 60));
 
+            return hours > 2 ? -1 : hours;
+        }
+    }
     public abstract void Consume();
 
     public abstract void ResetToMaximum();
@@ -30,18 +38,18 @@ public class SingleSurvivalResource : SurvivalResource
     public override void Consume()
     {
         CurrentAmount -= Time.deltaTime * ConsumptionPerSecond;
-        this.UpdateUI(CurrentAmount / MaximumAmount);
+        this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
     }
 
     public override void ResetToMaximum()
     {
         CurrentAmount = MaximumAmount;
-        this.UpdateUI(1f);
+        this.UpdateUI(1f, -1);
     }
     /// <summary>
     /// external call to UI code, float parameter is percentage of resource, 0-1f
     /// </summary>
-    internal Action<float> UpdateUI;
+    internal Action<float, int> UpdateUI;
 
     internal void Increment(float amount)
     {
@@ -52,7 +60,7 @@ public class SingleSurvivalResource : SurvivalResource
         else if (CurrentAmount < 0)
             CurrentAmount = 0f;
 
-        this.UpdateUI(CurrentAmount / MaximumAmount);
+        this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
     }
 }
 
@@ -65,16 +73,17 @@ public class DoubleSurvivalResource : SurvivalResource
         CurrentAmount -= Time.deltaTime * ConsumptionPerSecond;
         
         if (IsOnLastBar)
-            this.UpdateUI(0f, CurrentAmount / MaximumAmount);
+            this.UpdateUI(0f, CurrentAmount / MaximumAmount, HoursLeftHint);
+
         else if (CurrentAmount <= 0f)
         {
             IsOnLastBar = true;
             CurrentAmount = MaximumAmount;
-            this.UpdateUI(CurrentAmount / MaximumAmount, 0f);
+            this.UpdateUI(CurrentAmount / MaximumAmount, 0f, HoursLeftHint);
         }
         else
         {
-            this.UpdateUI(CurrentAmount / MaximumAmount, 0f);
+            this.UpdateUI(CurrentAmount / MaximumAmount, 0f, HoursLeftHint);
         }
     }
 
@@ -82,10 +91,10 @@ public class DoubleSurvivalResource : SurvivalResource
     {
         CurrentAmount = MaximumAmount;
         IsOnLastBar = false;
-        this.UpdateUI(1f, 0f);
+        this.UpdateUI(1f, 0f, -1);
     }
 
-    internal Action<float, float> UpdateUI;
+    internal Action<float, float, int> UpdateUI;
 }
 
 public class SurvivalTimer : MonoBehaviour {
@@ -93,13 +102,13 @@ public class SurvivalTimer : MonoBehaviour {
 
     public SingleSurvivalResource Oxygen = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = RedHomestead.Constants.KilogramsOxygenPerHour / 60 * SunOrbit.GameSecondsPerMartianMinute, //100f / 60f * 4f * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = RedHomestead.Constants.KilogramsOxygenPerHour / 60 * SunOrbit.GameSecondsPerMartianMinute,
         MaximumAmount = RedHomestead.Constants.KilogramsOxygenPerHour * 4f,
         CurrentAmount = RedHomestead.Constants.KilogramsOxygenPerHour * 4f
     };
     public SingleSurvivalResource Water = new SingleSurvivalResource()
     {
-        ConsumptionPerSecond = RedHomestead.Constants.LitersOfWaterPerDay / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute, //100f / 60f * 8f * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = RedHomestead.Constants.LitersOfWaterPerDay / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
         MaximumAmount = RedHomestead.Constants.LitersOfWaterPerDay / 2,
         CurrentAmount = RedHomestead.Constants.LitersOfWaterPerDay / 2
     };
@@ -111,7 +120,7 @@ public class SurvivalTimer : MonoBehaviour {
     };
     public DoubleSurvivalResource Power = new DoubleSurvivalResource()
     {
-        ConsumptionPerSecond = .1f //100f / 60f * 12f * SunOrbit.GameSecondsPerMartianMinute,
+        ConsumptionPerSecond = .1f 
     };
 
     public bool UsingPackResources = true;
