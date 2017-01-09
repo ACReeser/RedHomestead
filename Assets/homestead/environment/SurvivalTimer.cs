@@ -10,32 +10,88 @@ namespace RedHomestead
         public const float CaloriesPerDay = 2400;
         public const float LitersOfWaterPerDay = 3f;
     }
+
+    [Serializable]
+    public struct SurvivalResourceAudio
+    {
+        public AudioClip WarningClip, CriticalClip;
+    }
+
+    public enum ConsumptionPeriod { Daily, Hourly }
 }
 
 
 [Serializable]
 public abstract class SurvivalResource
 {
+    public readonly float ConsumptionPerSecond = .1f;
+    public RedHomestead.SurvivalResourceAudio AudioClips;
     public float CurrentAmount = 100f;
     public float MaximumAmount = 100f;
-    public float ConsumptionPerSecond = .1f;
+
+    internal bool IsCritical = false;
+    internal bool IsWarning = false;
+
     public int HoursLeftHint
     {
         get
         {
-            int hours = (int)Math.Ceiling(CurrentAmount / (ConsumptionPerSecond * 60));
-
-            return hours > 2 ? -1 : hours;
+            return (int)Math.Ceiling(CurrentAmount / (ConsumptionPerSecond * 60));
         }
     }
-    public abstract void Consume();
+
+    public SurvivalResource() { }
+    public SurvivalResource(RedHomestead.ConsumptionPeriod consumes, float consumeAmountPerPeriod, float maxAmt, float? currAmt = null)
+    {
+        if (!currAmt.HasValue)
+            currAmt = maxAmt;
+
+        switch (consumes)
+        {
+            case RedHomestead.ConsumptionPeriod.Daily:
+                this.ConsumptionPerSecond = consumeAmountPerPeriod / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute;
+                break;
+            case RedHomestead.ConsumptionPeriod.Hourly:
+                this.ConsumptionPerSecond = consumeAmountPerPeriod / 60 * SunOrbit.GameSecondsPerMartianMinute;
+                break;
+        }
+
+        this.MaximumAmount = maxAmt;
+        this.CurrentAmount = currAmt.Value;
+    }
+
+    public void Consume()
+    {
+        DoConsume();
+
+        bool newCritical = HoursLeftHint <= 1;
+        bool newWarning = !newCritical && HoursLeftHint <= 2f;
+
+        if (newCritical && !this.IsCritical)
+        {
+            GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.AudioClips.CriticalClip);
+        }
+        else if (newWarning && !this.IsWarning)
+        {
+            GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.AudioClips.WarningClip);
+        }
+
+        this.IsCritical = newCritical;
+        this.IsWarning = newWarning;
+    }
+
+    protected abstract void DoConsume();
 
     public abstract void ResetToMaximum();
 }
 
+[Serializable]
 public class SingleSurvivalResource : SurvivalResource
 {
-    public override void Consume()
+    public SingleSurvivalResource() { }
+    public SingleSurvivalResource(RedHomestead.ConsumptionPeriod consumes, float consumeAmountPerPeriod, float maxAmt, float? currAmt = null): base(consumes, consumeAmountPerPeriod, maxAmt, currAmt) { }
+
+    protected override void DoConsume()
     {
         CurrentAmount -= Time.deltaTime * ConsumptionPerSecond;
         this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
@@ -44,8 +100,9 @@ public class SingleSurvivalResource : SurvivalResource
     public override void ResetToMaximum()
     {
         CurrentAmount = MaximumAmount;
-        this.UpdateUI(1f, -1);
+        this.UpdateUI(1f, HoursLeftHint);
     }
+
     /// <summary>
     /// external call to UI code, float parameter is percentage of resource, 0-1f
     /// </summary>
@@ -64,11 +121,15 @@ public class SingleSurvivalResource : SurvivalResource
     }
 }
 
+[Serializable]
 public class DoubleSurvivalResource : SurvivalResource
 {
     public bool IsOnLastBar = false;
 
-    public override void Consume()
+    public DoubleSurvivalResource() { }
+    public DoubleSurvivalResource(RedHomestead.ConsumptionPeriod consumes, float consumeAmountPerPeriod, float maxAmt, float? currAmt = null): base(consumes, consumeAmountPerPeriod, maxAmt, currAmt) { }
+
+    protected override void DoConsume()
     {
         CurrentAmount -= Time.deltaTime * ConsumptionPerSecond;
         
@@ -91,7 +152,7 @@ public class DoubleSurvivalResource : SurvivalResource
     {
         CurrentAmount = MaximumAmount;
         IsOnLastBar = false;
-        this.UpdateUI(1f, 0f, -1);
+        this.UpdateUI(1f, 0f, HoursLeftHint);
     }
 
     internal Action<float, float, int> UpdateUI;
@@ -100,32 +161,20 @@ public class DoubleSurvivalResource : SurvivalResource
 public class SurvivalTimer : MonoBehaviour {
     public static SurvivalTimer Instance;
 
-    public SingleSurvivalResource Oxygen = new SingleSurvivalResource()
-    {
-        ConsumptionPerSecond = RedHomestead.Constants.KilogramsOxygenPerHour / 60 * SunOrbit.GameSecondsPerMartianMinute,
-        MaximumAmount = RedHomestead.Constants.KilogramsOxygenPerHour * 4f,
-        CurrentAmount = RedHomestead.Constants.KilogramsOxygenPerHour * 4f
-    };
-    public SingleSurvivalResource Water = new SingleSurvivalResource()
-    {
-        ConsumptionPerSecond = RedHomestead.Constants.LitersOfWaterPerDay / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
-        MaximumAmount = RedHomestead.Constants.LitersOfWaterPerDay / 2,
-        CurrentAmount = RedHomestead.Constants.LitersOfWaterPerDay / 2
-    };
-    public SingleSurvivalResource Food = new SingleSurvivalResource()
-    {
-        ConsumptionPerSecond = RedHomestead.Constants.CaloriesPerDay / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute,
-        MaximumAmount = RedHomestead.Constants.CaloriesPerDay,
-        CurrentAmount = RedHomestead.Constants.CaloriesPerDay
-    };
-    public DoubleSurvivalResource Power = new DoubleSurvivalResource()
-    {
-        ConsumptionPerSecond = .1f 
-    };
+    public SingleSurvivalResource Oxygen =
+        new SingleSurvivalResource(RedHomestead.ConsumptionPeriod.Hourly, RedHomestead.Constants.KilogramsOxygenPerHour, RedHomestead.Constants.KilogramsOxygenPerHour * 4f);
+
+    public SingleSurvivalResource Water =
+        new SingleSurvivalResource(RedHomestead.ConsumptionPeriod.Daily, RedHomestead.Constants.LitersOfWaterPerDay, RedHomestead.Constants.LitersOfWaterPerDay / 2);
+
+    public SingleSurvivalResource Food = 
+        new SingleSurvivalResource(RedHomestead.ConsumptionPeriod.Daily, RedHomestead.Constants.CaloriesPerDay, RedHomestead.Constants.CaloriesPerDay);
+
+    public DoubleSurvivalResource Power = new DoubleSurvivalResource(RedHomestead.ConsumptionPeriod.Hourly, 1f, 6f);
 
     public bool UsingPackResources = true;
 
-	void Awake () {
+    void Awake () {
         Instance = this;
     }
 

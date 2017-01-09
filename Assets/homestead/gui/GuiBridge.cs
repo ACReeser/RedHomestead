@@ -21,6 +21,7 @@ public class GuiBridge : MonoBehaviour {
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
     public Image OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
+    public AudioSource ComputerAudioSource;
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
 
     internal Text[] ConstructionRequirementsText;
@@ -301,25 +302,28 @@ public class GuiBridge : MonoBehaviour {
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
+    private void RefreshBarWarningCriticalText(Text textElement, int hoursLeftHint)
+    {
+        textElement.enabled = hoursLeftHint < 3;
+        textElement.text = string.Format("<{0}h", hoursLeftHint);
+    }
+
     internal void RefreshOxygenBar(float percentage, int hoursLeftHint)
     {
         this.OxygenBar.fillAmount = percentage;
-        this.OxygenBarHours.enabled = hoursLeftHint >= 0;
-        this.OxygenBarHours.text = string.Format("<{0}h", hoursLeftHint);
+        this.RefreshBarWarningCriticalText(this.OxygenBarHours, hoursLeftHint);
     }
 
     internal void RefreshWaterBar(float percentage, int hoursLeftHint)
     {
         this.WaterBar.fillAmount = percentage;
-        this.WaterBarHours.enabled = hoursLeftHint >= 0;
-        this.WaterBarHours.text = string.Format("<{0}h", hoursLeftHint);
+        this.RefreshBarWarningCriticalText(this.WaterBarHours, hoursLeftHint);
     }
 
     internal void RefreshFoodBar(float percentage, int hoursLeftHint)
     {
         this.FoodBar.fillAmount = percentage;
-        this.FoodBarHours.enabled = hoursLeftHint >= 0;
-        this.FoodBarHours.text = string.Format("<{0}h", hoursLeftHint);
+        this.RefreshBarWarningCriticalText(this.FoodBarHours, hoursLeftHint);
     }
 
     internal void RefreshRadiationBar(float percentage)
@@ -332,8 +336,7 @@ public class GuiBridge : MonoBehaviour {
         this.PowerImage.enabled = (powerPercentage > 0f);
         this.HotImage.enabled = (powerPercentage <= 0f) && (heatPercentage > .5f);
         this.ColdImage.enabled = (powerPercentage <= 0f) && (heatPercentage <= .5f);
-        this.PowerImageHours.enabled = hoursLeftHint >= 0;
-        this.PowerImageHours.text = string.Format("<{0}h", hoursLeftHint);
+        this.RefreshBarWarningCriticalText(this.PowerImageHours, hoursLeftHint);
 
         if (this.PowerImage.enabled)
         {
