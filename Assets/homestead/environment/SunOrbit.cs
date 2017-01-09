@@ -6,7 +6,7 @@ public class SunOrbit : MonoBehaviour {
     public Material Skybox;
     public Light GlobalLight;
 
-    public Transform DuskAndDawnOnlyParent;
+    public Transform DuskAndDawnOnlyParent, StarsParent;
 
     internal const float MartianMinutesPerDay = (24 * 60) + 40;
     internal const float MartianSecondsPerDay = MartianMinutesPerDay * 60;
@@ -56,9 +56,10 @@ public class SunOrbit : MonoBehaviour {
         }
 
         float percentOfDay = ((CurrentHour * 60) + CurrentMinute) / MartianMinutesPerDay;
-
-        GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
         
+        GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
+        StarsParent.transform.localRotation = GlobalLight.transform.localRotation;
+
         if (CurrentHour > 12f)
         {
             GlobalLight.intensity = Mathfx.Hermite(1, 0f, percentOfDay);
