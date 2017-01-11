@@ -13,7 +13,7 @@ public class SetHeightAbove : MonoBehaviour {
 
     private void SetHeight()
     {
-        Vector3 terrainPos = GetRelativeTerrainPositionFromPos(this.transform.position, myTerrain, myTerrain.terrainData.heightmapWidth, myTerrain.terrainData.heightmapHeight);
+        //Vector3 terrainPos = GetRelativeTerrainPositionFromPos(this.transform.position, myTerrain, myTerrain.terrainData.heightmapWidth, myTerrain.terrainData.heightmapHeight);
         
         //myTerrain.terrainData.SetHeights(terrainPos.x, terrainPos.z, alphas);
     }

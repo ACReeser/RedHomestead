@@ -84,11 +84,11 @@ public abstract class SingleResourceSink : Sink
 
     public override void Equalize()
     {
-        float totalAmount; int sinkCount;
-        foreach(Sink s in SimilarAdjacentSinks)
-        {
-            ResourceContainer rc = s.Get(SinkType);
-        }
+        //float totalAmount; int sinkCount;
+        //foreach(Sink s in SimilarAdjacentSinks)
+        //{
+        //    ResourceContainer rc = s.Get(SinkType);
+        //}
 
         if (flowAmountRenderer != null)
             flowAmountRenderer.transform.localScale = new Vector3(1, Container.UtilizationPercentage, 1);

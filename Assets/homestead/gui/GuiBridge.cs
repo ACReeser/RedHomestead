@@ -200,11 +200,11 @@ public class GuiBridge : MonoBehaviour {
 
     public void RefreshPlanningUI()
     {
-        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior);
-        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Exterior && currentlySelectedGroup != ConstructionGroup.Undecided);
+        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Exterior);
+        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Exterior && currentlySelectedGroup != ConstructionGroup.Undecided);
 
-        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Interiors);
-        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.PlanningMode.Interiors && selectedFloorplanGroup != FloorplanGroup.Undecided);
+        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Interiors);
+        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Interiors && selectedFloorplanGroup != FloorplanGroup.Undecided);
     }
 
     public void SetConstructionGroup(int index)
@@ -262,15 +262,15 @@ public class GuiBridge : MonoBehaviour {
     {
         switch(PlayerInput.Instance.CurrentMode)
         {
-            case PlayerInput.PlanningMode.None:
+            case PlayerInput.InputMode.Default:
                 this.ModeText.text = "Switch to Planning";
                 this.PlacingPanel.gameObject.SetActive(false);
                 break;
-            case PlayerInput.PlanningMode.Exterior:
+            case PlayerInput.InputMode.Exterior:
                 this.ModeText.text = "Stop Planning";
                 this.SetConstructionGroup(-1);
                 break;
-            case PlayerInput.PlanningMode.Interiors:
+            case PlayerInput.InputMode.Interiors:
                 this.ModeText.text = "Stop Planning";
                 this.SetConstructionGroup(-1);
                 break;

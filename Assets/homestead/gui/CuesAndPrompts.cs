@@ -203,4 +203,14 @@ public static class Prompts {
         Description = "Place Here",
         Key = "E"
     };
+    internal static PromptInfo PostItFinishHint = new PromptInfo()
+    {
+        Description = "Stop Writing Note",
+        Key = "Esc"
+    };
+    internal static PromptInfo PostItDeleteHint = new PromptInfo()
+    {
+        Description = "Scrap Note",
+        Key = "E"
+    };
 }

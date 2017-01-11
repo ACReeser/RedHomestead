@@ -9,7 +9,7 @@ using RedHomestead.Construction;
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
 public class PlayerInput : MonoBehaviour {
-    public enum PlanningMode { None, Exterior, Interiors }
+    public enum InputMode { Default, Exterior, Interiors, PostIt, Sleep }
 
     private const float InteractionRaycastDistance = 10f;
     public static PlayerInput Instance;
@@ -27,7 +27,7 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// The prefab for a construction zone
     /// </summary>
-    public Transform ConstructionZonePrefab,
+    public Transform ConstructionZonePrefab, PostItNotePrefab,
         //one of these for each module does NOT scale
         SmallSolarFarmPrefab,
         SmallGasTankPrefab,
@@ -44,8 +44,8 @@ public class PlayerInput : MonoBehaviour {
     public Material translucentPlanningMat;
 
     internal Module PlannedModule = Module.Unspecified;
-    internal PlanningMode CurrentMode = PlanningMode.None;
-    internal PlanningMode AvailableMode = PlanningMode.Exterior;
+    internal InputMode CurrentMode = InputMode.Default;
+    internal InputMode AvailableMode = InputMode.Exterior;
 
     /// <summary>
     /// Visualization == transparent preview of module to be built
@@ -56,9 +56,9 @@ public class PlayerInput : MonoBehaviour {
     internal void SetPressure(bool pressurized)
     {
         if (pressurized)
-            PlayerInput.Instance.AvailableMode = PlayerInput.PlanningMode.Interiors;
+            PlayerInput.Instance.AvailableMode = PlayerInput.InputMode.Interiors;
         else
-            PlayerInput.Instance.AvailableMode = PlayerInput.PlanningMode.Exterior;
+            PlayerInput.Instance.AvailableMode = PlayerInput.InputMode.Exterior;
 
         FPSController.PlaceBootprints = !pressurized;
     }
@@ -110,37 +110,38 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        if (Input.GetKeyUp(KeyCode.Tab))
+        if (CurrentMode != InputMode.PostIt)
         {
-            CycleMode();
-        }
+            if (Input.GetKeyUp(KeyCode.Tab))
+            {
+                CycleMode();
+            }
 
-        if (Input.GetKeyUp(KeyCode.F))
-        {
-            Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
-        }
+            if (Input.GetKeyUp(KeyCode.F))
+            {
+                Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
+            }
 
-        if (Input.GetKeyUp(KeyCode.F1))
-        {
-            GuiBridge.Instance.ToggleHelpMenu();
-        }
+            if (Input.GetKeyUp(KeyCode.F1))
+            {
+                GuiBridge.Instance.ToggleHelpMenu();
+            }
 
-        if (Input.GetKeyUp(KeyCode.V))
-        {
-            FlowCamera.enabled = !FlowCamera.enabled;
-        }
+            if (Input.GetKeyUp(KeyCode.V))
+            {
+                FlowCamera.enabled = !FlowCamera.enabled;
+            }
 
-        if (Input.GetKeyUp(KeyCode.Comma))
-        {
-            Time.timeScale /= 4f;
-            Time.timeScale = Mathf.Max(1f, Time.timeScale);
-            print("slooww");
-        }
-        else if (Input.GetKeyUp(KeyCode.Period))
-        {
-            Time.timeScale *= 2f;
-            Time.timeScale = Mathf.Min(32f, Time.timeScale);
-            print("fstr");
+            if (Input.GetKeyUp(KeyCode.Comma))
+            {
+                Time.timeScale /= 4f;
+                Time.timeScale = Mathf.Max(1f, Time.timeScale);
+            }
+            else if (Input.GetKeyUp(KeyCode.Period))
+            {
+                Time.timeScale *= 2f;
+                Time.timeScale = Mathf.Min(32f, Time.timeScale);
+            }
         }
 
 
@@ -149,14 +150,17 @@ public class PlayerInput : MonoBehaviour {
 
         switch (CurrentMode)
         {
-            case PlanningMode.None:
+            case InputMode.Default:
                 HandleDefaultInput(ref newPrompt, doInteract);
                 break;
-            case PlanningMode.Exterior:
+            case InputMode.Exterior:
                 HandleExteriorPlanningInput(ref newPrompt, doInteract);
                 break;
-            case PlanningMode.Interiors:
+            case InputMode.Interiors:
                 HandleInteriorPlanningInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.PostIt:
+                HandlePostItInput(ref newPrompt, doInteract);
                 break;
         }
 
@@ -172,6 +176,76 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandlePostItInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            this.PostItText = null;
+            this.CurrentMode = InputMode.Default;
+            FPSController.SuspendInput = false;
+
+            RefreshCurrentMode();
+        }
+        else if (this.PostItText != null)
+        {
+            if (Input.GetKeyUp(KeyCode.Backspace))
+            {
+                //I think text setter appends a newline at the end
+                //so you don't delete just len -1, you go back an extra char
+                int newLength = PostItText.text.Length - 2;
+                //if you're on a newline, go ahead and delete it too
+                //or you will be always stuck on this newline
+                if (PostItText.text[newLength] == '\n')
+                    newLength--;
+
+                this.PostItText.text = WordWrap(this.PostItText, this.PostItText.text.Substring(0, newLength));
+            }
+            else if (Input.GetKeyUp(KeyCode.Return))
+            {
+                this.PostItText.text = WordWrap(this.PostItText, this.PostItText.text + '\n');
+            }
+            else if (Input.anyKeyDown)
+            {
+                this.PostItText.text = WordWrap(this.PostItText, this.PostItText.text + (Input.inputString ?? "" ).ToLower());
+            }
+
+            newPrompt = Prompts.PostItFinishHint;
+        }
+    }
+
+    //calculated with PermanentMarker font, character size .2, line spacing .6
+    private string WordWrap(TextMesh t, string allText)
+    {
+        string[] lines = allText.Split('\n');
+        string lastLine = "";
+        bool addLastLine = false;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            print(lines[i].Replace('\n', '*'));
+            if (lines[i].Length > 13)
+            {
+                char orphan = lines[i][lines[i].Length - 1];
+                lines[i] = lines[i].Substring(0, lines[i].Length - 1); 
+                if (i + 1 < lines.Length)
+                {
+                    lines[i + 1] = orphan + lines[i + 1];
+                }
+                else if (lines.Length < 7)
+                {
+                    lastLine += orphan;
+                    addLastLine = true;
+                }
+            }
+        }
+
+        string result = string.Join("\n", lines);
+
+        if (addLastLine)
+            result += '\n' + lastLine;
+
+        return result;
+    }
 
     private void HandleInteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
@@ -213,7 +287,7 @@ public class PlayerInput : MonoBehaviour {
         }
 
         RaycastHit hitInfo;
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
         {
             if (hitInfo.collider != null)
             {
@@ -287,6 +361,7 @@ public class PlayerInput : MonoBehaviour {
     private static Quaternion eastQ = Quaternion.Euler(0, 90, 0);
     private static Quaternion southQ = Quaternion.Euler(0, 180, 0);
     private static Quaternion westQ = Quaternion.Euler(0, 270, 0);
+    private TextMesh PostItText;
 
     private Quaternion CurrentPlanningDirectionToQuaternion()
     {
@@ -342,7 +417,7 @@ public class PlayerInput : MonoBehaviour {
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
         RaycastHit hitInfo;
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask("interaction"), QueryTriggerInteraction.Collide))
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
         {
             if (hitInfo.collider != null)
             {
@@ -543,6 +618,17 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnFoodHover(doInteract, Prompts.MealShakeEatHint, MealType.Shake);
                 }
+                else if (hitInfo.collider.CompareTag("postit"))
+                {
+                    if (doInteract)
+                    {
+                        GameObject.Destroy(hitInfo.collider.gameObject);
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.PostItDeleteHint;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("airbagpayload"))
                 {
                     if (doInteract)
@@ -589,6 +675,25 @@ public class PlayerInput : MonoBehaviour {
             {
                 newPrompt = Prompts.LadderOffHint;
             }
+        }
+
+        if (!doInteract && Input.GetKeyUp(KeyCode.P))
+        {
+            PlacePostIt();
+        }
+    }
+
+    private void PlacePostIt()
+    {
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "Default", "interaction"))
+        {
+            Transform t = GameObject.Instantiate(PostItNotePrefab, hitInfo.point, Quaternion.LookRotation(hitInfo.normal)) as Transform;
+            t.SetParent(hitInfo.collider.transform);
+            this.PostItText = t.GetChild(0).GetChild(0).GetComponent<TextMesh>();
+            this.CurrentMode = InputMode.PostIt;
+            FPSController.SuspendInput = true;
+            this.RefreshCurrentMode();
         }
     }
 
@@ -663,13 +768,13 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        if (Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
         {
             if (hitInfo.collider != null)
             {
                 if (hitInfo.collider.CompareTag("terrain"))
                 {
-                    if (CurrentMode == PlanningMode.Exterior && PlannedModuleVisualization != null)
+                    if (CurrentMode == InputMode.Exterior && PlannedModuleVisualization != null)
                     {
                         //TODO: raycast 3 more times (other 3 corners)
                         //then take the average height between them
@@ -688,6 +793,11 @@ public class PlayerInput : MonoBehaviour {
                 }
             }
         }
+    }
+
+    private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)
+    {
+        return Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask(layerNames), triggerInteraction);
     }
 
     private PromptInfo OnFoodHover(bool doInteract, PromptInfo eatHint, MealType mealType)
@@ -882,31 +992,36 @@ public class PlayerInput : MonoBehaviour {
     private void CycleMode()
     {
         //todo: fix lazy code
-        if (CurrentMode == PlanningMode.None)
+        if (CurrentMode == InputMode.Default)
             CurrentMode = this.AvailableMode;
         else
-            CurrentMode = PlanningMode.None;
+            CurrentMode = InputMode.Default;
 
-        switch(CurrentMode)
+        RefreshCurrentMode();
+    }
+
+    private void RefreshCurrentMode()
+    {
+        switch (CurrentMode)
         {
-            case PlanningMode.Exterior:
+            case InputMode.Exterior:
                 FlowCamera.cullingMask = 1 << 9;
                 Cursor.lockState = CursorLockMode.Confined;
                 Cursor.visible = true;
                 break;
-            case PlanningMode.None:
+            case InputMode.Default:
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 DisableAndForgetFloorplanVisualization();
                 DisableAndForgetModuleVisualization();
                 this.PlannedModule = Module.Unspecified;
                 break;
-            case PlanningMode.Interiors:
+            case InputMode.Interiors:
                 FlowCamera.cullingMask = 1 << 10;
                 break;
         }
 
-        FlowCamera.enabled = (CurrentMode != PlanningMode.None);
+        FlowCamera.enabled = (CurrentMode != InputMode.Default);
         GuiBridge.Instance.RefreshMode();
     }
 
