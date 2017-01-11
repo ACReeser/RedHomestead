@@ -110,6 +110,17 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
+#if UNITY_EDITOR
+        if (Input.GetKeyUp(KeyCode.Comma))
+        {
+            SunOrbit.Instance.SlowDown();
+        }
+        else if (Input.GetKeyUp(KeyCode.Period))
+        {
+            SunOrbit.Instance.SpeedUp();
+        }
+#endif
+
         if (CurrentMode != InputMode.PostIt)
         {
             if (Input.GetKeyUp(KeyCode.Tab))
@@ -334,6 +345,9 @@ public class PlayerInput : MonoBehaviour {
                 GuiBridge.Instance.selectedFloorplanSubgroup = (FloorplanSubGroup)nextSubGroup;
             }
         }
+
+        GuiBridge.Instance.PlacingPanel.gameObject.SetActive(true);
+        GuiBridge.Instance.PlacingText.text = GuiBridge.Instance.selectedFloorplanMaterial + " " + GuiBridge.Instance.selectedFloorplanSubgroup + " " + GuiBridge.Instance.selectedFloorplanGroup;
     }
 
     private void CycleGroup()
@@ -630,6 +644,17 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         newPrompt = Prompts.PostItDeleteHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("evacharger"))
+                {
+                    if (Input.GetKey(KeyCode.E))
+                    {
+                        SurvivalTimer.Instance.Power.Resupply(7.5f * Time.deltaTime);
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.EVAChargeHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("airbagpayload"))

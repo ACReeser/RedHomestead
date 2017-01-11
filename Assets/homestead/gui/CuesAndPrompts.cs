@@ -223,4 +223,9 @@ public static class Prompts {
         Description = "Wake Up",
         Key = "E"
     };
+    internal static PromptInfo EVAChargeHint = new PromptInfo()
+    {
+        Description = "Charge",
+        Key = "E"
+    };
 }

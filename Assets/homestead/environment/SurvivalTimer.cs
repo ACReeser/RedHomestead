@@ -83,6 +83,7 @@ public abstract class SurvivalResource
     protected abstract void DoConsume();
 
     public abstract void ResetToMaximum();
+    public abstract void Resupply(float additionalSecondsOfSupply);
 }
 
 [Serializable]
@@ -117,6 +118,12 @@ public class SingleSurvivalResource : SurvivalResource
         else if (CurrentAmount < 0)
             CurrentAmount = 0f;
 
+        this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
+    }
+
+    public override void Resupply(float additionalSecondsOfSupply)
+    {
+        CurrentAmount = Mathf.Min(MaximumAmount, CurrentAmount + (additionalSecondsOfSupply * this.ConsumptionPerSecond));
         this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
     }
 }
@@ -156,6 +163,12 @@ public class DoubleSurvivalResource : SurvivalResource
     }
 
     internal Action<float, float, int> UpdateUI;
+
+    public override void Resupply(float additionalSecondsOfSupply)
+    {
+        CurrentAmount = Mathf.Min(MaximumAmount, CurrentAmount + (additionalSecondsOfSupply * this.ConsumptionPerSecond));
+        this.UpdateUI(CurrentAmount / MaximumAmount, 0f, HoursLeftHint);
+    }
 }
 
 public class SurvivalTimer : MonoBehaviour {
