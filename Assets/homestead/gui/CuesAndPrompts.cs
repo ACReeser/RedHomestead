@@ -213,4 +213,14 @@ public static class Prompts {
         Description = "Scrap Note",
         Key = "E"
     };
+    internal static PromptInfo BedEnterHint = new PromptInfo()
+    {
+        Description = "Sleep",
+        Key = "E"
+    };
+    internal static PromptInfo BedExitHint = new PromptInfo()
+    {
+        Description = "Wake Up",
+        Key = "E"
+    };
 }

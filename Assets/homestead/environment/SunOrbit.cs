@@ -16,13 +16,21 @@ public class SunOrbit : MonoBehaviour {
     internal const float MartianSecondsPerGameSecond = MartianSecondsPerDay / GameSecondsPerGameDay;
 
     internal const float GameSecondsPerMartianMinute = GameSecondsPerGameDay / MartianSecondsPerDay * 60;
-
+    private const int MaximumSpeedTiers = 6;
+    private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;
     internal float CurrentHour = 9;
     internal float CurrentMinute = 0;
+
+    internal static SunOrbit Instance;
+    void Awake()
+    {
+        Instance = this;
+    }
 
 	// Use this for initialization
 	void Start () {
         GetClockTextMeshes();
+        UpdateClockSpeedArrows();
 	}
 
     private void GetClockTextMeshes()
@@ -36,7 +44,7 @@ public class SunOrbit : MonoBehaviour {
     }
 
     private bool dawnMilestone, duskMilestone, dawnEnded, duskEnded;
-    private TextMesh[] Clocks;
+    internal TextMesh[] Clocks;
 
     // Update is called once per frame
     void Update () {
@@ -141,5 +149,30 @@ public class SunOrbit : MonoBehaviour {
                 emission.enabled = isStart;
             }
         }
+    }
+
+    //barry allen would be proud
+    private int speedTier = 1;
+    internal void SpeedUp()
+    {
+        Time.timeScale = Mathf.Min(MaximumTimeScale, Time.timeScale * 2f);
+        speedTier = Math.Min(MaximumSpeedTiers, speedTier + 1);
+        UpdateClockSpeedArrows();
+    }
+
+    private void UpdateClockSpeedArrows()
+    {
+        string arrows = new string('►', speedTier - 1);
+        foreach(var t in this.Clocks)
+        {
+            t.transform.GetChild(0).GetComponent<TextMesh>().text = arrows; 
+        }
+    }
+
+    internal void SlowDown()
+    {
+        Time.timeScale = Mathf.Max(1f, Time.timeScale / 2);
+        speedTier = Math.Max(1, speedTier - 1);
+        UpdateClockSpeedArrows();
     }
 }

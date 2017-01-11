@@ -131,17 +131,6 @@ public class PlayerInput : MonoBehaviour {
             {
                 FlowCamera.enabled = !FlowCamera.enabled;
             }
-
-            if (Input.GetKeyUp(KeyCode.Comma))
-            {
-                Time.timeScale /= 4f;
-                Time.timeScale = Mathf.Max(1f, Time.timeScale);
-            }
-            else if (Input.GetKeyUp(KeyCode.Period))
-            {
-                Time.timeScale *= 2f;
-                Time.timeScale = Mathf.Min(32f, Time.timeScale);
-            }
         }
 
 
@@ -161,6 +150,9 @@ public class PlayerInput : MonoBehaviour {
                 break;
             case InputMode.PostIt:
                 HandlePostItInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Sleep:
+                HandleSleepInput(ref newPrompt, doInteract);
                 break;
         }
 
@@ -618,6 +610,17 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnFoodHover(doInteract, Prompts.MealShakeEatHint, MealType.Shake);
                 }
+                else if (hitInfo.collider.CompareTag("bed"))
+                {
+                    if (doInteract)
+                    {
+                        BeginSleep(hitInfo.collider.transform.GetChild(0), hitInfo.collider.transform.GetChild(1));
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.BedEnterHint;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("postit"))
                 {
                     if (doInteract)
@@ -1021,7 +1024,7 @@ public class PlayerInput : MonoBehaviour {
                 break;
         }
 
-        FlowCamera.enabled = (CurrentMode != InputMode.Default);
+        FlowCamera.enabled = (CurrentMode == InputMode.Interiors) || (CurrentMode == InputMode.Exterior);
         GuiBridge.Instance.RefreshMode();
     }
 
@@ -1197,4 +1200,113 @@ public class PlayerInput : MonoBehaviour {
         FPSController.enabled = false;
         this.enabled = false;
     }
+
+    #region sleep mechanic
+    private SleepLerpContext sleerpCtx;
+
+    private struct SleepLerpContext
+    {
+        public Vector3 FromPosition, ToPosition;
+        public Quaternion FromRotation, ToRotation;
+        public float Duration;
+        private float Time;
+        public Transform SleepExit;
+        public bool Done;
+
+        public void StandUp()
+        {
+            FromPosition = ToPosition;
+            FromRotation = ToRotation;
+            ToPosition = SleepExit.position;
+            ToRotation = SleepExit.rotation;
+            Done = false;
+            Time = 0f;
+        }
+
+        public void Tick(Transform body, Transform camera)
+        {
+            this.Time += UnityEngine.Time.deltaTime;
+            if (this.Time > this.Duration)
+            {
+                body.position = ToPosition;
+                camera.rotation = ToRotation;
+                Done = true;
+            }
+            else
+            {
+                body.position = Vector3.Lerp(FromPosition, ToPosition, Time / Duration);
+                camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
+            }
+        }
+    }
+
+    private void BeginSleep(Transform enterTranform, Transform exitTransform)
+    {
+        sleerpCtx = new SleepLerpContext()
+        {
+            FromPosition = FPSController.transform.position,
+            ToPosition = enterTranform.position,
+            FromRotation = Camera.main.transform.rotation,
+            ToRotation = enterTranform.rotation,
+            Duration = .5f,
+            SleepExit = exitTransform
+        };
+
+        ToggleSleep(true);
+
+        StartCoroutine(BedLerp());
+    }
+
+    private void ExitSleep()
+    {
+        ToggleSleep(false);
+    }
+
+    private void ToggleSleep(bool isAsleep)
+    {
+        this.CurrentMode = isAsleep ? InputMode.Sleep : InputMode.Default;
+        FPSController.SuspendInput = isAsleep;
+        this.RefreshCurrentMode();
+    }
+
+    private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Comma))
+        {
+            SunOrbit.Instance.SlowDown();
+        }
+        else if (Input.GetKeyUp(KeyCode.Period))
+        {
+            SunOrbit.Instance.SpeedUp();
+        }
+
+        if (doInteract)
+        {
+            sleerpCtx.StandUp(); //reset ctx
+            StartCoroutine(BedLerp(true));
+        }
+        else
+        {
+            newPrompt = Prompts.BedExitHint;
+        }
+    }
+
+    private IEnumerator BedLerp(bool exitStateOnDone = false)
+    {
+        while (!sleerpCtx.Done)
+        {
+            sleerpCtx.Tick(FPSController.transform, Camera.main.transform);
+
+            //every time we modify the camera via script we need to do this call
+            FPSController.InitializeMouseLook();
+
+            yield return null;
+        }
+
+        if (exitStateOnDone)
+        {
+            ExitSleep();
+        }
+    }
+    #endregion
 }
