@@ -1,6 +1,6 @@
-# RedHomestead
-Mars colony building game
+![RED HOMESTEAD](http://imgur.com/GM70xtd.png)
 
+Mars colony building game
 #Contributing
 **_IMPORTANT_**
 
