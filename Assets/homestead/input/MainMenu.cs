@@ -2,6 +2,8 @@
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
@@ -10,22 +12,43 @@ public class MainMenu : MonoBehaviour {
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
+    private const string DefaultRadioButtonName = "default";
+    private const string RadioTagPostfix = "radio";
     private float transitionTime = 0f;
     private int smallLogoW, smallLogoH;
     private Vector3 mainMenuCameraPosition;
     private LerpContext cameraLerp;
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+    {
         smallLogoW = UnityEngine.Screen.width / 2;
         smallLogoH = UnityEngine.Screen.height / 2;
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    private void InitializeRadioButtons()
+    {
+        foreach (NewGameRadioButtons r in Enum.GetValues(typeof(NewGameRadioButtons)))
+        {
+            foreach (GameObject g in GameObject.FindGameObjectsWithTag(r.ToString() + RadioTagPostfix))
+            {
+                if (g.name == DefaultRadioButtonName)
+                {
+                    this.activeRadioTransform[r] = g.transform;
+                }
+                else
+                {
+                    g.transform.GetChild(0).gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    // Update is called once per frame
+    void Update () {
 	
 	}
 
@@ -53,7 +76,12 @@ public class MainMenu : MonoBehaviour {
         MainMenuButtons.gameObject.SetActive(onMainMenu);
 
         if (!onMainMenu)
+        {
             NewGamePanels.gameObject.SetActive(true);
+
+            //unselect all radio buttons
+            InitializeRadioButtons();
+        }
     }
 
     public void SettingsClick(bool state)
@@ -129,6 +157,34 @@ public class MainMenu : MonoBehaviour {
     public void LaunchGame()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
+    private enum NewGameRadioButtons { financing, training }
+
+    private Dictionary<NewGameRadioButtons, Transform> activeRadioTransform = new Dictionary<NewGameRadioButtons, Transform>();
+
+    private int currentlySelectedTrainingIndex;
+    public void SelectTraining(int trainingIndex)
+    {
+        OnRadioSelect(NewGameRadioButtons.training);
+    }
+
+    public void SelectFinancing(int financeIndex)
+    {
+        OnRadioSelect(NewGameRadioButtons.financing);
+    }
+
+    private void OnRadioSelect(NewGameRadioButtons radioGroup)
+    {
+        var thisT = EventSystem.current.currentSelectedGameObject.transform;
+
+        if (this.activeRadioTransform.ContainsKey(radioGroup))
+        {
+            this.activeRadioTransform[radioGroup].GetChild(0).gameObject.SetActive(false);
+        }
+        this.activeRadioTransform[radioGroup] = thisT;
+
+        thisT.GetChild(0).gameObject.SetActive(true);
     }
 
     private struct LerpContext
