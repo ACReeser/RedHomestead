@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
-    public RectTransform MainMenuButtons, NewGamePanels;
+    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
     public Transform OrbitCameraAnchor;
 
     private bool transitioning, onMainMenu = true;
@@ -29,6 +29,8 @@ public class MainMenu : MonoBehaviour {
         NewGamePanels.gameObject.SetActive(false);
     }
 
+    private GameObject[] defaultQuickstartClones = new GameObject[2];
+
     private void InitializeRadioButtons()
     {
         foreach (NewGameRadioButtons r in Enum.GetValues(typeof(NewGameRadioButtons)))
@@ -38,6 +40,14 @@ public class MainMenu : MonoBehaviour {
                 if (g.name == DefaultRadioButtonName)
                 {
                     this.activeRadioTransform[r] = g.transform;
+                    if (defaultQuickstartClones[(int)r] == null)
+                    {
+                        defaultQuickstartClones[(int)r] = GameObject.Instantiate(g);
+                        defaultQuickstartClones[(int)r].transform.SetParent(QuickstartTrainingEquipmentRow);
+                        //remove the checkbox
+                        defaultQuickstartClones[(int)r].transform.GetChild(0).gameObject.SetActive(false);
+                        defaultQuickstartClones[(int)r].tag = "Untagged";
+                    }
                 }
                 else
                 {
@@ -81,6 +91,8 @@ public class MainMenu : MonoBehaviour {
 
             //unselect all radio buttons
             InitializeRadioButtons();
+
+            QuickstartBackdrop.gameObject.SetActive(true);
         }
     }
 
@@ -159,6 +171,17 @@ public class MainMenu : MonoBehaviour {
         UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
+    public void StartQuickstart()
+    {
+#warning todo: make sure quickstart at quickstart equipment/training
+        LaunchGame();
+    }
+
+    public void StartCustomize()
+    {
+        QuickstartBackdrop.gameObject.SetActive(false);
+    }
+
     private enum NewGameRadioButtons { financing, training }
 
     private Dictionary<NewGameRadioButtons, Transform> activeRadioTransform = new Dictionary<NewGameRadioButtons, Transform>();
@@ -177,6 +200,9 @@ public class MainMenu : MonoBehaviour {
     private void OnRadioSelect(NewGameRadioButtons radioGroup)
     {
         var thisT = EventSystem.current.currentSelectedGameObject.transform;
+
+        if (thisT.CompareTag("Untagged"))
+            return;
 
         if (this.activeRadioTransform.ContainsKey(radioGroup))
         {

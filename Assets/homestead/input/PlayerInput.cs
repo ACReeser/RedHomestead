@@ -102,7 +102,7 @@ public class PlayerInput : MonoBehaviour {
         {
             if (playerIsOnFoot)
             {
-                Application.Quit();
+                UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
             }
             else if (playerInVehicle)
             {
