@@ -6,12 +6,12 @@ using System.Collections.Generic;
 public class Airlock : MonoBehaviour {
     public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
     public static Dictionary<Transform, Airlock> DoorToAirlock = new Dictionary<Transform, Airlock>();
-
-    public Material LightOff, GreenLight, RedLight;
-    public MeshRenderer PressurizedLight, DepressurizedLight;
+    
     public Collider TerrainCollider;
+    public Color OnColor, OffColor;
+    public SpriteRenderer PressurizedSprite, DepressurizedSprite;
 
-    public Transform OuterDoor, InnerDoor;
+    public Transform OuterDoor, InnerDoor, PressurizeButton, DepressurizeButton;
     public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
     private Animator OuterAnimator, InnerAnimator;
@@ -32,8 +32,8 @@ public class Airlock : MonoBehaviour {
         OuterDoor.name = IsPressurized ? LockedDoorName : ClosedDoorName;
         InnerDoor.name = IsPressurized ? ClosedDoorName : LockedDoorName;
 
-        PressurizedLight.material = IsPressurized ? GreenLight : LightOff;
-        DepressurizedLight.material = IsPressurized ? LightOff : RedLight;
+        PressurizedSprite.color = IsPressurized ? OffColor : OnColor;
+        DepressurizedSprite.color = IsPressurized ? OnColor : OffColor;
     }
 
     public void Pressurize()
@@ -47,6 +47,7 @@ public class Airlock : MonoBehaviour {
             OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
             PlayerInput.Instance.SetPressure(true);
+            RefreshSealedButtons();
         }
     }
 
@@ -70,6 +71,7 @@ public class Airlock : MonoBehaviour {
             OutsideVisuals.ToggleAllParticles(true);
             SetPlayerTerrainCollision(false);
             PlayerInput.Instance.SetPressure(false);
+            RefreshSealedButtons();
         }
     }
 
@@ -97,6 +99,22 @@ public class Airlock : MonoBehaviour {
                 OuterAnimator.SetBool("open", !OuterDoorSealed);
             }
         }
+
+        RefreshSealedButtons();
+    }
+
+    private void RefreshSealedButtons()
+    {
+        SetButtonColorsAndTag(PressurizeButton, OuterDoorSealed && InnerDoorSealed && !IsPressurized);
+        SetButtonColorsAndTag(DepressurizeButton, OuterDoorSealed && InnerDoorSealed && IsPressurized);
+    }
+
+    private void SetButtonColorsAndTag(Transform t, bool isButtonEnabled)
+    {
+        Color newColor = isButtonEnabled ? new Color(255f, 255f, 255f, 1f) : new Color(255f, 255f, 255f, .25f);
+        t.GetChild(0).GetComponent<SpriteRenderer>().color = newColor;
+        t.GetChild(1).GetComponent<TextMesh>().color = newColor;
+        t.tag = isButtonEnabled ? "button" : "Untagged";
     }
 
     public static void ToggleDoor(Transform t)
