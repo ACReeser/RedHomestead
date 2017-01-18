@@ -143,7 +143,7 @@ public class CustomFPSController : MonoBehaviour
                     m_IsOnLadder = m_PostTransitionLadderState;
                 }
             }
-            else
+            else if (transform.position.y < maximumLadderY)
             {
                 m_CharacterController.Move(new Vector3(0, m_Input.y, 0) * Time.fixedDeltaTime * speed / 2f);
             }
@@ -324,7 +324,7 @@ public class CustomFPSController : MonoBehaviour
         body.AddForceAtPosition(m_CharacterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
     }
 
-    public void GetOnLadder(Vector3 ladderPos)
+    public void GetOnLadder(Vector3 ladderPos, float maxLadderY)
     {
         if (m_IsOnLadder || m_IsTransitioningLadder)
         {
@@ -337,6 +337,7 @@ public class CustomFPSController : MonoBehaviour
             this.moveToLadderPos = new Vector3(ladderPos.x, this.transform.position.y, ladderPos.z);
             this.m_PostTransitionLadderState = true;
             this.m_IsTransitioningLadder = true;
+            this.maximumLadderY = maxLadderY;
             this.ladderMoveTime = 0;
         }
     }
@@ -363,6 +364,7 @@ public class CustomFPSController : MonoBehaviour
     private int lastBootIndex = -1;
 
     public bool PlaceBootprints = true;
+    private float maximumLadderY;
 
     private void PlaceBootprint()
     {

@@ -580,7 +580,7 @@ public class PlayerInput : MonoBehaviour {
                             FPSController.GetOffLadder();
                         else
                         {
-                            FPSController.GetOnLadder(hitInfo.collider.transform.GetChild(0).position);
+                            FPSController.GetOnLadder(hitInfo.collider.transform.GetChild(0).position, hitInfo.collider.transform.GetChild(1).position.y);
                         }
                     }
                     else
@@ -1254,13 +1254,13 @@ public class PlayerInput : MonoBehaviour {
             if (this.Time > this.Duration)
             {
                 body.position = ToPosition;
-                camera.rotation = ToRotation;
+                //camera.rotation = ToRotation;
                 Done = true;
             }
             else
             {
                 body.position = Vector3.Lerp(FromPosition, ToPosition, Time / Duration);
-                camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
+                //camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
             }
         }
     }
