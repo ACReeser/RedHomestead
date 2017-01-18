@@ -25,12 +25,6 @@ public class Sabatier : MultipleResourceConverter
         }
     }
 
-
-    void Start()
-    {
-
-    }
-
     public override void Convert()
     {
         if (HasPower && IsFullyConnected)

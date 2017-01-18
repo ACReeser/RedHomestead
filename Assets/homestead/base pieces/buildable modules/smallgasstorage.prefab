@@ -422,8 +422,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 0}
-  SinkType: 0
+  SinkType: -1
   flowAmountRenderer: {fileID: 21283906}
+  StartAmount: 0
+  Capacity: 10
   MeshFilter: {fileID: 3367382}
   CompoundUVSet:
   - {fileID: 4300002, guid: dd3fe2d26a8637c488604b24f75c208c, type: 3}
@@ -503,6 +505,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: SinkType
       value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: Capacity
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

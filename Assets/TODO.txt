@@ -29,9 +29,7 @@ Basic Habitat resources and update
 [x] Habitat food prep with prep/eat interaction
 [x] Habitat ladder to upper section
 [x] Habitat bed
-    [ ] BUG: lerp to stand up doesn't start from _current_ rotated view
-	[ ] Show speed up/slow down via prompts
-[ ] Habitat windows
+[x] Habitat windows
 
 Demo Goals:
 [ ] Start with hydrogen storage tanks + basic habitat
@@ -88,6 +86,7 @@ Hobbit Holes
     [x] Snap Rotation
 	[ ] Resource requirements
 [ ] Functional Interior Design
+[ ] Bulk component storage (free, and store components for interiors/floorplans)
 [ ] Habitat resources
 
 Exploration
@@ -130,7 +129,7 @@ Custom habitat
 
 Mini habitat
 [ ] Selectable in new game start
-[ ] Mini modules inside
+[ ] Mini modules inside habitat (see v2)
 
 Exterior Modules:
 [ ] Nuclear reactor
@@ -172,6 +171,10 @@ v1
     [x] Sleep dialog (either for time, or start/stop)
 	[x] Fast time during sleep
 	[ ] Wake when life threatening conditions
+	[ ] Speed scale prompts
+	[ ] Sleep til morning button
+	[ ] Dim the lights
+    [ ] BUG: lerp to stand up doesn't start from _current_ rotated view
 [ ] Kitchen food prep
     [x] Mesh
     [x] Make shake
@@ -184,15 +187,12 @@ v1
     [x] Shows display
     [x] Hides/shows contents of shelf
     [ ] Resource change event hook
-    [ ] Ability to eat from shelf
 [ ] Computer terminal
-[ ] Heater
-[ ] Bulk component storage (free, and store components for interiors/floorplans)
 [ ] Bulk water storage
     [x] Mesh
     [x] Mesh
     [x] Shows display
-    [ ] Hides/shows contents via LEDs
+    [ ] Hides/shows contents of tanks
 [ ] Bulk oxygen storage
     [x] Mesh
     [x] Shows display
@@ -200,7 +200,7 @@ v1
 [ ] Battery
     [ ] Mesh
     [ ] Shows display
-    [ ] Hides/shows contents of shelf
+    [ ] Hides/shows contents via LEDs
 [ ] Kitchen table and chairs
     [x] Mesh
     [x] Eat all kinds of meals
@@ -215,12 +215,16 @@ v2
 [ ] Workshop
     [ ] Exoskeleton
     [ ] Faster oxygen/power recharge rate
+Mini hab
+[ ] Ability to eat from shelf
+[ ] Condensed air/water panel
 v3
 [ ] Lab (geology) //most important!
 [ ] Lab (biology)
 [ ] Lab (chemistry)
 [ ] Scientific funding method
 [ ] Medical (something with radiation?)
+[ ] Heater //heating is...complicated
 
 
 Efficiency and Power Usage:

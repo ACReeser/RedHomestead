@@ -34,6 +34,12 @@ public abstract class ModuleGameplay : MonoBehaviour
         OnAdjacentChanged();
     }
 
+    void Start()
+    {
+        this.OnStart();
+    }
+
+    protected virtual void OnStart() { }
     public abstract void OnAdjacentChanged();
     public abstract void Tick();
 }
@@ -46,9 +52,8 @@ public abstract class PowerSupply : ModuleGameplay
 public abstract class Sink : ModuleGameplay
 {
     protected List<Sink> SimilarAdjacentSinks = new List<Sink>();
-
-    // Use this for initialization
-    void Start()
+    
+    protected override void OnStart()
     {
         FlowManager.Instance.Sinks.Add(this);
     }
@@ -72,6 +77,7 @@ public abstract class SingleResourceSink : Sink
     public Compound SinkType;
     public ResourceContainer Container;
     public SpriteRenderer flowAmountRenderer;
+    public float StartAmount, Capacity;
 
     public override ResourceContainer Get(Compound c)
     {
@@ -90,7 +96,7 @@ public abstract class SingleResourceSink : Sink
         //    ResourceContainer rc = s.Get(SinkType);
         //}
 
-        if (flowAmountRenderer != null)
+        if (flowAmountRenderer != null && Container != null)
             flowAmountRenderer.transform.localScale = new Vector3(1, Container.UtilizationPercentage, 1);
     }
 
@@ -113,9 +119,7 @@ public abstract class SingleResourceSink : Sink
 
 public abstract class Converter : ModuleGameplay
 {
-
-    // Use this for initialization
-    void Start()
+    protected override void OnStart()
     {
         FlowManager.Instance.Converters.Add(this);
     }

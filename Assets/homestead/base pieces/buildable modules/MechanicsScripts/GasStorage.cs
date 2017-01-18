@@ -16,13 +16,15 @@ public class GasStorage : SingleResourceSink {
     }
 
     // Use this for initialization
-    void Start()
+    protected override void OnStart()
     {
+        base.OnStart();
         SyncMeshToCompoundType();
     }
 
     private void SyncMeshToCompoundType()
     {
+        print(this.SinkType);
         RefreshMeshToCompound();
         SetValveTagsToCompound(this.transform);
     }
@@ -64,6 +66,11 @@ public class GasStorage : SingleResourceSink {
         {
             this.SinkType = c;
             SyncMeshToCompoundType();
+            this.Container = new ResourceContainer(StartAmount)
+            {
+                TotalCapacity = Capacity,
+                SimpleCompoundType = this.SinkType
+            };
         }
         else
         {
