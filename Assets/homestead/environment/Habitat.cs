@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Construction;
+using RedHomestead.Simulation;
 
 public class Habitat : MonoBehaviour //: MultipleResourceConverter
 {

@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Rovers;
 using RedHomestead.Construction;
+using RedHomestead.Buildings;
+using RedHomestead.Simulation;
 
 /// <summary>
 /// Responsible for raycasting, modes, and gameplay input

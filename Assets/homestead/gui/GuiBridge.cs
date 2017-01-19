@@ -4,8 +4,8 @@ using UnityEngine.UI;
 using System;
 using RedHomestead.Construction;
 using System.Collections.Generic;
-
-
+using RedHomestead.Buildings;
+using RedHomestead.Simulation;
 
 /// <summary>
 /// Scripting interface for all GUI elements

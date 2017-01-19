@@ -3,10 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using RedHomestead.Construction;
+using RedHomestead.Simulation;
 
 public abstract class ModuleGameplay : MonoBehaviour
 {
     public SpriteRenderer PowerIndicator;
+
+    public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
+    public LocalCompoundHistory CompoundHistory = new LocalCompoundHistory();
 
     private bool _hasPower;
     public bool HasPower {
@@ -154,7 +158,6 @@ public abstract class MultipleResourceConverter : Converter
     public Dictionary<Compound, ResourceContainer> Holding = new Dictionary<Compound, ResourceContainer>();
 }
 
-public enum Compound { Unspecified = -1, Hydrogen, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water }
 
 public class ResourceContainer
 {

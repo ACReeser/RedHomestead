@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Simulation;
 
 public class Pipe : MonoBehaviour {
     public MeshFilter MeshFilter, NorthVis, SouthVis;

@@ -2,6 +2,7 @@
 using System.Collections;
 using RedHomestead.Construction;
 using System;
+using RedHomestead.Simulation;
 
 public class MealResourceInterface : HabitatResourceInterface {
     public Transform RationMeals, OrganicMeals, ShakeMeals, ShakePowders;

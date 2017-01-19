@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Simulation;
 
 public class Sabatier : MultipleResourceConverter
 {
@@ -39,7 +40,9 @@ public class Sabatier : MultipleResourceConverter
     private void PushMethaneAndWater()
     {
         MethaneOut.Get(Compound.Methane).Push(MethanePerTick);
+        CompoundHistory.Consume(Compound.Methane, MethanePerTick);
         WaterOut.Get(Compound.Water).Push(WaterPerTick);
+        CompoundHistory.Consume(Compound.Water, MethanePerTick);
     }
 
     private float hydrogenBuffer = 0f;
@@ -47,7 +50,9 @@ public class Sabatier : MultipleResourceConverter
     {
         if (HydrogenSource != null)
         {
-            hydrogenBuffer += HydrogenSource.Get(Compound.Hydrogen).Pull(HydrogenPerTick);
+            float newHydrogen = HydrogenSource.Get(Compound.Hydrogen).Pull(HydrogenPerTick);
+            hydrogenBuffer += newHydrogen;
+            CompoundHistory.Consume(Compound.Hydrogen, newHydrogen);
 
             if (hydrogenBuffer >= HydrogenPerTick)
                 return true;

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Construction;
+using RedHomestead.Simulation;
 
 public class ResourceComponent : MonoBehaviour {
     public Resource ResourceType;

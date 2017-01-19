@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using RedHomestead.Simulation;
 
 public class GasStorage : SingleResourceSink {
     public MeshFilter MeshFilter;

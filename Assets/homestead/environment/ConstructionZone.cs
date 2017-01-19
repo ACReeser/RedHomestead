@@ -4,35 +4,11 @@ using RedHomestead.Construction;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using RedHomestead.Simulation;
+using RedHomestead.Buildings;
 
 namespace RedHomestead.Construction
 {
-    public enum Module { Unspecified = -1,
-        SolarPanelSmall,
-        SabatierReactor,
-        SmallGasTank,
-        LargeGasTank,
-        Workspace,
-        Habitat,
-        OreExtractor,
-        Smelter,
-        SmallWaterTank,
-        Splitter
-    }
-    //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
-    public enum Resource { Steel, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal }
-
-    public class ResourceEntry
-    {
-        public Resource Type { get; set; }
-        public int Count { get; set; }
-
-        public ResourceEntry(int count, Resource type)
-        {
-            this.Type = type;
-            this.Count = count;
-        }
-    }
 
     public static class Requirements
     {
