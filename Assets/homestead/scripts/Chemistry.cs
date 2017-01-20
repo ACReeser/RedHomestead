@@ -56,6 +56,14 @@ namespace RedHomestead.Simulation
         {
             _history[type].Consumed += additionalAmount;
         }
+
+        public Tracker this[T key]
+        {
+            get
+            {
+                return _history[key];
+            }
+        }
     }
 
     public class LocalEnergyHistory : History<Energy>

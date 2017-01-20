@@ -46,6 +46,8 @@ public abstract class ModuleGameplay : MonoBehaviour
     protected virtual void OnStart() { }
     public abstract void OnAdjacentChanged();
     public abstract void Tick();
+
+    public abstract void Report();
 }
 
 public abstract class PowerSupply : ModuleGameplay

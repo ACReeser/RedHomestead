@@ -37,4 +37,9 @@ public class SolarPanel : PowerSupply
     {
         
     }
+
+    public override void Report()
+    {
+        throw new NotImplementedException();
+    }
 }

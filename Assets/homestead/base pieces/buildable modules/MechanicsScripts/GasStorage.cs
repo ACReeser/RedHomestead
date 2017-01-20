@@ -78,4 +78,9 @@ public class GasStorage : SingleResourceSink {
             print("cannot set this storage to compound type "+c.ToString());
         }
     }
+
+    public override void Report()
+    {
+        throw new NotImplementedException();
+    }
 }

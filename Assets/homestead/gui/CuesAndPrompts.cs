@@ -228,4 +228,9 @@ public static class Prompts {
         Description = "Charge",
         Key = "E"
     };
+    internal static PromptInfo ReportHint = new PromptInfo()
+    {
+        Description = "Industrial Report",
+        Key = "E"
+    };
 }

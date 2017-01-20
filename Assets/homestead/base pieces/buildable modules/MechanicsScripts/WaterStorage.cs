@@ -14,6 +14,11 @@ public class WaterStorage : SingleResourceSink {
         }
     }
 
+    public override void Report()
+    {
+        throw new NotImplementedException();
+    }
+
     // Use this for initialization
     protected override void OnStart()
     {

@@ -81,4 +81,9 @@ public class Sabatier : MultipleResourceConverter
             WaterOut = s;
         }
     }
+
+    public override void Report()
+    {
+        print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", CompoundHistory[Compound.Hydrogen].Consumed, CompoundHistory[Compound.Water].Produced, CompoundHistory[Compound.Methane].Produced, HasPower));
+    }
 }

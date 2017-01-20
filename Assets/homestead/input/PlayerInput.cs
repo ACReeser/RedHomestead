@@ -659,6 +659,17 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.EVAChargeHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("network"))
+                {
+                    if (Input.GetKey(KeyCode.E))
+                    {
+                        GetReport(hitInfo.collider.transform.root.GetComponent<ModuleGameplay>());
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.ReportHint;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("airbagpayload"))
                 {
                     if (doInteract)
@@ -710,6 +721,14 @@ public class PlayerInput : MonoBehaviour {
         if (!doInteract && Input.GetKeyUp(KeyCode.P))
         {
             PlacePostIt();
+        }
+    }
+
+    private void GetReport(ModuleGameplay moduleGameplay)
+    {
+        if (moduleGameplay != null)
+        {
+            moduleGameplay.Report();
         }
     }
 
