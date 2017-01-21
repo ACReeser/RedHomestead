@@ -29,6 +29,7 @@ public abstract class ModuleGameplay : MonoBehaviour
     public void LinkToModule(ModuleGameplay adjacent)
     {
         Adjacent.Add(adjacent);
+        print("linked");
         OnAdjacentChanged();
     }
 
@@ -145,6 +146,7 @@ public abstract class Converter : ModuleGameplay
         {
             if (m is Sink)
             {
+                print("sinkConnected");
                 OnSinkConnected(m as Sink);
             }
         }

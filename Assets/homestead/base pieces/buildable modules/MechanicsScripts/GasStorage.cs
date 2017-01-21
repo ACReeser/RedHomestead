@@ -20,12 +20,15 @@ public class GasStorage : SingleResourceSink {
     protected override void OnStart()
     {
         base.OnStart();
-        SyncMeshToCompoundType();
+
+        if (this.SinkType != Compound.Unspecified)
+            _SpecifyCompound(this.SinkType);
+        else
+            SyncMeshToCompoundType();
     }
 
     private void SyncMeshToCompoundType()
     {
-        print(this.SinkType);
         RefreshMeshToCompound();
         SetValveTagsToCompound(this.transform);
     }
@@ -58,20 +61,20 @@ public class GasStorage : SingleResourceSink {
     // Update is called once per frame
     void Update()
     {
+        float percentage = 0f;
+        if (Container != null)
+        {
+            percentage = Container.UtilizationPercentage;
+        }
 
+        flowAmountRenderer.transform.localScale = new Vector3(1, percentage, 1);
     }
 
     public void SpecifyCompound(Compound c)
     {
         if (this.SinkType == Compound.Unspecified)
         {
-            this.SinkType = c;
-            SyncMeshToCompoundType();
-            this.Container = new ResourceContainer(StartAmount)
-            {
-                TotalCapacity = Capacity,
-                SimpleCompoundType = this.SinkType
-            };
+            _SpecifyCompound(c);
         }
         else
         {
@@ -79,8 +82,37 @@ public class GasStorage : SingleResourceSink {
         }
     }
 
+    private void _SpecifyCompound(Compound c)
+    {
+        this.SinkType = c;
+        SyncMeshToCompoundType();
+
+        if (c == Compound.Unspecified)
+        {
+            this.Container = null;
+        }
+        else
+        {
+            this.Container = new ResourceContainer(StartAmount)
+            {
+                TotalCapacity = Capacity,
+                SimpleCompoundType = this.SinkType
+            };
+        }
+    }
+
     public override void Report()
     {
         throw new NotImplementedException();
+    }
+
+    public override void OnAdjacentChanged()
+    {
+        base.OnAdjacentChanged();
+
+        if (Adjacent.Count == 0 && Container != null && Container.UtilizationPercentage <= 0f)
+        {
+            _SpecifyCompound(Compound.Unspecified);
+        }
     }
 }

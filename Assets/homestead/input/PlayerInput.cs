@@ -1009,6 +1009,9 @@ public class PlayerInput : MonoBehaviour {
 
         zone.InitializeRequirements();
 
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
+            zone.Complete();
+
         CycleMode();
     }
 
@@ -1131,21 +1134,30 @@ public class PlayerInput : MonoBehaviour {
     {
         Transform newPipe = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
 
+        if (selectedCompound == Compound.Unspecified)
+            selectedCompound = GetCompoundFromValve(collider);
+
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            g1.LinkToModule(g2);
-            g2.LinkToModule(g1);
             if (g2 is GasStorage)
             {
                 (g2 as GasStorage).SpecifyCompound(selectedCompound);
             }
+            else if (g1 is GasStorage)
+            {
+                (g1 as GasStorage).SpecifyCompound(selectedCompound);
+            }
+            g1.LinkToModule(g2);
+            g2.LinkToModule(g1);
         }
 
         Pipe pipeScript = newPipe.GetComponent<Pipe>();
         pipeScript.PipeType = selectedCompound;
         pipeScript.from = selectedGasValve.transform;
         pipeScript.to = collider.transform;
+
+        selectedCompound = Compound.Unspecified;
     }
 
     private void PlacePowerPlug(Collider collider)

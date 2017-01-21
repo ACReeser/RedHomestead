@@ -10,19 +10,21 @@ public class FlowManager : MonoBehaviour
     public List<Sink> Sinks = new List<Sink>();
     public List<Converter> Converters = new List<Converter>();
 
-    void Awake () {
+    void Awake() {
         Instance = this;    
 	}	
 	
-	void FixedUpdate () {
+	void FixedUpdate() {
 	    foreach(Converter c in Converters)
         {
-            c.Tick();
+            if (c.isActiveAndEnabled)
+                c.Tick();
         }
 
         foreach (Sink s in Sinks)
         {
-            s.Tick();
+            if (s.isActiveAndEnabled)
+                s.Tick();
         }
     }
 
