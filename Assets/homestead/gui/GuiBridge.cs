@@ -7,6 +7,53 @@ using System.Collections.Generic;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 
+[Serializable]
+public struct ReportIORow
+{
+    public Text Name, Now, AllTime;
+
+    internal void Bind(ReportIOData data)
+    {
+        Name.text = data.Name;
+        Now.text = data.Now;
+        AllTime.text = data.AllTime;
+    }
+
+    internal ReportIORow CreateNew(RectTransform parentTable)
+    {
+        ReportIORow result = new ReportIORow()
+        {
+            Name = GameObject.Instantiate(Name.gameObject).GetComponent<Text>(),
+            Now = GameObject.Instantiate(Now.gameObject).GetComponent<Text>(),
+            AllTime = GameObject.Instantiate(AllTime.gameObject).GetComponent<Text>(),
+        };
+        result.Name.transform.parent = parentTable;
+        result.Now.transform.parent = parentTable;
+        result.AllTime.transform.parent = parentTable;
+
+        return result;
+    }
+
+    internal void Destroy()
+    {
+        GameObject.Destroy(Name.gameObject);
+        GameObject.Destroy(Now.gameObject);
+        GameObject.Destroy(AllTime.gameObject);
+    }
+}
+
+internal struct ReportIOData
+{
+    public string Name, Now, AllTime;
+}
+
+[Serializable]
+public struct ReportFields
+{
+    public Text ModuleName, EnergyEfficiency, ReactionEfficiency, ReactionEquation;
+    public RectTransform InputRow, OutputRow;
+}
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -15,7 +62,7 @@ using RedHomestead.Simulation;
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel;
+    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel;
     public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
@@ -23,6 +70,8 @@ public class GuiBridge : MonoBehaviour {
     public Image OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
     public AudioSource ComputerAudioSource;
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
+    public ReportIORow ReportRowTemplate;
+    public ReportFields ReportTexts;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -46,6 +95,7 @@ public class GuiBridge : MonoBehaviour {
         PowerBarHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
         FoodBarHours = FoodBar.transform.GetChild(1).GetComponent<Text>();
         PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
+        ToggleReportMenu(false);
     }
 
     private void TogglePromptPanel(bool isActive)
@@ -90,6 +140,11 @@ public class GuiBridge : MonoBehaviour {
                 this.ConstructionRequirements[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    internal void ToggleReportMenu(bool isOn)
+    {
+        ReportPanel.gameObject.SetActive(isOn);
     }
 
     internal void HideConstruction()
@@ -381,4 +436,43 @@ public class GuiBridge : MonoBehaviour {
             }
         }
     };
+
+    private ReportIORow[] currentIORows;
+    internal void WriteReport(string moduleName, string reaction, string energyEfficiency, string reactionEfficiency, 
+        ReportIOData? power, ReportIOData[] inputs, ReportIOData[] outputs)
+    {
+        ToggleReportMenu(true);
+
+        ReportTexts.ModuleName.text = moduleName;
+        ReportTexts.EnergyEfficiency.text = "Energy Efficiency: "+energyEfficiency;
+        ReportTexts.ReactionEfficiency.text = "Reaction Efficiency: "+reactionEfficiency;
+        ReportTexts.ReactionEquation.text = reaction;
+        
+        if (currentIORows != null)
+        {
+            foreach(ReportIORow row in currentIORows)
+            {
+                row.Destroy();
+            }
+            currentIORows = null;
+        }
+
+        if (power.HasValue)
+        {
+            ReportRowTemplate.Bind(power.Value);
+        }
+
+        currentIORows = new ReportIORow[inputs.Length + outputs.Length];
+        int i;
+        for (i = 0; i < inputs.Length; i++)
+        {
+            currentIORows[i] = ReportRowTemplate.CreateNew(ReportTexts.InputRow);
+            currentIORows[i].Bind(inputs[i]);
+        }
+        for (int j = 0; j < outputs.Length; j++)
+        {
+            currentIORows[i+j] = ReportRowTemplate.CreateNew(ReportTexts.OutputRow);
+            currentIORows[i+j].Bind(outputs[j]);
+        }
+    }
 }

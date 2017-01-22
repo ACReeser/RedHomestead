@@ -75,6 +75,7 @@ public class PlayerInput : MonoBehaviour {
     private List<Transform> createdPipes = new List<Transform>();
     private List<Transform> createdPowerlines = new List<Transform>();
     private bool playerIsOnFoot = true;
+    private bool reportMenuOpen = false;
 
     private bool playerInVehicle
     {
@@ -111,6 +112,9 @@ public class PlayerInput : MonoBehaviour {
                 ToggleVehicle(null);
             }
         }
+
+        if (reportMenuOpen && Input.GetKeyUp(KeyCode.R))
+            ToggleReport(null);
 
 #if UNITY_EDITOR
         if (Input.GetKeyUp(KeyCode.Comma))
@@ -663,7 +667,14 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (Input.GetKey(KeyCode.E))
                     {
-                        GetReport(hitInfo.collider.transform.root.GetComponent<ModuleGameplay>());
+                        if (reportMenuOpen)
+                        {
+                            ToggleReport(null);
+                        }
+                        else
+                        {
+                            ToggleReport(hitInfo.collider.transform.root.GetComponent<ModuleGameplay>());
+                        }
                     }
                     else
                     {
@@ -724,11 +735,17 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private void GetReport(ModuleGameplay moduleGameplay)
+    private void ToggleReport(ModuleGameplay moduleGameplay)
     {
-        if (moduleGameplay != null)
+        if (moduleGameplay == null)
+        {
+            GuiBridge.Instance.ToggleReportMenu(false);
+            reportMenuOpen = false;
+        }
+        else
         {
             moduleGameplay.Report();
+            reportMenuOpen = true;
         }
     }
 

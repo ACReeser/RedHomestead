@@ -89,6 +89,22 @@ public class Sabatier : MultipleResourceConverter
 
     public override void Report()
     {
-        print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", CompoundHistory[Compound.Hydrogen].Consumed, CompoundHistory[Compound.Water].Produced, CompoundHistory[Compound.Methane].Produced, HasPower));
+        //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", CompoundHistory[Compound.Hydrogen].Consumed, CompoundHistory[Compound.Water].Produced, CompoundHistory[Compound.Methane].Produced, HasPower));
+        GuiBridge.Instance.WriteReport(
+            "Sabatier Reactor",
+            "1 kWh + 1kg H2 => 1kg CH4 + 1kg H2O",
+            "100%",
+            "100%",
+            new ReportIOData() { Name = "Power", Now = EnergyHistory[Energy.Electrical].Consumed + " kWh", AllTime = EnergyHistory[Energy.Electrical].Consumed + " kWh" },
+            new ReportIOData[]
+            {
+                new ReportIOData() { Name = "Hydrogen", Now = CompoundHistory[Compound.Hydrogen].Consumed + " kg", AllTime = CompoundHistory[Compound.Hydrogen].Consumed + " kg" }
+            },
+            new ReportIOData[]
+            {
+                new ReportIOData() { Name = "Methane", Now = CompoundHistory[Compound.Methane].Produced + " kg", AllTime = CompoundHistory[Compound.Methane].Produced + " kg" },
+                new ReportIOData() { Name = "Water", Now = CompoundHistory[Compound.Water].Produced + " kg", AllTime = CompoundHistory[Compound.Water].Produced + " kg" }
+            }
+            );
     }
 }
