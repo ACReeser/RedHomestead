@@ -10,13 +10,16 @@ using RedHomestead.Simulation;
 [Serializable]
 public struct ReportIORow
 {
-    public Text Name, Now, AllTime;
+    public Text Name, Flow, Amount;
+    internal Image IsConnected;
 
-    internal void Bind(ReportIOData data)
+    internal void Bind(ReportIOData data, Sprite connected, Sprite disconnected)
     {
         Name.text = data.Name;
-        Now.text = data.Now;
-        AllTime.text = data.AllTime;
+        Flow.text = data.Flow;
+        Amount.text = data.Amount;
+        IsConnected = Name.transform.GetChild(0).GetComponent<Image>();
+        IsConnected.sprite = data.Connected ? connected : disconnected;
     }
 
     internal ReportIORow CreateNew(RectTransform parentTable)
@@ -24,12 +27,12 @@ public struct ReportIORow
         ReportIORow result = new ReportIORow()
         {
             Name = GameObject.Instantiate(Name.gameObject).GetComponent<Text>(),
-            Now = GameObject.Instantiate(Now.gameObject).GetComponent<Text>(),
-            AllTime = GameObject.Instantiate(AllTime.gameObject).GetComponent<Text>(),
+            Flow = GameObject.Instantiate(Flow.gameObject).GetComponent<Text>(),
+            Amount = GameObject.Instantiate(Amount.gameObject).GetComponent<Text>(),
         };
         result.Name.transform.parent = parentTable;
-        result.Now.transform.parent = parentTable;
-        result.AllTime.transform.parent = parentTable;
+        result.Flow.transform.parent = parentTable;
+        result.Amount.transform.parent = parentTable;
 
         return result;
     }
@@ -37,14 +40,15 @@ public struct ReportIORow
     internal void Destroy()
     {
         GameObject.Destroy(Name.gameObject);
-        GameObject.Destroy(Now.gameObject);
-        GameObject.Destroy(AllTime.gameObject);
+        GameObject.Destroy(Flow.gameObject);
+        GameObject.Destroy(Amount.gameObject);
     }
 }
 
 internal struct ReportIOData
 {
-    public string Name, Now, AllTime;
+    public string Name, Flow, Amount;
+    public bool Connected;
 }
 
 [Serializable]
@@ -52,6 +56,7 @@ public struct ReportFields
 {
     public Text ModuleName, EnergyEfficiency, ReactionEfficiency, ReactionEquation;
     public RectTransform InputRow, OutputRow;
+    public Sprite Connected, Disconnected;
 }
 
 /// <summary>
@@ -459,7 +464,7 @@ public class GuiBridge : MonoBehaviour {
 
         if (power.HasValue)
         {
-            ReportRowTemplate.Bind(power.Value);
+            ReportRowTemplate.Bind(power.Value, ReportTexts.Connected, ReportTexts.Disconnected);
         }
 
         currentIORows = new ReportIORow[inputs.Length + outputs.Length];
@@ -467,12 +472,12 @@ public class GuiBridge : MonoBehaviour {
         for (i = 0; i < inputs.Length; i++)
         {
             currentIORows[i] = ReportRowTemplate.CreateNew(ReportTexts.InputRow);
-            currentIORows[i].Bind(inputs[i]);
+            currentIORows[i].Bind(inputs[i], ReportTexts.Connected, ReportTexts.Disconnected);
         }
         for (int j = 0; j < outputs.Length; j++)
         {
             currentIORows[i+j] = ReportRowTemplate.CreateNew(ReportTexts.OutputRow);
-            currentIORows[i+j].Bind(outputs[j]);
+            currentIORows[i+j].Bind(outputs[j], ReportTexts.Connected, ReportTexts.Disconnected);
         }
     }
 }

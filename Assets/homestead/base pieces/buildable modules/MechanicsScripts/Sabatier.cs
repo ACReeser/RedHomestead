@@ -89,21 +89,24 @@ public class Sabatier : MultipleResourceConverter
 
     public override void Report()
     {
+        //todo: report v3: flow is "0/1 kWh" etc, flow and amount update over time
+        //using some sort of UpdateReport() call (which reuses built text boxes)
+        //todo: report v4: each row gets a graph over time that shows effciency or flow
         //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", CompoundHistory[Compound.Hydrogen].Consumed, CompoundHistory[Compound.Water].Produced, CompoundHistory[Compound.Methane].Produced, HasPower));
         GuiBridge.Instance.WriteReport(
             "Sabatier Reactor",
             "1 kWh + 1kg H2 => 1kg CH4 + 1kg H2O",
             "100%",
             "100%",
-            new ReportIOData() { Name = "Power", Now = EnergyHistory[Energy.Electrical].Consumed + " kWh", AllTime = EnergyHistory[Energy.Electrical].Consumed + " kWh" },
+            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Hydrogen", Now = CompoundHistory[Compound.Hydrogen].Consumed + " kg", AllTime = CompoundHistory[Compound.Hydrogen].Consumed + " kg" }
+                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Methane", Now = CompoundHistory[Compound.Methane].Produced + " kg", AllTime = CompoundHistory[Compound.Methane].Produced + " kg" },
-                new ReportIOData() { Name = "Water", Now = CompoundHistory[Compound.Water].Produced + " kg", AllTime = CompoundHistory[Compound.Water].Produced + " kg" }
+                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Methane].Produced + " kg", Connected = MethaneOut != null },
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Water].Produced + " kg", Connected = WaterOut != null }
             }
             );
     }
