@@ -14,6 +14,7 @@ public class PlayerInput : MonoBehaviour {
     public enum InputMode { Default, Exterior, Interiors, PostIt, Sleep }
 
     private const float InteractionRaycastDistance = 10f;
+    private const float EVAChargerPerSecond = 7.5f;
     public static PlayerInput Instance;
 
     public Camera FlowCamera;
@@ -656,7 +657,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (Input.GetKey(KeyCode.E))
                     {
-                        SurvivalTimer.Instance.Power.Resupply(7.5f * Time.deltaTime);
+                        SurvivalTimer.Instance.Power.Resupply(EVAChargerPerSecond * Time.deltaTime);
                     }
                     else
                     {
