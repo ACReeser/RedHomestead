@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using RedHomestead.Construction;
 using RedHomestead.Simulation;
 
-public class Habitat : MonoBehaviour //: MultipleResourceConverter
+public class Habitat : MultipleResourceConverter
 {
-
     private float _CurrentPowerRequirements = 1f;
 
     //public override float WattRequirementsPerTick
@@ -22,6 +21,14 @@ public class Habitat : MonoBehaviour //: MultipleResourceConverter
     internal Dictionary<Resource, SumContainer> ComplexResourceTotals = new Dictionary<Resource, SumContainer>();
 
     private Sink WaterSink, OxygenSink;
+
+    public override float WattRequirementsPerTick
+    {
+        get
+        {
+            return _CurrentPowerRequirements;
+        }
+    }
 
     //public override void ClearHooks()
     //{
@@ -130,5 +137,20 @@ public class Habitat : MonoBehaviour //: MultipleResourceConverter
             ComplexResourceTotals[Resource.MealPowder].Pull(1f);
             ComplexResourceTotals[Resource.MealShake].Push(1f);
         }
+    }
+
+    public override void Convert()
+    {
+        
+    }
+
+    public override void ClearHooks()
+    {
+        
+    }
+
+    public override void Report()
+    {
+        
     }
 }

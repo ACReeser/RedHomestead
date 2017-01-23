@@ -15,6 +15,7 @@ public class Airlock : MonoBehaviour {
     public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
     private Animator OuterAnimator, InnerAnimator;
+    private Habitat attachedHab;
 
 	// Use this for initialization
 	void Start () {
@@ -25,6 +26,7 @@ public class Airlock : MonoBehaviour {
         InnerAnimator = InnerDoor.parent.GetComponent<Animator>();
 
         RefreshDoorAndLightState();
+        attachedHab = transform.root.GetComponent<Habitat>();
 	}
 
     private void RefreshDoorAndLightState()
@@ -43,7 +45,7 @@ public class Airlock : MonoBehaviour {
         {
             IsPressurized = true;
             RefreshDoorAndLightState();
-            SurvivalTimer.Instance.UseHabitatResources();
+            SurvivalTimer.Instance.EnterHabitat(attachedHab);
             OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
             PlayerInput.Instance.SetPressure(true);
@@ -67,7 +69,7 @@ public class Airlock : MonoBehaviour {
         {
             IsPressurized = false;
             RefreshDoorAndLightState();
-            SurvivalTimer.Instance.UsePackResources();
+            SurvivalTimer.Instance.BeginEVA();
             OutsideVisuals.ToggleAllParticles(true);
             SetPlayerTerrainCollision(false);
             PlayerInput.Instance.SetPressure(false);

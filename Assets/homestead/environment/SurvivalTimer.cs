@@ -185,7 +185,14 @@ public class SurvivalTimer : MonoBehaviour {
 
     public DoubleSurvivalResource Power = new DoubleSurvivalResource(RedHomestead.ConsumptionPeriod.Hourly, 1f, 6f);
 
-    public bool UsingPackResources = true;
+    public bool UsingPackResources
+    {
+        get
+        {
+            return CurrentHabitat == null;
+        }
+    }
+    private Habitat CurrentHabitat = null;
 
     void Awake () {
         Instance = this;
@@ -245,12 +252,12 @@ public class SurvivalTimer : MonoBehaviour {
         this.enabled = false;
     }
 
-    internal void UseHabitatResources()
+    internal void EnterHabitat(Habitat hab)
     {
         Oxygen.ResetToMaximum();
         Power.ResetToMaximum();
 
-        UsingPackResources = false;
+        CurrentHabitat = hab;
     }
 
     internal void FillWater()
@@ -263,9 +270,9 @@ public class SurvivalTimer : MonoBehaviour {
         Food.Increment(meal.GetCalories());
     }
 
-    internal void UsePackResources()
+    internal void BeginEVA()
     {
-        UsingPackResources = true;
+        CurrentHabitat = null;
     }
 }
 
