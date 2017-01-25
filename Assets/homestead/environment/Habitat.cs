@@ -69,9 +69,8 @@ public class Habitat : Converter
         if (s.HasContainerFor(Compound.Oxygen))
             OxygenSinks.Add(s);
     }
-
-    // Use this for initialization
-    void Start () {
+    
+    void Awake () {
         //todo: move this to individual Stuff adds
         BasicResourceTotals[Compound.Water] = new SumContainer(10f)
         {

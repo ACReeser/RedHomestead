@@ -14,6 +14,8 @@ public abstract class HabitatModule : MonoBehaviour {
             UnityEngine.Debug.LogWarning("Hab resource interface not linked!");
             this.enabled = false;
         }
+
+        OnStart();
     }
 
     protected abstract void OnStart();

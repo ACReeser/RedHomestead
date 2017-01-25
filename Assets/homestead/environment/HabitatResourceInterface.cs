@@ -24,7 +24,7 @@ public class HabitatResourceInterface : HabitatModule
         useResource = (DisplayCompound == Compound.Unspecified);
 	}
 	
-	void FixedUpdate ()
+	void FixedUpdate()
     {
         DoDisplay();
     }
