@@ -156,13 +156,6 @@ public abstract class Converter : ModuleGameplay
     public virtual void OnSinkConnected(Sink s) { }
 }
 
-
-public abstract class MultipleResourceConverter : Converter
-{
-    public Dictionary<Compound, ResourceContainer> Holding = new Dictionary<Compound, ResourceContainer>();
-}
-
-
 public class ResourceContainer
 {
     public ResourceContainer() { }

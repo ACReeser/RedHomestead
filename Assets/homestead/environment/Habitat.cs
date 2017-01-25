@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using RedHomestead.Construction;
 using RedHomestead.Simulation;
 
-public class Habitat : MultipleResourceConverter
+public class Habitat : Converter
 {
+    private const float WaterPullPerTick = 1f;
+    private const float OxygenPullPerTick = 1f;
     private float _CurrentPowerRequirements = 1f;
 
     //public override float WattRequirementsPerTick
@@ -20,7 +22,7 @@ public class Habitat : MultipleResourceConverter
     internal Dictionary<Compound, SumContainer> BasicResourceTotals = new Dictionary<Compound, SumContainer>();
     internal Dictionary<Resource, SumContainer> ComplexResourceTotals = new Dictionary<Resource, SumContainer>();
 
-    private Sink WaterSink, OxygenSink;
+    private List<Sink> WaterSinks = new List<Sink>(), OxygenSinks = new List<Sink>();
 
     public override float WattRequirementsPerTick
     {
@@ -30,29 +32,48 @@ public class Habitat : MultipleResourceConverter
         }
     }
 
-    //public override void ClearHooks()
-    //{
-    //    throw new NotImplementedException();
-    //}
+    public override void ClearHooks()
+    {
+        WaterSinks.Clear();
+        OxygenSinks.Clear();
+    }
 
-    //public override void Convert()
-    //{
-    //    if (WaterSink != null)
-    //    {
-    //        //BasicResourceTotals[Compound.Water].FlowWithExternal(WaterSink);
-    //    }
-    //}
+    public override void Convert()
+    {
+        FlowWithExternal(Compound.Water, WaterSinks, WaterPullPerTick);
+        FlowWithExternal(Compound.Oxygen, OxygenSinks, OxygenPullPerTick);
+    }
 
-    //public override void OnSinkConnected(Sink s)
-    //{
-    //    if (s.HasContainerFor(Compound.Water))
-    //        WaterSink = s;
-    //}
+    private void FlowWithExternal(Compound compound, List<Sink> externals, float pullPerTick)
+    {
+        if (externals.Count > 0 && BasicResourceTotals[compound].AvailableCapacity >= pullPerTick)
+        {
+            float pulled = 0f;
+            foreach (Sink s in WaterSinks)
+            {
+                pulled += s.Get(compound).Pull(pullPerTick);
+                if (pulled >= pullPerTick)
+                {
+                    break;
+                }
+            }
+            BasicResourceTotals[compound].Push(pulled);
+        }
+    }
+
+    public override void OnSinkConnected(Sink s)
+    {
+        if (s.HasContainerFor(Compound.Water))
+            WaterSinks.Add(s);
+
+        if (s.HasContainerFor(Compound.Oxygen))
+            OxygenSinks.Add(s);
+    }
 
     // Use this for initialization
     void Start () {
         //todo: move this to individual Stuff adds
-        BasicResourceTotals[Compound.Water] = new SumContainer(20f)
+        BasicResourceTotals[Compound.Water] = new SumContainer(10f)
         {
             SimpleCompoundType = Compound.Water,
             LastTickRateOfChange = 0,
@@ -138,17 +159,7 @@ public class Habitat : MultipleResourceConverter
             ComplexResourceTotals[Resource.MealShake].Push(1f);
         }
     }
-
-    public override void Convert()
-    {
-        
-    }
-
-    public override void ClearHooks()
-    {
-        
-    }
-
+    
     public override void Report()
     {
         

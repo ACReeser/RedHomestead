@@ -192,10 +192,14 @@ public class SurvivalTimer : MonoBehaviour {
             return CurrentHabitat == null;
         }
     }
-    private Habitat CurrentHabitat = null;
+    public Habitat CurrentHabitat
+    {
+        get; private set;
+    }
 
     void Awake () {
         Instance = this;
+        CurrentHabitat = null;
     }
 
     void Start()

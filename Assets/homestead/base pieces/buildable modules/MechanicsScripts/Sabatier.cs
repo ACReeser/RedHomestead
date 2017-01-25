@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 
-public class Sabatier : MultipleResourceConverter
+public class Sabatier : Converter
 {
     internal float HydrogenPerSecond = .1f;
     internal float MethanePerSecond = .1f;
