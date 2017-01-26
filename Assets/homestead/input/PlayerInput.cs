@@ -666,7 +666,7 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("network"))
                 {
-                    if (Input.GetKey(KeyCode.E))
+                    if (doInteract)
                     {
                         if (reportMenuOpen)
                         {
@@ -680,6 +680,24 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         newPrompt = Prompts.ReportHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("powerSwitch"))
+                {
+                    if (doInteract)
+                    {
+                        hitInfo.collider.transform.root.GetComponent<IPowerToggleable>().TogglePower();
+                    }
+                    else
+                    {
+                        if (hitInfo.collider.name == "on")
+                        {
+                            newPrompt = Prompts.PowerSwitchOffHint;
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.PowerSwitchOnHint;
+                        }
                     }
                 }
                 else if (hitInfo.collider.CompareTag("airbagpayload"))

@@ -65,6 +65,7 @@ public class SunOrbit : MonoBehaviour {
 
         float percentOfDay = ((CurrentHour * 60) + CurrentMinute) / MartianMinutesPerDay;
         
+        //todo: also set strength of shadows - strong at dawn/dust, much less strong around noon
         GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
         StarsParent.transform.localRotation = GlobalLight.transform.localRotation;
 

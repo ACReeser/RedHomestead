@@ -45,6 +45,7 @@ public abstract class ModuleGameplay : MonoBehaviour
     }
 
     protected virtual void OnStart() { }
+    public virtual void OnPowerChanged() { }
     public abstract void OnAdjacentChanged();
     public abstract void Tick();
 
@@ -256,4 +257,10 @@ public class SumContainer : ResourceContainer
 
     public SumContainer() { }
     public SumContainer(float initialAmount): base(initialAmount) { }
+}
+
+public interface IPowerToggleable
+{
+    bool IsOn { get; }
+    void TogglePower();
 }

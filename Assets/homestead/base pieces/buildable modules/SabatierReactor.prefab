@@ -261,6 +261,22 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
   m_IsActive: 1
+--- !u!1 &188892
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 455220}
+  - 65: {fileID: 6529756}
+  m_Layer: 8
+  m_Name: off
+  m_TagString: powerSwitch
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &190590
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,10 +384,23 @@ Transform:
   m_LocalPosition: {x: -1.197, y: 1.937, z: 0.397}
   m_LocalScale: {x: 3, y: 3, z: 3}
   m_Children:
+  - {fileID: 455220}
   - {fileID: 465302}
   - {fileID: 479022}
   m_Father: {fileID: 497914}
   m_RootOrder: 5
+--- !u!4 &455220
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 188892}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 451310}
+  m_RootOrder: 0
 --- !u!4 &457366
 Transform:
   m_ObjectHideFlags: 1
@@ -436,7 +465,7 @@ Transform:
   - {fileID: 474658}
   - {fileID: 457366}
   m_Father: {fileID: 451310}
-  m_RootOrder: 0
+  m_RootOrder: 1
 --- !u!4 &474658
 Transform:
   m_ObjectHideFlags: 1
@@ -496,7 +525,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 451310}
-  m_RootOrder: 1
+  m_RootOrder: 2
 --- !u!4 &483042
 Transform:
   m_ObjectHideFlags: 1
@@ -518,7 +547,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 146208}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071067}
-  m_LocalPosition: {x: 714.056, y: 0.15134895, z: 996.3207}
+  m_LocalPosition: {x: 729.75964, y: 0.15134895, z: 992.9762}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 422856}
@@ -812,6 +841,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.6, y: 0.6, z: 0.6}
   m_Center: {x: 0, y: 0, z: -0.78}
+--- !u!65 &6529756
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 188892}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.05, y: 0.22, z: 0.3}
+  m_Center: {x: 0.27, y: 0.21, z: 0}
 --- !u!65 &6531544
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -848,6 +889,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 21293132}
+  PowerCabinet: {fileID: 3332542}
+  OnMesh: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  OffMesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
 --- !u!212 &21224282
 SpriteRenderer:
   m_ObjectHideFlags: 1

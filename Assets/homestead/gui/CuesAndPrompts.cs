@@ -233,4 +233,14 @@ public static class Prompts {
         Description = "Industrial Report",
         Key = "E"
     };
+    internal static PromptInfo PowerSwitchOffHint = new PromptInfo()
+    {
+        Description = "Turn off power",
+        Key = "E"
+    };
+    internal static PromptInfo PowerSwitchOnHint = new PromptInfo()
+    {
+        Description = "Turn on power",
+        Key = "E"
+    };
 }

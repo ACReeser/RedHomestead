@@ -3,11 +3,15 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 
-public class Sabatier : Converter
+public class Sabatier : Converter, IPowerToggleable
 {
     internal float HydrogenPerSecond = .1f;
     internal float MethanePerSecond = .1f;
     internal float WaterPerSecond = .1f;
+    internal bool _isOn = false;
+
+    public MeshFilter PowerCabinet;
+    public Mesh OnMesh, OffMesh;
 
     public override float WattRequirementsPerTick
     {
@@ -26,15 +30,29 @@ public class Sabatier : Converter
         }
     }
 
+    public bool IsOn
+    {
+        get
+        {
+            return _isOn;
+        }
+    }
+
     public override void Convert()
     {
-        if (HasPower && IsFullyConnected)
+        if (HasPower && IsOn && IsFullyConnected)
         {
             if (PullHydrogen())
             {
                 PushMethaneAndWater();
             }
         }
+    }
+
+    protected override void OnStart()
+    {
+        base.OnStart();
+        RefreshPowerSwitch();
     }
 
     private void PushMethaneAndWater()
@@ -109,5 +127,27 @@ public class Sabatier : Converter
                 new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Water].Produced + " kg", Connected = WaterOut != null }
             }
             );
+    }
+
+    public void TogglePower()
+    {
+        //only allow power to turn on when power is connected
+        bool newPowerState = !_isOn;
+        if (newPowerState && HasPower)
+        {
+            _isOn = newPowerState;
+        }
+        else
+        {
+            _isOn = false;
+        }
+
+        RefreshPowerSwitch();
+    }
+
+    private void RefreshPowerSwitch()
+    {
+        PowerCabinet.mesh = IsOn ? OnMesh : OffMesh;
+        PowerCabinet.transform.GetChild(0).name = IsOn ? "on" : "off";
     }
 }
