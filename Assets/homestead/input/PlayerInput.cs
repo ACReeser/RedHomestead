@@ -12,6 +12,7 @@ using RedHomestead.Simulation;
 /// </summary>
 public class PlayerInput : MonoBehaviour {
     public enum InputMode { Default, Exterior, Interiors, PostIt, Sleep }
+    public enum Equipment { None, Drill, Blueprints, ChemicalSniffer, PostIt, Scanner, Wrench, Sidearm, LMG}
 
     private const float InteractionRaycastDistance = 10f;
     private const float EVAChargerPerSecond = 7.5f;
@@ -92,7 +93,7 @@ public class PlayerInput : MonoBehaviour {
     public enum Direction { North, East, South, West }
 
     private Direction CurrentPlanningDirection;
-
+    public Equipment Primary = Equipment.None, Secondary = Equipment.None;
 
     void Awake()
     {
@@ -104,7 +105,9 @@ public class PlayerInput : MonoBehaviour {
 
 	    if (Input.GetKeyUp(KeyCode.Escape))
         {
-            if (playerIsOnFoot)
+            if (reportMenuOpen)
+                ToggleReport(null);
+            else if (playerIsOnFoot)
             {
                 UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
             }
@@ -114,8 +117,6 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        if (reportMenuOpen && Input.GetKeyUp(KeyCode.R))
-            ToggleReport(null);
 
 #if UNITY_EDITOR
         if (Input.GetKeyUp(KeyCode.Comma))
@@ -130,9 +131,18 @@ public class PlayerInput : MonoBehaviour {
 
         if (CurrentMode != InputMode.PostIt)
         {
-            if (Input.GetKeyUp(KeyCode.Tab))
+            if (Input.GetKeyDown(KeyCode.Tab))
             {
-                CycleMode();
+                GuiBridge.Instance.ToggleRadialMenu(true);
+                //CycleMode();
+            }
+            else if (Input.GetKeyUp(KeyCode.Tab))
+            {
+                GuiBridge.Instance.ToggleRadialMenu(false);
+            }
+            else if (GuiBridge.Instance.RadialMenuOpen)
+            {
+                HandleRadialInput();
             }
 
             if (Input.GetKeyUp(KeyCode.F))
@@ -186,6 +196,17 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleRadialInput()
+    {
+        float x = Input.GetAxis("Mouse X"), y = Input.GetAxis("Mouse Y");
+        if (x != 0f && y != 0f)
+        {
+            float theta = Mathf.Atan2(y, x) * Mathf.Rad2Deg;
+            //print("x:"+Input.GetAxis("Mouse X")+ " y: "+ Input.GetAxis("Mouse Y") + " theta: "+theta);
+            GuiBridge.Instance.HighlightSector(theta);
+        }
+    }
 
     private void HandlePostItInput(ref PromptInfo newPrompt, bool doInteract)
     {

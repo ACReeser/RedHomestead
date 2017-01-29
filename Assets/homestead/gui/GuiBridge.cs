@@ -59,6 +59,13 @@ public struct ReportFields
     public Sprite Connected, Disconnected;
 }
 
+[Serializable]
+public struct RadialMenu
+{
+    public RectTransform RadialPanel;
+    public Image RadialSelector;
+}
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -77,9 +84,12 @@ public class GuiBridge : MonoBehaviour {
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
     public ReportIORow ReportRowTemplate;
     public ReportFields ReportTexts;
+    public RadialMenu RadialMenu;
+
 
     internal Text[] ConstructionRequirementsText;
 
+    internal bool RadialMenuOpen = false;
     internal PromptInfo CurrentPrompt { get; set; }
 
     void Awake()
@@ -101,6 +111,7 @@ public class GuiBridge : MonoBehaviour {
         FoodBarHours = FoodBar.transform.GetChild(1).GetComponent<Text>();
         PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
         ToggleReportMenu(false);
+        ToggleRadialMenu(false);
     }
 
     private void TogglePromptPanel(bool isActive)
@@ -180,7 +191,7 @@ public class GuiBridge : MonoBehaviour {
             }
         }
     }
-
+    
     internal void ToggleHelpMenu()
     {
         HelpPanel.gameObject.SetActive(!HelpPanel.gameObject.activeSelf);
@@ -441,6 +452,19 @@ public class GuiBridge : MonoBehaviour {
             }
         }
     };
+
+    internal void ToggleRadialMenu(bool state)
+    {
+        this.RadialMenu.RadialPanel.gameObject.SetActive(state);
+        this.RadialMenuOpen = state;
+        this.RadialMenu.RadialSelector.gameObject.SetActive(state);
+    }
+
+    internal void HighlightSector(float theta)
+    {
+        var rotation = Mathf.Min(theta  + 180f, 360f);
+        this.RadialMenu.RadialSelector.rectTransform.rotation = Quaternion.Euler(0, 0, rotation);
+    }
 
     private ReportIORow[] currentIORows;
     internal void WriteReport(string moduleName, string reaction, string energyEfficiency, string reactionEfficiency, 
