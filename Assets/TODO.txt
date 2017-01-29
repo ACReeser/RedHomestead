@@ -16,6 +16,7 @@ UX Improvement:
 [x] Press e when hovered over computer terminal? on modules for module report
 [x] Make module report GUI
 [x] DEVCHEAT When holding down some modifier key, instabuild
+[ ] Radial tool menu
 
 Resource Flow Visualization feature:
 [x] View input pipe hookups 
@@ -44,7 +45,7 @@ Demo Goals:
 [x] Hook up miner to hydrogen storage
 [x] Construct Water Tank 
 [x] Hook up miner to water tank
-[ ] Hook up water tank to habitat
+[x] Hook up water tank to habitat
 === can now make water for habitat, for hydrogen
 [x] Construct Methane Tank
 [x] Hook up miner to methane tank
@@ -140,6 +141,38 @@ Exterior Modules:
 [ ] Nuclear reactor
 [ ] Greenhouse
 
+Algae production
+[ ] Algae starter resouce
+[ ] Algae tank 
+    [ ] mesh
+	    [ ] vacuum glass on top
+    [ ] constructable module
+	    [ ] requires glass, structural material
+    [ ] fill w/ water
+    [ ] harvest for oxygen
+    [ ] harvest for fertilizer/nitrogen
+    [ ] harvest for food
+// notes on uses: 
+// _Spirulina_ is edible - Aztecakes!
+// Algenol claim they can make ethanol
+
+// notes on bacteria/Biofertilizer: 
+// Plant growth-promoting rhizobacteria - bacteria that form symbiotic relationships with specifc plant cultivars
+// Chlamydomonas nivalis - cryophile that lives in _Antarctic snow_
+// Phosphate solubilizing bacteria - help fix phosphate from rocks basically
+
+Fiber processing
+[ ] Retting tank (input = fiber plant, water, output = usable fibres, fertilizer)
+[ ] Bast fiber growing
+	[ ] Flax growing
+	[ ] Cotton growing
+	[ ] Hemp growing?
+
+Polyetheylene production:
+/// https://www.reddit.com/r/spacex/comments/56ldqj/what_does_packing_for_mars_look_like_mass/
+/// First, let me explain how simple PE is. It's basically three steps: electrolysis of water for hydrogen, then atmosphere + hydrogen + energy => ethylene. Add titanium(III) chloride or similar catalyst and tada, polyethylene. It isn't much more difficult than the sabatier reaction that produces methane.
+///
+
 Floorplan materials:
 //v1
 [x] Concrete
@@ -192,7 +225,9 @@ v1
     [x] Shows display
     [x] Hides/shows contents of shelf
     [ ] Resource change event hook
-[ ] Computer terminal
+[x] Computer terminal
+    [ ] Accel couch?
+    [ ] Server meshes on sides for cool factor
 [ ] Bulk water storage
     [x] Mesh
     [x] Mesh
@@ -203,7 +238,7 @@ v1
     [x] Shows display
     [ ] Hides/shows contents of tank
 [ ] Battery
-    [ ] Mesh
+    [x] Mesh
     [ ] Shows display
     [ ] Hides/shows contents via LEDs
 [ ] Kitchen table and chairs
