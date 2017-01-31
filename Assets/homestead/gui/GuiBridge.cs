@@ -453,17 +453,27 @@ public class GuiBridge : MonoBehaviour {
         }
     };
 
-    internal void ToggleRadialMenu(bool state)
+    internal void ToggleRadialMenu(bool isMenuOpen)
     {
-        this.RadialMenu.RadialPanel.gameObject.SetActive(state);
-        this.RadialMenuOpen = state;
-        this.RadialMenu.RadialSelector.gameObject.SetActive(state);
+        this.RadialMenu.RadialPanel.gameObject.SetActive(isMenuOpen);
+        this.RadialMenuOpen = isMenuOpen;
+        this.RadialMenu.RadialSelector.gameObject.SetActive(isMenuOpen);
+
+        //Cursor.visible = isMenuOpen;
+        Cursor.lockState = isMenuOpen ? CursorLockMode.None : CursorLockMode.Locked;
     }
 
+    private const float sectorThetaOffset = 30f;
     internal void HighlightSector(float theta)
     {
-        var rotation = Mathf.Min(theta  + 180f, 360f);
-        this.RadialMenu.RadialSelector.rectTransform.rotation = Quaternion.Euler(0, 0, rotation);
+        var rotation = Mathf.Lerp(0, 360, Mathf.InverseLerp(-180f, 180f, theta));
+
+        int index = (int)Mathf.Round((rotation - sectorThetaOffset) / 60f);
+        //corresponds to enum -^
+
+        //corresponds to UI rotation -v
+        rotation = (index + 2) * 60f;
+        this.RadialMenu.RadialSelector.rectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
     }
 
     private ReportIORow[] currentIORows;

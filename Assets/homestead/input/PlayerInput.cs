@@ -134,11 +134,13 @@ public class PlayerInput : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.Tab))
             {
                 GuiBridge.Instance.ToggleRadialMenu(true);
+                FPSController.FreezeLook = true;
                 //CycleMode();
             }
             else if (Input.GetKeyUp(KeyCode.Tab))
             {
                 GuiBridge.Instance.ToggleRadialMenu(false);
+                FPSController.FreezeLook = false;
             }
             else if (GuiBridge.Instance.RadialMenuOpen)
             {
@@ -199,12 +201,30 @@ public class PlayerInput : MonoBehaviour {
 
     private void HandleRadialInput()
     {
-        float x = Input.GetAxis("Mouse X"), y = Input.GetAxis("Mouse Y");
+        //float x = Input.GetAxis("Mouse X") * FPSController.MouseLook.XSensitivity,
+        //       y = Input.GetAxis("Mouse Y") * FPSController.MouseLook.YSensitivity;
+        //float x = Input.GetAxisRaw("Mouse X"),
+        //    y = Input.GetAxisRaw("Mouse Y");
+        float x = ((Input.mousePosition.x / Screen.width) * 2f) - 1f,
+            y = ((Input.mousePosition.y / Screen.height) * 2f) -1f;
+
         if (x != 0f && y != 0f)
         {
+            //var newRadialInputDirection = new Vector2(x, y).normalized;
+            //var newRadialInputDirection = new Vector2(x, y);
+
+            //float ang = Vector2.Angle(lastRadialInputDirection, newRadialInputDirection);
+            //Vector3 cross = Vector3.Cross(lastRadialInputDirection, newRadialInputDirection);
+
+            //if (cross.z < 0)
+            //    ang = 360 - ang;
+
+            //print(string.Format("X: {0} Y: {1}", lastRadialInputDirection.x, lastRadialInputDirection.y));
+            //print("direction: " + ang);
             float theta = Mathf.Atan2(y, x) * Mathf.Rad2Deg;
-            //print("x:"+Input.GetAxis("Mouse X")+ " y: "+ Input.GetAxis("Mouse Y") + " theta: "+theta);
             GuiBridge.Instance.HighlightSector(theta);
+
+            //lastRadialInputDirection = newRadialInputDirection;
         }
     }
 
@@ -1318,6 +1338,7 @@ public class PlayerInput : MonoBehaviour {
 
     #region sleep mechanic
     private SleepLerpContext sleerpCtx;
+    private Vector2 lastRadialInputDirection;
 
     private struct SleepLerpContext
     {

@@ -27,7 +27,7 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private float m_GravityMultiplier;
     [SerializeField]
-    private MouseLook m_MouseLook;
+    public MouseLook MouseLook;
     [SerializeField]
     private bool m_UseFovKick;
     [SerializeField]
@@ -67,6 +67,7 @@ public class CustomFPSController : MonoBehaviour
     private AudioSource m_AudioSource;
 
     public bool SuspendInput = false;
+    public bool FreezeLook = false;
 
     // Use this for initialization
     private void Start()
@@ -88,7 +89,9 @@ public class CustomFPSController : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        RotateView();
+        if (!FreezeLook)
+            RotateView();
+
         // the jump state needs to read here to make sure it is not missed
         if (!m_Jump)
         {
@@ -304,7 +307,7 @@ public class CustomFPSController : MonoBehaviour
 
     private void RotateView()
     {
-        m_MouseLook.LookRotation(transform, m_Camera.transform);
+        MouseLook.LookRotation(transform, m_Camera.transform);
     }
 
 
@@ -383,9 +386,9 @@ public class CustomFPSController : MonoBehaviour
 
     internal void InitializeMouseLook()
     {
-        m_MouseLook.Init(transform, m_Camera.transform);
+        MouseLook.Init(transform, m_Camera.transform);
 
-        m_MouseLook.UpdateCursorLock();
+        MouseLook.UpdateCursorLock();
     }
 }
 
