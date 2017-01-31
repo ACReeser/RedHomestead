@@ -62,7 +62,7 @@ public struct ReportFields
 [Serializable]
 public struct RadialMenu
 {
-    public RectTransform RadialPanel;
+    public RectTransform RadialPanel, RadialsParent;
     public Image RadialSelector;
 }
 
@@ -85,7 +85,7 @@ public class GuiBridge : MonoBehaviour {
     public ReportIORow ReportRowTemplate;
     public ReportFields ReportTexts;
     public RadialMenu RadialMenu;
-
+    public RedHomestead.Equipment.EquipmentSprites EquipmentSprites;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -453,16 +453,32 @@ public class GuiBridge : MonoBehaviour {
         }
     };
 
-    internal void ToggleRadialMenu(bool isMenuOpen)
+    private RedHomestead.Equipment.Slot lastHoverSlot;
+
+    internal RedHomestead.Equipment.Slot ToggleRadialMenu(bool isMenuOpen)
     {
         this.RadialMenu.RadialPanel.gameObject.SetActive(isMenuOpen);
         this.RadialMenuOpen = isMenuOpen;
         this.RadialMenu.RadialSelector.gameObject.SetActive(isMenuOpen);
 
+        //no need to actually show the cursor
         //Cursor.visible = isMenuOpen;
         Cursor.lockState = isMenuOpen ? CursorLockMode.None : CursorLockMode.Locked;
+
+        return lastHoverSlot;
     }
 
+    internal void BuildRadialMenu(RedHomestead.Equipment.Loadout load)
+    {
+        foreach(Transform t in RadialMenu.RadialsParent)
+        {
+            Image i = t.GetComponent<Image>();
+            RedHomestead.Equipment.Slot s = (RedHomestead.Equipment.Slot)Enum.Parse(typeof(RedHomestead.Equipment.Slot), i.name);
+            i.sprite = EquipmentSprites.FromEquipment(load[s]);
+        }
+    }
+
+    //use half the width of the sectors
     private const float sectorThetaOffset = 30f;
     internal void HighlightSector(float theta)
     {
@@ -474,6 +490,8 @@ public class GuiBridge : MonoBehaviour {
         //corresponds to UI rotation -v
         rotation = (index + 2) * 60f;
         this.RadialMenu.RadialSelector.rectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
+
+        lastHoverSlot = (RedHomestead.Equipment.Slot)index;
     }
 
     private ReportIORow[] currentIORows;

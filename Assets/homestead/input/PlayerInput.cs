@@ -6,18 +6,74 @@ using RedHomestead.Rovers;
 using RedHomestead.Construction;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
+using RedHomestead.Equipment;
+
+namespace RedHomestead.Equipment
+{
+    public enum Equipment { Locked = -1, None = 0, Drill, Blueprints, ChemicalSniffer, PostIt, Scanner, Wrench, Sidearm, LMG}
+    public enum Slot { Unequipped = 4, PrimaryTool = 5, SecondaryTool = 3, PrimaryGadget = 1, SecondaryGadget = 0, TertiaryGadget = 2 }
+
+    public class Loadout
+    {
+        private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
+        {
+            { Slot.Unequipped, Equipment.None },
+            { Slot.PrimaryTool, Equipment.Drill },
+            { Slot.SecondaryTool, Equipment.Locked },
+            { Slot.PrimaryGadget, Equipment.Blueprints },
+            { Slot.SecondaryGadget, Equipment.ChemicalSniffer },
+            { Slot.TertiaryGadget, Equipment.Locked },
+        };
+
+        public Equipment this[Slot s]
+        {
+            get
+            {
+                return _loadout[s];
+            }
+        }
+
+        public Slot ActiveSlot { get; set; }
+        public Equipment Equipped
+        {
+            get
+            {
+                return this[this.ActiveSlot];
+            }
+        }
+
+        public Loadout()
+        {
+            this.ActiveSlot = Slot.Unequipped;
+        }
+    }
+
+    [Serializable]
+    public struct EquipmentSprites
+    {
+        public Sprite[] Sprites;
+        public Sprite Locked;
+
+        internal Sprite FromEquipment(Equipment e)
+        {
+            if (e == Equipment.Locked)
+                return Locked;
+
+            return Sprites[(int)e];
+        }
+    }
+}
 
 /// <summary>
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
 public class PlayerInput : MonoBehaviour {
     public enum InputMode { Default, Exterior, Interiors, PostIt, Sleep }
-    public enum Equipment { None, Drill, Blueprints, ChemicalSniffer, PostIt, Scanner, Wrench, Sidearm, LMG}
 
     private const float InteractionRaycastDistance = 10f;
     private const float EVAChargerPerSecond = 7.5f;
     public static PlayerInput Instance;
-
+    
     public Camera FlowCamera;
     public Light Headlamp1, Headlamp2;
     /// <summary>
@@ -50,6 +106,7 @@ public class PlayerInput : MonoBehaviour {
     internal Module PlannedModule = Module.Unspecified;
     internal InputMode CurrentMode = InputMode.Default;
     internal InputMode AvailableMode = InputMode.Exterior;
+    internal Loadout Loadout = new Loadout();
 
     /// <summary>
     /// Visualization == transparent preview of module to be built
@@ -93,15 +150,19 @@ public class PlayerInput : MonoBehaviour {
     public enum Direction { North, East, South, West }
 
     private Direction CurrentPlanningDirection;
-    public Equipment Primary = Equipment.None, Secondary = Equipment.None;
 
     void Awake()
     {
         Instance = this;
     }
 
-	// Update is called once per frame
-	void Update () {
+    void Start()
+    {
+        GuiBridge.Instance.BuildRadialMenu(this.Loadout);
+    }
+
+    // Update is called once per frame
+    void Update () {
 
 	    if (Input.GetKeyUp(KeyCode.Escape))
         {
@@ -139,7 +200,7 @@ public class PlayerInput : MonoBehaviour {
             }
             else if (Input.GetKeyUp(KeyCode.Tab))
             {
-                GuiBridge.Instance.ToggleRadialMenu(false);
+                Loadout.ActiveSlot = GuiBridge.Instance.ToggleRadialMenu(false);
                 FPSController.FreezeLook = false;
             }
             else if (GuiBridge.Instance.RadialMenuOpen)
@@ -201,30 +262,13 @@ public class PlayerInput : MonoBehaviour {
 
     private void HandleRadialInput()
     {
-        //float x = Input.GetAxis("Mouse X") * FPSController.MouseLook.XSensitivity,
-        //       y = Input.GetAxis("Mouse Y") * FPSController.MouseLook.YSensitivity;
-        //float x = Input.GetAxisRaw("Mouse X"),
-        //    y = Input.GetAxisRaw("Mouse Y");
         float x = ((Input.mousePosition.x / Screen.width) * 2f) - 1f,
             y = ((Input.mousePosition.y / Screen.height) * 2f) -1f;
 
         if (x != 0f && y != 0f)
         {
-            //var newRadialInputDirection = new Vector2(x, y).normalized;
-            //var newRadialInputDirection = new Vector2(x, y);
-
-            //float ang = Vector2.Angle(lastRadialInputDirection, newRadialInputDirection);
-            //Vector3 cross = Vector3.Cross(lastRadialInputDirection, newRadialInputDirection);
-
-            //if (cross.z < 0)
-            //    ang = 360 - ang;
-
-            //print(string.Format("X: {0} Y: {1}", lastRadialInputDirection.x, lastRadialInputDirection.y));
-            //print("direction: " + ang);
             float theta = Mathf.Atan2(y, x) * Mathf.Rad2Deg;
             GuiBridge.Instance.HighlightSector(theta);
-
-            //lastRadialInputDirection = newRadialInputDirection;
         }
     }
 
