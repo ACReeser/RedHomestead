@@ -192,6 +192,13 @@ public class SurvivalTimer : MonoBehaviour {
             return CurrentHabitat == null;
         }
     }
+    public bool IsInHabitat
+    {
+        get
+        {
+            return CurrentHabitat != null;
+        }
+    }
     public Habitat CurrentHabitat
     {
         get; private set;

@@ -10,14 +10,14 @@ using RedHomestead.Equipment;
 
 namespace RedHomestead.Equipment
 {
-    public enum Equipment { Locked = -1, None = 0, Drill, Blueprints, ChemicalSniffer, PostIt, Scanner, Wrench, Sidearm, LMG}
+    public enum Equipment { Locked = -1, EmptyHand = 0, Drill, Blueprints, ChemicalSniffer, Stuff, Scanner, Wrench, Sidearm, LMG}
     public enum Slot { Unequipped = 4, PrimaryTool = 5, SecondaryTool = 3, PrimaryGadget = 1, SecondaryGadget = 0, TertiaryGadget = 2 }
 
     public class Loadout
     {
         private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
         {
-            { Slot.Unequipped, Equipment.None },
+            { Slot.Unequipped, Equipment.EmptyHand },
             { Slot.PrimaryTool, Equipment.Drill },
             { Slot.SecondaryTool, Equipment.Locked },
             { Slot.PrimaryGadget, Equipment.Blueprints },
@@ -46,6 +46,22 @@ namespace RedHomestead.Equipment
         {
             this.ActiveSlot = Slot.Unequipped;
         }
+
+        public bool IsConstructingExterior
+        {
+            get
+            {
+                return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.UsingPackResources;
+            }
+        }
+
+        public bool IsConstructingInterior
+        {
+            get
+            {
+                return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.IsInHabitat;
+            }
+        }
     }
 
     [Serializable]
@@ -68,10 +84,12 @@ namespace RedHomestead.Equipment
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
 public class PlayerInput : MonoBehaviour {
-    public enum InputMode { Default, Exterior, Interiors, PostIt, Sleep }
+    public enum InputMode { Normal, PostIt, Sleep }
 
     private const float InteractionRaycastDistance = 10f;
     private const float EVAChargerPerSecond = 7.5f;
+    private const int ChemicalFlowLayerIndex = 9;
+    private const int FloorplanLayerIndex = 10;
     public static PlayerInput Instance;
     
     public Camera FlowCamera;
@@ -104,8 +122,7 @@ public class PlayerInput : MonoBehaviour {
     public Material translucentPlanningMat;
 
     internal Module PlannedModule = Module.Unspecified;
-    internal InputMode CurrentMode = InputMode.Default;
-    internal InputMode AvailableMode = InputMode.Exterior;
+    internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
 
     /// <summary>
@@ -116,11 +133,6 @@ public class PlayerInput : MonoBehaviour {
 
     internal void SetPressure(bool pressurized)
     {
-        if (pressurized)
-            PlayerInput.Instance.AvailableMode = PlayerInput.InputMode.Interiors;
-        else
-            PlayerInput.Instance.AvailableMode = PlayerInput.InputMode.Exterior;
-
         FPSController.PlaceBootprints = !pressurized;
     }
 
@@ -159,6 +171,7 @@ public class PlayerInput : MonoBehaviour {
     void Start()
     {
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);
+        Equip(Slot.Unequipped);
     }
 
     // Update is called once per frame
@@ -196,11 +209,10 @@ public class PlayerInput : MonoBehaviour {
             {
                 GuiBridge.Instance.ToggleRadialMenu(true);
                 FPSController.FreezeLook = true;
-                //CycleMode();
             }
             else if (Input.GetKeyUp(KeyCode.Tab))
             {
-                Loadout.ActiveSlot = GuiBridge.Instance.ToggleRadialMenu(false);
+                Equip(GuiBridge.Instance.ToggleRadialMenu(false));
                 FPSController.FreezeLook = false;
             }
             else if (GuiBridge.Instance.RadialMenuOpen)
@@ -230,13 +242,9 @@ public class PlayerInput : MonoBehaviour {
 
         switch (CurrentMode)
         {
-            case InputMode.Default:
+            case InputMode.Normal:
                 HandleDefaultInput(ref newPrompt, doInteract);
-                break;
-            case InputMode.Exterior:
                 HandleExteriorPlanningInput(ref newPrompt, doInteract);
-                break;
-            case InputMode.Interiors:
                 HandleInteriorPlanningInput(ref newPrompt, doInteract);
                 break;
             case InputMode.PostIt:
@@ -277,10 +285,10 @@ public class PlayerInput : MonoBehaviour {
         if (Input.GetKeyUp(KeyCode.Escape))
         {
             this.PostItText = null;
-            this.CurrentMode = InputMode.Default;
+            this.CurrentMode = InputMode.Normal;
             FPSController.SuspendInput = false;
 
-            RefreshCurrentMode();
+            RefreshEquipmentState();
         }
         else if (this.PostItText != null)
         {
@@ -863,7 +871,7 @@ public class PlayerInput : MonoBehaviour {
             this.PostItText = t.GetChild(0).GetChild(0).GetComponent<TextMesh>();
             this.CurrentMode = InputMode.PostIt;
             FPSController.SuspendInput = true;
-            this.RefreshCurrentMode();
+            this.RefreshEquipmentState();
         }
     }
 
@@ -944,7 +952,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 if (hitInfo.collider.CompareTag("terrain"))
                 {
-                    if (CurrentMode == InputMode.Exterior && PlannedModuleVisualization != null)
+                    if (Loadout.Equipped == Equipment.Blueprints && PlannedModuleVisualization != null)
                     {
                         //TODO: raycast 3 more times (other 3 corners)
                         //then take the average height between them
@@ -1133,7 +1141,7 @@ public class PlayerInput : MonoBehaviour {
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
             zone.Complete();
 
-        CycleMode();
+        Equip(Slot.Unequipped);
     }
 
     private Transform GetPlannedModulePrefab()
@@ -1162,39 +1170,42 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private void CycleMode()
+    private void Equip(Slot s)
     {
-        //todo: fix lazy code
-        if (CurrentMode == InputMode.Default)
-            CurrentMode = this.AvailableMode;
-        else
-            CurrentMode = InputMode.Default;
+        if (Loadout[s] == Equipment.Locked)
+            s = Slot.Unequipped;
 
-        RefreshCurrentMode();
+        Loadout.ActiveSlot = s;
+
+        RefreshEquipmentState();
     }
 
-    private void RefreshCurrentMode()
+    private void RefreshEquipmentState()
     {
-        switch (CurrentMode)
+        switch (Loadout.Equipped)
         {
-            case InputMode.Exterior:
-                FlowCamera.cullingMask = 1 << 9;
-                Cursor.lockState = CursorLockMode.Confined;
-                Cursor.visible = true;
+            case Equipment.ChemicalSniffer:
+                FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                FlowCamera.enabled = true;
                 break;
-            case InputMode.Default:
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+            case Equipment.Blueprints:
+                if (SurvivalTimer.Instance.IsInHabitat)
+                {
+                    FlowCamera.cullingMask = 1 << FloorplanLayerIndex;
+                }
+                else
+                {
+                    FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                }
+                FlowCamera.enabled = true;
+                break;
+            default:
                 DisableAndForgetFloorplanVisualization();
                 DisableAndForgetModuleVisualization();
                 this.PlannedModule = Module.Unspecified;
-                break;
-            case InputMode.Interiors:
-                FlowCamera.cullingMask = 1 << 10;
+                FlowCamera.enabled = false;
                 break;
         }
-
-        FlowCamera.enabled = (CurrentMode == InputMode.Interiors) || (CurrentMode == InputMode.Exterior);
         GuiBridge.Instance.RefreshMode();
     }
 
@@ -1444,9 +1455,9 @@ public class PlayerInput : MonoBehaviour {
 
     private void ToggleSleep(bool isAsleep)
     {
-        this.CurrentMode = isAsleep ? InputMode.Sleep : InputMode.Default;
+        this.CurrentMode = isAsleep ? InputMode.Sleep : InputMode.Normal;
         FPSController.SuspendInput = isAsleep;
-        this.RefreshCurrentMode();
+        this.RefreshEquipmentState();
     }
 
     private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)

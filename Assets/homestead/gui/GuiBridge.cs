@@ -60,10 +60,14 @@ public struct ReportFields
 }
 
 [Serializable]
-public struct RadialMenu
+public class RadialMenu
 {
     public RectTransform RadialPanel, RadialsParent;
     public Image RadialSelector;
+    internal Image[] Radials = null;
+
+    public static Color HoverColor = new Color(1, 1, 1, 1);
+    public static Color DefaultColor = new Color(1, 1, 1, 0.6f);
 }
 
 /// <summary>
@@ -75,11 +79,11 @@ public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
     public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel;
-    public Text PromptKey, PromptDescription, ConstructionHeader, ModeText, PlacingText, TimeText;
+    public Text PromptKey, PromptDescription, ConstructionHeader, EquippedText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
+    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
     public AudioSource ComputerAudioSource;
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
     public ReportIORow ReportRowTemplate;
@@ -271,11 +275,11 @@ public class GuiBridge : MonoBehaviour {
 
     public void RefreshPlanningUI()
     {
-        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Exterior);
-        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Exterior && currentlySelectedGroup != ConstructionGroup.Undecided);
+        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior);
+        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior && currentlySelectedGroup != ConstructionGroup.Undecided);
 
-        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Interiors);
-        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.CurrentMode == PlayerInput.InputMode.Interiors && selectedFloorplanGroup != FloorplanGroup.Undecided);
+        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior);
+        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior && selectedFloorplanGroup != FloorplanGroup.Undecided);
     }
 
     public void SetConstructionGroup(int index)
@@ -331,20 +335,13 @@ public class GuiBridge : MonoBehaviour {
     /// </summary>
     internal void RefreshMode()
     {
-        switch(PlayerInput.Instance.CurrentMode)
+        this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
+        this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
+
+        if (PlayerInput.Instance.Loadout.Equipped != RedHomestead.Equipment.Equipment.Blueprints)
         {
-            case PlayerInput.InputMode.Default:
-                this.ModeText.text = "Switch to Planning";
-                this.PlacingPanel.gameObject.SetActive(false);
-                break;
-            case PlayerInput.InputMode.Exterior:
-                this.ModeText.text = "Stop Planning";
-                this.SetConstructionGroup(-1);
-                break;
-            case PlayerInput.InputMode.Interiors:
-                this.ModeText.text = "Stop Planning";
-                this.SetConstructionGroup(-1);
-                break;
+            this.PlacingPanel.gameObject.SetActive(false);
+            this.SetConstructionGroup(-1);
         }
 
         this.RefreshPlanningUI();
@@ -453,7 +450,7 @@ public class GuiBridge : MonoBehaviour {
         }
     };
 
-    private RedHomestead.Equipment.Slot lastHoverSlot;
+    private RedHomestead.Equipment.Slot lastHoverSlot = (RedHomestead.Equipment.Slot)(-1);
 
     internal RedHomestead.Equipment.Slot ToggleRadialMenu(bool isMenuOpen)
     {
@@ -470,11 +467,26 @@ public class GuiBridge : MonoBehaviour {
 
     internal void BuildRadialMenu(RedHomestead.Equipment.Loadout load)
     {
-        foreach(Transform t in RadialMenu.RadialsParent)
+        if (RadialMenu.Radials == null)
         {
-            Image i = t.GetComponent<Image>();
-            RedHomestead.Equipment.Slot s = (RedHomestead.Equipment.Slot)Enum.Parse(typeof(RedHomestead.Equipment.Slot), i.name);
-            i.sprite = EquipmentSprites.FromEquipment(load[s]);
+            RadialMenu.Radials = new Image[RadialMenu.RadialsParent.childCount];
+
+            foreach(Transform t in RadialMenu.RadialsParent)
+            {
+                Image img = t.GetComponent<Image>();
+                int index = int.Parse(img.name);
+                RedHomestead.Equipment.Slot s = (RedHomestead.Equipment.Slot)index;
+                RadialMenu.Radials[(int)s] = img;
+            }
+        }
+
+
+        int i = 0;
+        foreach(Image img in RadialMenu.Radials)
+        {
+            RedHomestead.Equipment.Slot s = (RedHomestead.Equipment.Slot)i;
+            img.sprite = EquipmentSprites.FromEquipment(load[s]);
+            i++;
         }
     }
 
@@ -490,6 +502,11 @@ public class GuiBridge : MonoBehaviour {
         //corresponds to UI rotation -v
         rotation = (index + 2) * 60f;
         this.RadialMenu.RadialSelector.rectTransform.localRotation = Quaternion.Euler(0, 0, rotation);
+
+        if ((int)lastHoverSlot > -1)
+            RadialMenu.Radials[(int)lastHoverSlot].color = RadialMenu.DefaultColor;
+
+        RadialMenu.Radials[index].color = RadialMenu.HoverColor;
 
         lastHoverSlot = (RedHomestead.Equipment.Slot)index;
     }
