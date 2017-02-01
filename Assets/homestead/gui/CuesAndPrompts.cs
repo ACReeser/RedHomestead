@@ -254,4 +254,10 @@ public static class Prompts {
         Description = "Turn on power",
         Key = "E"
     };
+
+    public static PromptInfo DrillHint = new PromptInfo()
+    {
+        Description = "(Requires Drill)",
+        Key = " "
+    };
 }

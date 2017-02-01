@@ -38,9 +38,11 @@ public class HobbitHole : MonoBehaviour {
 
     private OffsetArray<Transform> CavernTransforms = new OffsetArray<Transform>((2 * XDiameter) + 1, (2 * YDiameter) + 1, ZDepth);
     private OffsetArray<bool> CavernMap = new OffsetArray<bool>((2 * XDiameter) + 1, (2 * YDiameter) + 1, ZDepth);
-    
+    private OffsetArray<float> ProgressMap = new OffsetArray<float>((2 * XDiameter) + 1, (2 * YDiameter) + 1, ZDepth);
+
     private TransformBuffer CavernWallBuffer = new TransformBuffer();
     private TransformBuffer CavernBuffer = new TransformBuffer();
+    private const float BlockExcavationSeconds = 10f;
 
     private class TransformBuffer
     {
@@ -111,19 +113,37 @@ public class HobbitHole : MonoBehaviour {
 	
 	}
 
-    public void Excavate(Vector3 lPosition)
+    public float ExcavationProgress(Vector3 lPosition)
     {
-        if (!CavernMap[lPosition])
+        return ProgressMap[lPosition] / BlockExcavationSeconds;
+    }
+
+    public float Excavate(Vector3 lPosition, float excavationTime)
+    {
+        //if there's a cavern here (a lack of rock!) return 0
+        if (CavernMap[lPosition])
         {
-            Transform existingCavernWall = CavernTransforms[lPosition];
+            return 0f;
+        }
+        else //there's a rock here
+        {
+            //drill on it some
+            ProgressMap[lPosition] += excavationTime;
 
-            CavernWallBuffer.AddExisting(existingCavernWall);
+            if (ProgressMap[lPosition] > BlockExcavationSeconds)
+            {
+                Transform existingCavernWall = CavernTransforms[lPosition];
 
-            CavernTransforms[lPosition] = CavernBuffer.Get(lPosition);
+                CavernWallBuffer.AddExisting(existingCavernWall);
 
-            CavernMap[lPosition] = true;
+                CavernTransforms[lPosition] = CavernBuffer.Get(lPosition);
 
-            FillAdjacentTransformless(lPosition);
+                CavernMap[lPosition] = true;
+
+                FillAdjacentTransformless(lPosition);
+            }
+
+            return ProgressMap[lPosition] / BlockExcavationSeconds;
         }
     }
 

@@ -91,7 +91,7 @@ public class PlayerInput : MonoBehaviour {
     private const float EVAChargerPerSecond = 7.5f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
-
+    private const float ExcavationPerSecond = 1f;
     private float ConstructionPerSecond = 1f;
 
     public Camera FlowCamera;
@@ -619,25 +619,34 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("cavernwall"))
                 {
-                    if (doInteract)
+                    if (Loadout.Equipped == Equipment.Drill)
                     {
-                        if (hitInfo.collider.transform.parent == lastHobbitHoleTransform)
+                        if (hitInfo.collider.transform.parent != lastHobbitHoleTransform)
                         {
-                            lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition);
+                            lastHobbitHole = hitInfo.collider.transform.parent.GetComponent<HobbitHole>();
+                        }
+
+                        if (lastHobbitHole != null)
+                        {
+                            if (Input.GetKey(KeyCode.E))
+                            {
+                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * ExcavationPerSecond);
+                            }
+                            else
+                            {
+                                Prompts.ExcavateHint.Progress = lastHobbitHole.ExcavationProgress(hitInfo.collider.transform.localPosition);
+                            }
                         }
                         else
                         {
-                            HobbitHole hh = hitInfo.collider.transform.parent.GetComponent<HobbitHole>();
-
-                            if (hh != null)
-                                lastHobbitHole = hh;
-
-                            lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition);
+                            Prompts.ExcavateHint.Progress = 0f;
                         }
+
+                        newPrompt = Prompts.ExcavateHint;
                     }
                     else
                     {
-                        newPrompt = Prompts.ExcavateHint;
+                        newPrompt = Prompts.DrillHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("button"))
