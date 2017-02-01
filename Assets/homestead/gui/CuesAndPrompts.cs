@@ -9,6 +9,14 @@ public class PromptInfo
     public string Key { get; set; }
     public string Description { get; set; }
     public float Duration { get; set; }
+    /// <summary>
+    /// 0 to 1f percentage
+    /// </summary>
+    public float Progress { get; set; }
+    /// <summary>
+    /// Whether to show the progressbar, default to false
+    /// </summary>
+    public bool UsesProgress { get; set; }
 }
 
 public struct LinkablePrompts
@@ -87,7 +95,8 @@ public static class Prompts {
     internal static PromptInfo ConstructHint = new PromptInfo()
     {
         Description = "Construct",
-        Key = "E"
+        Key = "E",
+        UsesProgress = true
     };
     internal static PromptInfo OpenDoorHint = new PromptInfo()
     {
@@ -137,7 +146,8 @@ public static class Prompts {
     internal static PromptInfo ExcavateHint = new PromptInfo()
     {
         Description = "Excavate",
-        Key = "E"
+        Key = "E",
+        UsesProgress = true
     };
     internal static LinkablePrompts BulkheadBridgePrompts = new LinkablePrompts()
     {
@@ -226,7 +236,8 @@ public static class Prompts {
     internal static PromptInfo EVAChargeHint = new PromptInfo()
     {
         Description = "Charge",
-        Key = "E"
+        Key = "E",
+        UsesProgress = true
     };
     internal static PromptInfo ReportHint = new PromptInfo()
     {

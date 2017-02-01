@@ -3,7 +3,6 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Rovers;
-using RedHomestead.Construction;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Equipment;
@@ -84,14 +83,17 @@ namespace RedHomestead.Equipment
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
 public class PlayerInput : MonoBehaviour {
+    public static PlayerInput Instance;
+
     public enum InputMode { Normal, PostIt, Sleep }
 
     private const float InteractionRaycastDistance = 10f;
     private const float EVAChargerPerSecond = 7.5f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
-    public static PlayerInput Instance;
-    
+
+    private float ConstructionPerSecond = 1f;
+
     public Camera FlowCamera;
     public Light Headlamp1, Headlamp2;
     /// <summary>
@@ -585,14 +587,13 @@ public class PlayerInput : MonoBehaviour {
 
                     if (zone != null && carriedObject == null && zone.CanConstruct)
                     {
-                        if (doInteract)
+                        if (Input.GetKey(KeyCode.E))
                         {
-                            zone.WorkOnConstruction();
+                            zone.WorkOnConstruction(Time.deltaTime * this.ConstructionPerSecond);
                         }
-                        else
-                        {
-                            newPrompt = Prompts.ConstructHint;
-                        }
+
+                        Prompts.ConstructHint.Progress = zone.ProgressPercentage;
+                        newPrompt = Prompts.ConstructHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("door"))

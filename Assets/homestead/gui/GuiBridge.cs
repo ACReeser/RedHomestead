@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEngine.UI;
 using System;
-using RedHomestead.Construction;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
@@ -70,6 +69,14 @@ public class RadialMenu
     public static Color DefaultColor = new Color(1, 1, 1, 0.6f);
 }
 
+[Serializable]
+public struct PromptUI
+{
+    public RectTransform Panel, ProgressBar;
+    public Text Key, Description;
+    public Image ProgressFill;
+}
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -78,8 +85,8 @@ public class RadialMenu
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform PromptPanel, ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel;
-    public Text PromptKey, PromptDescription, ConstructionHeader, EquippedText, PlacingText, TimeText;
+    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel;
+    public Text ConstructionHeader, EquippedText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
@@ -90,6 +97,7 @@ public class GuiBridge : MonoBehaviour {
     public ReportFields ReportTexts;
     public RadialMenu RadialMenu;
     public RedHomestead.Equipment.EquipmentSprites EquipmentSprites;
+    public PromptUI Prompts;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -120,15 +128,18 @@ public class GuiBridge : MonoBehaviour {
 
     private void TogglePromptPanel(bool isActive)
     {
-        this.PromptPanel.gameObject.SetActive(isActive);
+        this.Prompts.Panel.gameObject.SetActive(isActive);
     }
 
     public void ShowPrompt(PromptInfo prompt)
     {
-        PromptKey.text = prompt.Key;
-        PromptKey.transform.parent.gameObject.SetActive(prompt.Key != null);
+        Prompts.Key.text = prompt.Key;
+        Prompts.Key.transform.parent.gameObject.SetActive(prompt.Key != null);
+        Prompts.Description.text = prompt.Description;
 
-        PromptDescription.text = prompt.Description;
+        Prompts.ProgressBar.gameObject.SetActive(prompt.UsesProgress);
+        Prompts.ProgressFill.fillAmount = prompt.Progress;
+
         TogglePromptPanel(true);
         CurrentPrompt = prompt;
 

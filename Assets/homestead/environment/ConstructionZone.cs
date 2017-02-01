@@ -1,72 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
-using RedHomestead.Construction;
 using System.Collections.Generic;
 using System;
 using System.Linq;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
-namespace RedHomestead.Construction
-{
-
-    public static class Requirements
-    {
-        //todo: load from file probably
-        //todo: disallow duplicate resource types by using another dict instead of a list
-        public static Dictionary<Module, List<ResourceEntry>> Map = new Dictionary<Module, List<ResourceEntry>>()
-        {
-            {
-                Module.SolarPanelSmall, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(2, Resource.Steel),
-                    new ResourceEntry(4, Resource.SiliconWafers)
-                }
-            },
-            {
-                Module.LargeGasTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(8, Resource.Steel)
-                }
-            },
-            {
-                Module.SmallGasTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Resource.Steel)
-                }
-            },
-            {
-                Module.SmallWaterTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Resource.Steel)
-                }
-            },
-            {
-                Module.Splitter, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Resource.Steel)
-                }
-            },
-            {
-                Module.SabatierReactor, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Resource.Steel)
-                }
-            },
-            {
-                Module.OreExtractor, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Resource.Steel)
-                }
-            }
-        };
-    }
-}
-
 public class ConstructionZone : MonoBehaviour {
     public Module UnderConstruction;
     public Transform ModulePrefab;
-    public int Progress = 0;
+
+    public float CurrentProgressSeconds = 0;
+    private float RequiredProgressSeconds = 10f;
+    public float ProgressPercentage
+    {
+        get
+        {
+            return CurrentProgressSeconds / RequiredProgressSeconds;
+        }
+    }
 
     internal static ConstructionZone CurrentZone;
     internal Dictionary<Resource, int> ResourceCount;
@@ -90,11 +42,11 @@ public class ConstructionZone : MonoBehaviour {
         {
             ResourceCount = new Dictionary<Resource, int>();
             ResourceList = new List<ResourceComponent>();
-            //todo: change to requirements.map[underconstruction].keys when that's a dict of <resource, entry> and not a list
-            RequiredResourceMask = new Resource[Requirements.Map[this.UnderConstruction].Count];
+            //todo: change to Construction.Requirements[underconstruction].keys when that's a dict of <resource, entry> and not a list
+            RequiredResourceMask = new Resource[Construction.Requirements[this.UnderConstruction].Count];
 
             int i = 0;
-            foreach(ResourceEntry required in Requirements.Map[this.UnderConstruction])
+            foreach(ResourceEntry required in Construction.Requirements[this.UnderConstruction])
             {
                 ResourceCount[required.Type] = 0;
                 RequiredResourceMask[i] = required.Type;
@@ -111,7 +63,7 @@ public class ConstructionZone : MonoBehaviour {
         {
             if (other.CompareTag("Player"))
             {
-                GuiBridge.Instance.ShowConstruction(Requirements.Map[this.UnderConstruction], ResourceCount, this.UnderConstruction);
+                GuiBridge.Instance.ShowConstruction(Construction.Requirements[this.UnderConstruction], ResourceCount, this.UnderConstruction);
                 CurrentZone = this;
             }
             else if (other.CompareTag("movable"))
@@ -124,7 +76,7 @@ public class ConstructionZone : MonoBehaviour {
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
-                    GuiBridge.Instance.ShowConstruction(Requirements.Map[this.UnderConstruction], ResourceCount, this.UnderConstruction);
+                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[this.UnderConstruction], ResourceCount, this.UnderConstruction);
                 }
             }
         }
@@ -149,7 +101,7 @@ public class ConstructionZone : MonoBehaviour {
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();
-                    GuiBridge.Instance.ShowConstruction(Requirements.Map[this.UnderConstruction], ResourceCount, this.UnderConstruction);
+                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[this.UnderConstruction], ResourceCount, this.UnderConstruction);
                 }
             }
         }
@@ -157,7 +109,7 @@ public class ConstructionZone : MonoBehaviour {
 
     private void RefreshCanConstruct()
     {
-        foreach(ResourceEntry resourceEntry in Requirements.Map[this.UnderConstruction])
+        foreach(ResourceEntry resourceEntry in Construction.Requirements[this.UnderConstruction])
         {
             if (ResourceCount[resourceEntry.Type] < resourceEntry.Count)
             {
@@ -169,10 +121,14 @@ public class ConstructionZone : MonoBehaviour {
         CanConstruct = true;
     }
 
-    public void WorkOnConstruction()
+    public void WorkOnConstruction(float constructionTime)
     {
-        this.Progress = 100;
-        this.Complete();
+        this.CurrentProgressSeconds += constructionTime;
+
+        if (this.CurrentProgressSeconds >= this.RequiredProgressSeconds)
+        {
+            this.Complete();
+        }
     }
 
     public void Complete()
@@ -210,7 +166,7 @@ public class ConstructionZone : MonoBehaviour {
                     deletedCount[component.ResourceType] = 0;
                 }
 
-                if (numDeleted < Requirements.Map[this.UnderConstruction].Where(r => r.Type == component.ResourceType).Count())
+                if (numDeleted < Construction.Requirements[this.UnderConstruction].Where(r => r.Type == component.ResourceType).Count())
                 {
                     this.ResourceList.Remove(component);
                     Destroy(component.gameObject);

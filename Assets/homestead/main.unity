@@ -1310,6 +1310,74 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 45053173}
   m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+--- !u!1 &46214929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 224: {fileID: 46214930}
+  - 222: {fileID: 46214932}
+  - 114: {fileID: 46214931}
+  m_Layer: 0
+  m_Name: ProgressBar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &46214930
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 46214929}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 449212350}
+  m_Father: {fileID: 1914087296}
+  m_RootOrder: 2
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: 0, y: -2}
+  m_SizeDelta: {x: 0, y: 8}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &46214931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 46214929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 21300000, guid: 94cd3b44aa14de04d8d412d8e0f17c47, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 0
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+--- !u!222 &46214932
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 46214929}
 --- !u!1 &52590833
 GameObject:
   m_ObjectHideFlags: 0
@@ -10407,6 +10475,73 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 448410468}
+--- !u!1 &449212349
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 4
+  m_Component:
+  - 224: {fileID: 449212350}
+  - 222: {fileID: 449212352}
+  - 114: {fileID: 449212351}
+  m_Layer: 0
+  m_Name: ProgressFill
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &449212350
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 449212349}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 46214930}
+  m_RootOrder: 0
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &449212351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 449212349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0.582, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Sprite: {fileID: 21300000, guid: 94cd3b44aa14de04d8d412d8e0f17c47, type: 3}
+  m_Type: 3
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 0
+  m_FillAmount: 0.574
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+--- !u!222 &449212352
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 449212349}
 --- !u!1 &449298544
 GameObject:
   m_ObjectHideFlags: 0
@@ -16478,7 +16613,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &728579866
 RectTransform:
   m_ObjectHideFlags: 0
@@ -34309,7 +34444,7 @@ GameObject:
   - 222: {fileID: 1469756493}
   - 114: {fileID: 1469756492}
   m_Layer: 0
-  m_Name: PromptText
+  m_Name: PlacingPromptText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38426,7 +38561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1625b390460e1e449bc00753ed8e4536, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PromptPanel: {fileID: 1914087296}
   ConstructionPanel: {fileID: 957219897}
   ConstructionGroupPanel: {fileID: 130235092}
   ConstructionModulesPanel: {fileID: 448410469}
@@ -38437,8 +38571,6 @@ MonoBehaviour:
   FloorplanPanel: {fileID: 1778971676}
   HelpPanel: {fileID: 2092935833}
   ReportPanel: {fileID: 1342943605}
-  PromptKey: {fileID: 651063884}
-  PromptDescription: {fileID: 2068005049}
   ConstructionHeader: {fileID: 287664180}
   EquippedText: {fileID: 883329000}
   PlacingText: {fileID: 1469756492}
@@ -38505,6 +38637,12 @@ MonoBehaviour:
     - {fileID: 21300000, guid: acc0d5d0c17ba8a49b75e7dd2fe8db06, type: 3}
     - {fileID: 21300000, guid: 9086b49097b11b34b964a9223776ce65, type: 3}
     Locked: {fileID: 21300000, guid: 9a0562dd6806eba479ae9a3a55951b98, type: 3}
+  Prompts:
+    Panel: {fileID: 1914087296}
+    ProgressBar: {fileID: 46214930}
+    Key: {fileID: 651063884}
+    Description: {fileID: 2068005049}
+    ProgressFill: {fileID: 449212351}
   selectedFloorplanGroup: -1
   selectedFloorplanSubgroup: 0
   selectedFloorplanMaterial: 0
@@ -45022,6 +45160,7 @@ RectTransform:
   m_Children:
   - {fileID: 2068005048}
   - {fileID: 961142477}
+  - {fileID: 46214930}
   m_Father: {fileID: 1606079960}
   m_RootOrder: 0
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -47627,7 +47766,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3975659, g: 1, b: 0.20588237, a: 1}
+  m_Color: {r: 1, g: 0.582, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
