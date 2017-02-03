@@ -84,4 +84,9 @@ public class Terminal : MonoBehaviour {
 
         currentBuyTab.gameObject.SetActive(true);
     }
+
+    public void Checkout(int supplierIndex)
+    {
+        SwitchBuyTab((int)BuyTab.Checkout);
+    }
 }
