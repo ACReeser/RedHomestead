@@ -123,17 +123,25 @@ Trading
 [ ] Ability to buy materials
     [ ] Resource first or Supplier first screen
     [ ] Resource first: List resources by rarity (common to rare), list supplier by price. Select supplier button on right.
-    [ ] Supplier first: List suppliers by total stock desc, list resources by (quantity|price|rarity [rare to common]) Select supplier button on left.
+    [ ] Supplier first: List suppliers by total stock desc, list resources by (quantity|price|rarity [rare to common]) Select supplier button on bottom right.
 	[ ] Once supplier is chosen, allow adding resources to cart
     [ ] Checkout screen (totals, shipping method selection, confirmation)
+        [ ] replace resource first/supplier first with cancel button
     [ ] Success screen
 [ ] Ability to see en route
     [ ] Incoming deliveries (delivery type, contents & time)
     [ ] ?? Outgoing orders (delivery type, contents & time)
 [ ] Ability to sell materials
-    [ ] List all resources
+    [ ] Put materials in warehouse/pickup zone
+    [ ] List all resources in warehouse in terminal
 	[ ] Set type & price (show low, avg, high prices of market)
-    [ ] Put materials in pickup zone
+	[ ] Have some sort of buyer script
+[ ] Packing algorithm
+    [ ] 3to4 levels of cubes
+	[ ] lay cubes iteratively, large to small
+	[ ] Pack check in checkout for validity
+	    [ ] Disable all if vol == max
+	    [ ] Disable any of size X if cannot fit another one in
 [x] Materials dropped off by airbag
 [ ] Materials dropped off by rocket
 [ ] Materials dropped off by rover

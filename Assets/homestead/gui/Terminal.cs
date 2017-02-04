@@ -1,14 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
+using System;
 
 public enum TerminalProgram { Finances, Colony, News, Market }
 public enum MarketTab { Buy, EnRoute, Sell }
 public enum BuyTab { ByResource, BySupplier, Checkout }
 
+[Serializable]
+public struct ColonyFields
+{
+    public Text ColonyDayText;
+}
+
+[Serializable]
+public struct FinanceFields
+{
+    public Text DaysUntilPaydayText, BankAccountText;
+    public Image DaysUntilPaydayVisualization;
+}
+
 public class Terminal : MonoBehaviour {
 
     public RectTransform[] ProgramPanels, MarketTabs, BuyTabs;
     public RectTransform HomePanel;
+    public ColonyFields colony;
+    public FinanceFields finance;
 
     private RectTransform currentProgramPanel, currentMarketTab, currentBuyTab;
 
@@ -20,6 +37,31 @@ public class Terminal : MonoBehaviour {
         HideAll(BuyTabs);
 
         SetProgram(null);
+        SunOrbit.Instance.OnHourChange += OnHourChange;
+        SunOrbit.Instance.OnSolChange += OnSolChange;
+        EconomyManager.Instance.OnBankAccountChange += OnBankAccountChange;
+    }
+
+    private void OnBankAccountChange()
+    {
+        finance.BankAccountText.text = String.Format("${0:n0}", EconomyManager.Instance.Player.BankAccount);
+    }
+
+    void Destroy()
+    {
+        SunOrbit.Instance.OnHourChange -= OnHourChange;
+        SunOrbit.Instance.OnSolChange -= OnSolChange;
+    }
+
+    private void OnSolChange(int newSol)
+    {
+        colony.ColonyDayText.text = newSol.ToString() + " Sols";
+    }
+
+    private void OnHourChange(int newSol, float newHour)
+    {
+        finance.DaysUntilPaydayText.text = string.Format("{0}hrs until payday", EconomyManager.Instance.HoursUntilPayday);
+        finance.DaysUntilPaydayVisualization.fillAmount = EconomyManager.Instance.HoursUntilPaydayPercentage;
     }
 
     private void HideAll(RectTransform[] collection)
@@ -89,4 +131,6 @@ public class Terminal : MonoBehaviour {
     {
         SwitchBuyTab((int)BuyTab.Checkout);
     }
+
+
 }

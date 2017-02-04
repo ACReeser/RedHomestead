@@ -2,6 +2,9 @@
 using System.Collections;
 using System;
 
+public delegate void HandleHourChange(int sol, float hour);
+public delegate void HandleSolChange(int sol);
+
 public class SunOrbit : MonoBehaviour {
     public Material Skybox;
     public Light GlobalLight;
@@ -20,6 +23,9 @@ public class SunOrbit : MonoBehaviour {
     private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;
     internal float CurrentHour = 9;
     internal float CurrentMinute = 0;
+    internal int CurrentSol = 1;
+    internal event HandleHourChange OnHourChange;
+    internal event HandleSolChange OnSolChange;
 
     internal static SunOrbit Instance;
     void Awake()
@@ -54,13 +60,20 @@ public class SunOrbit : MonoBehaviour {
         {
             CurrentHour++;
             CurrentMinute = 60f - CurrentMinute;
+
+            if (OnHourChange != null)
+                OnHourChange(CurrentSol, CurrentHour);
         }
 
         if (CurrentHour > 24 && CurrentMinute > 40f)
         {
+            CurrentSol += 1;
             CurrentHour = 0;
             CurrentMinute = 40 - CurrentMinute;
             dawnMilestone = duskMilestone = dawnEnded = duskEnded = false;
+
+            if (OnSolChange != null)
+                OnSolChange(CurrentSol);
         }
 
         float percentOfDay = ((CurrentHour * 60) + CurrentMinute) / MartianMinutesPerDay;
