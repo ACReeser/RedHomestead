@@ -26,7 +26,8 @@ public struct FinanceFields
 public struct BuyFields
 {
     public RectTransform[] BuyTabs;
-    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate;
+    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, CheckoutStockParent, CheckoutDeliveryButtonParent;
+    public Text CheckoutVendorName, CheckoutWeight, CheckoutVolume, CheckoutAccount, CheckoutGoods, CheckoutShippingCost, CheckoutTotal;
 
     internal void SetBySuppliersStock(Vendor v)
     {
@@ -35,6 +36,7 @@ public struct BuyFields
         {
             if (v != null && i < v.Stock.Count)
             {
+                //t.GetChild(0).GetComponent<Image>().sprite = v.Stock[i].Sprite;
                 t.GetChild(1).GetComponent<Text>().text = v.Stock[i].Name;
                 t.GetChild(2).GetComponent<Text>().text = v.Stock[i].StockAvailable + " @ $" + v.Stock[i].ListPrice;
                 t.gameObject.SetActive(true);
@@ -81,6 +83,7 @@ public class Terminal : MonoBehaviour {
     public BuyFields buys;
 
     private RectTransform currentProgramPanel, currentMarketTab, currentBuyTab;
+    internal Order CurrentOrder;
 
 	// Use this for initialization
 	void Start ()
@@ -93,6 +96,8 @@ public class Terminal : MonoBehaviour {
         SunOrbit.Instance.OnHourChange += OnHourChange;
         SunOrbit.Instance.OnSolChange += OnSolChange;
         EconomyManager.Instance.OnBankAccountChange += OnBankAccountChange;
+
+        CurrentOrder = new Order();
     }
 
     private void OnBankAccountChange()
@@ -188,7 +193,14 @@ public class Terminal : MonoBehaviour {
 
     public void Checkout(int supplierIndex)
     {
+        CheckoutVendor = Corporations.Wholesalers[supplierIndex];
+        FillCheckoutStock();
         SwitchBuyTab((int)BuyTab.Checkout);
+    }
+
+    private void FillCheckoutStock()
+    {
+        throw new NotImplementedException();
     }
 
     private Vendor CheckoutVendor = null;
@@ -201,7 +213,35 @@ public class Terminal : MonoBehaviour {
 
     public void BySupplierSelectVendorAndCheckout()
     {
-        CheckoutVendor = Corporations.Wholesalers[BySupplierVendorIndex];
-        SwitchBuyTab((int)BuyTab.Checkout);
+        Checkout(BySupplierVendorIndex);
+    }
+
+    public void SelectDeliveryType(int type)
+    {
+
+    }
+
+    public void AddItem()
+    {
+        Transform button = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform;
+        RefreshAmountText(button.parent);
+    }
+
+    private void RefreshAmountText(Transform checkoutFieldsParent)
+    {
+
+    }
+
+    public void SubtractItem()
+    {
+        Transform button = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform;
+        int stockI = button.parent.parent.GetSiblingIndex();
+
+        RefreshAmountText(button.parent);
+    }
+
+    public void PlaceOrder()
+    {
+
     }
 }

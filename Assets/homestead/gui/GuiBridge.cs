@@ -59,6 +59,12 @@ public struct ReportFields
 }
 
 [Serializable]
+public struct Icons
+{
+    public Sprite[] ResourceIcons, CompoundIcons;
+}
+
+[Serializable]
 public class RadialMenu
 {
     public RectTransform RadialPanel, RadialsParent;
@@ -98,6 +104,7 @@ public class GuiBridge : MonoBehaviour {
     public RadialMenu RadialMenu;
     public RedHomestead.Equipment.EquipmentSprites EquipmentSprites;
     public PromptUI Prompts;
+    public Icons Icons;
 
     internal Text[] ConstructionRequirementsText;
 

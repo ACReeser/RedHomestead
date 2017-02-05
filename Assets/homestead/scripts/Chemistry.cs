@@ -10,7 +10,7 @@ namespace RedHomestead.Simulation
     public enum Compound { Unspecified = -1, Hydrogen, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water }
 
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
-    public enum Resource { Steel, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal,
+    public enum Resource { Steel = 1, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal,
         Silica,
         Copper,
         Uranium,
@@ -34,7 +34,7 @@ namespace RedHomestead.Simulation
         }
     }
 
-    public static class MassExtensions
+    public static class MatterExtensions
     {
         //http://www.engineeringtoolbox.com/density-solids-d_1265.html
         private static Dictionary<Resource, float> DensityKgPerCubicMeter = new Dictionary<Resource, float>()
@@ -61,6 +61,16 @@ namespace RedHomestead.Simulation
         public static float Kilograms(this Resource r, float volumeCubicMeter = 1f)
         {
             return DensityKgPerCubicMeter[r] * volumeCubicMeter;
+        }
+
+        public static Sprite Sprite(this Resource r)
+        {
+            return GuiBridge.Instance.Icons.ResourceIcons[(int)r];
+        }
+
+        public static Sprite Sprite(this Compound r)
+        {
+            return GuiBridge.Instance.Icons.CompoundIcons[(int)r];
         }
     }
 

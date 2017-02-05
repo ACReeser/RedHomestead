@@ -76,7 +76,6 @@ namespace RedHomestead.Economy{
     {
         public Compound Compound;
         public override string Name { get { return Compound.ToString(); } }
-
     }
 
     public class Vendor
@@ -116,9 +115,11 @@ namespace RedHomestead.Economy{
 
     public class Order
     {
-        public List<Stock> Stock;
+        public List<Stock> Stock = new List<Economy.Stock>();
         public int DeliverySol;
         public int DeliveryHour;
         public DeliveryType Via;
+        public string VendorName;
+        public Vendor Vendor;
     }
 }
