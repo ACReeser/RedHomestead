@@ -17,6 +17,11 @@ namespace RedHomestead.Economy{
 
     public static class EnumExtensions
     {
+        public static bool IsSet(this DeliveryType value, DeliveryType flag)
+        {
+            return (value & flag) == flag;
+        }
+
         public static int DollarsPerKilogram(this DeliveryType dt, float distanceKilometers)
         {
             switch (dt)
@@ -59,23 +64,18 @@ namespace RedHomestead.Economy{
     {
         public int ListPrice { get; set; }
         public int StockAvailable { get; set; }
-        public int Weight { get; set; }
-        public int Volume
-        {
-            get
-            {
-                return 1;
-            }
-        }
+        public abstract string Name { get;  }
     }
 
     public class ResourceStock : Stock
     {
         public Resource Resource;
+        public override string Name { get { return Resource.ToString(); } }
     }
     public class CompoundStock : Stock
     {
         public Compound Compound;
+        public override string Name { get { return Compound.ToString(); } }
 
     }
 

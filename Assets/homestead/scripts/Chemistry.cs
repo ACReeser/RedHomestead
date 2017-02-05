@@ -10,7 +10,17 @@ namespace RedHomestead.Simulation
     public enum Compound { Unspecified = -1, Hydrogen, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water }
 
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
-    public enum Resource { Steel, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal }
+    public enum Resource { Steel, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal,
+        Silica,
+        Copper,
+        Uranium,
+        Polyethylene,
+        Platinum,
+        Glass,
+        Gold,
+        Silver,
+        Bauxite
+    }
 
     public class ResourceEntry
     {
@@ -23,6 +33,37 @@ namespace RedHomestead.Simulation
             this.Count = count;
         }
     }
+
+    public static class MassExtensions
+    {
+        //http://www.engineeringtoolbox.com/density-solids-d_1265.html
+        private static Dictionary<Resource, float> DensityKgPerCubicMeter = new Dictionary<Resource, float>()
+        {
+            { Resource.Steel, 7850f },
+            { Resource.SiliconWafers, 2330f },
+            { Resource.Aluminium, 2800f },
+            { Resource.Bauxite, 1280f },
+            { Resource.Biomass, 760f }, //same as wheat
+            { Resource.Silica, 2100 },
+            { Resource.Copper, 8790 },
+            { Resource.Uranium, 19100 },
+            { Resource.Polyethylene, 960 },
+            { Resource.Platinum, 21500 },
+            { Resource.Gold, 19290 },
+            { Resource.Silver, 10500 },
+            { Resource.Glass, 2600 },
+            { Resource.MealShake, 1100 }, //slightly denser than water
+            { Resource.MealPowder, 1600 }, //same as sand??
+            { Resource.RationMeal, 870 }, //same as butter
+            { Resource.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking
+        };
+
+        public static float Kilograms(this Resource r, float volumeCubicMeter = 1f)
+        {
+            return DensityKgPerCubicMeter[r] * volumeCubicMeter;
+        }
+    }
+
 
     public class Tracker
     {
