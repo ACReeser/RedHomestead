@@ -4,18 +4,21 @@ using UnityEngine.UI;
 using System;
 using RedHomestead.Economy;
 using System.Collections.Generic;
+using RedHomestead.Simulation;
 
 public enum TerminalProgram { Finances, Colony, News, Market }
 public enum MarketTab { Buy, EnRoute, Sell }
 public enum BuyTab { ByResource, BySupplier, Checkout }
 
 [Serializable]
+/// bindings and display logic for all the stuff under the colony app
 public struct ColonyFields
 {
     public Text ColonyDayText;
 }
 
 [Serializable]
+/// bindings and display logic for all the stuff under the finance app
 public struct FinanceFields
 {
     public Text DaysUntilPaydayText, BankAccountText;
@@ -23,22 +26,54 @@ public struct FinanceFields
 }
 
 [Serializable]
+/// bindings and display logic for all the stuff under the Market > Buy tabs
 public struct BuyFields
 {
     public RectTransform[] BuyTabs;
-    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, CheckoutStockParent, CheckoutDeliveryButtonParent;
+    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton;
     public Text CheckoutVendorName, CheckoutWeight, CheckoutVolume, CheckoutAccount, CheckoutGoods, CheckoutShippingCost, CheckoutTotal;
-
+    
+    internal void FillCheckout(Vendor v)
+    {
+        RefreshBuyTabsTabs(true);
+        CheckoutVendorName.text = v.Name;
+        CheckoutAccount.text = String.Format("${0:n0}", EconomyManager.Instance.Player.BankAccount);
+        FillCheckoutStock(v);
+    }
+    internal void RefreshBuyTabsTabs(bool isCheckingOut)
+    {
+        BySupplierButton.gameObject.SetActive(!isCheckingOut);
+        ByResourceButton.gameObject.SetActive(!isCheckingOut);
+    }
+    private void FillCheckoutStock(Vendor v)
+    {
+        SetStock(v, CheckoutStockParent, (Transform t, int i) =>
+        {
+            Transform group = t.GetChild(0);
+            group.GetChild(0).GetComponent<Image>().sprite = v.Stock[i].Matter.Sprite();
+            group.GetChild(1).GetComponent<Text>().text = v.Stock[i].Name;
+            group.GetChild(2).GetComponent<Text>().text = string.Format(
+                "{0} @ ${1}  {2}<size=6>kg</size> {3}<size=6>m3</size>", v.Stock[i].StockAvailable, v.Stock[i].ListPrice, v.Stock[i].Matter.Kilograms(), 1);
+            group.GetChild(5).GetComponent<Text>().text = "0";
+        });
+    }
     internal void SetBySuppliersStock(Vendor v)
     {
+        SetStock(v, BySuppliersStockTemplate.parent, (Transform t, int i) =>
+        {
+            t.GetChild(0).GetComponent<Image>().sprite = v.Stock[i].Matter.Sprite();
+            t.GetChild(1).GetComponent<Text>().text = v.Stock[i].Name;
+            t.GetChild(2).GetComponent<Text>().text = v.Stock[i].StockAvailable + " @ $" + v.Stock[i].ListPrice;
+        });
+    }
+    private void SetStock(Vendor v, Transform stockParent, Action<Transform, int> bind)
+    {
         int i = 0;
-        foreach(Transform t in BySuppliersStockTemplate.parent)
+        foreach (Transform t in stockParent)
         {
             if (v != null && i < v.Stock.Count)
             {
-                //t.GetChild(0).GetComponent<Image>().sprite = v.Stock[i].Sprite;
-                t.GetChild(1).GetComponent<Text>().text = v.Stock[i].Name;
-                t.GetChild(2).GetComponent<Text>().text = v.Stock[i].StockAvailable + " @ $" + v.Stock[i].ListPrice;
+                bind(t, i);
                 t.gameObject.SetActive(true);
             }
             else
@@ -96,6 +131,7 @@ public class Terminal : MonoBehaviour {
         SunOrbit.Instance.OnHourChange += OnHourChange;
         SunOrbit.Instance.OnSolChange += OnSolChange;
         EconomyManager.Instance.OnBankAccountChange += OnBankAccountChange;
+        OnBankAccountChange();
 
         CurrentOrder = new Order();
     }
@@ -169,8 +205,11 @@ public class Terminal : MonoBehaviour {
 
         currentMarketTab = MarketTabs[t];
 
-        if (currentMarketTab == MarketTabs[(int)MarketTab.Sell])
+        if (currentMarketTab == MarketTabs[(int)MarketTab.Buy])
+        {
+            buys.RefreshBuyTabsTabs(false);
             SwitchBuyTab((int)BuyTab.BySupplier);
+        }
 
         currentMarketTab.gameObject.SetActive(true);
     }
@@ -194,20 +233,16 @@ public class Terminal : MonoBehaviour {
     public void Checkout(int supplierIndex)
     {
         CheckoutVendor = Corporations.Wholesalers[supplierIndex];
-        FillCheckoutStock();
+        buys.FillCheckout(CheckoutVendor);
         SwitchBuyTab((int)BuyTab.Checkout);
-    }
-
-    private void FillCheckoutStock()
-    {
-        throw new NotImplementedException();
     }
 
     private Vendor CheckoutVendor = null;
     private int BySupplierVendorIndex = -1;
     public void BySupplierVendorClick()
     {
-        BySupplierVendorIndex = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.GetSiblingIndex();
+        BySupplierVendorIndex = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.parent.GetSiblingIndex();
+        print(BySupplierVendorIndex);
         buys.SetBySuppliersStock(Corporations.Wholesalers[BySupplierVendorIndex]);
     }
 
@@ -221,27 +256,35 @@ public class Terminal : MonoBehaviour {
 
     }
 
-    public void AddItem()
-    {
-        Transform button = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform;
-        RefreshAmountText(button.parent);
-    }
-
-    private void RefreshAmountText(Transform checkoutFieldsParent)
-    {
-
-    }
-
-    public void SubtractItem()
+    public void DeltaItem(int amount)
     {
         Transform button = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform;
         int stockI = button.parent.parent.GetSiblingIndex();
+        Stock s = CheckoutVendor.Stock[stockI];
+        CurrentOrder.LineItemUnits.AddOrAddIfNonnegativeResult<Matter>(s.Matter, amount);
+        CurrentOrder.MatterCost += s.ListPrice* amount;
 
-        RefreshAmountText(button.parent);
+        RefreshAmountText(button.parent, CurrentOrder.LineItemUnits[s.Matter]);
+    }
+
+    private void RefreshAmountText(Transform checkoutFieldsParent, int units)
+    {
+        checkoutFieldsParent.GetChild(5).GetComponent<Text>().text = units.ToString();
     }
 
     public void PlaceOrder()
     {
+        if (EconomyManager.Instance.Player.BankAccount < CurrentOrder.GrandTotal)
+            return;
+        else
+        {
 
+        }
+    }
+
+    public void CancelOrder()
+    {
+        buys.RefreshBuyTabsTabs(false);
+        SwitchBuyTab((int)BuyTab.BySupplier);
     }
 }

@@ -15,7 +15,7 @@ namespace RedHomestead.Economy{
     [Flags]
     public enum DeliveryType { Rover, Lander, Drop }
 
-    public static class EnumExtensions
+    public static class EconomyExtensions
     {
         public static bool IsSet(this DeliveryType value, DeliveryType flag)
         {
@@ -56,6 +56,18 @@ namespace RedHomestead.Economy{
                     //300 km/h suborbital speed
                     //for 24.7h each day
                     return .5f + (distanceKilometers / (300 * 24.6f));
+            }
+        }
+
+        public static void AddOrAddIfNonnegativeResult<T>(this Dictionary<T, int> dict, T key, int amount)
+        {
+            if (dict.ContainsKey(key) && dict[key] + amount > -1)
+            {
+                dict[key] += amount;
+            }
+            else if (amount > -1)
+            {
+                dict[key] = amount;
             }
         }
     }
@@ -115,5 +127,14 @@ namespace RedHomestead.Economy{
         public DeliveryType Via;
         public string VendorName;
         public Vendor Vendor;
+        public int MatterCost;
+        public int ShippingCost;
+        public int GrandTotal
+        {
+            get
+            {
+                return ShippingCost + MatterCost;
+            }
+        }
     }
 }

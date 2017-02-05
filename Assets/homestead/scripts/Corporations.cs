@@ -59,8 +59,8 @@ public static class Corporations {
             {
                 new Stock()
                 {
-                    ListPrice = 1000,
-                    StockAvailable = 100,
+                    ListPrice = 900,
+                    StockAvailable = 50,
                     Matter = Matter.Steel
                 },
                 new Stock()
@@ -80,6 +80,12 @@ public static class Corporations {
                     ListPrice = 2000,
                     StockAvailable = 100,
                     Matter = Matter.SiliconWafers
+                },
+                new Stock()
+                {
+                    ListPrice = 300,
+                    StockAvailable = 100,
+                    Matter = Matter.Glass
                 }
             }
         }

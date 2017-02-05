@@ -38,8 +38,13 @@ namespace RedHomestead.Simulation
     public static class MatterExtensions
     {
         //http://www.engineeringtoolbox.com/density-solids-d_1265.html
+        //https://www.wolframalpha.com/input/?i=density+of+hydrogen+at+0+deg+C+and+350+bar
         private static Dictionary<Matter, float> DensityKgPerCubicMeter = new Dictionary<Matter, float>()
         {
+            { Matter.Hydrogen, 24f }, // 0 deg and 350 bar
+            { Matter.Oxygen, 498f }, // 0 deg and 350 bar
+            { Matter.Methane, 258f }, // 0 deg and 350 bar
+            { Matter.Water, 1000f }, // 0.1 deg and 1 atm
             { Matter.Steel, 7850f },
             { Matter.SiliconWafers, 2330f },
             { Matter.Aluminium, 2800f },
