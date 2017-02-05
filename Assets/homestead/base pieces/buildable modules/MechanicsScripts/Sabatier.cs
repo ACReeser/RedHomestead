@@ -57,10 +57,10 @@ public class Sabatier : Converter, IPowerToggleable
 
     private void PushMethaneAndWater()
     {
-        MethaneOut.Get(Compound.Methane).Push(MethanePerSecond * Time.fixedDeltaTime);
-        CompoundHistory.Produce(Compound.Methane, MethanePerSecond * Time.fixedDeltaTime);
-        WaterOut.Get(Compound.Water).Push(WaterPerSecond * Time.fixedDeltaTime);
-        CompoundHistory.Produce(Compound.Water, MethanePerSecond * Time.fixedDeltaTime);
+        MethaneOut.Get(Matter.Methane).Push(MethanePerSecond * Time.fixedDeltaTime);
+        MatterHistory.Produce(Matter.Methane, MethanePerSecond * Time.fixedDeltaTime);
+        WaterOut.Get(Matter.Water).Push(WaterPerSecond * Time.fixedDeltaTime);
+        MatterHistory.Produce(Matter.Water, MethanePerSecond * Time.fixedDeltaTime);
     }
 
     private float hydrogenBuffer = 0f;
@@ -68,9 +68,9 @@ public class Sabatier : Converter, IPowerToggleable
     {
         if (HydrogenSource != null)
         {
-            float newHydrogen = HydrogenSource.Get(Compound.Hydrogen).Pull(HydrogenPerSecond * Time.fixedDeltaTime);
+            float newHydrogen = HydrogenSource.Get(Matter.Hydrogen).Pull(HydrogenPerSecond * Time.fixedDeltaTime);
             hydrogenBuffer += newHydrogen;
-            CompoundHistory.Consume(Compound.Hydrogen, newHydrogen);
+            MatterHistory.Consume(Matter.Hydrogen, newHydrogen);
 
             float hydrogenThisTick = HydrogenPerSecond * Time.fixedDeltaTime;
 
@@ -91,15 +91,15 @@ public class Sabatier : Converter, IPowerToggleable
 
     public override void OnSinkConnected(Sink s)
     {
-        if (s.HasContainerFor(Compound.Hydrogen))
+        if (s.HasContainerFor(Matter.Hydrogen))
         {
             HydrogenSource = s;
         }
-        if (s.HasContainerFor(Compound.Methane))
+        if (s.HasContainerFor(Matter.Methane))
         {
             MethaneOut = s;
         }
-        if (s.HasContainerFor(Compound.Water))
+        if (s.HasContainerFor(Matter.Water))
         {
             WaterOut = s;
         }
@@ -110,7 +110,7 @@ public class Sabatier : Converter, IPowerToggleable
         //todo: report v3: flow is "0/1 kWh" etc, flow and amount update over time
         //using some sort of UpdateReport() call (which reuses built text boxes)
         //todo: report v4: each row gets a graph over time that shows effciency or flow
-        //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", CompoundHistory[Compound.Hydrogen].Consumed, CompoundHistory[Compound.Water].Produced, CompoundHistory[Compound.Methane].Produced, HasPower));
+        //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", MatterHistory[Matter.Hydrogen].Consumed, MatterHistory[Matter.Water].Produced, MatterHistory[Matter.Methane].Produced, HasPower));
         GuiBridge.Instance.WriteReport(
             "Sabatier Reactor",
             "1 kWh + 1kg H2 => 1kg CH4 + 1kg H2O",
@@ -119,12 +119,12 @@ public class Sabatier : Converter, IPowerToggleable
             new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
+                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = MatterHistory[Matter.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Methane].Produced + " kg", Connected = MethaneOut != null },
-                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Water].Produced + " kg", Connected = WaterOut != null }
+                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = MatterHistory[Matter.Methane].Produced + " kg", Connected = MethaneOut != null },
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = MatterHistory[Matter.Water].Produced + " kg", Connected = WaterOut != null }
             }
             );
     }

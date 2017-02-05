@@ -20,29 +20,29 @@ public static class Corporations {
             },
             Stock = new List<Stock>()
             {
-                new ResourceStock()
+                new Stock()
                 {
                     ListPrice = 1000,
                     StockAvailable = 100,
-                    Resource = Resource.Steel
+                    Matter = Matter.Steel
                 },
-                new ResourceStock()
+                new Stock()
                 {
                     ListPrice = 100,
                     StockAvailable = 100,
-                    Resource = Resource.RationMeal
+                    Matter = Matter.RationMeal
                 },
-                new CompoundStock()
+                new Stock()
                 {
                     ListPrice = 500,
                     StockAvailable = 100,
-                    Compound = Compound.Hydrogen
+                    Matter = Matter.Hydrogen
                 },
-                new ResourceStock()
+                new Stock()
                 {
                     ListPrice = 2000,
                     StockAvailable = 100,
-                    Resource = Resource.SiliconWafers
+                    Matter = Matter.SiliconWafers
                 }
             }
         },
@@ -57,29 +57,29 @@ public static class Corporations {
             },
             Stock = new List<Stock>()
             {
-                new ResourceStock()
+                new Stock()
                 {
                     ListPrice = 1000,
                     StockAvailable = 100,
-                    Resource = Resource.Steel
+                    Matter = Matter.Steel
                 },
-                new ResourceStock()
+                new Stock()
                 {
                     ListPrice = 100,
                     StockAvailable = 100,
-                    Resource = Resource.RationMeal
+                    Matter = Matter.RationMeal
                 },
-                new CompoundStock()
+                new Stock()
                 {
                     ListPrice = 100,
                     StockAvailable = 100,
-                    Compound = Compound.Hydrogen
+                    Matter = Matter.Hydrogen
                 },
-                new ResourceStock()
+                new Stock()
                 {
                     ListPrice = 2000,
                     StockAvailable = 100,
-                    Resource = Resource.SiliconWafers
+                    Matter = Matter.SiliconWafers
                 }
             }
         }

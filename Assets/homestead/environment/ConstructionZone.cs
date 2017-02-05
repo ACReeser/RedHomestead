@@ -21,10 +21,10 @@ public class ConstructionZone : MonoBehaviour {
     }
 
     internal static ConstructionZone CurrentZone;
-    internal Dictionary<Resource, int> ResourceCount;
+    internal Dictionary<Matter, int> ResourceCount;
     internal List<ResourceComponent> ResourceList;
     internal bool CanConstruct { get; private set; }
-    internal Resource[] RequiredResourceMask;
+    internal Matter[] RequiredResourceMask;
 
 	// Use this for initialization
 	void Start () {
@@ -40,10 +40,10 @@ public class ConstructionZone : MonoBehaviour {
     {
         if (UnderConstruction != Module.Unspecified)
         {
-            ResourceCount = new Dictionary<Resource, int>();
+            ResourceCount = new Dictionary<Matter, int>();
             ResourceList = new List<ResourceComponent>();
             //todo: change to Construction.Requirements[underconstruction].keys when that's a dict of <resource, entry> and not a list
-            RequiredResourceMask = new Resource[Construction.Requirements[this.UnderConstruction].Count];
+            RequiredResourceMask = new Matter[Construction.Requirements[this.UnderConstruction].Count];
 
             int i = 0;
             foreach(ResourceEntry required in Construction.Requirements[this.UnderConstruction])
@@ -148,7 +148,7 @@ public class ConstructionZone : MonoBehaviour {
         //what this code is doing:
         //only destroying those entries in the ResourceList that are required to build the Module
         //so you can't put in 100 steel to something that requires 10 and lose 90 excess steel
-        Dictionary<Resource, int> deletedCount = new Dictionary<Resource, int>();
+        Dictionary<Matter, int> deletedCount = new Dictionary<Matter, int>();
         for(int i = this.ResourceList.Count - 1; i >= 0; i--)
         {
             ResourceComponent component = this.ResourceList[i];

@@ -9,7 +9,7 @@ public abstract class ModuleGameplay : MonoBehaviour
     public SpriteRenderer PowerIndicator;
 
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
-    public LocalCompoundHistory CompoundHistory = new LocalCompoundHistory();
+    public LocalMatterHistory MatterHistory = new LocalMatterHistory();
 
     private bool _hasPower;
     public bool HasPower {
@@ -70,23 +70,23 @@ public abstract class Sink : ModuleGameplay
         this.Equalize();
     }
 
-    public bool HasContainerFor(Compound c)
+    public bool HasContainerFor(Matter c)
     {
         return Get(c) != null;
     }
 
-    public abstract ResourceContainer Get(Compound c);
+    public abstract ResourceContainer Get(Matter c);
     public abstract void Equalize();
 }
 
 public abstract class SingleResourceSink : Sink
 {
-    public Compound SinkType;
+    public Matter SinkType;
     public ResourceContainer Container;
     public SpriteRenderer flowAmountRenderer;
     public float StartAmount, Capacity;
 
-    public override ResourceContainer Get(Compound c)
+    public override ResourceContainer Get(Matter c)
     {
         if (SinkType == c)
         {
@@ -164,8 +164,7 @@ public class ResourceContainer
         this.Amount = initialAmount;
     }
 
-    public Compound SimpleCompoundType;
-    public Resource ComplexResourceType;
+    public Matter MattterType;
 
     public float TotalCapacity = 1f;
     protected float Amount;

@@ -6,11 +6,12 @@ using System;
 namespace RedHomestead.Simulation
 {
     public enum Energy { Electrical, Thermal }
-
-    public enum Compound { Unspecified = -1, Hydrogen, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water }
-
+    
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
-    public enum Resource { Steel = 1, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal,
+    public enum Matter {
+        Hydrogen = -6, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water,
+        Unspecified = 0,
+        Steel = 1, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal,
         Silica,
         Copper,
         Uranium,
@@ -24,10 +25,10 @@ namespace RedHomestead.Simulation
 
     public class ResourceEntry
     {
-        public Resource Type { get; set; }
+        public Matter Type { get; set; }
         public int Count { get; set; }
 
-        public ResourceEntry(int count, Resource type)
+        public ResourceEntry(int count, Matter type)
         {
             this.Type = type;
             this.Count = count;
@@ -37,40 +38,43 @@ namespace RedHomestead.Simulation
     public static class MatterExtensions
     {
         //http://www.engineeringtoolbox.com/density-solids-d_1265.html
-        private static Dictionary<Resource, float> DensityKgPerCubicMeter = new Dictionary<Resource, float>()
+        private static Dictionary<Matter, float> DensityKgPerCubicMeter = new Dictionary<Matter, float>()
         {
-            { Resource.Steel, 7850f },
-            { Resource.SiliconWafers, 2330f },
-            { Resource.Aluminium, 2800f },
-            { Resource.Bauxite, 1280f },
-            { Resource.Biomass, 760f }, //same as wheat
-            { Resource.Silica, 2100 },
-            { Resource.Copper, 8790 },
-            { Resource.Uranium, 19100 },
-            { Resource.Polyethylene, 960 },
-            { Resource.Platinum, 21500 },
-            { Resource.Gold, 19290 },
-            { Resource.Silver, 10500 },
-            { Resource.Glass, 2600 },
-            { Resource.MealShake, 1100 }, //slightly denser than water
-            { Resource.MealPowder, 1600 }, //same as sand??
-            { Resource.RationMeal, 870 }, //same as butter
-            { Resource.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking
+            { Matter.Steel, 7850f },
+            { Matter.SiliconWafers, 2330f },
+            { Matter.Aluminium, 2800f },
+            { Matter.Bauxite, 1280f },
+            { Matter.Biomass, 760f }, //same as wheat
+            { Matter.Silica, 2100 },
+            { Matter.Copper, 8790 },
+            { Matter.Uranium, 19100 },
+            { Matter.Polyethylene, 960 },
+            { Matter.Platinum, 21500 },
+            { Matter.Gold, 19290 },
+            { Matter.Silver, 10500 },
+            { Matter.Glass, 2600 },
+            { Matter.MealShake, 1100 }, //slightly denser than water
+            { Matter.MealPowder, 1600 }, //same as sand??
+            { Matter.RationMeal, 870 }, //same as butter
+            { Matter.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking
         };
 
-        public static float Kilograms(this Resource r, float volumeCubicMeter = 1f)
+        public static float Kilograms(this Matter r, float volumeCubicMeter = 1f)
         {
             return DensityKgPerCubicMeter[r] * volumeCubicMeter;
         }
 
-        public static Sprite Sprite(this Resource r)
+        public static Sprite Sprite(this Matter r)
         {
-            return GuiBridge.Instance.Icons.ResourceIcons[(int)r];
-        }
-
-        public static Sprite Sprite(this Compound r)
-        {
-            return GuiBridge.Instance.Icons.CompoundIcons[(int)r];
+            int i = (int)r;
+            if (i < 0)
+            {
+                return GuiBridge.Instance.Icons.CompoundIcons[i + 6]; //6 "compounds" are negative
+            }
+            else
+            {
+                return GuiBridge.Instance.Icons.ResourceIcons[i - 1]; // 1 unspecified
+            }
         }
     }
 
@@ -132,15 +136,15 @@ namespace RedHomestead.Simulation
         }
     }
 
-    public class LocalCompoundHistory : History<Compound>
+    public class LocalMatterHistory : History<Matter>
     {
-        public override void Produce(Compound type, float additionalAmount)
+        public override void Produce(Matter type, float additionalAmount)
         {
             base.Produce(type, additionalAmount);
             GlobalHistory.Compound.Produce(type, additionalAmount);
         }
 
-        public override void Consume(Compound type, float additionalAmount)
+        public override void Consume(Matter type, float additionalAmount)
         {
             base.Consume(type, additionalAmount);
             GlobalHistory.Compound.Consume(type, additionalAmount);
@@ -150,7 +154,7 @@ namespace RedHomestead.Simulation
     public static class GlobalHistory
     {
         public static History<Energy> Energy = new History<Simulation.Energy>();
-        public static History<Compound> Compound = new History<Simulation.Compound>();
-        public static History<Resource> Resource = new History<Simulation.Resource>();
+        public static History<Matter> Compound = new History<Simulation.Matter>();
+        public static History<Matter> Resource = new History<Simulation.Matter>();
     }
 }

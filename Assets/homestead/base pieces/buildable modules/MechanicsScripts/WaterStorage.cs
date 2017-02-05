@@ -23,11 +23,11 @@ public class WaterStorage : SingleResourceSink {
     protected override void OnStart()
     {
         base.OnStart();
-        this.SinkType = Compound.Water;
+        this.SinkType = Matter.Water;
         this.Container = new ResourceContainer(StartAmount)
         {
             TotalCapacity = Capacity,
-            SimpleCompoundType = Compound.Water
+            MattterType = Matter.Water
         };
     }
     

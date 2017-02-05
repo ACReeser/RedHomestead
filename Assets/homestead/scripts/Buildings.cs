@@ -59,44 +59,44 @@ namespace RedHomestead.Buildings
             {
                 Module.SolarPanelSmall, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(2, Resource.Steel),
-                    new ResourceEntry(4, Resource.SiliconWafers)
+                    new ResourceEntry(2, Matter.Steel),
+                    new ResourceEntry(4, Matter.SiliconWafers)
                 }
             },
             {
                 Module.LargeGasTank, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(8, Resource.Steel)
+                    new ResourceEntry(8, Matter.Steel)
                 }
             },
             {
                 Module.SmallGasTank, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(1, Resource.Steel)
+                    new ResourceEntry(1, Matter.Steel)
                 }
             },
             {
                 Module.SmallWaterTank, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(1, Resource.Steel)
+                    new ResourceEntry(1, Matter.Steel)
                 }
             },
             {
                 Module.Splitter, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(1, Resource.Steel)
+                    new ResourceEntry(1, Matter.Steel)
                 }
             },
             {
                 Module.SabatierReactor, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(1, Resource.Steel)
+                    new ResourceEntry(1, Matter.Steel)
                 }
             },
             {
                 Module.OreExtractor, new List<ResourceEntry>()
                 {
-                    new ResourceEntry(1, Resource.Steel)
+                    new ResourceEntry(1, Matter.Steel)
                 }
             }
         };

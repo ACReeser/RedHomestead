@@ -8,10 +8,10 @@ public class MealResourceInterface : HabitatResourceInterface {
     
     protected override void OnResourceChange()
     {
-        ShowPantry(RationMeals, LinkedHab.ComplexResourceTotals[Resource.RationMeal]);
-        ShowPantry(OrganicMeals, LinkedHab.ComplexResourceTotals[Resource.OrganicMeal]);
-        ShowPantry(ShakePowders, LinkedHab.ComplexResourceTotals[Resource.MealPowder]);
-        ShowPantry(ShakeMeals, LinkedHab.ComplexResourceTotals[Resource.MealShake]);
+        ShowPantry(RationMeals, LinkedHab.MatterTotals[Matter.RationMeal]);
+        ShowPantry(OrganicMeals, LinkedHab.MatterTotals[Matter.OrganicMeal]);
+        ShowPantry(ShakePowders, LinkedHab.MatterTotals[Matter.MealPowder]);
+        ShowPantry(ShakeMeals, LinkedHab.MatterTotals[Matter.MealShake]);
     }
 
     private void ShowPantry(Transform visualizationRoot, SumContainer sumContainer)
@@ -24,11 +24,11 @@ public class MealResourceInterface : HabitatResourceInterface {
 
     protected override void DoDisplay()
     {
-        SumContainer bioC = LinkedHab.ComplexResourceTotals[Resource.Biomass];
-        SumContainer organicC = LinkedHab.ComplexResourceTotals[Resource.OrganicMeal];
-        SumContainer rationC = LinkedHab.ComplexResourceTotals[Resource.RationMeal];
-        SumContainer powderC = LinkedHab.ComplexResourceTotals[Resource.MealPowder];
-        SumContainer shakeC = LinkedHab.ComplexResourceTotals[Resource.MealShake];
+        SumContainer bioC = LinkedHab.MatterTotals[Matter.Biomass];
+        SumContainer organicC = LinkedHab.MatterTotals[Matter.OrganicMeal];
+        SumContainer rationC = LinkedHab.MatterTotals[Matter.RationMeal];
+        SumContainer powderC = LinkedHab.MatterTotals[Matter.MealPowder];
+        SumContainer shakeC = LinkedHab.MatterTotals[Matter.MealShake];
 
         string days = (Math.Truncate(100 * ((bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) / 2f + (powderC.CurrentAmount + shakeC.CurrentAmount) / 4f)) / 100).ToString();
 

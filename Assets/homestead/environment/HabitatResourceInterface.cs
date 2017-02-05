@@ -6,8 +6,8 @@ using RedHomestead.Simulation;
 public class HabitatResourceInterface : HabitatModule
 {
     public TextMesh DisplayOut;
-    public Resource DisplayResource;
-    public Compound DisplayCompound = Compound.Unspecified;
+    public Matter DisplayResource;
+    public Matter DisplayCompound = Matter.Unspecified;
     public string HeaderText = "";
 
     private bool useResource;
@@ -20,7 +20,7 @@ public class HabitatResourceInterface : HabitatModule
             OnResourceChange();
         }
 
-        useResource = (DisplayCompound == Compound.Unspecified);
+        useResource = (DisplayCompound == Matter.Unspecified);
 	}
 	
 	void FixedUpdate()
@@ -39,16 +39,7 @@ public class HabitatResourceInterface : HabitatModule
 
     private void DisplaySingleContainer()
     {
-        SumContainer container = null;
-
-        if (useResource)
-        {
-            container = LinkedHab.ComplexResourceTotals[DisplayResource];
-        }
-        else
-        {
-            container = LinkedHab.BasicResourceTotals[DisplayCompound];
-        }
+        SumContainer container = LinkedHab.MatterTotals[DisplayResource];
 
         DisplayOut.text = string.Format("{0}: {1}\n{2}/{3}kg\n{4}{5} {6}",
             HeaderText,

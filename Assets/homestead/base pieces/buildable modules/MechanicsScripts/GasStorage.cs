@@ -22,7 +22,7 @@ public class GasStorage : SingleResourceSink {
     {
         base.OnStart();
 
-        if (this.SinkType != Compound.Unspecified)
+        if (this.SinkType != Matter.Unspecified)
             _SpecifyCompound(this.SinkType);
         else
             SyncMeshToCompoundType();
@@ -52,7 +52,7 @@ public class GasStorage : SingleResourceSink {
     private void RefreshMeshToCompound()
     {
         //unspecified == -1, so add 1 to get 0 based array index of meshes
-        int index = ((int)this.SinkType) + 1;
+        int index = Math.Abs((int)this.SinkType);
         if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
         {
             this.MeshFilter.mesh = CompoundUVSet[index];
@@ -72,9 +72,9 @@ public class GasStorage : SingleResourceSink {
         flowAmountRenderer.transform.localScale = new Vector3(1, percentage, 1);
     }
 
-    public void SpecifyCompound(Compound c)
+    public void SpecifyCompound(Matter c)
     {
-        if (this.SinkType == Compound.Unspecified)
+        if (this.SinkType == Matter.Unspecified)
         {
             _SpecifyCompound(c);
         }
@@ -84,12 +84,12 @@ public class GasStorage : SingleResourceSink {
         }
     }
 
-    private void _SpecifyCompound(Compound c)
+    private void _SpecifyCompound(Matter c)
     {
         this.SinkType = c;
         SyncMeshToCompoundType();
 
-        if (c == Compound.Unspecified)
+        if (c == Matter.Unspecified)
         {
             this.Container = null;
         }
@@ -98,7 +98,7 @@ public class GasStorage : SingleResourceSink {
             this.Container = new ResourceContainer(StartAmount)
             {
                 TotalCapacity = Capacity,
-                SimpleCompoundType = this.SinkType
+                MattterType = this.SinkType
             };
         }
     }
@@ -114,7 +114,7 @@ public class GasStorage : SingleResourceSink {
 
         if (Adjacent.Count == 0 && Container != null && Container.UtilizationPercentage <= 0f)
         {
-            _SpecifyCompound(Compound.Unspecified);
+            _SpecifyCompound(Matter.Unspecified);
         }
     }
 }

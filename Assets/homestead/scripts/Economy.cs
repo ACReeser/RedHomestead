@@ -60,22 +60,16 @@ namespace RedHomestead.Economy{
         }
     }
 
-    public abstract class Stock
+    public class Stock
     {
+        public Matter Matter { get; set; }
         public int ListPrice { get; set; }
         public int StockAvailable { get; set; }
-        public abstract string Name { get;  }
-    }
-
-    public class ResourceStock : Stock
-    {
-        public Resource Resource;
-        public override string Name { get { return Resource.ToString(); } }
-    }
-    public class CompoundStock : Stock
-    {
-        public Compound Compound;
-        public override string Name { get { return Compound.ToString(); } }
+        public string Name {
+            get {
+                return Matter.ToString();
+            }
+        }
     }
 
     public class Vendor
@@ -115,7 +109,7 @@ namespace RedHomestead.Economy{
 
     public class Order
     {
-        public List<Stock> Stock = new List<Economy.Stock>();
+        public Dictionary<Matter, int> LineItemUnits = new Dictionary<Matter, int>();
         public int DeliverySol;
         public int DeliveryHour;
         public DeliveryType Via;

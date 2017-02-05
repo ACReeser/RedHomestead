@@ -143,7 +143,7 @@ public class PlayerInput : MonoBehaviour {
 
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket, carriedObject;
-    private Compound selectedCompound = Compound.Unspecified;
+    private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
     private List<Transform> createdPowerlines = new List<Transform>();
@@ -1023,9 +1023,9 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        Compound other = GetCompoundFromValve(hitInfo.collider);
+        Matter other = GetCompoundFromValve(hitInfo.collider);
 
-        if (selectedCompound != Compound.Unspecified)
+        if (selectedCompound != Matter.Unspecified)
         {
             if (!CompoundsMatch(selectedCompound, other))
             {
@@ -1039,22 +1039,22 @@ public class PlayerInput : MonoBehaviour {
 
             if (value == null)
                 //todo: bug this actually should be nullable
-                selectedCompound = Compound.Unspecified;
+                selectedCompound = Matter.Unspecified;
             else 
                 selectedCompound = other;
 
         }, PlaceGasPipe, Prompts.GasPipePrompts);
     }
 
-    private static bool CompoundsMatch(Compound selectedCompound, Compound other)
+    private static bool CompoundsMatch(Matter selectedCompound, Matter other)
     {
-        if (selectedCompound == Compound.Unspecified &&
-            other == Compound.Unspecified)
+        if (selectedCompound == Matter.Unspecified &&
+            other == Matter.Unspecified)
         {
             return true;
         }
-        else if (selectedCompound != Compound.Unspecified &&
-            other == Compound.Unspecified)
+        else if (selectedCompound != Matter.Unspecified &&
+            other == Matter.Unspecified)
         {
             return true;
         }
@@ -1064,39 +1064,39 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private static Compound GetCompoundFromValve(Collider collider)
+    private static Matter GetCompoundFromValve(Collider collider)
     {
         switch (collider.tag)
         {
             case "oxygenvalve":
-                return Compound.Oxygen;
+                return Matter.Oxygen;
             case "hydrogenvalve":
-                return Compound.Hydrogen;
+                return Matter.Hydrogen;
             case "methanevalve":
-                return Compound.Methane;
+                return Matter.Methane;
             case "carbondioxidevalve":
-                return Compound.CarbonDioxide;
+                return Matter.CarbonDioxide;
             case "watervalve":
-                return Compound.Water;
+                return Matter.Water;
             default:
-                return Compound.Unspecified;
+                return Matter.Unspecified;
         }
     }
 
     //todo: move out of this class
-    public static string GetValveFromCompound(Compound c)
+    public static string GetValveFromCompound(Matter c)
     {
         switch (c)
         {
-            case Compound.Oxygen:
+            case Matter.Oxygen:
                 return "oxygenvalve";
-            case Compound.Hydrogen:
+            case Matter.Hydrogen:
                 return "hydrogenvalve";
-            case Compound.Methane:
+            case Matter.Methane:
                 return "methanevalve";
-            case Compound.CarbonDioxide:
+            case Matter.CarbonDioxide:
                 return "carbondioxidevalve";
-            case Compound.Water:
+            case Matter.Water:
                 return "watervalve";
             default:
                 return "valve";
@@ -1276,7 +1276,7 @@ public class PlayerInput : MonoBehaviour {
     {
         Transform newPipe = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
 
-        if (selectedCompound == Compound.Unspecified)
+        if (selectedCompound == Matter.Unspecified)
             selectedCompound = GetCompoundFromValve(collider);
 
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
@@ -1299,7 +1299,7 @@ public class PlayerInput : MonoBehaviour {
         pipeScript.from = selectedGasValve.transform;
         pipeScript.to = collider.transform;
 
-        selectedCompound = Compound.Unspecified;
+        selectedCompound = Matter.Unspecified;
     }
 
     private void PlacePowerPlug(Collider collider)

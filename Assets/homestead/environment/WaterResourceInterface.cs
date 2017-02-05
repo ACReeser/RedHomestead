@@ -7,7 +7,7 @@ public class WaterResourceInterface : HabitatResourceInterface {
 
     protected override void OnResourceChange()
     {
-        int numBarrels = Mathf.CeilToInt(Barrels.Count * LinkedHab.BasicResourceTotals[RedHomestead.Simulation.Compound.Water].UtilizationPercentage);
+        int numBarrels = Mathf.CeilToInt(Barrels.Count * LinkedHab.MatterTotals[RedHomestead.Simulation.Matter.Water].UtilizationPercentage);
         
         for (int i = 0; i < Barrels.Count; i++)
         {

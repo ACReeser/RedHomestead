@@ -8,8 +8,8 @@ public class Pipe : MonoBehaviour {
     public Mesh[] CompoundUVSet = new Mesh[7];
     public Mesh[] NorthFlowVisualizationUVSet = new Mesh[7];
     public Mesh[] SouthFlowVisualizationUVSet = new Mesh[7];
-    private Compound _pipeType = Compound.Unspecified;
-    internal Compound PipeType
+    private Matter _pipeType = Matter.Unspecified;
+    internal Matter PipeType
     {
         get
         {
@@ -23,12 +23,12 @@ public class Pipe : MonoBehaviour {
 
     internal Transform from, to;
 
-    private void SetPipeType(Compound value)
+    private void SetPipeType(Matter value)
     {
         _pipeType = value;
-        if (_pipeType != Compound.Unspecified)
+        if (_pipeType != Matter.Unspecified)
         {
-            int index = ((int)_pipeType) + 1;
+            int index = Math.Abs((int)_pipeType);
 
             if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
             {

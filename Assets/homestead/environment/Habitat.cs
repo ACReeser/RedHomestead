@@ -17,9 +17,8 @@ public class Habitat : Converter
     //        return _CurrentPowerRequirements;
     //    }
     //}
-
-    internal Dictionary<Compound, SumContainer> BasicResourceTotals = new Dictionary<Compound, SumContainer>();
-    internal Dictionary<Resource, SumContainer> ComplexResourceTotals = new Dictionary<Resource, SumContainer>();
+    
+    internal Dictionary<Matter, SumContainer> MatterTotals = new Dictionary<Matter, SumContainer>();
 
     private List<Sink> WaterSinks = new List<Sink>(), OxygenSinks = new List<Sink>();
 
@@ -39,13 +38,13 @@ public class Habitat : Converter
 
     public override void Convert()
     {
-        FlowWithExternal(Compound.Water, WaterSinks, WaterPullPerTick);
-        FlowWithExternal(Compound.Oxygen, OxygenSinks, OxygenPullPerTick);
+        FlowWithExternal(Matter.Water, WaterSinks, WaterPullPerTick);
+        FlowWithExternal(Matter.Oxygen, OxygenSinks, OxygenPullPerTick);
     }
 
-    private void FlowWithExternal(Compound compound, List<Sink> externals, float pullPerTick)
+    private void FlowWithExternal(Matter compound, List<Sink> externals, float pullPerTick)
     {
-        if (externals.Count > 0 && BasicResourceTotals[compound].AvailableCapacity >= pullPerTick)
+        if (externals.Count > 0 && MatterTotals[compound].AvailableCapacity >= pullPerTick)
         {
             float pulled = 0f;
             foreach (Sink s in WaterSinks)
@@ -56,60 +55,60 @@ public class Habitat : Converter
                     break;
                 }
             }
-            BasicResourceTotals[compound].Push(pulled);
+            MatterTotals[compound].Push(pulled);
         }
     }
 
     public override void OnSinkConnected(Sink s)
     {
-        if (s.HasContainerFor(Compound.Water))
+        if (s.HasContainerFor(Matter.Water))
             WaterSinks.Add(s);
 
-        if (s.HasContainerFor(Compound.Oxygen))
+        if (s.HasContainerFor(Matter.Oxygen))
             OxygenSinks.Add(s);
     }
     
     void Awake () {
         //todo: move this to individual Stuff adds
-        BasicResourceTotals[Compound.Water] = new SumContainer(10f)
+        MatterTotals[Matter.Water] = new SumContainer(10f)
         {
-            SimpleCompoundType = Compound.Water,
+            MattterType = Matter.Water,
             LastTickRateOfChange = 0,
             TotalCapacity = 20f
         };
-        BasicResourceTotals[Compound.Oxygen] = new SumContainer(20f)
+        MatterTotals[Matter.Oxygen] = new SumContainer(20f)
         {
-            SimpleCompoundType = Compound.Oxygen,
+            MattterType = Matter.Oxygen,
             LastTickRateOfChange = 0,
             TotalCapacity = 20f
         };
-        ComplexResourceTotals[Resource.Biomass] = new SumContainer(0f)
+        MatterTotals[Matter.Biomass] = new SumContainer(0f)
         {
-            ComplexResourceType = Resource.Biomass,
+            MattterType = Matter.Biomass,
             LastTickRateOfChange = 0,
             TotalCapacity = 0
         };
-        ComplexResourceTotals[Resource.OrganicMeal] = new SumContainer(10f)
+        MatterTotals[Matter.OrganicMeal] = new SumContainer(10f)
         {
-            ComplexResourceType = Resource.OrganicMeal,
+            MattterType = Matter.OrganicMeal,
             LastTickRateOfChange = 0,
             TotalCapacity = 18f
         };
-        ComplexResourceTotals[Resource.RationMeal] = new SumContainer(10f)
+        MatterTotals[Matter.RationMeal] = new SumContainer(10f)
         {
-            ComplexResourceType = Resource.RationMeal,
+            MattterType = Matter.RationMeal,
             LastTickRateOfChange = 0,
             TotalCapacity = 18f
         };
-        ComplexResourceTotals[Resource.MealPowder] = new SumContainer(20f)
+        MatterTotals[Matter.MealPowder] = new SumContainer(20f)
         {
-            ComplexResourceType = Resource.MealPowder,
+            MattterType = Matter.MealPowder,
             LastTickRateOfChange = 0,
             TotalCapacity = 36f
         };
-        ComplexResourceTotals[Resource.MealShake] = new SumContainer(6f)
+        MatterTotals[Matter.MealShake] = new SumContainer(6f)
         {
-            ComplexResourceType = Resource.MealShake,
+            MattterType = Matter.MealShake,
             LastTickRateOfChange = 0,
             TotalCapacity = 36f
         };
@@ -142,19 +141,19 @@ public class Habitat : Converter
 
     public void PrepareBiomassToPreparedMeal()
     {
-        if (ComplexResourceTotals[Resource.Biomass].CurrentAmount > 0 && ComplexResourceTotals[Resource.OrganicMeal].AvailableCapacity >= 1f)
+        if (MatterTotals[Matter.Biomass].CurrentAmount > 0 && MatterTotals[Matter.OrganicMeal].AvailableCapacity >= 1f)
         {
-            ComplexResourceTotals[Resource.Biomass].Pull(1f);
-            ComplexResourceTotals[Resource.OrganicMeal].Push(1f);
+            MatterTotals[Matter.Biomass].Pull(1f);
+            MatterTotals[Matter.OrganicMeal].Push(1f);
         }
     }
 
     public void PreparePowderToShake()
     {
-        if (ComplexResourceTotals[Resource.MealPowder].CurrentAmount > 0 && ComplexResourceTotals[Resource.MealShake].AvailableCapacity >= 1f)
+        if (MatterTotals[Matter.MealPowder].CurrentAmount > 0 && MatterTotals[Matter.MealShake].AvailableCapacity >= 1f)
         {
-            ComplexResourceTotals[Resource.MealPowder].Pull(1f);
-            ComplexResourceTotals[Resource.MealShake].Push(1f);
+            MatterTotals[Matter.MealPowder].Pull(1f);
+            MatterTotals[Matter.MealShake].Push(1f);
         }
     }
     
