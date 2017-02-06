@@ -21,18 +21,21 @@ namespace RedHomestead.Economy{
         {
             return (value & flag) == flag;
         }
-
-        public static int DollarsPerKilogram(this DeliveryType dt, float distanceKilometers)
+        
+        //rover shipping type should be based on miles, not weight
+        //lander/drop should be some fraction miles vs weight
+        public static int DollarsPerKilogramPerKilometer(this DeliveryType dt, float kilograms, float distanceKilometers)
         {
             switch (dt)
             {
+                //this is just kms
                 default:
                 case DeliveryType.Rover:
                     return 10 * (int)distanceKilometers;
                 case DeliveryType.Drop:
-                    return 60 * (int)distanceKilometers;
+                    return 100 * (int)kilograms;
                 case DeliveryType.Lander:
-                    return 30 * (int)distanceKilometers;
+                    return 5 * (int)distanceKilometers + 10 * (int)kilograms;
             }
         }
 
@@ -59,15 +62,31 @@ namespace RedHomestead.Economy{
             }
         }
 
-        public static void AddOrAddIfNonnegativeResult<T>(this Dictionary<T, int> dict, T key, int amount)
+        public static int MaximumMass(this DeliveryType dt)
         {
-            if (dict.ContainsKey(key) && dict[key] + amount > -1)
+            switch (dt)
             {
-                dict[key] += amount;
+                case DeliveryType.Drop:
+                    return 5000;
+                case DeliveryType.Lander:
+                    return 10000;
+                default:
+                case DeliveryType.Rover:
+                    return 20000;
             }
-            else if (amount > -1)
+        }
+
+        public static int MaximumVolume(this DeliveryType dt)
+        {
+            switch (dt)
             {
-                dict[key] = amount;
+                case DeliveryType.Drop:
+                    return 4;
+                case DeliveryType.Lander:
+                    return 6;
+                default:
+                case DeliveryType.Rover:
+                    return 8;
             }
         }
     }
@@ -94,7 +113,7 @@ namespace RedHomestead.Economy{
             get
             {
                 if (!_playerDist.HasValue)
-                    _playerDist = this.Location.DistanceMeters(PlayerGeography.BaseLocation);
+                    _playerDist = this.Location.DistanceKilometers(PlayerGeography.BaseLocation);
 
                 return _playerDist.Value;
             }
@@ -124,7 +143,13 @@ namespace RedHomestead.Economy{
         public Dictionary<Matter, int> LineItemUnits = new Dictionary<Matter, int>();
         public int DeliverySol;
         public int DeliveryHour;
-        public DeliveryType Via;
+        private DeliveryType via;
+        public DeliveryType Via
+        {
+            get { return via; }
+            //todo: bug - selecting delivery will get around mass/volume limits
+            set { via = value; RecalcVolumeMassShipping(); }
+        }
         public string VendorName;
         public Vendor Vendor;
         public int MatterCost;
@@ -135,6 +160,47 @@ namespace RedHomestead.Economy{
             {
                 return ShippingCost + MatterCost;
             }
+        }
+
+        public bool TryAddLineItems(Stock s, int amount)
+        {
+            bool hasKey = LineItemUnits.ContainsKey(s.Matter);
+
+            if ((hasKey && LineItemUnits[s.Matter] + amount > -1) || (!hasKey && amount > -1))
+            {
+                if (hasKey)
+                    LineItemUnits[s.Matter] += amount;
+                else
+                    LineItemUnits[s.Matter] = amount;
+
+                MatterCost += s.ListPrice * amount;
+                
+                RecalcVolumeMassShipping();
+
+                //validate
+                if (amount > 0)
+                {
+                    if (TotalVolume > Via.MaximumVolume() || TotalMass > Via.MaximumMass())
+                    {
+                        TryAddLineItems(s, -amount);
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+        
+        public float TotalVolume { get; set; }
+        public float TotalMass { get; set; }
+
+        private void RecalcVolumeMassShipping()
+        {
+            TotalVolume = LineItemUnits.Sum(x => x.Key.BaseCubicMeters() * x.Value);
+            TotalMass = LineItemUnits.Sum(x => x.Value * x.Key.Kilograms());
+            ShippingCost = Via.DollarsPerKilogramPerKilometer(TotalMass, this.Vendor.DistanceFromPlayerKilometersRounded);
         }
     }
 }

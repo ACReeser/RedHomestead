@@ -13,9 +13,9 @@ namespace RedHomestead.Geography
         public float LatitudeDegrees;
         public float LongitudeDegrees;
 
-        public float DistanceMeters(LatLong other)
+        public float DistanceKilometers(LatLong other)
         {
-            return -1f;
+            return 100f;
         }
     }
 }

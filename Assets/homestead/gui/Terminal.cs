@@ -45,6 +45,14 @@ public struct BuyFields
         BySupplierButton.gameObject.SetActive(!isCheckingOut);
         ByResourceButton.gameObject.SetActive(!isCheckingOut);
     }
+    internal void RefreshMassVolumeMoney(Order o)
+    {
+        CheckoutWeight.text = String.Format("{0}/{1}<size=6>kg</size>", o.TotalMass, o.Via.MaximumMass());
+        CheckoutVolume.text = String.Format("{0}/{1}<size=6>m3</size>", o.TotalVolume, o.Via.MaximumVolume());
+        CheckoutGoods.text = String.Format("-{0:n0}", o.MatterCost);
+        CheckoutShippingCost.text = String.Format("-{0:n0}", o.ShippingCost);
+        CheckoutTotal.text = String.Format("-{0:n0}", o.GrandTotal);
+    }
     private void FillCheckoutStock(Vendor v)
     {
         SetStock(v, CheckoutStockParent, (Transform t, int i) =>
@@ -233,7 +241,9 @@ public class Terminal : MonoBehaviour {
     public void Checkout(int supplierIndex)
     {
         CheckoutVendor = Corporations.Wholesalers[supplierIndex];
+        CurrentOrder.Vendor = CheckoutVendor;
         buys.FillCheckout(CheckoutVendor);
+        buys.RefreshMassVolumeMoney(CurrentOrder);
         SwitchBuyTab((int)BuyTab.Checkout);
     }
 
@@ -251,9 +261,12 @@ public class Terminal : MonoBehaviour {
         Checkout(BySupplierVendorIndex);
     }
 
+
+    //todo: bug - selecting delivery will get around limits
     public void SelectDeliveryType(int type)
     {
-
+        CurrentOrder.Via = (DeliveryType)type;
+        buys.RefreshMassVolumeMoney(CurrentOrder);
     }
 
     public void DeltaItem(int amount)
@@ -261,10 +274,10 @@ public class Terminal : MonoBehaviour {
         Transform button = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform;
         int stockI = button.parent.parent.GetSiblingIndex();
         Stock s = CheckoutVendor.Stock[stockI];
-        CurrentOrder.LineItemUnits.AddOrAddIfNonnegativeResult<Matter>(s.Matter, amount);
-        CurrentOrder.MatterCost += s.ListPrice* amount;
+        CurrentOrder.TryAddLineItems(s, amount);
 
         RefreshAmountText(button.parent, CurrentOrder.LineItemUnits[s.Matter]);
+        buys.RefreshMassVolumeMoney(CurrentOrder);
     }
 
     private void RefreshAmountText(Transform checkoutFieldsParent, int units)
@@ -284,6 +297,7 @@ public class Terminal : MonoBehaviour {
 
     public void CancelOrder()
     {
+        CurrentOrder = new Order();
         buys.RefreshBuyTabsTabs(false);
         SwitchBuyTab((int)BuyTab.BySupplier);
     }

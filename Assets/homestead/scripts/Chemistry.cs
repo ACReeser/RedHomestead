@@ -64,9 +64,21 @@ namespace RedHomestead.Simulation
             { Matter.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking
         };
 
-        public static float Kilograms(this Matter r, float volumeCubicMeter = 1f)
+        public static float Kilograms(this Matter r, float? volumeCubicMeter = null)
         {
-            return DensityKgPerCubicMeter[r] * volumeCubicMeter;
+            if (volumeCubicMeter.HasValue)
+            {
+                return DensityKgPerCubicMeter[r] * volumeCubicMeter.Value;
+            }
+            else
+            {
+                return DensityKgPerCubicMeter[r] * r.BaseCubicMeters();
+            }
+        }
+
+        public static float BaseCubicMeters(this Matter r)
+        {
+            return 1f;
         }
 
         public static Sprite Sprite(this Matter r)
