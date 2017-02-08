@@ -26,6 +26,58 @@ public struct FinanceFields
 }
 
 [Serializable]
+public struct EnRouteFields
+{
+    public RectTransform EnRouteTemplate;
+    public Sprite[] DeliverySprites;
+
+    internal void FillEnRoute(List<Order> enroutes)
+    {
+        int i = 0;
+        foreach (Transform t in EnRouteTemplate.parent)
+        {
+            if (enroutes != null && i < enroutes.Count)
+            {
+                Order o = enroutes[i];
+                t.GetChild(0).GetComponent<Image>().sprite = DeliverySprites[(int)o.Via];
+                Text tex = t.GetChild(1).GetComponent<Text>();
+                tex.text = o.ETA.ToString();
+                tex.transform.GetChild(0).GetComponent<Image>().fillAmount = o.DeliveryWaitPercentage();
+                Transform childItemParent = t.GetChild(2);
+
+                int j = 0;
+                Matter[] orderedMatter = o.GetKeyArray();
+                foreach(Transform li in childItemParent)
+                {
+                    if (o.LineItemUnits != null && orderedMatter != null && j < o.LineItemUnits.Count)
+                    {
+                        li.GetComponent<Text>().text = orderedMatter[j].ToString();
+                        li.GetChild(0).GetComponent<Image>().sprite = orderedMatter[j].Sprite();
+                        li.GetChild(1).GetComponent<Text>().text = String.Format("{0} <size=6>m3</size>", o.LineItemUnits[orderedMatter[j]] * orderedMatter[j].BaseCubicMeters());
+
+                        li.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        li.gameObject.SetActive(false);
+                    }
+
+                    j++;
+                }
+
+                t.gameObject.SetActive(true);
+            }
+            else
+            {
+                t.gameObject.SetActive(false);
+            }
+
+            i++;
+        }
+    }
+}
+
+[Serializable]
 /// bindings and display logic for all the stuff under the Market > Buy tabs
 public struct BuyFields
 {
@@ -124,7 +176,7 @@ public class Terminal : MonoBehaviour {
     public ColonyFields colony;
     public FinanceFields finance;
     public BuyFields buys;
-
+    public EnRouteFields enroute;
     private RectTransform currentProgramPanel, currentMarketTab, currentBuyTab;
     internal Order CurrentOrder;
 
@@ -212,11 +264,15 @@ public class Terminal : MonoBehaviour {
             currentMarketTab.gameObject.SetActive(false);
 
         currentMarketTab = MarketTabs[t];
-
+        
         if (currentMarketTab == MarketTabs[(int)MarketTab.Buy])
         {
             buys.RefreshBuyTabsTabs(false);
             SwitchBuyTab((int)BuyTab.BySupplier);
+        }
+        else if (currentMarketTab == MarketTabs[(int)MarketTab.EnRoute])
+        {
+            enroute.FillEnRoute(EconomyManager.Instance.Player.EnRouteOrders);
         }
 
         currentMarketTab.gameObject.SetActive(true);
@@ -252,7 +308,7 @@ public class Terminal : MonoBehaviour {
     public void BySupplierVendorClick()
     {
         BySupplierVendorIndex = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.parent.GetSiblingIndex();
-        print(BySupplierVendorIndex);
+        
         buys.SetBySuppliersStock(Corporations.Wholesalers[BySupplierVendorIndex]);
     }
 
@@ -267,6 +323,7 @@ public class Terminal : MonoBehaviour {
     {
         CurrentOrder.Via = (DeliveryType)type;
         buys.RefreshMassVolumeMoney(CurrentOrder);
+        //todo: refresh delivery estimate text using CurrentOrder.DeliveryTime.ToString()
     }
 
     public void DeltaItem(int amount)
@@ -291,7 +348,10 @@ public class Terminal : MonoBehaviour {
             return;
         else
         {
-
+            CurrentOrder.FinalizeOrder();
+            EconomyManager.Instance.Player.EnRouteOrders.Add(CurrentOrder);
+            CurrentOrder = new Order();
+            SwitchMarketTab((int)MarketTab.EnRoute);
         }
     }
 

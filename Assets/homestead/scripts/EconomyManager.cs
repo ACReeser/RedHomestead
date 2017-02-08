@@ -30,7 +30,7 @@ public class EconomyManager : MonoBehaviour
 
     public int BasePaydayAmount = 1000000;
 
-    public PlayerAccount Player = new PlayerAccount();
+    public PersistentPlayer Player = new PersistentPlayer();
 
     void Awake()
     {

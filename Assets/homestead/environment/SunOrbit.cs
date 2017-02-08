@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Economy;
 
 public delegate void HandleHourChange(int sol, float hour);
 public delegate void HandleSolChange(int sol);
@@ -11,6 +12,7 @@ public class SunOrbit : MonoBehaviour {
 
     public Transform DuskAndDawnOnlyParent, StarsParent;
 
+    internal const float MartianHoursPerDay = 24.7f;
     internal const float MartianMinutesPerDay = (24 * 60) + 40;
     internal const float MartianSecondsPerDay = MartianMinutesPerDay * 60;
     internal const float GameMinutesPerGameDay = 20;
@@ -24,6 +26,13 @@ public class SunOrbit : MonoBehaviour {
     internal float CurrentHour = 9;
     internal float CurrentMinute = 0;
     internal int CurrentSol = 1;
+    public float HoursSinceSol0
+    {
+        get
+        {
+            return CurrentSol * MartianHoursPerDay + CurrentHour;
+        }
+    }
     internal event HandleHourChange OnHourChange;
     internal event HandleSolChange OnSolChange;
 

@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace RedHomestead.Economy{
-    public class PlayerAccount
+    public class PersistentPlayer
     {
         public int BankAccount = 100000;
+        public List<Order> EnRouteOrders = new List<Order>();
     }
 
     [Flags]
@@ -39,7 +40,7 @@ namespace RedHomestead.Economy{
             }
         }
 
-        public static float ShippingTimeSols(this DeliveryType dt, float distanceKilometers)
+        public static float ShippingTimeHours(this DeliveryType dt, float distanceKilometers)
         {
             switch (dt)
             {
@@ -48,17 +49,17 @@ namespace RedHomestead.Economy{
                     //1 sol for scheduling problems and start/stops on way
                     //48.3 km/h (30 mph) driving speed
                     //for 24.7h each day
-                    return 1 + (distanceKilometers / (48.3f * 24.7f));
+                    return 24.7f + (distanceKilometers / (48.3f));
                 case DeliveryType.Drop:
                     //0 sol (fast loading)
                     //600 km/h suborbital speed
                     //for 24.7h each day
-                    return distanceKilometers / (600 * 24.6f);
+                    return distanceKilometers / (600);
                 case DeliveryType.Lander:
                     //.5 sol for loading and fueling
                     //300 km/h suborbital speed
                     //for 24.7h each day
-                    return .5f + (distanceKilometers / (300 * 24.6f));
+                    return 12.35f + (distanceKilometers / (300));
             }
         }
 
@@ -138,17 +139,81 @@ namespace RedHomestead.Economy{
         }
     }
 
+    [Serializable]
+    public struct DayHourStamp
+    {
+        public int Sol;
+        public int Hour;
+
+        public override string ToString()
+        {
+            return String.Format("{0}{1:} Sols", Sol, Hour > 1 ? String.Format("{0:.0}", (double)(Hour / SunOrbit.MartianHoursPerDay)) : "");
+        }
+
+        internal float HoursSinceSol0
+        {
+            get
+            {
+                return Sol * SunOrbit.MartianHoursPerDay + Hour;
+            }
+        }
+
+        internal DayHourStamp DayHoursIntoFuture(DayHourStamp futureDayHour)
+        {
+            return new DayHourStamp()
+            {
+                Sol = futureDayHour.Sol - this.Sol,
+                Hour = futureDayHour.Hour - this.Hour
+            };
+        }
+
+        internal static DayHourStamp Now()
+        {
+            return new DayHourStamp()
+            {
+                Sol = SunOrbit.Instance.CurrentSol,
+                Hour = Mathf.RoundToInt(SunOrbit.Instance.CurrentHour)
+            };
+        }
+        
+        internal static DayHourStamp FromFractionalHours(int startSol, float startHour, float additionalFractionalHours)
+        {
+            int additionalDays = (int)Math.Truncate(additionalFractionalHours / SunOrbit.MartianHoursPerDay);
+
+            additionalFractionalHours = additionalFractionalHours - (additionalDays * SunOrbit.MartianHoursPerDay);
+
+            int newSol = startSol + additionalDays;
+
+            float newHour = startHour + additionalFractionalHours;
+
+            if (newHour >= SunOrbit.MartianHoursPerDay)
+            {
+                newSol++;
+                newHour -= SunOrbit.MartianHoursPerDay;
+            }
+
+            return new DayHourStamp()
+            {
+                Sol = newSol,
+                Hour = Mathf.CeilToInt(additionalFractionalHours)
+            };
+        }
+    }
+
     public class Order
     {
         public Dictionary<Matter, int> LineItemUnits = new Dictionary<Matter, int>();
-        public int DeliverySol;
-        public int DeliveryHour;
+        public DayHourStamp ETA, Ordered;
         private DeliveryType via;
         public DeliveryType Via
         {
             get { return via; }
             //todo: bug - selecting delivery will get around mass/volume limits
-            set { via = value; RecalcVolumeMassShipping(); }
+            set {
+                via = value;
+                RecalcVolumeMassShipping();
+                RecalcDeliveryTime();
+            }
         }
         public string VendorName;
         public Vendor Vendor;
@@ -201,6 +266,39 @@ namespace RedHomestead.Economy{
             TotalVolume = LineItemUnits.Sum(x => x.Key.BaseCubicMeters() * x.Value);
             TotalMass = LineItemUnits.Sum(x => x.Value * x.Key.Kilograms());
             ShippingCost = Via.DollarsPerKilogramPerKilometer(TotalMass, this.Vendor.DistanceFromPlayerKilometersRounded);
+        }
+
+        private void RecalcDeliveryTime()
+        {
+            ETA = DayHourStamp.FromFractionalHours(SunOrbit.Instance.CurrentSol, SunOrbit.Instance.CurrentHour, 
+                this.Via.ShippingTimeHours(this.Vendor.DistanceFromPlayerKilometersRounded));
+        }
+
+        public void FinalizeOrder()
+        {
+            RecalcDeliveryTime();
+            Ordered = DayHourStamp.Now();
+            EconomyManager.Instance.Player.BankAccount -= GrandTotal;
+        }
+
+        internal Matter[] GetKeyArray()
+        {
+            Matter[] result = new Matter[this.LineItemUnits.Keys.Count];
+            this.LineItemUnits.Keys.CopyTo(result, 0);
+            return result;
+        }
+
+        public string ETAFromNow()
+        {
+            return DayHourStamp.Now().DayHoursIntoFuture(ETA).ToString();
+        }
+        
+        public float DeliveryWaitPercentage()
+        {
+            float elapsed = SunOrbit.Instance.HoursSinceSol0 - this.Ordered.HoursSinceSol0;
+            float duration = this.ETA.HoursSinceSol0 - this.Ordered.HoursSinceSol0;
+
+            return elapsed / duration;
         }
     }
 }
