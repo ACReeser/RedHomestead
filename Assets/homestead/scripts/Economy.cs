@@ -18,6 +18,8 @@ namespace RedHomestead.Economy{
 
     public static class EconomyExtensions
     {
+        private const float MinimumDeliveryTimeHours = 2f;
+
         public static bool IsSet(this DeliveryType value, DeliveryType flag)
         {
             return (value & flag) == flag;
@@ -42,6 +44,7 @@ namespace RedHomestead.Economy{
 
         public static float ShippingTimeHours(this DeliveryType dt, float distanceKilometers)
         {
+            float hours = 0f;
             switch (dt)
             {
                 default:
@@ -49,18 +52,22 @@ namespace RedHomestead.Economy{
                     //1 sol for scheduling problems and start/stops on way
                     //48.3 km/h (30 mph) driving speed
                     //for 24.7h each day
-                    return 24.7f + (distanceKilometers / (48.3f));
-                case DeliveryType.Drop:
-                    //0 sol (fast loading)
-                    //600 km/h suborbital speed
-                    //for 24.7h each day
-                    return distanceKilometers / (600);
+                    hours = 24.7f + (distanceKilometers / (48.3f));
+                    break;
                 case DeliveryType.Lander:
                     //.5 sol for loading and fueling
                     //300 km/h suborbital speed
                     //for 24.7h each day
-                    return 12.35f + (distanceKilometers / (300));
+                    hours = 12.35f + (distanceKilometers / (300));
+                    break;
+                case DeliveryType.Drop:
+                    //0 sol (fast loading)
+                    //600 km/h suborbital speed
+                    //for 24.7h each day
+                    hours = distanceKilometers / (600);
+                    break;
             }
+            return Mathf.Max(hours, MinimumDeliveryTimeHours);//no delivery can ever take less than 2 hours!
         }
 
         public static int MaximumMass(this DeliveryType dt)
@@ -139,15 +146,52 @@ namespace RedHomestead.Economy{
         }
     }
 
-    [Serializable]
-    public struct DayHourStamp
+    public interface ISolsAndHours
     {
-        public int Sol;
-        public int Hour;
+        int Sol { get; set; }
+        int Hour { get; set; }
+    }
+
+    [Serializable]
+    public struct SolsAndHours : ISolsAndHours
+    {
+        public int Sol { get; set; }
+        public int Hour { get; set; }
+
+        public SolsAndHours(int sols, int hours)
+        {
+            this.Sol = sols;
+            this.Hour = hours;
+        }
 
         public override string ToString()
         {
-            return String.Format("{0}{1:} Sols", Sol, Hour > 1 ? String.Format("{0:.0}", (double)(Hour / SunOrbit.MartianHoursPerDay)) : "");
+            if (Sol < 1)
+            {
+                return String.Format("{0} Hours", Hour);
+            }
+            else
+            {
+                return String.Format("{0}{1:} Sols", Sol, Hour > 1 ? String.Format("{0:.0}", (double)(Hour / SunOrbit.MartianHoursPerDay)) : "");
+            }
+        }
+
+        internal static SolsAndHours SolHoursFromNow(float additionalFractionalHours)
+        {
+            var cheat = SolHourStamp.FromFractionalHours(0, 0, additionalFractionalHours);
+            return new SolsAndHours(cheat.Sol, cheat.Hour);
+        }
+    }
+
+    [Serializable]
+    public struct SolHourStamp : ISolsAndHours
+    {
+        public int Sol { get; set; }
+        public int Hour { get; set; }
+
+        public override string ToString()
+        {
+            return String.Format("Sol {0} Hour {1}", Sol, Hour);
         }
 
         internal float HoursSinceSol0
@@ -158,44 +202,63 @@ namespace RedHomestead.Economy{
             }
         }
 
-        internal DayHourStamp DayHoursIntoFuture(DayHourStamp futureDayHour)
+        internal SolsAndHours SolHoursIntoFuture(SolHourStamp futureDayHour)
         {
-            return new DayHourStamp()
+            UnityEngine.Debug.Log(String.Format("Getting future from Sol {0} and Hour {1} to Sol {2} and Hour {3}", this.Sol, this.Hour, futureDayHour.Sol, futureDayHour.Hour));
+
+            int daysInFuture = futureDayHour.Sol - this.Sol;
+            float hoursInFuture = futureDayHour.Hour - this.Hour;
+
+            UnityEngine.Debug.Log(String.Format("{0} sols and {1} hours in future", daysInFuture, hoursInFuture));
+
+            if (daysInFuture == 1 && hoursInFuture < 0)
             {
-                Sol = futureDayHour.Sol - this.Sol,
-                Hour = futureDayHour.Hour - this.Hour
-            };
+                return new SolsAndHours(0, Mathf.RoundToInt(SunOrbit.MartianHoursPerDay + hoursInFuture));
+            }
+            else
+            {
+                return new SolsAndHours(daysInFuture, Mathf.RoundToInt(hoursInFuture));
+            }
         }
 
-        internal static DayHourStamp Now()
+        internal static SolHourStamp Now()
         {
-            return new DayHourStamp()
+            return new SolHourStamp()
             {
                 Sol = SunOrbit.Instance.CurrentSol,
                 Hour = Mathf.RoundToInt(SunOrbit.Instance.CurrentHour)
             };
         }
         
-        internal static DayHourStamp FromFractionalHours(int startSol, float startHour, float additionalFractionalHours)
+        internal static SolHourStamp FromFractionalHours(int startSol, float startHour, float additionalFractionalHours)
         {
             int additionalDays = (int)Math.Truncate(additionalFractionalHours / SunOrbit.MartianHoursPerDay);
 
+            UnityEngine.Debug.Log(additionalDays + " additional days to Sol "+startSol);
+
             additionalFractionalHours = additionalFractionalHours - (additionalDays * SunOrbit.MartianHoursPerDay);
+
+            UnityEngine.Debug.Log(additionalFractionalHours + " additional hours to Hour "+startHour);
 
             int newSol = startSol + additionalDays;
 
             float newHour = startHour + additionalFractionalHours;
 
+            UnityEngine.Debug.Log("will be Sol " + newSol + " Hour " + newHour);
+
             if (newHour >= SunOrbit.MartianHoursPerDay)
             {
                 newSol++;
                 newHour -= SunOrbit.MartianHoursPerDay;
+                UnityEngine.Debug.Log("rolling over to Sol "+newSol+ " Hour "+newHour);
             }
+            
+            UnityEngine.Debug.Log("will be Sol " + newSol + " Hour " + Mathf.CeilToInt(newHour));
 
-            return new DayHourStamp()
+            return new SolHourStamp()
             {
                 Sol = newSol,
-                Hour = Mathf.CeilToInt(additionalFractionalHours)
+                Hour = Mathf.CeilToInt(newHour)
             };
         }
     }
@@ -203,7 +266,7 @@ namespace RedHomestead.Economy{
     public class Order
     {
         public Dictionary<Matter, int> LineItemUnits = new Dictionary<Matter, int>();
-        public DayHourStamp ETA, Ordered;
+        public SolHourStamp ETA, Ordered;
         private DeliveryType via;
         public DeliveryType Via
         {
@@ -270,14 +333,16 @@ namespace RedHomestead.Economy{
 
         private void RecalcDeliveryTime()
         {
-            ETA = DayHourStamp.FromFractionalHours(SunOrbit.Instance.CurrentSol, SunOrbit.Instance.CurrentHour, 
+            ETA = SolHourStamp.FromFractionalHours(SunOrbit.Instance.CurrentSol, SunOrbit.Instance.CurrentHour, 
                 this.Via.ShippingTimeHours(this.Vendor.DistanceFromPlayerKilometersRounded));
+            UnityEngine.Debug.Log(ETA);
         }
 
         public void FinalizeOrder()
         {
+            UnityEngine.Debug.Log("Finalizing order");
             RecalcDeliveryTime();
-            Ordered = DayHourStamp.Now();
+            Ordered = SolHourStamp.Now();
             EconomyManager.Instance.Player.BankAccount -= GrandTotal;
         }
 
@@ -288,9 +353,9 @@ namespace RedHomestead.Economy{
             return result;
         }
 
-        public string ETAFromNow()
+        public string TimeUntilETA()
         {
-            return DayHourStamp.Now().DayHoursIntoFuture(ETA).ToString();
+            return SolHourStamp.Now().SolHoursIntoFuture(ETA).ToString();
         }
         
         public float DeliveryWaitPercentage()

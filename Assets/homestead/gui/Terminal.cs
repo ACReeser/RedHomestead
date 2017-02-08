@@ -41,7 +41,7 @@ public struct EnRouteFields
                 Order o = enroutes[i];
                 t.GetChild(0).GetComponent<Image>().sprite = DeliverySprites[(int)o.Via];
                 Text tex = t.GetChild(1).GetComponent<Text>();
-                tex.text = o.ETA.ToString();
+                tex.text = o.TimeUntilETA();
                 tex.transform.GetChild(0).GetComponent<Image>().fillAmount = o.DeliveryWaitPercentage();
                 Transform childItemParent = t.GetChild(2);
 
@@ -84,12 +84,17 @@ public struct BuyFields
     public RectTransform[] BuyTabs;
     public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton;
     public Text CheckoutVendorName, CheckoutWeight, CheckoutVolume, CheckoutAccount, CheckoutGoods, CheckoutShippingCost, CheckoutTotal;
+    public Text[] DeliveryTimeLabels;
     
     internal void FillCheckout(Vendor v)
     {
         RefreshBuyTabsTabs(true);
         CheckoutVendorName.text = v.Name;
         CheckoutAccount.text = String.Format("${0:n0}", EconomyManager.Instance.Player.BankAccount);
+        foreach(DeliveryType delivery in Enum.GetValues(typeof(DeliveryType)))
+        {
+            DeliveryTimeLabels[(int)delivery].text = SolsAndHours.SolHoursFromNow(delivery.ShippingTimeHours(v.DistanceFromPlayerKilometersRounded)).ToString();
+        }
         FillCheckoutStock(v);
     }
     internal void RefreshBuyTabsTabs(bool isCheckingOut)
@@ -216,6 +221,11 @@ public class Terminal : MonoBehaviour {
     {
         finance.DaysUntilPaydayText.text = string.Format("{0}hrs until payday", EconomyManager.Instance.HoursUntilPayday);
         finance.DaysUntilPaydayVisualization.fillAmount = EconomyManager.Instance.HoursUntilPaydayPercentage;
+
+        if (currentMarketTab == MarketTabs[(int)MarketTab.EnRoute])
+        {
+            enroute.FillEnRoute(EconomyManager.Instance.Player.EnRouteOrders);
+        }
     }
 
     private void HideAll(RectTransform[] collection)

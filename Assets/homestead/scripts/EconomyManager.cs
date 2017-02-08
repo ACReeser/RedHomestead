@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Economy;
+using System;
 
 public class EconomyManager : MonoBehaviour
 {
@@ -63,6 +64,13 @@ public class EconomyManager : MonoBehaviour
         {
             Payday();
         }
+
+        CheckOrdersForArrival();
+    }
+
+    private void CheckOrdersForArrival()
+    {
+        //TODO:
     }
 
     private void Payday()
