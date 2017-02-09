@@ -366,4 +366,9 @@ namespace RedHomestead.Economy{
             return elapsed / duration;
         }
     }
+
+    public interface IDeliveryScript
+    {
+        void Deliver(Order o);
+    }
 }

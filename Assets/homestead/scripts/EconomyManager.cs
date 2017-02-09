@@ -10,6 +10,8 @@ public class EconomyManager : MonoBehaviour
     public static EconomyManager Instance;
 
     public event EconomyHandler OnBankAccountChange;
+    
+    public LandingZone LandingZone;
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
 
@@ -70,7 +72,28 @@ public class EconomyManager : MonoBehaviour
 
     private void CheckOrdersForArrival()
     {
-        //TODO:
+        SolHourStamp now = SolHourStamp.Now();
+
+        foreach (Order candidate in Player.EnRouteOrders.ToArray())
+        {
+            SolsAndHours future = now.SolHoursIntoFuture(candidate.ETA);
+
+            if (future.Sol <= 1 && future.Hour <= 1)
+            {
+                Deliver(candidate);
+                Player.EnRouteOrders.Remove(candidate);
+            }
+        }
+    }
+
+    private void Deliver(Order order)
+    {
+        switch (order.Via)
+        {
+            default:
+                LandingZone.Deliver(order);
+                break;
+        }
     }
 
     private void Payday()

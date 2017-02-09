@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Economy;
 
-public class BounceLander : MonoBehaviour
+public class BounceLander : MonoBehaviour, IDeliveryScript
 {
     public ParticleSystem[] Rockets = new ParticleSystem[4];
     public Transform airbagRoot, payloadCube, rocketRoot, payloadRoot;
@@ -196,5 +197,10 @@ public class BounceLander : MonoBehaviour
         }
 
         GameObject.Destroy(this.gameObject);
+    }
+
+    public void Deliver(Order o)
+    {
+        
     }
 }

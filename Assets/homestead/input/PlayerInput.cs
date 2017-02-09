@@ -661,10 +661,6 @@ public class PlayerInput : MonoBehaviour {
                         {
                             hitInfo.collider.transform.parent.GetComponent<Airlock>().Pressurize();
                         }
-                        else if (hitInfo.collider.name == "supplydrop")
-                        {
-                            hitInfo.collider.transform.root.GetComponent<LandingZone>().CallLander();
-                        }
                     }
                     else
                     {
