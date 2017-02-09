@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public class News
+{
+    public string Text { get; set; }
+    public float Duration { get; set; }
+    public Sprite Icon;
+}
+
+
 /// <summary>
 /// Information for things like "[E] Pick Up"
 /// </summary>
@@ -8,7 +16,6 @@ public class PromptInfo
 {
     public string Key { get; set; }
     public string Description { get; set; }
-    public float Duration { get; set; }
     /// <summary>
     /// 0 to 1f percentage
     /// </summary>
@@ -23,7 +30,16 @@ public struct LinkablePrompts
 {
     public PromptInfo HoverWhenNoneSelected;
     public PromptInfo HoverWhenOneSelected;
-    public PromptInfo WhenCompleted;
+    public News WhenCompleted;
+}
+
+public static class NewsSource
+{
+    public static News DroppodHere = new News()
+    {
+        Text = "Incoming Drop Pod",
+        Duration = 10000
+    };
 }
 
 public static class Prompts {
@@ -39,10 +55,9 @@ public static class Prompts {
         Key = "E"
     };
 
-    public static PromptInfo BulkheadBridgeCompletedPrompt = new PromptInfo()
+    public static News BulkheadBridgeCompleted = new News()
     {
-        Description = "Bulkheads connected",
-        Key = "E",
+        Text = "Bulkheads connected",
         Duration = 1500
     };
     public static PromptInfo StartGasPipeHint = new PromptInfo()
@@ -55,10 +70,9 @@ public static class Prompts {
         Description = "Connect gas pipe",
         Key = "E"
     };
-    public static PromptInfo GasPipeCompletedPrompt = new PromptInfo()
+    public static News GasPipeCompleted = new News()
     {
-        Description = "Gas Pipe connected",
-        Key = "E",
+        Text = "Gas Pipe connected",
         Duration = 1500
     };
     public static PromptInfo StartPowerPlugHint = new PromptInfo()
@@ -71,10 +85,9 @@ public static class Prompts {
         Description = "Connect power",
         Key = "E"
     };
-    public static PromptInfo PowerPlugCompletedPrompt = new PromptInfo()
+    public static News PowerPlugCompleted = new News()
     {
-        Description = "Power connected",
-        Key = "E",
+        Text = "Power connected",
         Duration = 1500
     };
     public static PromptInfo DriveRoverPrompt = new PromptInfo()
@@ -153,19 +166,19 @@ public static class Prompts {
     {
         HoverWhenNoneSelected = StartBulkheadBridgeHint,
         HoverWhenOneSelected = EndBulkheadBridgeHint,
-        WhenCompleted = BulkheadBridgeCompletedPrompt
+        WhenCompleted = BulkheadBridgeCompleted
     };
     internal static LinkablePrompts GasPipePrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartGasPipeHint,
         HoverWhenOneSelected = EndGasPipeHint,
-        WhenCompleted = GasPipeCompletedPrompt
+        WhenCompleted = GasPipeCompleted
     };
     internal static LinkablePrompts PowerPlugPrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartPowerPlugHint,
         HoverWhenOneSelected = EndPowerPlugHint,
-        WhenCompleted = PowerPlugCompletedPrompt
+        WhenCompleted = PowerPlugCompleted
     };
 
     internal static PromptInfo LadderOnHint = new PromptInfo()

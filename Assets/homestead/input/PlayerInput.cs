@@ -1116,7 +1116,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 OnLinkPlaced(hitInfo.collider);
                 SetSaved(null);
-                newPrompt = promptGroup.WhenCompleted;
+                GuiBridge.Instance.ShowNews(promptGroup.WhenCompleted);
             }
         }
         else

@@ -65,6 +65,15 @@ public struct Icons
 }
 
 [Serializable]
+public struct NewsUI
+{
+    public RectTransform Panel, ProgressBar;
+    public Text Description;
+    public Image Icon, ProgressFill;
+}
+
+
+[Serializable]
 public class RadialMenu
 {
     public RectTransform RadialPanel, RadialsParent;
@@ -105,6 +114,7 @@ public class GuiBridge : MonoBehaviour {
     public RedHomestead.Equipment.EquipmentSprites EquipmentSprites;
     public PromptUI Prompts;
     public Icons Icons;
+    public NewsUI News;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -131,6 +141,36 @@ public class GuiBridge : MonoBehaviour {
         PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
+        ShowNews(null);
+    }
+
+    private Coroutine newsTimer;
+
+    internal void ShowNews(News news)
+    {
+        News.Panel.gameObject.SetActive(news != null);
+
+        if (news != null)
+        {
+            News.Description.text = news.Text;
+            
+            News.Icon.sprite = news.Icon;
+            News.Icon.gameObject.SetActive(news.Icon != null);
+
+            if (newsTimer != null)
+            {
+                StopCoroutine(newsTimer);
+            }
+
+            newsTimer = StartCoroutine(HideNewsAfter(news.Duration));
+        }
+    }
+
+    private IEnumerator HideNewsAfter(float duration)
+    {
+        yield return new WaitForSeconds(duration / 1000f);
+
+        ShowNews(null);
     }
 
     private void TogglePromptPanel(bool isActive)
@@ -149,11 +189,6 @@ public class GuiBridge : MonoBehaviour {
 
         TogglePromptPanel(true);
         CurrentPrompt = prompt;
-
-        if (prompt.Duration > 0)
-        {
-            StartCoroutine(HidePromptAfter(prompt.Duration));
-        }
     }
 
     //todo: just pass constructionZone, it's less params
@@ -190,27 +225,12 @@ public class GuiBridge : MonoBehaviour {
         this.ConstructionPanel.gameObject.SetActive(false);
     }
 
-    private IEnumerator HidePromptAfter(float duration)
-    {
-        yield return new WaitForSeconds(duration / 1000f);
-
-        TogglePromptPanel(false);
-    }
-
     public void HidePrompt()
     {
         if (CurrentPrompt != null)
         {
-            //if it's manually turned on and off, hide it
-            if (CurrentPrompt.Duration <= 0f)
-            {
-                TogglePromptPanel(false);
-                CurrentPrompt = null;
-            }
-            else
-            {
-                //if it's timed, let it time out
-            }
+            TogglePromptPanel(false);
+            CurrentPrompt = null;
         }
     }
     
