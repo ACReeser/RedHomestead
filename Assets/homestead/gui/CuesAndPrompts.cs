@@ -98,12 +98,12 @@ public static class Prompts {
     public static PromptInfo PickupHint = new PromptInfo()
     {
         Description = "Pick up",
-        Key = "E"
+        Key = "LMB"
     };
     internal static PromptInfo DropHint = new PromptInfo()
     {
         Description = "Drop",
-        Key = "E"
+        Key = "LMB"
     };
     internal static PromptInfo ConstructHint = new PromptInfo()
     {

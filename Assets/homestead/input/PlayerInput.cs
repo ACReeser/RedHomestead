@@ -533,7 +533,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (carriedObject == null)
                     {
-                        if (doInteract)
+                        if (Input.GetMouseButtonDown(0))
                         {
                             PickUpObject(hitInfo);
                         }
@@ -544,7 +544,7 @@ public class PlayerInput : MonoBehaviour {
                     }
                     else
                     {
-                        if (doInteract)
+                        if (Input.GetMouseButtonUp(0))
                         {
                             DropObject();
                         }
