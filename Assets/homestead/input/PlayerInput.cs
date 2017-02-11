@@ -591,7 +591,6 @@ public class PlayerInput : MonoBehaviour {
                         {
                             zone.WorkOnConstruction(Time.deltaTime * this.ConstructionPerSecond);
                         }
-
                         Prompts.ConstructHint.Progress = zone.ProgressPercentage;
                         newPrompt = Prompts.ConstructHint;
                     }

@@ -109,6 +109,8 @@ public class ConstructionZone : MonoBehaviour {
 
     private void RefreshCanConstruct()
     {
+        CanConstruct = true;
+
         foreach(ResourceEntry resourceEntry in Construction.Requirements[this.UnderConstruction])
         {
             if (ResourceCount[resourceEntry.Type] < resourceEntry.Count)
@@ -118,16 +120,18 @@ public class ConstructionZone : MonoBehaviour {
                 break;
             }
         }
-        CanConstruct = true;
     }
 
     public void WorkOnConstruction(float constructionTime)
     {
-        this.CurrentProgressSeconds += constructionTime;
-
-        if (this.CurrentProgressSeconds >= this.RequiredProgressSeconds)
+        if (CanConstruct)
         {
-            this.Complete();
+            this.CurrentProgressSeconds += constructionTime;
+
+            if (this.CurrentProgressSeconds >= this.RequiredProgressSeconds)
+            {
+                this.Complete();
+            }
         }
     }
 
