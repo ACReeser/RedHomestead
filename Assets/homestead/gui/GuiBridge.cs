@@ -127,7 +127,6 @@ public class GuiBridge : MonoBehaviour {
         TogglePromptPanel(false);
         this.ConstructionPanel.gameObject.SetActive(false);
         ConstructionRequirementsText = new Text[ConstructionRequirements.Length];
-        this.RefreshPlanningUI();
         int i = 0;
         foreach (RectTransform t in ConstructionRequirements)
         {
@@ -142,6 +141,11 @@ public class GuiBridge : MonoBehaviour {
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
         ShowNews(null);
+    }
+
+    void Start()
+    {
+        this.RefreshPlanningUI();
     }
 
     private Coroutine newsTimer;

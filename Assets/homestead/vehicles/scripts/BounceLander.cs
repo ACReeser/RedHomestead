@@ -2,11 +2,14 @@
 using System.Collections;
 using System;
 using RedHomestead.Economy;
+using RedHomestead.Simulation;
+using System.Collections.Generic;
 
 public class BounceLander : MonoBehaviour, IDeliveryScript
 {
     public ParticleSystem[] Rockets = new ParticleSystem[4];
     public Transform airbagRoot, payloadCube, rocketRoot, payloadRoot;
+    public Transform cratePrefab, vesselPrefab;
 
     // Use this for initialization
     void Start()
@@ -145,7 +148,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
 
         while (deflateTime < deflateDuration)
         {
-            foreach(Transform t in airbagRoot)
+            foreach (Transform t in airbagRoot)
             {
                 t.localScale = Vector3.one * Mathf.Lerp(1f, .25f, deflateTime / deflateDuration);
             }
@@ -201,6 +204,30 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
 
     public void Deliver(Order o)
     {
-        
+        PackLander(o.LineItemUnits);
+    }
+    
+    private void PackLander(Dictionary<Matter, int> lineItemUnits)
+    {
+        int i = 0;
+        foreach(KeyValuePair<Matter, int> kvp in lineItemUnits)
+        {
+            Vector3 localPos = new Vector3(
+                (i % 4) > 1? .8f : -.8f,
+                i > 3 ? 1f : -1f,
+                (i % 2) == 0 ? .8f : -.8f
+                );
+
+            Transform newT = GameObject.Instantiate<Transform>(cratePrefab);
+            newT.SetParent(payloadRoot);
+            newT.localPosition = localPos;
+            newT.localRotation = Quaternion.identity;
+
+            var rc = newT.GetComponent<ResourceComponent>();
+            rc.ResourceType = kvp.Key;
+            rc.Quantity = kvp.Value;
+
+            newT.GetComponent<Collider>().enabled = false;
+        }
     }
 }
