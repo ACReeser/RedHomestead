@@ -212,22 +212,30 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         int i = 0;
         foreach(KeyValuePair<Matter, int> kvp in lineItemUnits)
         {
-            Vector3 localPos = new Vector3(
-                (i % 4) > 1? .8f : -.8f,
-                i > 3 ? 1f : -1f,
-                (i % 2) == 0 ? .8f : -.8f
-                );
+            for (int vol = 0; vol < kvp.Value; vol++)
+            {
+                Vector3 localPos = new Vector3(
+                    (i % 4) > 1? .8f : -.8f,
+                    i > 3 ? 1f : -1f,
+                    (i % 2) == 0 ? .8f : -.8f
+                    );
 
-            Transform newT = GameObject.Instantiate<Transform>(cratePrefab);
-            newT.SetParent(payloadRoot);
-            newT.localPosition = localPos;
-            newT.localRotation = Quaternion.identity;
+                Transform newT = GameObject.Instantiate<Transform>(cratePrefab);
+                newT.SetParent(payloadRoot);
+                newT.localPosition = localPos;
+                newT.localRotation = Quaternion.identity;
 
-            var rc = newT.GetComponent<ResourceComponent>();
-            rc.ResourceType = kvp.Key;
-            rc.Quantity = kvp.Value;
+                var rc = newT.GetComponent<ResourceComponent>();
+                rc.ResourceType = kvp.Key;
+                rc.Quantity = kvp.Value;
 
-            newT.GetComponent<Collider>().enabled = false;
+                newT.GetComponent<Collider>().enabled = false;
+                var rigibody = newT.GetComponent<Rigidbody>();
+                rigibody.isKinematic = true;
+                rigibody.useGravity = false;
+
+                i++;
+            }
         }
     }
 }

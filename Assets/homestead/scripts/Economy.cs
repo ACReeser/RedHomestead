@@ -9,7 +9,7 @@ using System.Linq;
 namespace RedHomestead.Economy{
     public class PersistentPlayer
     {
-        public int BankAccount = 100000;
+        public int BankAccount = 350000;
         public List<Order> EnRouteOrders = new List<Order>();
     }
 
@@ -89,12 +89,12 @@ namespace RedHomestead.Economy{
             switch (dt)
             {
                 case DeliveryType.Drop:
-                    return 4;
+                    return 8;
                 case DeliveryType.Lander:
-                    return 6;
+                    return 10;
                 default:
                 case DeliveryType.Rover:
-                    return 8;
+                    return 12;
             }
         }
     }
