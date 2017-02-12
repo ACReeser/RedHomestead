@@ -275,8 +275,8 @@ public class GuiBridge : MonoBehaviour {
             ConstructionGroup.Habitation,
             new Module[]
             {
-                Module.Habitat,
-                Module.Workspace
+                //Module.Habitat,
+                //Module.Workspace
             }
         },
         {
@@ -291,23 +291,23 @@ public class GuiBridge : MonoBehaviour {
             new Module[]
             {
                 Module.SabatierReactor,
-                Module.OreExtractor,
+                //Module.OreExtractor,
             }
         },
         {
             ConstructionGroup.Refinement,
             new Module[]
             {
-                Module.Smelter
+                Module.WaterElectrolyzer
             }
         },
         {
             ConstructionGroup.Storage,
             new Module[]
             {
-                Module.Splitter,
+                //Module.Splitter,
                 Module.SmallGasTank,
-                Module.LargeGasTank,
+                //Module.LargeGasTank,
                 Module.SmallWaterTank
             }
         },

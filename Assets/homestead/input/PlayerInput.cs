@@ -116,6 +116,7 @@ public class PlayerInput : MonoBehaviour {
         SabatierPrefab,
         SplitterPrefab,
         OreExtractorPrefab,
+        WaterElectrolyzerPrefab,
         InteriorLightPrefab;
     /// <summary>
     /// the material to put on module prefabs
@@ -1167,6 +1168,8 @@ public class PlayerInput : MonoBehaviour {
                 return SabatierPrefab;
             case Module.OreExtractor:
                 return OreExtractorPrefab;
+            case Module.WaterElectrolyzer:
+                return WaterElectrolyzerPrefab;
             //power
             case Module.SolarPanelSmall:
                 return SmallSolarFarmPrefab;

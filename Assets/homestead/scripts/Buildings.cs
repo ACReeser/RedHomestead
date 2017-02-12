@@ -17,7 +17,8 @@ namespace RedHomestead.Buildings
         OreExtractor,
         Smelter,
         SmallWaterTank,
-        Splitter
+        Splitter,
+        WaterElectrolyzer
     }
 
     public static class Construction
@@ -49,6 +50,9 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.OreExtractor, DefaultBuildTimeSeconds
+            },
+            {
+                Module.WaterElectrolyzer, DefaultBuildTimeSeconds
             }
         };
 
@@ -95,6 +99,12 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.OreExtractor, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Matter.Steel)
+                }
+            },
+            {
+                Module.WaterElectrolyzer, new List<ResourceEntry>()
                 {
                     new ResourceEntry(1, Matter.Steel)
                 }

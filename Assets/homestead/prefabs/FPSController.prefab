@@ -125,8 +125,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 125892}
-  m_LocalRotation: {x: 0, y: 0.9833026, z: 0, w: 0.18197799}
-  m_LocalPosition: {x: 720, y: 1.19, z: 1011.8}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 715.372, y: 1.19, z: 982.561}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 423614}
@@ -234,7 +234,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294965759
-  m_RenderingPath: 3
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -542,7 +542,7 @@ MonoBehaviour:
   m_JumpSpeed: 10
   m_StickToGroundForce: 10
   m_GravityMultiplier: 1
-  m_MouseLook:
+  MouseLook:
     XSensitivity: 2
     YSensitivity: 2
     clampVerticalRotation: 1
@@ -624,6 +624,7 @@ MonoBehaviour:
   m_JumpSound: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   m_LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   SuspendInput: 0
+  FreezeLook: 0
   bootSprites:
   - {fileID: 0}
   - {fileID: 0}
@@ -681,6 +682,8 @@ MonoBehaviour:
   SabatierPrefab: {fileID: 497914, guid: c70a5d7b7c5035145a4c5912c508bace, type: 2}
   SplitterPrefab: {fileID: 422740, guid: e88a4b7ccf4e1374aaf90d89264c3ca5, type: 2}
   OreExtractorPrefab: {fileID: 425088, guid: 1bc0cbbd20e62cf43907750ec56cb76d, type: 2}
+  WaterElectrolyzerPrefab: {fileID: 437340, guid: d8eb26328004dae46aeec480519e0cf6,
+    type: 2}
   InteriorLightPrefab: {fileID: 434370, guid: f4c9ca540ea3a8f46b5528bf418fd326, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
@@ -720,7 +723,6 @@ MonoBehaviour:
     CurrentAmount: 6
     MaximumAmount: 6
     IsOnLastBar: 0
-  UsingPackResources: 1
 --- !u!143 &14362950
 CharacterController:
   m_ObjectHideFlags: 1
