@@ -47,7 +47,7 @@ public class Habitat : Converter
         if (externals.Count > 0 && MatterTotals[compound].AvailableCapacity >= pullPerTick)
         {
             float pulled = 0f;
-            foreach (Sink s in WaterSinks)
+            foreach (Sink s in externals)
             {
                 pulled += s.Get(compound).Pull(pullPerTick);
                 if (pulled >= pullPerTick)
@@ -72,43 +72,43 @@ public class Habitat : Converter
         //todo: move this to individual Stuff adds
         MatterTotals[Matter.Water] = new SumContainer(10f)
         {
-            MattterType = Matter.Water,
+            MatterType = Matter.Water,
             LastTickRateOfChange = 0,
             TotalCapacity = 20f
         };
         MatterTotals[Matter.Oxygen] = new SumContainer(20f)
         {
-            MattterType = Matter.Oxygen,
+            MatterType = Matter.Oxygen,
             LastTickRateOfChange = 0,
             TotalCapacity = 20f
         };
         MatterTotals[Matter.Biomass] = new SumContainer(0f)
         {
-            MattterType = Matter.Biomass,
+            MatterType = Matter.Biomass,
             LastTickRateOfChange = 0,
             TotalCapacity = 0
         };
         MatterTotals[Matter.OrganicMeal] = new SumContainer(10f)
         {
-            MattterType = Matter.OrganicMeal,
+            MatterType = Matter.OrganicMeal,
             LastTickRateOfChange = 0,
             TotalCapacity = 18f
         };
         MatterTotals[Matter.RationMeal] = new SumContainer(10f)
         {
-            MattterType = Matter.RationMeal,
+            MatterType = Matter.RationMeal,
             LastTickRateOfChange = 0,
             TotalCapacity = 18f
         };
         MatterTotals[Matter.MealPowder] = new SumContainer(20f)
         {
-            MattterType = Matter.MealPowder,
+            MatterType = Matter.MealPowder,
             LastTickRateOfChange = 0,
             TotalCapacity = 36f
         };
         MatterTotals[Matter.MealShake] = new SumContainer(6f)
         {
-            MattterType = Matter.MealShake,
+            MatterType = Matter.MealShake,
             LastTickRateOfChange = 0,
             TotalCapacity = 36f
         };

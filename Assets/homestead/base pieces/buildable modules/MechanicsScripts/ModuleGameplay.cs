@@ -28,7 +28,6 @@ public abstract class ModuleGameplay : MonoBehaviour
     public void LinkToModule(ModuleGameplay adjacent)
     {
         Adjacent.Add(adjacent);
-        print("linked");
         OnAdjacentChanged();
     }
 
@@ -56,7 +55,13 @@ public abstract class PowerSupply : ModuleGameplay
     public abstract float WattsPerTick { get; }
 }
 
-public abstract class Sink : ModuleGameplay
+public interface ISink
+{
+    ResourceContainer Get(Matter c);
+    bool HasContainerFor(Matter c);
+}
+
+public abstract class Sink : ModuleGameplay, ISink
 {
     protected List<Sink> SimilarAdjacentSinks = new List<Sink>();
     
@@ -144,16 +149,15 @@ public abstract class Converter : ModuleGameplay
 
         foreach(ModuleGameplay m in Adjacent)
         {
-            if (m is Sink)
+            if (m is ISink)
             {
-                print("sinkConnected");
-                OnSinkConnected(m as Sink);
+                OnSinkConnected(m as ISink);
             }
         }
     }
 
     public abstract void ClearHooks();
-    public virtual void OnSinkConnected(Sink s) { }
+    public virtual void OnSinkConnected(ISink s) { }
 }
 
 public class ResourceContainer
@@ -164,7 +168,7 @@ public class ResourceContainer
         this.Amount = initialAmount;
     }
 
-    public Matter MattterType;
+    public Matter MatterType;
 
     public float TotalCapacity = 1f;
     protected float Amount;

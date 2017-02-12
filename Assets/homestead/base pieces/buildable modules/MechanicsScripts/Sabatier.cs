@@ -21,7 +21,7 @@ public class Sabatier : Converter, IPowerToggleable
         }
     }
 
-    private Sink HydrogenSource, MethaneOut, WaterOut;
+    private ISink HydrogenSource, MethaneOut, WaterOut;
     private bool IsFullyConnected
     {
         get
@@ -89,7 +89,7 @@ public class Sabatier : Converter, IPowerToggleable
         HydrogenSource = MethaneOut = WaterOut = null;
     }
 
-    public override void OnSinkConnected(Sink s)
+    public override void OnSinkConnected(ISink s)
     {
         if (s.HasContainerFor(Matter.Hydrogen))
         {

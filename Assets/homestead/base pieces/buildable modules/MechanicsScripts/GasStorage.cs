@@ -98,7 +98,7 @@ public class GasStorage : SingleResourceSink {
             this.Container = new ResourceContainer(StartAmount)
             {
                 TotalCapacity = Capacity,
-                MattterType = this.SinkType
+                MatterType = this.SinkType
             };
         }
     }

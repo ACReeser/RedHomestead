@@ -20,7 +20,7 @@ public class Electrolyzer : Converter, IPowerToggleable
         }
     }
 
-    private Sink HydrogenOut, OxygenOut, WaterIn;
+    private ISink HydrogenOut, OxygenOut, WaterIn;
     private bool IsFullyConnected
     {
         get
@@ -89,7 +89,7 @@ public class Electrolyzer : Converter, IPowerToggleable
         HydrogenOut = OxygenOut = WaterIn = null;
     }
 
-    public override void OnSinkConnected(Sink s)
+    public override void OnSinkConnected(ISink s)
     {
         if (s.HasContainerFor(Matter.Hydrogen))
         {

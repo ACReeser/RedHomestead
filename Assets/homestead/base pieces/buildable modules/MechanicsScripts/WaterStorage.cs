@@ -27,7 +27,7 @@ public class WaterStorage : SingleResourceSink {
         this.Container = new ResourceContainer(StartAmount)
         {
             TotalCapacity = Capacity,
-            MattterType = Matter.Water
+            MatterType = Matter.Water
         };
     }
     
