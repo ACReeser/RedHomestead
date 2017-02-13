@@ -7,6 +7,7 @@ using RedHomestead.Simulation;
 public class GasStorage : SingleResourceSink {
     public MeshFilter MeshFilter;
     public Mesh[] CompoundUVSet = new Mesh[6];
+    public Mesh UnspecifiedUV;
     public Color[] CompoundColors = new Color[6];
 
     public override float WattRequirementsPerTick
@@ -51,13 +52,20 @@ public class GasStorage : SingleResourceSink {
 
     private void RefreshMeshToCompound()
     {
-        //unspecified == -1, so add 1 to get 0 based array index of meshes
-        int index = Math.Abs((int)this.SinkType);
-        if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
+        if (this.SinkType == Matter.Unspecified)
         {
-            this.MeshFilter.mesh = CompoundUVSet[index];
+            this.MeshFilter.mesh = UnspecifiedUV;
+            flowAmountRenderer.color = CompoundColors[0];
         }
-        flowAmountRenderer.color = CompoundColors[index];
+        else
+        {
+            int index = (int)this.SinkType + 6;
+            if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
+            {
+                this.MeshFilter.mesh = CompoundUVSet[index];
+            }
+            flowAmountRenderer.color = CompoundColors[index];
+        }
     }
 
     // Update is called once per frame
