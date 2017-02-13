@@ -18,7 +18,8 @@ namespace RedHomestead.Buildings
         Smelter,
         SmallWaterTank,
         Splitter,
-        WaterElectrolyzer
+        WaterElectrolyzer,
+        AlgaeTank
     }
 
     public static class Construction
@@ -53,6 +54,9 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.WaterElectrolyzer, DefaultBuildTimeSeconds
+            },
+            {
+                Module.AlgaeTank, DefaultBuildTimeSeconds
             }
         };
 
@@ -107,6 +111,14 @@ namespace RedHomestead.Buildings
                 Module.WaterElectrolyzer, new List<ResourceEntry>()
                 {
                     new ResourceEntry(1, Matter.Steel)
+                }
+            },
+            {
+                Module.AlgaeTank, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(2, Matter.Steel),
+                    new ResourceEntry(2, Matter.Glass),
+                    new ResourceEntry(2, Matter.Biomass),
                 }
             }
         };

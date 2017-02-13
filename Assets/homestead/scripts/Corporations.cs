@@ -43,6 +43,12 @@ public static class Corporations {
                     ListPrice = 2000,
                     StockAvailable = 100,
                     Matter = Matter.SiliconWafers
+                },
+                new Stock()
+                {
+                    ListPrice = 1000,
+                    StockAvailable = 10,
+                    Matter = Matter.Biomass
                 }
             }
         },

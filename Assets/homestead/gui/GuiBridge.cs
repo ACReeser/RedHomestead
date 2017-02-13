@@ -291,6 +291,7 @@ public class GuiBridge : MonoBehaviour {
             new Module[]
             {
                 Module.SabatierReactor,
+                Module.AlgaeTank
                 //Module.OreExtractor,
             }
         },
