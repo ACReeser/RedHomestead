@@ -20,7 +20,7 @@ public class Habitat : Converter
     
     internal Dictionary<Matter, SumContainer> MatterTotals = new Dictionary<Matter, SumContainer>();
 
-    private List<Sink> WaterSinks = new List<Sink>(), OxygenSinks = new List<Sink>();
+    private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
     public override float WattRequirementsPerTick
     {
@@ -42,12 +42,12 @@ public class Habitat : Converter
         FlowWithExternal(Matter.Oxygen, OxygenSinks, OxygenPullPerTick);
     }
 
-    private void FlowWithExternal(Matter compound, List<Sink> externals, float pullPerTick)
+    private void FlowWithExternal(Matter compound, List<ISink> externals, float pullPerTick)
     {
         if (externals.Count > 0 && MatterTotals[compound].AvailableCapacity >= pullPerTick)
         {
             float pulled = 0f;
-            foreach (Sink s in externals)
+            foreach (ISink s in externals)
             {
                 pulled += s.Get(compound).Pull(pullPerTick);
                 if (pulled >= pullPerTick)
@@ -59,7 +59,7 @@ public class Habitat : Converter
         }
     }
 
-    public override void OnSinkConnected(Sink s)
+    public override void OnSinkConnected(ISink s)
     {
         if (s.HasContainerFor(Matter.Water))
             WaterSinks.Add(s);
