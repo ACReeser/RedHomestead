@@ -2,6 +2,9 @@
 using System.Collections;
 using System;
 
+public enum StuffGroup { Bedroom, Kitchen }
+public enum Stuff { Bed, Desk, Terminal, Couch, Table, Kitchen, Pantry }
+
 /// <summary>
 /// Top level groups that organize floorplans
 /// </summary>
@@ -14,12 +17,27 @@ public enum FloorplanSubGroup { Solid, Mesh, Door, Window, SingleColumn, DoubleC
 
 public enum FloorplanMaterial { Concrete, Brick, Metal, Plastic, Rock, Glass }
 
+[Serializable]
+public struct FloorplanPrefabs
+{
+    public Transform[] SubGroupMeshes;
+    public Material[] Materials;
+}
+
+[Serializable]
+public struct StuffPrefabs
+{
+    public Transform[] Prefabs;
+}
+
 public class FloorplanBridge : MonoBehaviour {
     public static FloorplanBridge Instance;
 
     public Transform FloorPrefab, MeshFloorPrefab, WallPrefab, SingleCornerColumnPrefab, EdgeColumnPrefab, DoorPrefab;
     public Material ConcreteMaterial;
-    
+    public FloorplanPrefabs Floorplans;
+    public StuffPrefabs Stuff;
+
 	// Use this for initialization
 	void Awake () {
         Instance = this;
