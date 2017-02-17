@@ -6,6 +6,7 @@ using RedHomestead.Rovers;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Equipment;
+using RedHomestead.Interiors;
 
 namespace RedHomestead.Equipment
 {
@@ -435,12 +436,12 @@ public class PlayerInput : MonoBehaviour {
         if (GuiBridge.Instance.selectedFloorplanGroup == FloorplanGroup.Undecided)
         {
             GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
-            GuiBridge.Instance.selectedFloorplanSubgroup = GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
+            GuiBridge.Instance.selectedFloorplanSubgroup = InteriorMap.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
         }
         else
         {
             int nextSubGroup = (int)GuiBridge.Instance.selectedFloorplanSubgroup + 1;
-            if (nextSubGroup >= GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup].Length)
+            if (nextSubGroup >= InteriorMap.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup].Length)
             {
                 CycleGroup();
             }
@@ -457,14 +458,14 @@ public class PlayerInput : MonoBehaviour {
     private void CycleGroup()
     {
         int nextGroup = (int)GuiBridge.Instance.selectedFloorplanGroup + 1;
-        if (nextGroup >= GuiBridge.FloorplanGroupmap.Keys.Count)
+        if (nextGroup >= InteriorMap.FloorplanGroupmap.Keys.Count)
         {
             GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
         }
         else
         {
             GuiBridge.Instance.selectedFloorplanGroup = (FloorplanGroup)nextGroup;
-            GuiBridge.Instance.selectedFloorplanSubgroup = GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
+            GuiBridge.Instance.selectedFloorplanSubgroup = InteriorMap.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
         }
     }
 

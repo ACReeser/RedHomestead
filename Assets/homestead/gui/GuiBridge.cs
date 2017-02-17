@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
+using RedHomestead.Interiors;
 
 [Serializable]
 public struct ReportIORow
@@ -463,35 +464,6 @@ public class GuiBridge : MonoBehaviour {
     public FloorplanSubGroup selectedFloorplanSubgroup;
     public FloorplanMaterial selectedFloorplanMaterial;
 
-    public static Dictionary<FloorplanGroup, FloorplanSubGroup[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, FloorplanSubGroup[]>()
-    {
-        {
-            FloorplanGroup.Floor,
-            new FloorplanSubGroup[]
-            {
-                FloorplanSubGroup.Solid,
-                FloorplanSubGroup.Mesh
-            }
-        },
-        {
-            FloorplanGroup.Edge,
-            new FloorplanSubGroup[]
-            {
-                FloorplanSubGroup.Solid,
-                FloorplanSubGroup.Window,
-                FloorplanSubGroup.Door,
-                FloorplanSubGroup.SingleColumn,
-                FloorplanSubGroup.DoubleColumn
-            }
-        },
-        {
-            FloorplanGroup.Corner,
-            new FloorplanSubGroup[]
-            {
-                FloorplanSubGroup.SingleColumn
-            }
-        }
-    };
 
     private RedHomestead.Equipment.Slot lastHoverSlot = (RedHomestead.Equipment.Slot)(-1);
 
