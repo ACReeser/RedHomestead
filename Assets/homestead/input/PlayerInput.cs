@@ -10,11 +10,14 @@ using RedHomestead.Interiors;
 
 namespace RedHomestead.Equipment
 {
-    public enum Equipment { Locked = -1, EmptyHand = 0, Drill, Blueprints, ChemicalSniffer, Stuff, Scanner, Wrench, Sidearm, LMG}
+    public enum Equipment { Locked = -1, EmptyHand = 0, Drill, Blueprints, ChemicalSniffer, Wheelbarrow, Scanner, Wrench, Sidearm, LMG, Screwdriver}
     public enum Slot { Unequipped = 4, PrimaryTool = 5, SecondaryTool = 3, PrimaryGadget = 1, SecondaryGadget = 0, TertiaryGadget = 2 }
 
     public class Loadout
     {
+        private Equipment[] OutdoorGadgets = new Equipment[] { Equipment.Blueprints, Equipment.ChemicalSniffer, Equipment.Locked };
+        private Equipment[] IndoorGadgets = new Equipment[] { Equipment.Screwdriver, Equipment.Wheelbarrow, Equipment.Locked };
+
         private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
         {
             { Slot.Unequipped, Equipment.EmptyHand },
@@ -61,6 +64,24 @@ namespace RedHomestead.Equipment
             {
                 return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.IsInHabitat;
             }
+        }
+
+        public void RefreshGadgetsBasedOnLocation()
+        {
+            if (SurvivalTimer.Instance.IsInHabitat)
+            {
+                _loadout[Slot.PrimaryGadget] = IndoorGadgets[0];
+                _loadout[Slot.SecondaryGadget] = IndoorGadgets[1];
+                _loadout[Slot.TertiaryGadget] = IndoorGadgets[2];
+            }
+            else
+            {
+                _loadout[Slot.PrimaryGadget] = OutdoorGadgets[0];
+                _loadout[Slot.SecondaryGadget] = OutdoorGadgets[1];
+                _loadout[Slot.TertiaryGadget] = OutdoorGadgets[2];
+            }
+
+            GuiBridge.Instance.BuildRadialMenu(this);
         }
     }
 
@@ -1202,14 +1223,12 @@ public class PlayerInput : MonoBehaviour {
                 FlowCamera.enabled = true;
                 break;
             case Equipment.Blueprints:
-                if (SurvivalTimer.Instance.IsInHabitat)
-                {
-                    FlowCamera.cullingMask = 1 << FloorplanLayerIndex;
-                }
-                else
-                {
-                    FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
-                }
+                FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                FlowCamera.enabled = true;
+                break;
+            case Equipment.Wheelbarrow:
+            case Equipment.Screwdriver:
+                FlowCamera.cullingMask = 1 << FloorplanLayerIndex;
                 FlowCamera.enabled = true;
                 break;
             default:

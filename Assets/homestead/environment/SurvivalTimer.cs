@@ -269,6 +269,7 @@ public class SurvivalTimer : MonoBehaviour {
         Power.ResetToMaximum();
 
         CurrentHabitat = hab;
+        PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
     }
 
     internal void FillWater()
@@ -284,6 +285,7 @@ public class SurvivalTimer : MonoBehaviour {
     internal void BeginEVA()
     {
         CurrentHabitat = null;
+        PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
     }
 }
 
