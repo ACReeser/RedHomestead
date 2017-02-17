@@ -40,6 +40,10 @@ public class FloorplanBridge : MonoBehaviour {
     {
         this.StuffFields.StuffPanel.gameObject.SetActive(state);
         this.StuffFields.StuffGroupsPanel.gameObject.SetActive(state);
+        this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(false);
+
+        Cursor.lockState = state ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = state;
     }
 
     public void SelectStuffGroup(int index)
@@ -52,17 +56,29 @@ public class FloorplanBridge : MonoBehaviour {
     private void FillStuffDetail(StuffGroup index)
     {
         int i = 0;
-        foreach(Transform t in this.StuffFields.StuffButtonsParent)
+        Stuff[] stuffInGroup = InteriorMap.StuffGroups[index];
+        foreach (Transform t in this.StuffFields.StuffButtonsParent)
         {
-            if (i < StuffFields.Prefabs.Length)
+            if (i < stuffInGroup.Length)
             {
-                t.gameObject.SetActive(true);
+                Stuff aStuff = stuffInGroup[i];
 
+                if ((int)aStuff < StuffFields.Prefabs.Length)
+                {
+                    t.gameObject.SetActive(true);
+                    t.GetChild(0).GetComponent<Text>().text = aStuff.ToString();
+                    t.GetChild(1).GetComponent<Image>().sprite = aStuff.Sprite();
+                }
+                else
+                {
+                    t.gameObject.SetActive(false);
+                }
             }
             else
             {
                 t.gameObject.SetActive(false);
             }
+            i++;
         }
     }
 

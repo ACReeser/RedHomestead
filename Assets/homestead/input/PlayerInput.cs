@@ -238,8 +238,8 @@ public class PlayerInput : MonoBehaviour {
             }
             else if (Input.GetKeyUp(KeyCode.Tab))
             {
-                Equip(GuiBridge.Instance.ToggleRadialMenu(false));
                 FPSController.FreezeLook = false;
+                Equip(GuiBridge.Instance.ToggleRadialMenu(false));
             }
             else if (GuiBridge.Instance.RadialMenuOpen)
             {
@@ -1226,10 +1226,12 @@ public class PlayerInput : MonoBehaviour {
                 FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
                 FlowCamera.enabled = true;
                 break;
-            case Equipment.Wheelbarrow:
             case Equipment.Screwdriver:
+            case Equipment.Wheelbarrow:
+                this.FPSController.FreezeLook = true;
                 FlowCamera.cullingMask = 1 << FloorplanLayerIndex;
                 FlowCamera.enabled = true;
+                FloorplanBridge.Instance.ToggleStuffPanel(Loadout.Equipped == Equipment.Screwdriver);
                 break;
             default:
                 DisableAndForgetFloorplanVisualization();
