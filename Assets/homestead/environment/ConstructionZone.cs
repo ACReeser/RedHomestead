@@ -35,6 +35,14 @@ public class ConstructionZone : MonoBehaviour {
 	//void Update () {
 	//
 	//}
+
+    public void Initialize(Module toBuild)
+    {
+        this.UnderConstruction = toBuild;
+        ModulePrefab = PrefabCache<Module>.Cache.GetPrefab(toBuild);
+
+        InitializeRequirements();
+    }
     
     public void InitializeRequirements()
     {

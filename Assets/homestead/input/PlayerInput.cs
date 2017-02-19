@@ -140,16 +140,9 @@ public class PlayerInput : MonoBehaviour {
     /// when planning where to put them on the ground
     /// </summary>
     public Material translucentPlanningMat;
-
-    internal Module PlannedModule = Module.Unspecified;
+    
     internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
-
-    /// <summary>
-    /// Visualization == transparent preview of module to be built
-    /// Cache == only create 1 of each type of module because creation is expensive
-    /// </summary>
-    private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
 
     internal void SetPressure(bool pressurized)
     {
@@ -175,8 +168,11 @@ public class PlayerInput : MonoBehaviour {
             return !playerIsOnFoot;
         }
     }
-    
-    private Transform PlannedModuleVisualization, PlannedFloorplanVisualization;
+
+    private Planning<Module> ModulePlan = new Planning<Module>();
+    private Planning<Stuff> StuffPlan = new Planning<Stuff>();
+
+    private Transform PlannedFloorplanVisualization;
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
     public enum Direction { North, East, South, West }
@@ -468,7 +464,7 @@ public class PlayerInput : MonoBehaviour {
                     }
                     else
                     {
-                        newPrompt = Prompts.PlaceLightHint;
+                        newPrompt = Prompts.PlaceStuffHint;
                     }
                 }
             }
@@ -545,10 +541,12 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceStuffHere(Collider place)
     {
-        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Stuff>.Cache.GetPrefab(Stuff.FloorLight));
+        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Stuff>.Cache.GetPrefab(StuffPlan.Type));
         t.SetParent(place.transform.parent);
         t.localEulerAngles = Round(t.localEulerAngles);
         t.localPosition = Vector3.down * .5f;
+        Equip(Slot.Unequipped);
+        StuffPlan.Reset();
     }
 
     private Vector3 Round(Vector3 localEulerAngles)
@@ -958,8 +956,18 @@ public class PlayerInput : MonoBehaviour {
     private void HandleExteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
         RaycastHit hitInfo;
-        if (PlannedModule == Module.Unspecified)
+
+        if (ModulePlan.IsActive)
         {
+            if (Input.GetMouseButton(0))
+            {
+                ModulePlan.Rotate(true);
+            }
+            else if (Input.GetMouseButton(1))
+            {
+                ModulePlan.Rotate(false);
+            }
+        } else {
             if (Input.GetKeyUp(KeyCode.Q))
             {
                 GuiBridge.Instance.CycleConstruction(-1);
@@ -986,30 +994,18 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        if (PlannedModuleVisualization != null)
-        {
-            if (Input.GetMouseButton(0))
-            {
-                PlannedModuleVisualization.Rotate(Vector3.up * 90 * Time.deltaTime);
-            }
-            else if (Input.GetMouseButton(1))
-            {
-                PlannedModuleVisualization.Rotate(-Vector3.up * 90 * Time.deltaTime);
-            }
-        }
-
         if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
         {
             if (hitInfo.collider != null)
             {
                 if (hitInfo.collider.CompareTag("terrain"))
                 {
-                    if (Loadout.Equipped == Equipment.Blueprints && PlannedModuleVisualization != null)
+                    if (Loadout.Equipped == Equipment.Blueprints && ModulePlan.IsActive)
                     {
                         //TODO: raycast 3 more times (other 3 corners)
                         //then take the average height between them
                         //and invalidate the placement if it passes some threshold
-                        PlannedModuleVisualization.position = hitInfo.point;
+                        ModulePlan.Visualization.position = hitInfo.point;
 
                         if (doInteract)
                         {
@@ -1182,17 +1178,16 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceConstructionHere(Vector3 point)
     {
-        Transform zoneT = (Transform)GameObject.Instantiate(ConstructionZonePrefab, PlannedModuleVisualization.position, PlannedModuleVisualization.rotation);
+        Transform zoneT = (Transform)GameObject.Instantiate(ConstructionZonePrefab, ModulePlan.Visualization.position, ModulePlan.Visualization.rotation);
 
         ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
-        zone.UnderConstruction = PlannedModule;
-        zone.ModulePrefab = PrefabCache<Module>.Cache.GetPrefab(this.PlannedModule);
 
-        zone.InitializeRequirements();
+        zone.Initialize(ModulePlan.Type);
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
             zone.Complete();
 
+        ModulePlan.Reset();
         Equip(Slot.Unequipped);
     }
 
@@ -1227,21 +1222,10 @@ public class PlayerInput : MonoBehaviour {
                 break;
             default:
                 DisableAndForgetFloorplanVisualization();
-                DisableAndForgetModuleVisualization();
-                this.PlannedModule = Module.Unspecified;
                 AlternativeCamera.enabled = false;
                 break;
         }
         GuiBridge.Instance.RefreshMode();
-    }
-
-    private void DisableAndForgetModuleVisualization()
-    {
-        if (this.PlannedModuleVisualization != null)
-        {
-            this.PlannedModuleVisualization.gameObject.SetActive(false);
-            this.PlannedModuleVisualization = null;
-        }
     }
 
     private void PickUpObject(RaycastHit hitInfo)
@@ -1359,10 +1343,14 @@ public class PlayerInput : MonoBehaviour {
 
     internal void PlanModule(Module planModule)
     {
-        this.PlannedModule = planModule;
-
-        PlannedModuleVisualization = PrefabCache<Module>.Cache.Get(planModule);
+        this.ModulePlan.SetVisualization(planModule);
     }
+
+    internal void PlanStuff(Stuff s)
+    {
+        this.StuffPlan.SetVisualization(s);
+    }
+
     public void KillPlayer()
     {
         GuiBridge.Instance.ShowKillMenu();

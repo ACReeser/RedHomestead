@@ -28,8 +28,6 @@ public class FloorplanBridge : MonoBehaviour {
     public FloorplanPrefabs Floorplans;
     public StuffFields StuffFields;
 
-    internal Stuff CurrentStuffBuild;
-
 	// Use this for initialization
 	void Awake () {
         Instance = this;
@@ -86,7 +84,7 @@ public class FloorplanBridge : MonoBehaviour {
     {
         this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(false);
         ToggleStuffPanel(false);
-        this.CurrentStuffBuild = (Stuff)index;
+        PlayerInput.Instance.PlanStuff((Stuff)index);
         //code smell! :(
         PlayerInput.Instance.FPSController.FreezeLook = false;
     }

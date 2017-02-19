@@ -21,29 +21,31 @@ public class PrefabCache<T> where T : IConvertible {
         }
     }
 
-    private Dictionary<T, Transform> TransformCache = new Dictionary<T, Transform>();
+    /// <summary>
+    /// Visualization == transparent preview of module to be built
+    /// Cache == only create 1 of each type of module because creation is expensive
+    /// </summary>
+    private Dictionary<T, Transform> VisualizationTransformCache = new Dictionary<T, Transform>();
 
-    public Transform Get(T key)
+    public Transform GetVisualization(T key, bool translucent = false)
     {
         Transform result = null;
 
-        if (TransformCache.ContainsKey(key))
+        if (VisualizationTransformCache.ContainsKey(key))
         {
-            result = TransformCache[key];
+            result = VisualizationTransformCache[key];
             result.gameObject.SetActive(true);
         }
         else
         {
             result = GameObject.Instantiate<Transform>(GetPrefab(key));
-            TransformCache[key] = result;
             RecurseDisableColliderSetTranslucentRenderer(result);
+            VisualizationTransformCache[key] = result;
         }
 
         return result;
     }
-
-
-
+    
     private void RecurseDisableColliderSetTranslucentRenderer(Transform parent)
     {
         foreach (Transform child in parent)
@@ -77,8 +79,7 @@ public class PrefabCache<T> where T : IConvertible {
             RecurseDisableColliderSetTranslucentRenderer(child);
         }
     }
-
-
+    
     public Transform GetPrefab(T key)
     {
         if (typeof(T) == typeof(Module))
@@ -97,5 +98,36 @@ public class PrefabCache<T> where T : IConvertible {
     {
         Enum myEnum = Enum.Parse(typeof(T), key.ToString()) as Enum;
         return Convert.ToInt32(myEnum);
+    }
+}
+
+public class Planning<T> where T : IConvertible
+{
+    public Transform Visualization { get; private set; }
+    public T Type { get; private set; }
+
+    public bool IsActive
+    {
+        get
+        {
+            return Visualization != null;
+        }
+    }
+
+    public void SetVisualization(T type)
+    {
+        this.Visualization = PrefabCache<T>.Cache.GetVisualization(type);
+        this.Type = type;
+    }
+
+    public void Rotate(bool clockwise)
+    {
+        Visualization.Rotate(Vector3.up * (clockwise ? 90 : -90) * Time.deltaTime);
+    }
+
+    public void Reset()
+    {
+        Visualization.gameObject.SetActive(false);
+        Visualization = null;
     }
 }
