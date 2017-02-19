@@ -61,9 +61,11 @@ public class FloorplanBridge : MonoBehaviour {
             {
                 Stuff aStuff = stuffInGroup[i];
 
-                if ((int)aStuff < StuffFields.Prefabs.Length)
+                if ((int)aStuff < StuffFields.Prefabs.Length && StuffFields.Prefabs[(int)aStuff] != null)
                 {
                     t.gameObject.SetActive(true);
+                    //cheat and set the name to the enum value;
+                    t.name = aStuff.ToString();
                     t.GetChild(0).GetComponent<Text>().text = aStuff.ToString();
                     t.GetChild(1).GetComponent<Image>().sprite = aStuff.Sprite();
                 }
@@ -80,11 +82,12 @@ public class FloorplanBridge : MonoBehaviour {
         }
     }
 
-    public void SelectStuffToBuild(int index)
+    public void SelectStuffToBuild()
     {
+        Stuff whatToBuild = (Stuff)Enum.Parse(typeof(Stuff), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
         this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(false);
         ToggleStuffPanel(false);
-        PlayerInput.Instance.PlanStuff((Stuff)index);
+        PlayerInput.Instance.PlanStuff(whatToBuild);
         //code smell! :(
         PlayerInput.Instance.FPSController.FreezeLook = false;
     }

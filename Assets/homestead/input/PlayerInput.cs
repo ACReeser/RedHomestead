@@ -7,6 +7,7 @@ using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Equipment;
 using RedHomestead.Interiors;
+using RedHomestead.Geography;
 
 namespace RedHomestead.Equipment
 {
@@ -175,7 +176,6 @@ public class PlayerInput : MonoBehaviour {
     private Transform PlannedFloorplanVisualization;
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
-    public enum Direction { North, East, South, West }
 
     private Direction CurrentPlanningDirection;
 
@@ -278,6 +278,8 @@ public class PlayerInput : MonoBehaviour {
                         HandleExteriorPlanningInput(ref newPrompt, doInteract);
                         break;
                     case Equipment.Screwdriver:
+                        HandleStuffPlanningInput(ref newPrompt, doInteract);
+                        break;
                     case Equipment.Wheelbarrow:
                         HandleInteriorPlanningInput(ref newPrompt, doInteract);
                         break;
@@ -303,6 +305,59 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleStuffPlanningInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (StuffPlan.IsActive)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                StuffPlan.Rotate(true, false, 45);
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                StuffPlan.Rotate(false, false, 45);
+            }
+
+            RaycastHit hitInfo;
+            if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
+            {
+                if (hitInfo.collider != null)
+                {
+                    if (hitInfo.collider.CompareTag("cavernstuff"))
+                    {
+                        if (doInteract)
+                        {
+                            PlaceStuffHere(hitInfo.collider);
+                        }
+                        else
+                        {
+                            if (StuffPlan.IsActive && StuffPlan.Visualization.parent != hitInfo.collider.transform)
+                            {
+                                StuffPlan.Visualization.SetParent(hitInfo.collider.transform);
+                                StuffPlan.Visualization.localPosition = Vector3.zero;
+                                StuffPlan.Visualization.localRotation = Quaternion.identity;
+                            }
+
+                            newPrompt = Prompts.PlaceStuffHint;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.G))
+            {
+                FloorplanBridge.Instance.ToggleStuffPanel(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                FloorplanBridge.Instance.ToggleStuffPanel(false);
+                StuffPlan.Reset();
+            }
+        }
+    }
 
     private void HandleRadialInput()
     {
@@ -390,25 +445,11 @@ public class PlayerInput : MonoBehaviour {
     {
         if (Input.GetMouseButtonUp(0))
         {
-            CurrentPlanningDirection = CurrentPlanningDirection - 1;
-            if (CurrentPlanningDirection < 0)
-                CurrentPlanningDirection = Direction.West;
+            CurrentPlanningDirection.Rotate(true);
         }
         else if (Input.GetMouseButtonUp(1))
         {
-            CurrentPlanningDirection = CurrentPlanningDirection + 1;
-
-            if (CurrentPlanningDirection > Direction.West)
-                CurrentPlanningDirection = Direction.North;
-        }
-
-        if (Input.GetKeyUp(KeyCode.G))
-        {
-            FloorplanBridge.Instance.ToggleStuffPanel(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            FloorplanBridge.Instance.ToggleStuffPanel(false);
+            CurrentPlanningDirection.Rotate(false);
         }
 
         if (Input.GetKeyUp(KeyCode.T))
@@ -450,7 +491,7 @@ public class PlayerInput : MonoBehaviour {
                         if (PlannedFloorplanVisualization != null)
                         {
                             PlannedFloorplanVisualization.position = hitInfo.collider.transform.parent.position;
-                            PlannedFloorplanVisualization.localRotation = CurrentPlanningDirectionToQuaternion();
+                            PlannedFloorplanVisualization.localRotation = CurrentPlanningDirection.ToQuaternion();
 
                             newPrompt = Prompts.PlaceFloorplanHint;
                         }
@@ -509,27 +550,7 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private static Quaternion eastQ = Quaternion.Euler(0, 90, 0);
-    private static Quaternion southQ = Quaternion.Euler(0, 180, 0);
-    private static Quaternion westQ = Quaternion.Euler(0, 270, 0);
     private TextMesh PostItText;
-
-    private Quaternion CurrentPlanningDirectionToQuaternion()
-    {
-        switch (CurrentPlanningDirection)
-        {
-            case Direction.North:
-                return Quaternion.identity;
-            case Direction.East:
-                return eastQ;
-            case Direction.South:
-                return southQ;
-            case Direction.West:
-                return westQ;
-        }
-
-        return Quaternion.identity;
-    }
 
     private void PlaceFloorplanHere(Collider place)
     {
@@ -955,8 +976,6 @@ public class PlayerInput : MonoBehaviour {
 
     private void HandleExteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
-        RaycastHit hitInfo;
-
         if (ModulePlan.IsActive)
         {
             if (Input.GetMouseButton(0))
@@ -994,6 +1013,7 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
+        RaycastHit hitInfo;
         if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
         {
             if (hitInfo.collider != null)

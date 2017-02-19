@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RedHomestead.Buildings;
 using RedHomestead.Interiors;
 using System;
+using RedHomestead.Geography;
 
 public class PrefabCache<T> where T : IConvertible {
 
@@ -120,9 +121,14 @@ public class Planning<T> where T : IConvertible
         this.Type = type;
     }
 
-    public void Rotate(bool clockwise)
+    public void Rotate(bool clockwise, bool smooth = true, int increment = 90)
     {
-        Visualization.Rotate(Vector3.up * (clockwise ? 90 : -90) * Time.deltaTime);
+        float amount = (clockwise ? increment : -increment);
+
+        if (smooth)
+            amount *= Time.deltaTime;
+
+        Visualization.Rotate(Vector3.up * amount);
     }
 
     public void Reset()
