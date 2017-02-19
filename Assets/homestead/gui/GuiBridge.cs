@@ -101,7 +101,7 @@ public struct PromptUI
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel;
+    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel;
     public Text ConstructionHeader, EquippedText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
@@ -141,6 +141,8 @@ public class GuiBridge : MonoBehaviour {
         PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
+        //same as ToggleEscapeMenu(false) basically
+        this.EscapeMenuPanel.gameObject.SetActive(false);
         ShowNews(null);
     }
 
@@ -218,6 +220,20 @@ public class GuiBridge : MonoBehaviour {
                 this.ConstructionRequirements[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    public void ToggleEscapeMenu()
+    {
+        bool escapeMenuWillBeVisible = !this.EscapeMenuPanel.gameObject.activeInHierarchy;
+        this.EscapeMenuPanel.gameObject.SetActive(escapeMenuWillBeVisible);
+
+        Cursor.visible = escapeMenuWillBeVisible;
+        Cursor.lockState = escapeMenuWillBeVisible ? CursorLockMode.None : CursorLockMode.Confined;
+    }
+
+    public void ConfirmQuit()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     internal void ToggleReportMenu(bool isOn)

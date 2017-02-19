@@ -27,6 +27,9 @@ public class MainMenu : MonoBehaviour {
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     private GameObject[] defaultQuickstartClones = new GameObject[2];

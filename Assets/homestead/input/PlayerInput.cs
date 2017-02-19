@@ -201,7 +201,7 @@ public class PlayerInput : MonoBehaviour {
                 ToggleReport(null);
             else if (playerIsOnFoot)
             {
-                UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                GuiBridge.Instance.ToggleEscapeMenu();
             }
             else if (playerInVehicle)
             {
