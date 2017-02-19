@@ -83,6 +83,11 @@ namespace RedHomestead.Equipment
 
             GuiBridge.Instance.BuildRadialMenu(this);
         }
+
+        internal void PutEquipmentInSlot(Slot aSlot, Equipment e)
+        {
+            this._loadout[aSlot] = e;
+        }
     }
 
     [Serializable]
@@ -129,18 +134,7 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// The prefab for a construction zone
     /// </summary>
-    public Transform ConstructionZonePrefab, PostItNotePrefab,
-        //one of these for each module does NOT scale
-        SmallSolarFarmPrefab,
-        SmallGasTankPrefab,
-        SmallWaterTankPrefab,
-        OxygenTank,
-        SabatierPrefab,
-        SplitterPrefab,
-        OreExtractorPrefab,
-        WaterElectrolyzerPrefab,
-        AlgaeFarmPrefab,
-        InteriorLightPrefab;
+    public Transform ConstructionZonePrefab, PostItNotePrefab;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
@@ -198,6 +192,8 @@ public class PlayerInput : MonoBehaviour {
     {
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);
         Equip(Slot.Unequipped);
+        PrefabCache<Module>.TranslucentPlanningMat = translucentPlanningMat;
+        PrefabCache<Stuff>.TranslucentPlanningMat = translucentPlanningMat;
     }
 
     // Update is called once per frame
@@ -226,6 +222,14 @@ public class PlayerInput : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.Period))
         {
             SunOrbit.Instance.SpeedUp();
+        }
+        else if (Input.GetKeyUp(KeyCode.I))
+        {
+            Loadout.PutEquipmentInSlot(Slot.SecondaryGadget, Equipment.Screwdriver);
+        }
+        else if (Input.GetKeyUp(KeyCode.B))
+        {
+            Loadout.PutEquipmentInSlot(Slot.SecondaryGadget, Equipment.Wheelbarrow);
         }
 #endif
 
@@ -541,7 +545,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceStuffHere(Collider place)
     {
-        Transform t = GameObject.Instantiate<Transform>(InteriorLightPrefab);
+        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Stuff>.Cache.GetPrefab(Stuff.FloorLight));
         t.SetParent(place.transform.parent);
         t.localEulerAngles = Round(t.localEulerAngles);
         t.localPosition = Vector3.down * .5f;
@@ -1182,7 +1186,7 @@ public class PlayerInput : MonoBehaviour {
 
         ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
         zone.UnderConstruction = PlannedModule;
-        zone.ModulePrefab = GetPlannedModulePrefab();
+        zone.ModulePrefab = PrefabCache<Module>.Cache.GetPrefab(this.PlannedModule);
 
         zone.InitializeRequirements();
 
@@ -1190,37 +1194,6 @@ public class PlayerInput : MonoBehaviour {
             zone.Complete();
 
         Equip(Slot.Unequipped);
-    }
-
-    private Transform GetPlannedModulePrefab()
-    {
-        switch(PlannedModule)
-        {
-            //storage
-            case Module.SmallGasTank:
-                return SmallGasTankPrefab;
-            case Module.LargeGasTank:
-                return OxygenTank;
-            case Module.SmallWaterTank:
-                return SmallWaterTankPrefab;
-            case Module.Splitter:
-                return SplitterPrefab;
-            //extraction
-            case Module.SabatierReactor:
-                return SabatierPrefab;
-            case Module.AlgaeTank:
-                return AlgaeFarmPrefab;
-            case Module.OreExtractor:
-                return OreExtractorPrefab;
-            //refinement
-            case Module.WaterElectrolyzer:
-                return WaterElectrolyzerPrefab;
-            //power
-            case Module.SolarPanelSmall:
-                return SmallSolarFarmPrefab;
-            default:
-                return SmallSolarFarmPrefab;
-        }
     }
 
     private void Equip(Slot s)
@@ -1388,53 +1361,8 @@ public class PlayerInput : MonoBehaviour {
     {
         this.PlannedModule = planModule;
 
-        if (VisualizationCache.ContainsKey(planModule))
-        {
-            PlannedModuleVisualization = VisualizationCache[planModule];
-            PlannedModuleVisualization.gameObject.SetActive(true);
-        }
-        else
-        {
-            PlannedModuleVisualization = GameObject.Instantiate<Transform>(GetPlannedModulePrefab());
-            VisualizationCache[planModule] = PlannedModuleVisualization;
-            RecurseDisableColliderSetTranslucentRenderer(PlannedModuleVisualization);
-        }        
+        PlannedModuleVisualization = PrefabCache<Module>.Cache.Get(planModule);
     }
-
-    private void RecurseDisableColliderSetTranslucentRenderer(Transform parent)
-    {
-        foreach (Transform child in parent)
-        {
-            //only default layer
-            if (child.gameObject.layer == 0)
-            {
-                Collider c = child.GetComponent<Collider>();
-                if (c != null)
-                    c.enabled = false;
-
-                Renderer r = child.GetComponent<Renderer>();
-                if (r != null)
-                {
-                    if (r.materials != null && r.materials.Length > 1)
-                    {
-                        var newMats = new Material[r.materials.Length];
-                        for (int i = 0; i < r.materials.Length; i++)
-                        {
-                            newMats[i] = translucentPlanningMat;
-                        }
-                        r.materials = newMats;
-                    }
-                    else
-                    {
-                        r.material = translucentPlanningMat;
-                    }
-                }
-            }
-
-            RecurseDisableColliderSetTranslucentRenderer(child);
-        }
-    }
-
     public void KillPlayer()
     {
         GuiBridge.Instance.ShowKillMenu();

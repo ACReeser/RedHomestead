@@ -87,6 +87,8 @@ public class FloorplanBridge : MonoBehaviour {
         this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(false);
         ToggleStuffPanel(false);
         this.CurrentStuffBuild = (Stuff)index;
+        //code smell! :(
+        PlayerInput.Instance.FPSController.FreezeLook = false;
     }
 
     internal Transform GetPrefab(out Material matchingMaterial)
