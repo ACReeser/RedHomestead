@@ -61,7 +61,7 @@ GameObject:
   - 4: {fileID: 474800}
   - 20: {fileID: 2090158}
   m_Layer: 0
-  m_Name: FlowCamera
+  m_Name: AlternativeCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95,7 +95,6 @@ GameObject:
   - 45: {fileID: 4574634}
   - 114: {fileID: 11493248}
   - 114: {fileID: 11499320}
-  - 114: {fileID: 11437394}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: MainCamera
@@ -635,25 +634,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   PlaceBootprints: 1
---- !u!114 &11437394
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 194682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bd69a3d1df1d0e4383dd694418f8ab3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  FloorPrefab: {fileID: 403102, guid: 9f51324f67ccf504a8af4e7275680364, type: 2}
-  MeshFloorPrefab: {fileID: 403102, guid: 9f51324f67ccf504a8af4e7275680364, type: 2}
-  WallPrefab: {fileID: 419304, guid: c69737d56bf3f5b4fbc10e5598288d1c, type: 2}
-  SingleCornerColumnPrefab: {fileID: 440040, guid: c5b821ef7c1776e49b83ad431ac841ac,
-    type: 2}
-  EdgeColumnPrefab: {fileID: 422066, guid: 634570a8188d5164daa8216c03d4fab6, type: 2}
-  DoorPrefab: {fileID: 413222, guid: 1442f73cacd4f9f4a8472e192b0ddc4b, type: 2}
-  ConcreteMaterial: {fileID: 2100000, guid: 34df2bd5a8fabc64cb08c0062b97798e, type: 2}
 --- !u!114 &11493248
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -665,7 +645,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ccc3c24a2ce84d40a4f94a5a3b98d08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FlowCamera: {fileID: 2090158}
+  AlternativeCamera: {fileID: 2090158}
   Headlamp1: {fileID: 10888764}
   Headlamp2: {fileID: 10817006}
   tubePrefab: {fileID: 463720, guid: 9d86cff3e08476b4389c61101a0f06dd, type: 2}

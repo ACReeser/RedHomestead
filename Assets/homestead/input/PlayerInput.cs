@@ -116,7 +116,7 @@ public class PlayerInput : MonoBehaviour {
     private const float ExcavationPerSecond = 1f;
     private float ConstructionPerSecond = 1f;
 
-    public Camera FlowCamera;
+    public Camera AlternativeCamera;
     public Light Headlamp1, Headlamp2;
     /// <summary>
     /// Tube prefab to be created when linking bulkheads
@@ -258,7 +258,7 @@ public class PlayerInput : MonoBehaviour {
 
             if (Input.GetKeyUp(KeyCode.V))
             {
-                FlowCamera.enabled = !FlowCamera.enabled;
+                AlternativeCamera.enabled = !AlternativeCamera.enabled;
             }
         }
 
@@ -269,9 +269,19 @@ public class PlayerInput : MonoBehaviour {
         switch (CurrentMode)
         {
             case InputMode.Normal:
+
                 HandleDefaultInput(ref newPrompt, doInteract);
-                HandleExteriorPlanningInput(ref newPrompt, doInteract);
-                HandleInteriorPlanningInput(ref newPrompt, doInteract);
+
+                switch (this.Loadout.Equipped)
+                {
+                    case Equipment.Blueprints:
+                        HandleExteriorPlanningInput(ref newPrompt, doInteract);
+                        break;
+                    case Equipment.Screwdriver:
+                    case Equipment.Wheelbarrow:
+                        HandleInteriorPlanningInput(ref newPrompt, doInteract);
+                        break;
+                }
                 break;
             case InputMode.PostIt:
                 HandlePostItInput(ref newPrompt, doInteract);
@@ -390,6 +400,15 @@ public class PlayerInput : MonoBehaviour {
 
             if (CurrentPlanningDirection > Direction.West)
                 CurrentPlanningDirection = Direction.North;
+        }
+
+        if (Input.GetKeyUp(KeyCode.G))
+        {
+            FloorplanBridge.Instance.ToggleStuffPanel(true);
+        }
+        else if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            FloorplanBridge.Instance.ToggleStuffPanel(false);
         }
 
         if (Input.GetKeyUp(KeyCode.T))
@@ -1219,25 +1238,25 @@ public class PlayerInput : MonoBehaviour {
         switch (Loadout.Equipped)
         {
             case Equipment.ChemicalSniffer:
-                FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
-                FlowCamera.enabled = true;
+                AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                AlternativeCamera.enabled = true;
                 break;
             case Equipment.Blueprints:
-                FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
-                FlowCamera.enabled = true;
+                AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                AlternativeCamera.enabled = true;
                 break;
             case Equipment.Screwdriver:
             case Equipment.Wheelbarrow:
                 this.FPSController.FreezeLook = true;
-                FlowCamera.cullingMask = 1 << FloorplanLayerIndex;
-                FlowCamera.enabled = true;
+                AlternativeCamera.cullingMask = 1 << FloorplanLayerIndex;
+                AlternativeCamera.enabled = true;
                 FloorplanBridge.Instance.ToggleStuffPanel(Loadout.Equipped == Equipment.Screwdriver);
                 break;
             default:
                 DisableAndForgetFloorplanVisualization();
                 DisableAndForgetModuleVisualization();
                 this.PlannedModule = Module.Unspecified;
-                FlowCamera.enabled = false;
+                AlternativeCamera.enabled = false;
                 break;
         }
         GuiBridge.Instance.RefreshMode();
