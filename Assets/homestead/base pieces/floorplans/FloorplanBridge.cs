@@ -6,68 +6,48 @@ using RedHomestead.Interiors;
 using UnityEngine.UI;
 
 [Serializable]
-public struct FloorplanPrefabs
+public abstract class InteriorFields<G, C> where C : IConvertible
 {
-    public Transform[] SubGroupMeshes;
-    public Material[] Materials;
-}
-
-[Serializable]
-public struct StuffFields
-{
+    public RectTransform FullPanel, GroupsPanel, GroupDetailPanel, DetailButtonsParent;
     public Transform[] Prefabs;
     public Sprite[] Sprites;
-    public RectTransform StuffPanel, StuffGroupsPanel, StuffGroupDetailPanel, StuffButtonsParent;
-}
 
-public class FloorplanBridge : MonoBehaviour {
-    public static FloorplanBridge Instance;
-    
-    public Transform FloorPrefab, MeshFloorPrefab, WallPrefab, SingleCornerColumnPrefab, EdgeColumnPrefab, DoorPrefab;
-    public Material ConcreteMaterial;
-    public FloorplanPrefabs Floorplans;
-    public StuffFields StuffFields;
-
-	// Use this for initialization
-	void Awake () {
-        Instance = this;
-        ToggleStuffPanel(false);
-    }
-
-    internal void ToggleStuffPanel(bool state)
+    public void Toggle(bool state)
     {
-        this.StuffFields.StuffPanel.gameObject.SetActive(state);
-        this.StuffFields.StuffGroupsPanel.gameObject.SetActive(state);
-        this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(false);
+        this.FullPanel.gameObject.SetActive(state);
+        this.GroupsPanel.gameObject.SetActive(state);
+        this.GroupDetailPanel.gameObject.SetActive(false);
 
         Cursor.lockState = state ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = state;
     }
 
-    public void SelectStuffGroup(int index)
+    public void SelectGroup(int index)
     {
-        this.StuffFields.StuffGroupsPanel.gameObject.SetActive(false);
-        FillStuffDetail((StuffGroup)index);
-        this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(true);
+
+        this.GroupsPanel.gameObject.SetActive(false);
+        FillDetail((G)(object)index);
+        this.GroupDetailPanel.gameObject.SetActive(true);
     }
 
-    private void FillStuffDetail(StuffGroup index)
+    public void FillDetail(G group)
     {
         int i = 0;
-        Stuff[] stuffInGroup = InteriorMap.StuffGroups[index];
-        foreach (Transform t in this.StuffFields.StuffButtonsParent)
+        C[] children = Map[group];
+        foreach (Transform t in this.DetailButtonsParent)
         {
-            if (i < stuffInGroup.Length)
+            if (i < children.Length)
             {
-                Stuff aStuff = stuffInGroup[i];
+                C child = children[i];
 
-                if ((int)aStuff < StuffFields.Prefabs.Length && StuffFields.Prefabs[(int)aStuff] != null)
+                int index = Convert.ToInt32(child);
+                if (index < Prefabs.Length && Prefabs[index] != null)
                 {
                     t.gameObject.SetActive(true);
                     //cheat and set the name to the enum value;
-                    t.name = aStuff.ToString();
-                    t.GetChild(0).GetComponent<Text>().text = aStuff.ToString();
-                    t.GetChild(1).GetComponent<Image>().sprite = aStuff.Sprite();
+                    t.name = child.ToString();
+                    t.GetChild(0).GetComponent<Text>().text = child.ToString();
+                    t.GetChild(1).GetComponent<Image>().sprite = Sprites[index];
                 }
                 else
                 {
@@ -82,14 +62,87 @@ public class FloorplanBridge : MonoBehaviour {
         }
     }
 
+    protected abstract Dictionary<G, C[]> Map { get; }
+}
+
+[Serializable]
+public class FloorplanPrefabs: InteriorFields<FloorplanGroup, FloorplanSubGroup>
+{
+    public Material[] Materials;
+    internal Material SelectedMaterial;
+
+    protected override Dictionary<FloorplanGroup, FloorplanSubGroup[]> Map
+    {
+        get
+        {
+            return InteriorMap.FloorplanGroupmap;
+        }
+    }
+}
+
+[Serializable]
+public class StuffFields: InteriorFields<StuffGroup, Stuff>
+{
+
+    protected override Dictionary<StuffGroup, Stuff[]> Map
+    {
+        get
+        {
+            return InteriorMap.StuffGroups;
+        }
+    }
+}
+
+public class FloorplanBridge : MonoBehaviour {
+    public static FloorplanBridge Instance;
+    
+    public Transform FloorPrefab, MeshFloorPrefab, WallPrefab, SingleCornerColumnPrefab, EdgeColumnPrefab, DoorPrefab;
+    public Material ConcreteMaterial;
+    public FloorplanPrefabs Floorplans;
+    public StuffFields StuffFields;
+
+	// Use this for initialization
+	void Awake () {
+        Instance = this;
+        ToggleStuffPanel(false);
+        ToggleFloorplanPanel(false);
+    }
+
+    internal void ToggleStuffPanel(bool state)
+    {
+        this.StuffFields.Toggle(state);
+    }
+
+    internal void ToggleFloorplanPanel(bool state)
+    {
+        this.Floorplans.Toggle(state);
+    }
+
+    public void SelectStuffGroup(int index)
+    {
+        this.StuffFields.SelectGroup(index);
+    }
+
+    public void SelectFloorplanGroup(int index)
+    {
+        this.Floorplans.SelectGroup(index);
+    }
+
     public void SelectStuffToBuild()
     {
         Stuff whatToBuild = (Stuff)Enum.Parse(typeof(Stuff), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
-        this.StuffFields.StuffGroupDetailPanel.gameObject.SetActive(false);
+
+        this.StuffFields.GroupDetailPanel.gameObject.SetActive(false);
         ToggleStuffPanel(false);
+
         PlayerInput.Instance.PlanStuff(whatToBuild);
         //code smell! :(
         PlayerInput.Instance.FPSController.FreezeLook = false;
+    }
+
+    public void SelectFloorplanToBuild()
+    {
+
     }
 
     internal Transform GetPrefab(out Material matchingMaterial)
@@ -145,5 +198,10 @@ public static class InteriorExtensions
     internal static Sprite Sprite(this Stuff s)
     {
         return FloorplanBridge.Instance.StuffFields.Sprites[(int)s];
+    }
+
+    internal static Sprite Sprite(this FloorplanSubGroup s)
+    {
+        return FloorplanBridge.Instance.Floorplans.Sprites[(int)s];
     }
 }

@@ -6815,10 +6815,10 @@ RectTransform:
   - {fileID: 1049997698}
   m_Father: {fileID: 1012301203}
   m_RootOrder: 1
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 187.5, y: -22}
-  m_SizeDelta: {x: 125, y: 44}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &183235918
 MonoBehaviour:
@@ -10009,7 +10009,7 @@ GameObject:
   - 224: {fileID: 267369644}
   - 114: {fileID: 267369645}
   m_Layer: 5
-  m_Name: StuffList
+  m_Name: FloorplanList
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11968,9 +11968,31 @@ MonoBehaviour:
   DoorPrefab: {fileID: 413222, guid: 1442f73cacd4f9f4a8472e192b0ddc4b, type: 2}
   ConcreteMaterial: {fileID: 2100000, guid: de9e59af1f9458d4ea416649a64ffc1c, type: 2}
   Floorplans:
-    SubGroupMeshes: []
-    Materials: []
+    FullPanel: {fileID: 629700038}
+    GroupsPanel: {fileID: 1794165092}
+    GroupDetailPanel: {fileID: 400275722}
+    DetailButtonsParent: {fileID: 267369644}
+    Prefabs:
+    - {fileID: 419304, guid: c69737d56bf3f5b4fbc10e5598288d1c, type: 2}
+    - {fileID: 0}
+    - {fileID: 413222, guid: 1442f73cacd4f9f4a8472e192b0ddc4b, type: 2}
+    - {fileID: 0}
+    - {fileID: 440040, guid: c5b821ef7c1776e49b83ad431ac841ac, type: 2}
+    - {fileID: 0}
+    Sprites:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    Materials:
+    - {fileID: 0}
   StuffFields:
+    FullPanel: {fileID: 1051269883}
+    GroupsPanel: {fileID: 956335562}
+    GroupDetailPanel: {fileID: 1511132201}
+    DetailButtonsParent: {fileID: 183267249}
     Prefabs:
     - {fileID: 485108, guid: 929663c902b412f40a29ce40f389412e, type: 2}
     - {fileID: 0}
@@ -12005,10 +12027,6 @@ MonoBehaviour:
     - {fileID: 21300000, guid: ace47336e1d613542bba522b4d5afc27, type: 3}
     - {fileID: 21300000, guid: e7057b30c20b3144cacee5a51143f5a7, type: 3}
     - {fileID: 21300000, guid: 44c4e7d5d0d1f194a999c41098e55a56, type: 3}
-    StuffPanel: {fileID: 1051269883}
-    StuffGroupsPanel: {fileID: 956335562}
-    StuffGroupDetailPanel: {fileID: 1511132201}
-    StuffButtonsParent: {fileID: 183267249}
 --- !u!114 &297514240
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14389,10 +14407,10 @@ RectTransform:
   - {fileID: 100284784}
   m_Father: {fileID: 1794165092}
   m_RootOrder: 3
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 437.5, y: -128}
-  m_SizeDelta: {x: 125, y: 256}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &351934460
 MonoBehaviour:
@@ -14452,7 +14470,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffGroup
+        m_MethodName: SelectFloorplanGroup
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -24721,7 +24739,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &629700038
 RectTransform:
   m_ObjectHideFlags: 0
@@ -26820,10 +26838,10 @@ RectTransform:
   - {fileID: 1865269481}
   m_Father: {fileID: 267369644}
   m_RootOrder: 1
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100, y: -76.8}
-  m_SizeDelta: {x: 200, y: 51.2}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &706785624
 MonoBehaviour:
@@ -26883,7 +26901,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffToBuild
+        m_MethodName: SelectFloorplanToBuild
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -38082,10 +38100,10 @@ RectTransform:
   - {fileID: 90242056}
   m_Father: {fileID: 267369644}
   m_RootOrder: 2
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100, y: -128}
-  m_SizeDelta: {x: 200, y: 51.2}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &965278952
 MonoBehaviour:
@@ -38145,7 +38163,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffToBuild
+        m_MethodName: SelectFloorplanToBuild
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -42178,10 +42196,10 @@ RectTransform:
   - {fileID: 1067447498}
   m_Father: {fileID: 1794165092}
   m_RootOrder: 1
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 187.5, y: -128}
-  m_SizeDelta: {x: 125, y: 256}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1079668149
 MonoBehaviour:
@@ -42241,7 +42259,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffGroup
+        m_MethodName: SelectFloorplanGroup
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -67479,10 +67497,10 @@ RectTransform:
   - {fileID: 608254820}
   m_Father: {fileID: 1012301203}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 62.5, y: -22}
-  m_SizeDelta: {x: 125, y: 44}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1649527211
 MonoBehaviour:
@@ -67833,10 +67851,10 @@ RectTransform:
   - {fileID: 1229987523}
   m_Father: {fileID: 1012301203}
   m_RootOrder: 3
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 437.5, y: -22}
-  m_SizeDelta: {x: 125, y: 44}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1652966545
 MonoBehaviour:
@@ -69557,10 +69575,10 @@ RectTransform:
   - {fileID: 1076564216}
   m_Father: {fileID: 267369644}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100, y: -25.6}
-  m_SizeDelta: {x: 200, y: 51.2}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1696647012
 MonoBehaviour:
@@ -69620,7 +69638,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffToBuild
+        m_MethodName: SelectFloorplanToBuild
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -76936,10 +76954,10 @@ RectTransform:
   - {fileID: 1667141594}
   m_Father: {fileID: 1012301203}
   m_RootOrder: 2
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 312.5, y: -22}
-  m_SizeDelta: {x: 125, y: 44}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1860645616
 MonoBehaviour:
@@ -81427,10 +81445,10 @@ RectTransform:
   - {fileID: 1919221358}
   m_Father: {fileID: 267369644}
   m_RootOrder: 3
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100, y: -179.20001}
-  m_SizeDelta: {x: 200, y: 51.2}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1970565369
 MonoBehaviour:
@@ -81490,7 +81508,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffToBuild
+        m_MethodName: SelectFloorplanToBuild
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -84454,10 +84472,10 @@ RectTransform:
   - {fileID: 1208022783}
   m_Father: {fileID: 1794165092}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 62.5, y: -128}
-  m_SizeDelta: {x: 125, y: 256}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2043937825
 MonoBehaviour:
@@ -84517,7 +84535,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffGroup
+        m_MethodName: SelectFloorplanGroup
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -85240,10 +85258,10 @@ RectTransform:
   - {fileID: 1587804062}
   m_Father: {fileID: 1794165092}
   m_RootOrder: 2
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 312.5, y: -128}
-  m_SizeDelta: {x: 125, y: 256}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2065590681
 MonoBehaviour:
@@ -85303,7 +85321,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffGroup
+        m_MethodName: SelectFloorplanGroup
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -87253,10 +87271,10 @@ RectTransform:
   - {fileID: 300012377}
   m_Father: {fileID: 267369644}
   m_RootOrder: 4
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 100, y: -230.40001}
-  m_SizeDelta: {x: 200, y: 51.2}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2110895786
 MonoBehaviour:
@@ -87316,7 +87334,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 297514239}
-        m_MethodName: SelectStuffToBuild
+        m_MethodName: SelectFloorplanToBuild
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

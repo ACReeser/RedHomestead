@@ -452,6 +452,15 @@ public class PlayerInput : MonoBehaviour {
             CurrentPlanningDirection.Rotate(false);
         }
 
+        if (Input.GetKeyUp(KeyCode.G))
+        {
+            FloorplanBridge.Instance.ToggleFloorplanPanel(true);
+        }
+        else if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            FloorplanBridge.Instance.ToggleFloorplanPanel(false);
+        }
+
         if (Input.GetKeyUp(KeyCode.T))
         {
             DisableAndForgetFloorplanVisualization();
@@ -1221,6 +1230,13 @@ public class PlayerInput : MonoBehaviour {
         RefreshEquipmentState();
     }
 
+    private void CommonInteriorEquipmentState()
+    {
+        this.FPSController.FreezeLook = true;
+        AlternativeCamera.cullingMask = 1 << FloorplanLayerIndex;
+        AlternativeCamera.enabled = true;
+    }
+
     private void RefreshEquipmentState()
     {
         switch (Loadout.Equipped)
@@ -1234,11 +1250,12 @@ public class PlayerInput : MonoBehaviour {
                 AlternativeCamera.enabled = true;
                 break;
             case Equipment.Screwdriver:
+                this.CommonInteriorEquipmentState();
+                FloorplanBridge.Instance.ToggleStuffPanel(true);
+                break;
             case Equipment.Wheelbarrow:
-                this.FPSController.FreezeLook = true;
-                AlternativeCamera.cullingMask = 1 << FloorplanLayerIndex;
-                AlternativeCamera.enabled = true;
-                FloorplanBridge.Instance.ToggleStuffPanel(Loadout.Equipped == Equipment.Screwdriver);
+                this.CommonInteriorEquipmentState();
+                FloorplanBridge.Instance.ToggleFloorplanPanel(true);
                 break;
             default:
                 DisableAndForgetFloorplanVisualization();
