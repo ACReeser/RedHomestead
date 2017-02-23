@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using RedHomestead.Simulation;
 
 public class Airlock : MonoBehaviour {
     public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
@@ -122,6 +123,16 @@ public class Airlock : MonoBehaviour {
     public static void ToggleDoor(Transform t)
     {
         DoorToAirlock[t]._ToggleDoor(t);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        print("Airlock on trigger enter");
+        ResourceComponent comp = other.GetComponent<ResourceComponent>();
+        if (comp != null && this.attachedHab != null)
+        {
+            this.attachedHab.ImportResource(comp);
+        }
     }
 }
 

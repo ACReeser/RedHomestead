@@ -4,7 +4,7 @@ using RedHomestead.Simulation;
 
 public class ResourceComponent : MonoBehaviour {
     public Matter ResourceType;
-    public int Quantity = 1;
+    public float Quantity = 1;
 
     public Mesh[] ResourceLabelMeshes, CompoundLabelMeshes;
     public MeshFilter LabelMeshFilter;

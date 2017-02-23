@@ -729,11 +729,11 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (hitInfo.collider.name == "depressurize")
                         {
-                            hitInfo.collider.transform.parent.GetComponent<Airlock>().Depressurize();
+                            hitInfo.collider.transform.parent.parent.GetComponent<Airlock>().Depressurize();
                         }
                         else if (hitInfo.collider.name == "pressurize")
                         {
-                            hitInfo.collider.transform.parent.GetComponent<Airlock>().Pressurize();
+                            hitInfo.collider.transform.parent.parent.GetComponent<Airlock>().Pressurize();
                         }
                     }
                     else

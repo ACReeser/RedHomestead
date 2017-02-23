@@ -119,24 +119,21 @@ public class Habitat : Converter
 	
 	}
 
-    public void HarvestPlanter(Transform t)
+    public void ImportResource(ResourceComponent r)
     {
-
-    }
-
-    public void ConsumePreparedMeal()
-    {
-
-    }
-
-    public void ConsumeMealShake()
-    {
-
-    }
-
-    public void ConsumeDrink()
-    {
-
+        if (r.ResourceType.IsStoredInHabitat())
+        {
+            float amountLeft = MatterTotals[r.ResourceType].Push(r.Quantity);
+            
+            if (amountLeft <= 0)
+            {
+                GameObject.Destroy(r.gameObject);
+            }
+            else
+            {
+                r.Quantity = amountLeft;
+            }
+        }
     }
 
     public void PrepareBiomassToPreparedMeal()

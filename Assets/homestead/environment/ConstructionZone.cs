@@ -80,7 +80,8 @@ public class ConstructionZone : MonoBehaviour {
                 //todo: bug: adds resources that aren't required, and surplus resources
                 if (addedResources != null && !addedResources.IsInConstructionZone)
                 {
-                    ResourceCount[addedResources.ResourceType] += addedResources.Quantity;
+#warning rounding error
+                    ResourceCount[addedResources.ResourceType] += (int)addedResources.Quantity;
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
@@ -105,7 +106,8 @@ public class ConstructionZone : MonoBehaviour {
                 //todo: bug: removes resources that aren't required, and surplus resources
                 if (removedResources != null && removedResources.IsInConstructionZone)
                 {
-                    ResourceCount[removedResources.ResourceType] -= removedResources.Quantity;
+#warning rounding error
+                    ResourceCount[removedResources.ResourceType] -= (int)removedResources.Quantity;
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();

@@ -93,6 +93,19 @@ namespace RedHomestead.Simulation
                 return GuiBridge.Instance.Icons.ResourceIcons[i - 1]; // 1 unspecified
             }
         }
+
+        public static bool IsStoredInHabitat(this Matter r) {
+            switch (r)
+            {
+                case Matter.OrganicMeal:
+                case Matter.MealPowder:
+                case Matter.MealShake:
+                case Matter.RationMeal:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
 
