@@ -9,6 +9,13 @@ public class GasStorage : SingleResourceSink {
     public Mesh[] CompoundUVSet = new Mesh[6];
     public Mesh UnspecifiedUV;
     public Color[] CompoundColors = new Color[6];
+    public Transform SnapAnchor, PumpHandle;
+    public SpriteRenderer IconRenderer;
+    public Sprite[] PumpSprites;
+    public Color OnColor, OffColor;
+
+    private enum PumpStatus { PumpOff, PumpIn, PumpOut }
+    private PumpStatus CurrentPumpStatus;
 
     public override float WattRequirementsPerTick
     {
@@ -27,6 +34,8 @@ public class GasStorage : SingleResourceSink {
             _SpecifyCompound(this.SinkType);
         else
             SyncMeshToCompoundType();
+
+        RefreshPumpState();
     }
 
     private void SyncMeshToCompoundType()
@@ -123,6 +132,59 @@ public class GasStorage : SingleResourceSink {
         if (Adjacent.Count == 0 && Container != null && Container.UtilizationPercentage <= 0f)
         {
             _SpecifyCompound(Matter.Unspecified);
+        }
+    }
+
+    private ResourceComponent capturedResource;
+    private Rigidbody capturedRigidbody;
+    void OnTriggerEnter(Collider other)
+    {
+        ResourceComponent res = other.GetComponent<ResourceComponent>();
+
+        if (res != null && this.SinkType != Matter.Unspecified && this.SinkType == res.ResourceType && capturedResource == null)
+        {
+            capturedResource = res;
+            capturedRigidbody = other.attachedRigidbody;
+            capturedRigidbody.isKinematic = true;
+            capturedRigidbody.useGravity = false;
+            capturedResource.transform.position = SnapAnchor.position;
+            RefreshPumpState();
+        }
+    }
+
+    public void StartPumpingToContainer()
+    {
+        RefreshPumpState();
+    }
+
+    private void RefreshPumpState()
+    {
+        switch (this.CurrentPumpStatus)
+        {
+            case PumpStatus.PumpOff:
+                this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
+                break;
+            case PumpStatus.PumpIn:
+                this.IconRenderer.flipY = true;
+                this.PumpHandle.localRotation = Quaternion.Euler(0, 180, 0);
+                break;
+            case PumpStatus.PumpOut:
+                this.IconRenderer.flipY = false;
+                this.PumpHandle.localRotation = Quaternion.identity;
+                break;
+        }
+
+        this.IconRenderer.sprite = this.CurrentPumpStatus == PumpStatus.PumpOff ? this.PumpSprites[0] : this.PumpSprites[1];
+        this.IconRenderer.color = this.CurrentPumpStatus == PumpStatus.PumpOff ? this.OffColor : this.OnColor;
+
+        if (capturedResource != null)
+        {
+            capturedResource.transform.tag = this.CurrentPumpStatus == PumpStatus.PumpOff ? "attachedCrate" : "Untagged";
+            PumpHandle.tag = "pumpHandle";
+        }
+        else
+        {
+            PumpHandle.tag = "Untagged";
         }
     }
 }
