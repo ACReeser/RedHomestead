@@ -127,7 +127,6 @@ public class Airlock : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        print("Airlock on trigger enter");
         ResourceComponent comp = other.GetComponent<ResourceComponent>();
         if (comp != null && this.attachedHab != null)
         {
