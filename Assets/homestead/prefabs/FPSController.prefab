@@ -1,5 +1,21 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &118486
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 401984}
+  - 82: {fileID: 8279176}
+  m_Layer: 0
+  m_Name: Interaction Audio Source
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &125892
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,6 +28,7 @@ GameObject:
   - 54: {fileID: 5498730}
   - 82: {fileID: 8292960}
   - 114: {fileID: 11421442}
+  - 114: {fileID: 11422656}
   m_Layer: 0
   m_Name: FPSController
   m_TagString: Player
@@ -118,6 +135,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &401984
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 118486}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -292.8153, y: 395.3482, z: -982.561}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 408964}
+  m_RootOrder: 0
 --- !u!4 &408964
 Transform:
   m_ObjectHideFlags: 1
@@ -128,6 +157,7 @@ Transform:
   m_LocalPosition: {x: 715.372, y: 1.19, z: 982.561}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 401984}
   - {fileID: 423614}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -156,7 +186,7 @@ Transform:
   - {fileID: 429462}
   - {fileID: 474800}
   m_Father: {fileID: 408964}
-  m_RootOrder: 0
+  m_RootOrder: 1
 --- !u!4 &429462
 Transform:
   m_ObjectHideFlags: 1
@@ -326,6 +356,80 @@ AudioSource:
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 5
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+--- !u!82 &8279176
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 118486}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -634,6 +738,17 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   PlaceBootprints: 1
+--- !u!114 &11422656
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 125892}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &11493248
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -655,19 +770,9 @@ MonoBehaviour:
   ConstructionZonePrefab: {fileID: 484780, guid: 321c08093368d234292c4d1189edd6be,
     type: 2}
   PostItNotePrefab: {fileID: 407182, guid: b414ae3cf623a354f8b6eed66ed28175, type: 2}
-  SmallSolarFarmPrefab: {fileID: 491350, guid: 3dfa33079b916e641b7b3825e953557b, type: 2}
-  SmallGasTankPrefab: {fileID: 469504, guid: 1c934b355be8daa4e913f21bc3468299, type: 2}
-  SmallWaterTankPrefab: {fileID: 470818, guid: 59c859395974f3145a510915a770b40e, type: 2}
-  OxygenTank: {fileID: 499950, guid: c008327f633d6064d940c5527f99e5e4, type: 2}
-  SabatierPrefab: {fileID: 497914, guid: c70a5d7b7c5035145a4c5912c508bace, type: 2}
-  SplitterPrefab: {fileID: 422740, guid: e88a4b7ccf4e1374aaf90d89264c3ca5, type: 2}
-  OreExtractorPrefab: {fileID: 425088, guid: 1bc0cbbd20e62cf43907750ec56cb76d, type: 2}
-  WaterElectrolyzerPrefab: {fileID: 437340, guid: d8eb26328004dae46aeec480519e0cf6,
-    type: 2}
-  AlgaeFarmPrefab: {fileID: 446350, guid: 26c204ce33575d441b5698153296ded1, type: 2}
-  InteriorLightPrefab: {fileID: 434370, guid: f4c9ca540ea3a8f46b5528bf418fd326, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
+  InteractionSource: {fileID: 8279176}
 --- !u!114 &11499320
 MonoBehaviour:
   m_ObjectHideFlags: 1

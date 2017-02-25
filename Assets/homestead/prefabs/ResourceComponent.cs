@@ -5,6 +5,7 @@ using RedHomestead.Simulation;
 public class ResourceComponent : MonoBehaviour {
     public Matter ResourceType;
     public float Quantity = 1;
+    public AudioClip MetalBang;
 
     public Mesh[] ResourceLabelMeshes, CompoundLabelMeshes;
     public MeshFilter LabelMeshFilter;
@@ -33,4 +34,9 @@ public class ResourceComponent : MonoBehaviour {
                 LabelMeshFilter.mesh = CompoundLabelMeshes[index + 6];
         }
     }
+
+    //void OnCollisionEnter(Collision c)
+    //{
+
+    //}
 }

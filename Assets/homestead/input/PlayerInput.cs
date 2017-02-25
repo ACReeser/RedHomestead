@@ -141,6 +141,8 @@ public class PlayerInput : MonoBehaviour {
     /// when planning where to put them on the ground
     /// </summary>
     public Material translucentPlanningMat;
+
+    public AudioSource InteractionSource;
     
     internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
@@ -182,6 +184,7 @@ public class PlayerInput : MonoBehaviour {
     void Awake()
     {
         Instance = this;
+        InteractionSource.transform.SetParent(null);
     }
 
     void Start()
@@ -864,10 +867,12 @@ public class PlayerInput : MonoBehaviour {
                         if (Input.GetMouseButtonUp(0))
                         {
                             storage.StartPumpingIn();
+                            PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
                         }
                         else if (Input.GetMouseButtonUp(1))
                         {
                             storage.StartPumpingOut();
+                            PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
                         }
                         else
                         {
@@ -957,6 +962,12 @@ public class PlayerInput : MonoBehaviour {
         {
             PlacePostIt();
         }
+    }
+
+    public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip)
+    {
+        this.InteractionSource.transform.position = point;
+        this.InteractionSource.PlayOneShot(handleChangeClip);
     }
 
     private void ToggleReport(ModuleGameplay moduleGameplay)
