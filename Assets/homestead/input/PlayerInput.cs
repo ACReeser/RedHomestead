@@ -156,7 +156,8 @@ public class PlayerInput : MonoBehaviour {
     private Dictionary<Transform, Transform> FloorplanVisCache = new Dictionary<Transform, Transform>();
 
     private RoverInput DrivingRoverInput;
-    private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket, carriedObject;
+    private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket;
+    private Rigidbody carriedObject;
     private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
@@ -613,7 +614,7 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
-                            PickUpObject(hitInfo);
+                            PickUpObject(hitInfo.rigidbody);
                         }
                         else
                         {
@@ -1308,16 +1309,18 @@ public class PlayerInput : MonoBehaviour {
         GuiBridge.Instance.RefreshMode();
     }
 
-    private void PickUpObject(RaycastHit hitInfo)
+    internal void PickUpObject(Rigidbody rigid)
     {
-        carriedObject = hitInfo.collider;
-        carriedObject.GetComponent<Rigidbody>().useGravity = false;
+        carriedObject = rigid;
+        carriedObject.useGravity = false;
+        //carriedObject.isKinematic = true;
         carriedObject.transform.SetParent(this.transform);
     }
 
     internal void DropObject()
     {
-        carriedObject.GetComponent<Rigidbody>().useGravity = true;
+        carriedObject.useGravity = true;
+        carriedObject.isKinematic = false;
         carriedObject.transform.SetParent(null);
         carriedObject = null;
     }

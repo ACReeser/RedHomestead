@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
 
-public class GasStorage : SingleResourceSink {
+public class GasStorage : SingleResourceSink, ICrateSnapper {
     public MeshFilter MeshFilter;
     public Mesh[] CompoundUVSet = new Mesh[6];
     public Mesh UnspecifiedUV;
@@ -145,7 +145,6 @@ public class GasStorage : SingleResourceSink {
     }
 
     private ResourceComponent capturedResource;
-    private Rigidbody capturedRigidbody;
     private Coroutine Pumping;
 
     void OnTriggerEnter(Collider other)
@@ -161,13 +160,7 @@ public class GasStorage : SingleResourceSink {
     private void CaptureResource(Collider other, ResourceComponent res)
     {
         capturedResource = res;
-        PlayerInput.Instance.DropObject();
-        capturedRigidbody = other.attachedRigidbody;
-        capturedRigidbody.isKinematic = true;
-        capturedRigidbody.useGravity = false;
-        capturedResource.transform.position = SnapAnchor.position;
-        capturedResource.transform.localRotation = Quaternion.identity;
-        PlayerInput.Instance.PlayInteractionClip(SnapAnchor.position, res.MetalBang);
+        res.SnapCrate(this, SnapAnchor.position);
         RefreshPumpState();
     }
 
@@ -273,12 +266,17 @@ public class GasStorage : SingleResourceSink {
 
         if (capturedResource != null)
         {
-            capturedResource.transform.tag = this.CurrentPumpStatus == PumpStatus.PumpOff ? "attachedCrate" : "Untagged";
+            capturedResource.transform.tag = this.CurrentPumpStatus == PumpStatus.PumpOff ? "movable" : "Untagged";
             PumpHandle.tag = "pumpHandle";
         }
         else
         {
             PumpHandle.tag = "Untagged";
         }
+    }
+
+    public void DetachCrate()
+    {
+        this.capturedResource = null;
     }
 }

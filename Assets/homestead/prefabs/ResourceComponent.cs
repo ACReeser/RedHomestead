@@ -2,15 +2,19 @@
 using System.Collections;
 using RedHomestead.Simulation;
 
+[RequireComponent(typeof(Rigidbody))]
 public class ResourceComponent : MonoBehaviour {
     public Matter ResourceType;
     public float Quantity = 1;
     public AudioClip MetalBang;
+    public ICrateSnapper SnappedTo;
 
     public Mesh[] ResourceLabelMeshes, CompoundLabelMeshes;
     public MeshFilter LabelMeshFilter;
 
-    
+    private Rigidbody myRigidbody;
+    private Collider myCollider;
+
     //todo: could be CurrentConstructionZone reference instead
     internal bool IsInConstructionZone = false;
     internal bool IsOutsideConstructionZone
@@ -24,6 +28,9 @@ public class ResourceComponent : MonoBehaviour {
 
     void Start()
     {
+        myRigidbody = GetComponent<Rigidbody>();
+        myCollider = GetComponent<Collider>();
+
         if (ResourceType != Matter.Unspecified)
         {
             int index = (int)ResourceType;
@@ -39,4 +46,25 @@ public class ResourceComponent : MonoBehaviour {
     //{
 
     //}
+
+    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition)
+    {
+        PlayerInput.Instance.DropObject();
+        this.SnappedTo = snapParent;
+        myRigidbody.isKinematic = true;
+        myRigidbody.useGravity = false;
+        transform.position = snapPosition;
+        transform.localRotation = Quaternion.identity;
+        PlayerInput.Instance.PlayInteractionClip(snapPosition, MetalBang);
+    }
+
+    public void UnsnapCrate()
+    {
+        this.SnappedTo.DetachCrate();
+        this.SnappedTo = null;
+        myRigidbody.isKinematic = false;
+        myRigidbody.useGravity = true;
+        PlayerInput.Instance.PickUpObject(this.myRigidbody);
+        PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
+    }
 }

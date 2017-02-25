@@ -187,4 +187,9 @@ namespace RedHomestead.Simulation
         public static History<Matter> Compound = new History<Simulation.Matter>();
         public static History<Matter> Resource = new History<Simulation.Matter>();
     }
+
+    public interface ICrateSnapper
+    {
+        void DetachCrate();
+    }
 }
