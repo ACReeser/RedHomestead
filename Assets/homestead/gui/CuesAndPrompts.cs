@@ -35,6 +35,8 @@ public class PromptInfo
     /// Whether to show the progressbar, default to false
     /// </summary>
     public bool UsesProgress { get; set; }
+
+    public string ItalicizedText { get; set; }
 }
 
 public struct LinkablePrompts

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Simulation;
+using System;
 
 [RequireComponent(typeof(Rigidbody))]
 public class ResourceComponent : MonoBehaviour {
@@ -66,5 +67,10 @@ public class ResourceComponent : MonoBehaviour {
         myRigidbody.isKinematic = false;
         myRigidbody.useGravity = true;
         PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
+    }
+
+    internal string GetText()
+    {
+        return this.ResourceType.ToString() + String.Format(" {0:0.##}kg", this.Quantity * this.ResourceType.Kilograms());
     }
 }

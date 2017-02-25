@@ -89,7 +89,7 @@ public class RadialMenu
 public struct PromptUI
 {
     public RectTransform Panel, ProgressBar, Background;
-    public Text Key, Description, SecondaryKey, SecondaryDescription;
+    public Text Key, Description, SecondaryKey, SecondaryDescription, TypeText;
     public Image ProgressFill;
 }
 
@@ -204,6 +204,8 @@ public class GuiBridge : MonoBehaviour {
         Prompts.SecondaryKey.text = prompt.SecondaryKey;
 
         Prompts.Background.offsetMin = new Vector2(0, prompt.HasSecondary ? -66 : 0);
+
+        Prompts.TypeText.text = prompt.ItalicizedText;
 
         TogglePromptPanel(true);
         CurrentPrompt = prompt;

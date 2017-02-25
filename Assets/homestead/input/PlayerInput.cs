@@ -610,15 +610,18 @@ public class PlayerInput : MonoBehaviour {
             {
                 if (hitInfo.collider.gameObject.CompareTag("movable"))
                 {
+                    ResourceComponent res = hitInfo.collider.GetComponent<ResourceComponent>();
+
                     if (carriedObject == null)
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
-                            PickUpObject(hitInfo.rigidbody);
+                            PickUpObject(hitInfo.rigidbody, res);
                         }
                         else
                         {
                             newPrompt = Prompts.PickupHint;
+                            newPrompt.ItalicizedText = res.GetText();
                         }
                     }
                     else
@@ -630,6 +633,7 @@ public class PlayerInput : MonoBehaviour {
                         else
                         {
                             newPrompt = Prompts.DropHint;
+                            newPrompt.ItalicizedText = res.GetText();
                         }
                     }
                 }
@@ -1309,9 +1313,8 @@ public class PlayerInput : MonoBehaviour {
         GuiBridge.Instance.RefreshMode();
     }
 
-    internal void PickUpObject(Rigidbody rigid)
+    internal void PickUpObject(Rigidbody rigid, ResourceComponent res)
     {
-        ResourceComponent res = rigid.GetComponent<ResourceComponent>();
         if (res != null && res.SnappedTo != null)
         {
             res.UnsnapCrate();

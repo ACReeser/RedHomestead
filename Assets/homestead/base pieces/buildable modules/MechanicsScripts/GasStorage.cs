@@ -178,14 +178,13 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
         else if (CurrentPumpStatus == PumpStatus.PumpOff)
         {
             CurrentPumpStatus = PumpStatus.PumpOut;
+            if (Pumping != null)
+                StopCoroutine(Pumping);
+
+            Pumping = StartCoroutine(Pump(false));
         }
 
         RefreshPumpState();
-
-        if (Pumping != null)
-            StopCoroutine(Pumping);
-
-        Pumping = StartCoroutine(Pump(false));
     }
 
     public void StartPumpingIn()
@@ -197,21 +196,21 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
         else if (CurrentPumpStatus == PumpStatus.PumpOff)
         {
             CurrentPumpStatus = PumpStatus.PumpIn;
+
+            if (Pumping != null)
+                StopCoroutine(Pumping);
+
+            Pumping = StartCoroutine(Pump(true));
         }
 
         RefreshPumpState();
-
-        if (Pumping != null)
-            StopCoroutine(Pumping);
-
-        Pumping = StartCoroutine(Pump(true));
     }
 
     private IEnumerator Pump(bool pumpIn)
     {
         PumpSoundSource.Play();
 
-        while(isActiveAndEnabled && capturedResource != null)
+        while(isActiveAndEnabled && CurrentPumpStatus != PumpStatus.PumpOff && capturedResource != null)
         {
             if (pumpIn)
             {
@@ -284,6 +283,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     {
         this.lastCapturedResource = this.capturedResource;
         this.capturedResource = null;
+        PumpHandle.tag = "Untagged";
         this.CrateInterferenceTimer = StartCoroutine(CrateInterferenceCountdown());
     }
 
