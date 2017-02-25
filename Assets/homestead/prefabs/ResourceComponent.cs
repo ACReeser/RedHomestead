@@ -58,13 +58,13 @@ public class ResourceComponent : MonoBehaviour {
         PlayerInput.Instance.PlayInteractionClip(snapPosition, MetalBang);
     }
 
+    //called in pick up object
     public void UnsnapCrate()
     {
         this.SnappedTo.DetachCrate();
         this.SnappedTo = null;
         myRigidbody.isKinematic = false;
         myRigidbody.useGravity = true;
-        PlayerInput.Instance.PickUpObject(this.myRigidbody);
         PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
     }
 }

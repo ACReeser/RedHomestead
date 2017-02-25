@@ -21,6 +21,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     public const float PumpPerSecond = .25f;
     public const float PumpUpdateIntervalSeconds = .25f;
     public const float PumpPerUpdateInterval = PumpPerSecond / PumpUpdateIntervalSeconds;
+    private const float SnapInterferenceTimerSeconds = 1.25f;
 
     private AudioSource PumpSoundSource;
 
@@ -144,14 +145,18 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
         }
     }
 
-    private ResourceComponent capturedResource;
-    private Coroutine Pumping;
+    private ResourceComponent capturedResource, lastCapturedResource;
+    private Coroutine Pumping, CrateInterferenceTimer;
 
     void OnTriggerEnter(Collider other)
     {
         ResourceComponent res = other.GetComponent<ResourceComponent>();
 
-        if (res != null && this.SinkType != Matter.Unspecified && this.SinkType == res.ResourceType && capturedResource == null)
+        if (res != null &&
+            this.SinkType != Matter.Unspecified &&
+            this.SinkType == res.ResourceType &&
+            capturedResource == null &&
+            (res != lastCapturedResource || CrateInterferenceTimer == null))
         {
             CaptureResource(other, res);
         }
@@ -277,6 +282,14 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
 
     public void DetachCrate()
     {
+        this.lastCapturedResource = this.capturedResource;
         this.capturedResource = null;
+        this.CrateInterferenceTimer = StartCoroutine(CrateInterferenceCountdown());
+    }
+
+    private IEnumerator CrateInterferenceCountdown()
+    {
+        yield return new WaitForSeconds(SnapInterferenceTimerSeconds);
+        this.CrateInterferenceTimer = null;
     }
 }

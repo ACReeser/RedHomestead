@@ -1311,6 +1311,12 @@ public class PlayerInput : MonoBehaviour {
 
     internal void PickUpObject(Rigidbody rigid)
     {
+        ResourceComponent res = rigid.GetComponent<ResourceComponent>();
+        if (res != null && res.SnappedTo != null)
+        {
+            res.UnsnapCrate();
+        }
+
         carriedObject = rigid;
         carriedObject.useGravity = false;
         //carriedObject.isKinematic = true;

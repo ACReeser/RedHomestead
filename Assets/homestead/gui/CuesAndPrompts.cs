@@ -26,6 +26,7 @@ public class PromptInfo
             return SecondaryKey != null;
         }
     }
+
     /// <summary>
     /// 0 to 1f percentage
     /// </summary>
