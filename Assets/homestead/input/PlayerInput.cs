@@ -855,6 +855,38 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.ReportHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("pumpHandle"))
+                {
+                    GasStorage storage = hitInfo.collider.transform.root.GetComponent<GasStorage>();
+
+                    if (storage != null)
+                    {
+                        if (Input.GetMouseButtonUp(0))
+                        {
+                            storage.StartPumpingIn();
+                        }
+                        else if (Input.GetMouseButtonUp(1))
+                        {
+                            storage.StartPumpingOut();
+                        }
+                        else
+                        {
+                            switch (storage.CurrentPumpStatus)
+                            {
+                                case GasStorage.PumpStatus.PumpOff:
+                                    newPrompt = Prompts.TurnPumpOnHint;
+                                    break;
+                                case GasStorage.PumpStatus.PumpIn:
+                                    newPrompt = Prompts.StopPumpingInHint;
+                                    break;
+                                case GasStorage.PumpStatus.PumpOut:
+                                    newPrompt = Prompts.StopPumpingOutHint;
+                                    break;
+                            }
+                        }
+                    }
+
+                }
                 else if (hitInfo.collider.CompareTag("powerSwitch"))
                 {
                     if (doInteract)
@@ -1272,7 +1304,7 @@ public class PlayerInput : MonoBehaviour {
         carriedObject.transform.SetParent(this.transform);
     }
 
-    private void DropObject()
+    internal void DropObject()
     {
         carriedObject.GetComponent<Rigidbody>().useGravity = true;
         carriedObject.transform.SetParent(null);

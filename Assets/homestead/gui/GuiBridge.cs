@@ -88,8 +88,8 @@ public class RadialMenu
 [Serializable]
 public struct PromptUI
 {
-    public RectTransform Panel, ProgressBar;
-    public Text Key, Description;
+    public RectTransform Panel, ProgressBar, Background;
+    public Text Key, Description, SecondaryKey, SecondaryDescription;
     public Image ProgressFill;
 }
 
@@ -164,6 +164,9 @@ public class GuiBridge : MonoBehaviour {
             News.Icon.sprite = news.Icon;
             News.Icon.gameObject.SetActive(news.Icon != null);
 
+#warning news progressbar unimplemented
+            News.ProgressBar.gameObject.SetActive(false);
+
             if (newsTimer != null)
             {
                 StopCoroutine(newsTimer);
@@ -193,6 +196,14 @@ public class GuiBridge : MonoBehaviour {
 
         Prompts.ProgressBar.gameObject.SetActive(prompt.UsesProgress);
         Prompts.ProgressFill.fillAmount = prompt.Progress;
+        
+        Prompts.SecondaryDescription.gameObject.SetActive(prompt.HasSecondary);
+        Prompts.SecondaryDescription.text = prompt.SecondaryDescription;
+
+        Prompts.SecondaryKey.transform.parent.gameObject.SetActive(prompt.HasSecondary);
+        Prompts.SecondaryKey.text = prompt.SecondaryKey;
+
+        Prompts.Background.offsetMin = new Vector2(0, prompt.HasSecondary ? -66 : 0);
 
         TogglePromptPanel(true);
         CurrentPrompt = prompt;

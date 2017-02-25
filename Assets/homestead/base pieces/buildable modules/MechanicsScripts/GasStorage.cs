@@ -14,8 +14,8 @@ public class GasStorage : SingleResourceSink {
     public Sprite[] PumpSprites;
     public Color OnColor, OffColor;
 
-    private enum PumpStatus { PumpOff, PumpIn, PumpOut }
-    private PumpStatus CurrentPumpStatus;
+    internal enum PumpStatus { PumpOff, PumpIn, PumpOut }
+    internal PumpStatus CurrentPumpStatus;
 
     public override float WattRequirementsPerTick
     {
@@ -144,16 +144,41 @@ public class GasStorage : SingleResourceSink {
         if (res != null && this.SinkType != Matter.Unspecified && this.SinkType == res.ResourceType && capturedResource == null)
         {
             capturedResource = res;
+            PlayerInput.Instance.DropObject();
             capturedRigidbody = other.attachedRigidbody;
             capturedRigidbody.isKinematic = true;
             capturedRigidbody.useGravity = false;
             capturedResource.transform.position = SnapAnchor.position;
+            capturedResource.transform.localRotation = Quaternion.identity;
             RefreshPumpState();
         }
     }
 
-    public void StartPumpingToContainer()
+    public void StartPumpingOut()
     {
+        if (CurrentPumpStatus == PumpStatus.PumpIn)
+        {
+            CurrentPumpStatus = PumpStatus.PumpOff;
+        }
+        else if (CurrentPumpStatus == PumpStatus.PumpOff)
+        {
+            CurrentPumpStatus = PumpStatus.PumpOut;
+        }
+
+        RefreshPumpState();
+    }
+
+    public void StartPumpingIn()
+    {
+        if (CurrentPumpStatus == PumpStatus.PumpOut)
+        {
+            CurrentPumpStatus = PumpStatus.PumpOff;
+        }
+        else if (CurrentPumpStatus == PumpStatus.PumpOff)
+        {
+            CurrentPumpStatus = PumpStatus.PumpIn;
+        }
+
         RefreshPumpState();
     }
 
@@ -162,6 +187,7 @@ public class GasStorage : SingleResourceSink {
         switch (this.CurrentPumpStatus)
         {
             case PumpStatus.PumpOff:
+                this.IconRenderer.flipY = false;
                 this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
                 break;
             case PumpStatus.PumpIn:

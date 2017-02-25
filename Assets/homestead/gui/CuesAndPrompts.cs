@@ -16,6 +16,16 @@ public class PromptInfo
 {
     public string Key { get; set; }
     public string Description { get; set; }
+
+    public string SecondaryKey { get; set; }
+    public string SecondaryDescription { get; set; }
+    public bool HasSecondary
+    {
+        get
+        {
+            return SecondaryKey != null;
+        }
+    }
     /// <summary>
     /// 0 to 1f percentage
     /// </summary>
@@ -266,6 +276,24 @@ public static class Prompts {
     {
         Description = "Turn on power",
         Key = "E"
+    };
+
+    internal static PromptInfo StopPumpingOutHint = new PromptInfo()
+    {
+        Description = "Disable Pump",
+        Key = "LMB"
+    };
+    internal static PromptInfo StopPumpingInHint = new PromptInfo()
+    {
+        Description = "Disable Pump",
+        Key = "RMB"
+    };
+    internal static PromptInfo TurnPumpOnHint = new PromptInfo()
+    {
+        Description = "Pump Into Tank",
+        Key = "LMB",
+        SecondaryDescription = "Pump Out of Tank",
+        SecondaryKey = "RMB"
     };
 
     public static PromptInfo DrillHint = new PromptInfo()
