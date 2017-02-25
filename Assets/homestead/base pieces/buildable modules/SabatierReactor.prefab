@@ -76,6 +76,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 497914}
   - 114: {fileID: 11415782}
+  - 82: {fileID: 8285138}
   m_Layer: 0
   m_Name: SabatierReactor
   m_TagString: Untagged
@@ -547,7 +548,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 146208}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071067}
-  m_LocalPosition: {x: 729.75964, y: 0.15134895, z: 992.9762}
+  m_LocalPosition: {x: 709.264, y: 0.19247793, z: 998.0095}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 422856}
@@ -877,6 +878,80 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.6, y: 0.6, z: 0.6}
   m_Center: {x: 0, y: 0, z: -0.78}
+--- !u!82 &8285138
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 146208}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: f5a1c4add0f76204b85bc2c2b4949b30, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.5
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 30
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!114 &11415782
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -889,6 +964,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 21293132}
+  HandleChangeClip: {fileID: 8300000, guid: 9d6e34029f51262458002bc29b39a063, type: 3}
   PowerCabinet: {fileID: 3332542}
   OnMesh: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
   OffMesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}

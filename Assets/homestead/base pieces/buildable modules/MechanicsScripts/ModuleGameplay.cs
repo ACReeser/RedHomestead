@@ -7,6 +7,7 @@ using RedHomestead.Simulation;
 public abstract class ModuleGameplay : MonoBehaviour
 {
     public SpriteRenderer PowerIndicator;
+    protected AudioSource SoundSource;
 
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public LocalMatterHistory MatterHistory = new LocalMatterHistory();
@@ -39,6 +40,7 @@ public abstract class ModuleGameplay : MonoBehaviour
 
     void Start()
     {
+        SoundSource = this.GetComponent<AudioSource>();
         this.OnStart();
     }
 

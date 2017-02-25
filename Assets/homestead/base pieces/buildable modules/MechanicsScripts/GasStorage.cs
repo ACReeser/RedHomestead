@@ -23,8 +23,6 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     public const float PumpPerUpdateInterval = PumpPerSecond / PumpUpdateIntervalSeconds;
     private const float SnapInterferenceTimerSeconds = 1.25f;
 
-    private AudioSource PumpSoundSource;
-
     public override float WattRequirementsPerTick
     {
         get
@@ -37,8 +35,6 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     protected override void OnStart()
     {
         base.OnStart();
-
-        PumpSoundSource = this.GetComponent<AudioSource>();
 
         if (this.SinkType != Matter.Unspecified)
             _SpecifyCompound(this.SinkType);
@@ -208,7 +204,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
 
     private IEnumerator Pump(bool pumpIn)
     {
-        PumpSoundSource.Play();
+        SoundSource.Play();
 
         while(isActiveAndEnabled && CurrentPumpStatus != PumpStatus.PumpOff && capturedResource != null)
         {
@@ -242,7 +238,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
             yield return new WaitForSeconds(PumpUpdateIntervalSeconds);
         }
 
-        PumpSoundSource.Stop();
+        SoundSource.Stop();
         CurrentPumpStatus = PumpStatus.PumpOff;
         RefreshPumpState();
     }

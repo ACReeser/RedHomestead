@@ -901,6 +901,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
+                        //PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
                         hitInfo.collider.transform.root.GetComponent<IPowerToggleable>().TogglePower();
                     }
                     else

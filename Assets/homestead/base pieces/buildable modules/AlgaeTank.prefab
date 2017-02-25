@@ -58,7 +58,8 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 446350}
-  - 114: {fileID: 11451314}
+  - 114: {fileID: 11489852}
+  - 82: {fileID: 8238016}
   m_Layer: 0
   m_Name: AlgaeTank
   m_TagString: Untagged
@@ -529,8 +530,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 112556}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 729.75964, y: 0.15134895, z: 992.9762}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: -0.00000016292068}
+  m_LocalPosition: {x: 699.12, y: 0.3883896, z: 1002.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 481232}
@@ -1014,6 +1015,80 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 3.85, y: 4.48, z: 0.8}
   m_Center: {x: -0.34, y: 2.18, z: 0}
+--- !u!82 &8238016
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 112556}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 44736b764a6649143aea2519dca02fc4, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.5
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 20
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!114 &11404008
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1031,21 +1106,6 @@ MonoBehaviour:
   animateEmissive: 0
   diffuseName: _MainTex
   emissiveName: _EmissionMap
---- !u!114 &11451314
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 112556}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 867d0602996406243ae5028b2693ee9a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PowerIndicator: {fileID: 21201610}
-  PowerCabinet: {fileID: 3395020}
-  OnMesh: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
-  OffMesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
 --- !u!114 &11476738
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1063,6 +1123,22 @@ MonoBehaviour:
   animateEmissive: 0
   diffuseName: _MainTex
   emissiveName: _EmissionMap
+--- !u!114 &11489852
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 112556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92406f83d6ee64446939a50233cd57e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PowerIndicator: {fileID: 21201610}
+  HandleChangeClip: {fileID: 8300000, guid: 9d6e34029f51262458002bc29b39a063, type: 3}
+  PowerCabinet: {fileID: 3395020}
+  OnMesh: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  OffMesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
 --- !u!212 &21201610
 SpriteRenderer:
   m_ObjectHideFlags: 1
