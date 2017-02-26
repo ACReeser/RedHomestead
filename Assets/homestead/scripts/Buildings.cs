@@ -12,7 +12,7 @@ namespace RedHomestead.Buildings
         SabatierReactor,
         SmallGasTank,
         LargeGasTank,
-        Workspace,
+        Warehouse,
         Habitat,
         OreExtractor,
         Smelter,
@@ -57,6 +57,9 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.AlgaeTank, DefaultBuildTimeSeconds
+            },
+            {
+                Module.Warehouse, DefaultBuildTimeSeconds
             }
         };
 
@@ -119,6 +122,13 @@ namespace RedHomestead.Buildings
                     new ResourceEntry(2, Matter.Steel),
                     new ResourceEntry(2, Matter.Glass),
                     new ResourceEntry(2, Matter.Biomass),
+                }
+            },
+            {
+                Module.Warehouse, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(2, Matter.Steel),
+                    new ResourceEntry(4, Matter.Canvas)
                 }
             }
         };

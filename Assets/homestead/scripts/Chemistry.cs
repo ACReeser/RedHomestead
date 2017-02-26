@@ -20,7 +20,8 @@ namespace RedHomestead.Simulation
         Glass,
         Gold,
         Silver,
-        Bauxite
+        Bauxite,
+        Canvas
     }
 
     public class ResourceEntry
@@ -41,24 +42,31 @@ namespace RedHomestead.Simulation
         //https://www.wolframalpha.com/input/?i=density+of+hydrogen+at+0+deg+C+and+350+bar
         private static Dictionary<Matter, float> DensityKgPerCubicMeter = new Dictionary<Matter, float>()
         {
+            //gases and water
             { Matter.Hydrogen, 24f }, // 0 deg and 350 bar
             { Matter.Oxygen, 498f }, // 0 deg and 350 bar
             { Matter.Methane, 258f }, // 0 deg and 350 bar
             { Matter.Water, 1000f }, // 0.1 deg and 1 atm
-            { Matter.Steel, 7850f },
-            { Matter.SiliconWafers, 2330f },
-            { Matter.Aluminium, 2800f },
+            //ores
             { Matter.Bauxite, 1280f },
-            { Matter.Biomass, 760f }, //same as wheat
-            { Matter.Silica, 2100 },
+            //metals
+            { Matter.Steel, 7850f },
+            { Matter.Aluminium, 2800f },
             { Matter.Copper, 8790 },
             { Matter.Uranium, 19100 },
-            { Matter.Polyethylene, 960 },
             { Matter.Platinum, 21500 },
             { Matter.Gold, 19290 },
             { Matter.Silver, 10500 },
+            //minerals
+            { Matter.Silica, 2100 },
+            //processed
+            { Matter.SiliconWafers, 2330f },
             { Matter.Glass, 2600 },
             { Matter.MealShake, 1100 }, //slightly denser than water
+            ///organics
+            { Matter.Biomass, 760f }, //same as wheat
+            { Matter.Polyethylene, 960 },
+            { Matter.Canvas, 1500 }, //same as starch, artificial wool, heavy paper
             { Matter.MealPowder, 1600 }, //same as sand??
             { Matter.RationMeal, 870 }, //same as butter
             { Matter.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking

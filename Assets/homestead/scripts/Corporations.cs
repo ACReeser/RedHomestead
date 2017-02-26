@@ -11,6 +11,7 @@ public static class Corporations {
     {
         new Vendor()
         {
+            //Specializes in: commodity
             Name = "MonsMart",
             AvailableDelivery = DeliveryType.Drop | DeliveryType.Lander | DeliveryType.Rover,
             Location = new LatLong()
@@ -41,19 +42,14 @@ public static class Corporations {
                 new Stock()
                 {
                     ListPrice = 2000,
-                    StockAvailable = 100,
+                    StockAvailable = 50,
                     Matter = Matter.SiliconWafers
-                },
-                new Stock()
-                {
-                    ListPrice = 1000,
-                    StockAvailable = 10,
-                    Matter = Matter.Biomass
                 }
             }
         },
         new Vendor()
         {
+            //Specializes in: commodity & high tech
             Name = "Bradbury & Co.",
             AvailableDelivery = DeliveryType.Drop | DeliveryType.Lander | DeliveryType.Rover,
             Location = new LatLong()
@@ -92,6 +88,44 @@ public static class Corporations {
                     ListPrice = 300,
                     StockAvailable = 100,
                     Matter = Matter.Glass
+                },
+                new Stock()
+                {
+                    ListPrice = 200,
+                    StockAvailable = 100,
+                    Matter = Matter.Canvas
+                }
+            }
+        },
+        new Vendor()
+        {
+            //Specializes in: bio-anything
+            Name = "Utopia Biochemical",
+            AvailableDelivery = DeliveryType.Drop | DeliveryType.Lander | DeliveryType.Rover,
+            Location = new LatLong()
+            {
+                LatitudeDegrees = 30f,
+                LongitudeDegrees = 90f
+            },
+            Stock = new List<Stock>()
+            {
+                new Stock()
+                {
+                    ListPrice = 100,
+                    StockAvailable = 100,
+                    Matter = Matter.Hydrogen
+                },
+                new Stock()
+                {
+                    ListPrice = 200,
+                    StockAvailable = 100,
+                    Matter = Matter.Canvas
+                },
+                new Stock()
+                {
+                    ListPrice = 500,
+                    StockAvailable = 100,
+                    Matter = Matter.Biomass
                 }
             }
         }
