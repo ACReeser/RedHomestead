@@ -62,7 +62,7 @@ public class ResourceComponent : MonoBehaviour {
     //called in pick up object
     public void UnsnapCrate()
     {
-        this.SnappedTo.DetachCrate();
+        this.SnappedTo.DetachCrate(this);
         this.SnappedTo = null;
         myRigidbody.isKinematic = false;
         myRigidbody.useGravity = true;

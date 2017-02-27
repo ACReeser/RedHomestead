@@ -1329,9 +1329,13 @@ public class PlayerInput : MonoBehaviour {
 
     internal void DropObject()
     {
-        carriedObject.useGravity = true;
-        carriedObject.isKinematic = false;
-        carriedObject.transform.SetParent(null);
+        if (carriedObject != null)
+        {
+            carriedObject.useGravity = true;
+            carriedObject.isKinematic = false;
+            carriedObject.transform.SetParent(null);
+        }
+
         carriedObject = null;
     }
 

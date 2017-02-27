@@ -198,6 +198,6 @@ namespace RedHomestead.Simulation
 
     public interface ICrateSnapper
     {
-        void DetachCrate();
+        void DetachCrate(ResourceComponent detaching);
     }
 }

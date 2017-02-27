@@ -275,7 +275,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
         }
     }
 
-    public void DetachCrate()
+    public void DetachCrate(ResourceComponent detaching)
     {
         this.lastCapturedResource = this.capturedResource;
         this.capturedResource = null;
