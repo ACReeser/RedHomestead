@@ -192,9 +192,9 @@ GameObject:
   m_Component:
   - 4: {fileID: 472234}
   - 65: {fileID: 6540512}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: algae_tank
-  m_TagString: Untagged
+  m_TagString: harvestable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -344,6 +344,23 @@ GameObject:
   - 65: {fileID: 6537532}
   m_Layer: 0
   m_Name: structure
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &189956
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 430406}
+  - 65: {fileID: 6585782}
+  - 114: {fileID: 11433682}
+  m_Layer: 0
+  m_Name: crateAnchorAndTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -500,6 +517,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 414936}
   m_RootOrder: 0
+--- !u!4 &430406
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 189956}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.258, y: 0.683, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 446350}
+  m_RootOrder: 7
 --- !u!4 &434174
 Transform:
   m_ObjectHideFlags: 1
@@ -541,6 +570,7 @@ Transform:
   - {fileID: 427720}
   - {fileID: 468086}
   - {fileID: 472234}
+  - {fileID: 430406}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!4 &460384
@@ -1003,6 +1033,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.6, y: 0.6, z: 0.6}
   m_Center: {x: 0, y: 0, z: -0.78}
+--- !u!65 &6585782
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 189956}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.1, y: 1.1, z: 1.1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &6599968
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -1106,6 +1148,17 @@ MonoBehaviour:
   animateEmissive: 0
   diffuseName: _MainTex
   emissiveName: _EmissionMap
+--- !u!114 &11433682
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 189956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 601d8d47802955743aadf072242adc81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &11476738
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1139,6 +1192,8 @@ MonoBehaviour:
   PowerCabinet: {fileID: 3395020}
   OnMesh: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
   OffMesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  CratePrefab: {fileID: 434448, guid: 2eadcf53d0112eb4bac2d8edb7fb393f, type: 2}
+  CrateAnchor: {fileID: 430406}
 --- !u!212 &21201610
 SpriteRenderer:
   m_ObjectHideFlags: 1

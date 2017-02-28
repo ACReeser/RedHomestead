@@ -133,4 +133,10 @@ namespace RedHomestead.Buildings
             }
         };
     }
+
+    public interface IHarvestable
+    {
+        bool CanHarvest { get; }
+        void Harvest();
+    }
 }

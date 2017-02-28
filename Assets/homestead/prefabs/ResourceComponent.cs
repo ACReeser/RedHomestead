@@ -31,7 +31,11 @@ public class ResourceComponent : MonoBehaviour {
     {
         myRigidbody = GetComponent<Rigidbody>();
         myCollider = GetComponent<Collider>();
+        RefreshLabel();
+    }
 
+    public void RefreshLabel()
+    {
         if (ResourceType != Matter.Unspecified)
         {
             int index = (int)ResourceType;

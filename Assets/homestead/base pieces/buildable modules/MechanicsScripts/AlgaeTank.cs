@@ -1,17 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
+using System;
 
-public class AlgaeTank : Converter, IPowerToggleable
+public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnapper, ITriggerSubscriber
 {
     public AudioClip HandleChangeClip;
 
-    internal float BiomassPerSecond = .1f;
-    internal float WaterPerSecond = .1f;
+    // 760 kg/m2 per unit, per fourth
+    internal const float LeastBiomassHarvestKilograms = 760f / 4f;
+    // least harvest kg per five days per seconds per day
+    internal const float BiomassPerSecond = LeastBiomassHarvestKilograms / 5f / SunOrbit.MartianSecondsPerDay;
+    internal const float MaximumBiomass = 760f;
+
+    internal float BiomassCollected = 0f;
+
+#warning these are made up numbers
+    internal float WaterPerSecond = .001f;
+    internal float OxygenPerSecond = .001f;
+
     internal bool _isOn = false;
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
+    public Transform CratePrefab, CrateAnchor;
+    private ResourceComponent capturedResource;
 
     public override float WattRequirementsPerTick
     {
@@ -38,13 +52,22 @@ public class AlgaeTank : Converter, IPowerToggleable
         }
     }
 
+    public bool CanHarvest
+    {
+        get
+        {
+            return BiomassCollected > LeastBiomassHarvestKilograms &&
+                ((capturedResource == null) || (capturedResource.Quantity < MaximumBiomass));
+        }
+    }
+
     public override void Convert()
     {
-        if (HasPower && IsOn && IsFullyConnected)
+        if (HasPower && IsOn && IsFullyConnected && BiomassCollected < MaximumBiomass)
         {
             if (PullWater())
             {
-                PushBiomass();
+                BuildUpBiomass();
             }
         }
     }
@@ -55,31 +78,39 @@ public class AlgaeTank : Converter, IPowerToggleable
         RefreshPowerSwitch();
     }
 
-    private void PushBiomass()
+    private bool lastTickUnharvestable = true;
+    private void BuildUpBiomass()
     {
-        //MethaneOut.Get(Matter.Methane).Push(MethanePerSecond * Time.fixedDeltaTime);
-        //MatterHistory.Produce(Matter.Methane, MethanePerSecond * Time.fixedDeltaTime);
-        //WaterOut.Get(Matter.Water).Push(WaterPerSecond * Time.fixedDeltaTime);
-        //MatterHistory.Produce(Matter.Water, MethanePerSecond * Time.fixedDeltaTime);
+        BiomassCollected += BiomassPerSecond;
+
+        if (lastTickUnharvestable && CanHarvest)
+        {
+            GuiBridge.Instance.ShowNews(NewsSource.AlgaeHarvestable);
+            lastTickUnharvestable = false;
+        }
+        else
+        {
+            lastTickUnharvestable = true;
+        }
     }
 
     private float waterBuffer = 0f;
     private bool PullWater()
     {
-        //if (HydrogenSource != null)
-        //{
-        //    float newHydrogen = HydrogenSource.Get(Matter.Hydrogen).Pull(HydrogenPerSecond * Time.fixedDeltaTime);
-        //    hydrogenBuffer += newHydrogen;
-        //    MatterHistory.Consume(Matter.Hydrogen, newHydrogen);
+        if (WaterIn != null)
+        {
+            float newWater = WaterIn.Get(Matter.Water).Pull(WaterPerSecond * Time.fixedDeltaTime);
+            waterBuffer += newWater;
+            MatterHistory.Consume(Matter.Water, newWater);
 
-        //    float hydrogenThisTick = HydrogenPerSecond * Time.fixedDeltaTime;
+            float waterThisTick = WaterPerSecond * Time.fixedDeltaTime;
 
-        //    if (hydrogenBuffer >= hydrogenThisTick)
-        //    {
-        //        hydrogenBuffer -= hydrogenThisTick;
-        //        return true;
-        //    }
-        //}
+            if (waterBuffer >= waterThisTick)
+            {
+                waterBuffer -= waterThisTick;
+                return true;
+            }
+        }
 
         return false;
     }
@@ -105,7 +136,7 @@ public class AlgaeTank : Converter, IPowerToggleable
         //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", MatterHistory[Matter.Hydrogen].Consumed, MatterHistory[Matter.Water].Produced, MatterHistory[Matter.Methane].Produced, HasPower));
         GuiBridge.Instance.WriteReport(
             "Algae Tank",
-            "1 kWh + 1kg H2O => 1kg Biomass",
+            "1 kWh + 2kg H2O => 1kg Biomass + 1kg O2",
             "100%",
             "100%",
             new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
@@ -145,6 +176,49 @@ public class AlgaeTank : Converter, IPowerToggleable
             SoundSource.Play();
         else
             SoundSource.Stop();
+    }
+
+    public void Harvest()
+    {
+        if (capturedResource == null)
+        {
+            capturedResource = GameObject.Instantiate<Transform>(CratePrefab).GetComponent<ResourceComponent>();
+            capturedResource.ResourceType = Matter.Biomass;
+            capturedResource.Quantity = 0;
+            capturedResource.RefreshLabel();
+            capturedResource.SnapCrate(this, CrateAnchor.position);
+        }
+
+        if (capturedResource.Quantity < MaximumBiomass)
+        {
+            capturedResource.Quantity += BiomassCollected;
+            BiomassCollected = 0;
+        }
+    }
+
+    private Coroutine detachTimer;
+    public void OnChildTriggerEnter(string childName, Collider c, ResourceComponent res)
+    {
+        if (detachTimer == null && res != null)
+        {
+            if (res.ResourceType == Matter.Biomass)
+            {
+                capturedResource = res;
+                capturedResource.SnapCrate(this, CrateAnchor.position);
+            }
+        }
+    }
+
+    public void DetachCrate(ResourceComponent detaching)
+    {
+        capturedResource = null;
+        detachTimer = StartCoroutine(DetachTimer());
+    }
+
+    private IEnumerator DetachTimer()
+    {
+        yield return new WaitForSeconds(1f);
+        detachTimer = null;
     }
 }
 

@@ -933,6 +933,22 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.PayloadDisassembleHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("harvestable"))
+                {
+                    IHarvestable harvestable = hitInfo.collider.transform.parent.GetComponent<IHarvestable>();
+
+                    if (harvestable.CanHarvest)
+                    {
+                        if (doInteract)
+                        {
+                            harvestable.Harvest();
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.HarvestHint;
+                        }
+                    }
+                }
             }
             else if (doInteract)
             {

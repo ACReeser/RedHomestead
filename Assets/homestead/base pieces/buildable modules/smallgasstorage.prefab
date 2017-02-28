@@ -562,9 +562,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 0}
-  SinkType: -6
+  SinkType: 0
   flowAmountRenderer: {fileID: 21283906}
-  StartAmount: 5
+  StartAmount: 0
   Capacity: 10
   MeshFilter: {fileID: 3343802}
   CompoundUVSet:
@@ -740,6 +740,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: StartAmount
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

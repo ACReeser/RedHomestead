@@ -53,6 +53,11 @@ public static class NewsSource
         Text = "Incoming Drop Pod",
         Duration = 10000
     };
+    public static News AlgaeHarvestable = new News()
+    {
+        Text = "Algae Harvest Ready",
+        Duration = 10000
+    };
 }
 
 public static class Prompts {
@@ -303,5 +308,10 @@ public static class Prompts {
     {
         Description = "(Requires Drill)",
         Key = " "
+    };
+    internal static PromptInfo HarvestHint = new PromptInfo()
+    {
+        Description = "Harvest",
+        Key = "E"
     };
 }
