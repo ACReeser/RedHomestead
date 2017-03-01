@@ -4,8 +4,8 @@ using RedHomestead.Simulation;
 
 public class Electrolyzer : Converter, IPowerToggleable
 {
-    internal float OxygenPerSecond = .1f;
-    internal float HydrogenPerSecond = .1f;
+    internal float OxygenPerSecond = .03f;
+    internal float HydrogenPerSecond = .06f;
     internal float WaterPerSecond = .1f;
     internal bool _isOn = false;
 
@@ -110,7 +110,6 @@ public class Electrolyzer : Converter, IPowerToggleable
         //todo: report v3: flow is "0/1 kWh" etc, flow and amount update over time
         //using some sort of UpdateReport() call (which reuses built text boxes)
         //todo: report v4: each row gets a graph over time that shows effciency or flow
-        //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", MatterHistory[Matter.Hydrogen].Consumed, MatterHistory[Matter.Water].Produced, MatterHistory[Matter.Methane].Produced, HasPower));
         GuiBridge.Instance.WriteReport(
             "Water Electrolyzer",
             "1 kWh + 1kg H20 => .3kg O2 + .6kg H2",
@@ -119,12 +118,12 @@ public class Electrolyzer : Converter, IPowerToggleable
             new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = MatterHistory[Matter.Hydrogen].Consumed + " kg", Connected = HydrogenOut != null  }
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = MatterHistory[Matter.Water].Consumed + " kg", Connected = WaterIn != null  }
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = MatterHistory[Matter.Methane].Produced + " kg", Connected = OxygenOut != null },
-                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = MatterHistory[Matter.Water].Produced + " kg", Connected = WaterIn != null }
+                new ReportIOData() { Name = "Oxygen", Flow = ".3kg kg/d", Amount = MatterHistory[Matter.Oxygen].Produced + " kg", Connected = OxygenOut != null },
+                new ReportIOData() { Name = "Hydrogen", Flow = ".6kg kg/d", Amount = MatterHistory[Matter.Hydrogen].Produced + " kg", Connected = HydrogenOut != null }
             }
             );
     }
