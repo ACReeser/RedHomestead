@@ -19,10 +19,11 @@ public class SunOrbit : MonoBehaviour {
     internal const float GameSecondsPerGameDay = GameMinutesPerGameDay * 60;
 
     internal const float MartianSecondsPerGameSecond = MartianSecondsPerDay / GameSecondsPerGameDay;
-
     internal const float GameSecondsPerMartianMinute = GameSecondsPerGameDay / MartianSecondsPerDay * 60;
+
     private const int MaximumSpeedTiers = 6;
     private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;
+
     internal float CurrentHour = 9;
     internal float CurrentMinute = 0;
     internal int CurrentSol = 1;
@@ -33,6 +34,9 @@ public class SunOrbit : MonoBehaviour {
             return CurrentSol * MartianHoursPerDay + CurrentHour;
         }
     }
+
+    internal bool RunTilMorning { get; private set; }
+
     internal event HandleHourChange OnHourChange;
     internal event HandleSolChange OnSolChange;
 
@@ -44,11 +48,11 @@ public class SunOrbit : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        GetClockTextMeshes();
+        RefreshClockTextMeshes();
         UpdateClockSpeedArrows();
 	}
 
-    private void GetClockTextMeshes()
+    public void RefreshClockTextMeshes()
     {
         var clocks = GameObject.FindGameObjectsWithTag("clock");
         this.Clocks = new TextMesh[clocks.Length];
@@ -72,6 +76,11 @@ public class SunOrbit : MonoBehaviour {
 
             if (OnHourChange != null)
                 OnHourChange(CurrentSol, CurrentHour);
+
+            if (RunTilMorning && CurrentHour == 6)
+            {
+                ToggleSleepUntilMorning(false);
+            }
         }
 
         if (CurrentHour > 24 && CurrentMinute > 40f)
@@ -175,17 +184,18 @@ public class SunOrbit : MonoBehaviour {
     }
 
     //barry allen would be proud
-    private int speedTier = 1;
+    private int SpeedTier = 1;
     internal void SpeedUp()
     {
         Time.timeScale = Mathf.Min(MaximumTimeScale, Time.timeScale * 2f);
-        speedTier = Math.Min(MaximumSpeedTiers, speedTier + 1);
+        SpeedTier = Math.Min(MaximumSpeedTiers, SpeedTier + 1);
         UpdateClockSpeedArrows();
     }
 
     private void UpdateClockSpeedArrows()
     {
-        string arrows = new string('►', speedTier - 1);
+        //dat unicode arrow
+        string arrows = new string('►', SpeedTier - 1);
         foreach(var t in this.Clocks)
         {
             t.transform.GetChild(0).GetComponent<TextMesh>().text = arrows; 
@@ -195,7 +205,40 @@ public class SunOrbit : MonoBehaviour {
     internal void SlowDown()
     {
         Time.timeScale = Mathf.Max(1f, Time.timeScale / 2);
-        speedTier = Math.Max(1, speedTier - 1);
+        SpeedTier = Math.Max(1, SpeedTier - 1);
         UpdateClockSpeedArrows();
+    }
+
+    internal void ToggleSleepUntilMorning(bool startSleeping)
+    {
+        if (startSleeping)
+        {
+            Time.timeScale = 60f;
+            SpeedTier = MaximumSpeedTiers;
+            UpdateClockSpeedArrows();
+            RunTilMorning = true;
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            RunTilMorning = false;
+            PlayerInput.Instance.wakeyWakeySignal = true;
+        }
+    }
+
+    internal void CheckEmergencyReset()
+    {
+        if (SpeedTier > 1f || RunTilMorning)
+        {
+            Time.timeScale = 1f;
+            SpeedTier = 1;
+            UpdateClockSpeedArrows();
+
+            if (RunTilMorning)
+            {
+                RunTilMorning = false;
+                PlayerInput.Instance.wakeyWakeySignal = true;
+            }
+        }
     }
 }

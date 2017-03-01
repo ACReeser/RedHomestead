@@ -1538,10 +1538,13 @@ public class PlayerInput : MonoBehaviour {
     private void ToggleSleep(bool isAsleep)
     {
         this.CurrentMode = isAsleep ? InputMode.Sleep : InputMode.Normal;
+
         FPSController.SuspendInput = isAsleep;
+
         this.RefreshEquipmentState();
     }
 
+    internal bool wakeyWakeySignal = false;
     private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)
     {
         if (Input.GetKeyUp(KeyCode.Comma))
@@ -1553,10 +1556,15 @@ public class PlayerInput : MonoBehaviour {
             SunOrbit.Instance.SpeedUp();
         }
 
-        if (doInteract)
+        if (wakeyWakeySignal || doInteract)
         {
+            wakeyWakeySignal = false;
             sleerpCtx.StandUp(); //reset ctx
             StartCoroutine(BedLerp(true));
+        }
+        else if (Input.GetKeyUp(KeyCode.Z))
+        {
+            SunOrbit.Instance.ToggleSleepUntilMorning(true);
         }
         else
         {
@@ -1575,6 +1583,8 @@ public class PlayerInput : MonoBehaviour {
 
             yield return null;
         }
+
+
 
         if (exitStateOnDone)
         {

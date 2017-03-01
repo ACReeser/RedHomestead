@@ -262,7 +262,9 @@ public static class Prompts {
     internal static PromptInfo BedExitHint = new PromptInfo()
     {
         Description = "Wake Up",
-        Key = "E"
+        Key = "E",
+        SecondaryDescription = "Sleep Until Morning",
+        SecondaryKey = "Z"
     };
     internal static PromptInfo EVAChargeHint = new PromptInfo()
     {
