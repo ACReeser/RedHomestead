@@ -3,10 +3,17 @@ using System.Collections;
 using RedHomestead.Simulation;
 using System;
 
-[RequireComponent(typeof(Rigidbody))]
-public class ResourceComponent : MonoBehaviour {
+[Serializable]
+public class CrateInfo
+{
     public Matter ResourceType;
     public float Quantity = 1;
+}
+
+[RequireComponent(typeof(Rigidbody))]
+public class ResourceComponent : MonoBehaviour {
+    public CrateInfo Info;
+
     public AudioClip MetalBang;
     public ICrateSnapper SnappedTo;
 
@@ -36,9 +43,9 @@ public class ResourceComponent : MonoBehaviour {
 
     public void RefreshLabel()
     {
-        if (ResourceType != Matter.Unspecified)
+        if (Info.ResourceType != Matter.Unspecified)
         {
-            int index = (int)ResourceType;
+            int index = (int)Info.ResourceType;
 
             if (index > 0)
                 LabelMeshFilter.mesh = ResourceLabelMeshes[index - 1];
@@ -75,6 +82,6 @@ public class ResourceComponent : MonoBehaviour {
 
     internal string GetText()
     {
-        return this.ResourceType.ToString() + String.Format(" {0:0.##}kg", this.Quantity * this.ResourceType.Kilograms());
+        return this.Info.ResourceType.ToString() + String.Format(" {0:0.##}kg", this.Info.Quantity * this.Info.ResourceType.Kilograms());
     }
 }

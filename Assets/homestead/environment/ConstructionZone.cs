@@ -81,7 +81,7 @@ public class ConstructionZone : MonoBehaviour {
                 if (addedResources != null && !addedResources.IsInConstructionZone)
                 {
 #warning rounding error
-                    ResourceCount[addedResources.ResourceType] += (int)addedResources.Quantity;
+                    ResourceCount[addedResources.Info.ResourceType] += (int)addedResources.Info.Quantity;
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
@@ -107,7 +107,7 @@ public class ConstructionZone : MonoBehaviour {
                 if (removedResources != null && removedResources.IsInConstructionZone)
                 {
 #warning rounding error
-                    ResourceCount[removedResources.ResourceType] -= (int)removedResources.Quantity;
+                    ResourceCount[removedResources.Info.ResourceType] -= (int)removedResources.Info.Quantity;
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();
@@ -171,16 +171,16 @@ public class ConstructionZone : MonoBehaviour {
             //(this frees it for use in another zone)
             component.IsInConstructionZone = false;
 
-            if (RequiredResourceMask.Contains(component.ResourceType))
+            if (RequiredResourceMask.Contains(component.Info.ResourceType))
             {
                 int numDeleted = 0;
-                if (deletedCount.ContainsKey(component.ResourceType))
+                if (deletedCount.ContainsKey(component.Info.ResourceType))
                 {
-                    numDeleted = deletedCount[component.ResourceType];
-                    deletedCount[component.ResourceType] = 0;
+                    numDeleted = deletedCount[component.Info.ResourceType];
+                    deletedCount[component.Info.ResourceType] = 0;
                 }
 
-                if (numDeleted < Construction.Requirements[this.UnderConstruction].Where(r => r.Type == component.ResourceType).Count())
+                if (numDeleted < Construction.Requirements[this.UnderConstruction].Where(r => r.Type == component.Info.ResourceType).Count())
                 {
                     this.ResourceList.Remove(component);
                     Destroy(component.gameObject);

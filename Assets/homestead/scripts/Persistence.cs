@@ -12,7 +12,7 @@ namespace RedHomestead.Persistence
     [Serializable]
     public class Base {
         //player data
-        public List<ResourceComponent> Crates { get; set; }
+        public List<CrateInfo> Crates { get; set; }
         public List<Habitat> Habitats { get; set; }
         //hobbit hole data
         //floorplan data

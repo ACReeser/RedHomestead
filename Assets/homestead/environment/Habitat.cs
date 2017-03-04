@@ -121,9 +121,9 @@ public class Habitat : Converter
 
     public void ImportResource(ResourceComponent r)
     {
-        if (r.ResourceType.IsStoredInHabitat())
+        if (r.Info.ResourceType.IsStoredInHabitat())
         {
-            float amountLeft = MatterTotals[r.ResourceType].Push(r.Quantity);
+            float amountLeft = MatterTotals[r.Info.ResourceType].Push(r.Info.Quantity);
             
             if (amountLeft <= 0)
             {
@@ -131,7 +131,7 @@ public class Habitat : Converter
             }
             else
             {
-                r.Quantity = amountLeft;
+                r.Info.Quantity = amountLeft;
             }
         }
     }

@@ -57,7 +57,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         get
         {
             return BiomassCollected > LeastBiomassHarvestKilograms &&
-                ((capturedResource == null) || (capturedResource.Quantity < MaximumBiomass));
+                ((capturedResource == null) || (capturedResource.Info.Quantity < MaximumBiomass));
         }
     }
 
@@ -183,15 +183,15 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         if (capturedResource == null)
         {
             capturedResource = GameObject.Instantiate<Transform>(CratePrefab).GetComponent<ResourceComponent>();
-            capturedResource.ResourceType = Matter.Biomass;
-            capturedResource.Quantity = 0;
+            capturedResource.Info.ResourceType = Matter.Biomass;
+            capturedResource.Info.Quantity = 0;
             capturedResource.RefreshLabel();
             capturedResource.SnapCrate(this, CrateAnchor.position);
         }
 
-        if (capturedResource.Quantity < MaximumBiomass)
+        if (capturedResource.Info.Quantity < MaximumBiomass)
         {
-            capturedResource.Quantity += BiomassCollected;
+            capturedResource.Info.Quantity += BiomassCollected;
             BiomassCollected = 0;
         }
     }
@@ -201,7 +201,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     {
         if (detachTimer == null && res != null)
         {
-            if (res.ResourceType == Matter.Biomass)
+            if (res.Info.ResourceType == Matter.Biomass)
             {
                 capturedResource = res;
                 capturedResource.SnapCrate(this, CrateAnchor.position);
