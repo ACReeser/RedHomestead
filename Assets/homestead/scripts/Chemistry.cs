@@ -114,6 +114,20 @@ namespace RedHomestead.Simulation
                     return false;
             }
         }
+
+        public static bool IsPressureVessel(this Matter r)
+        {
+            switch (r)
+            {
+                case Matter.Hydrogen:
+                case Matter.Oxygen:
+                case Matter.CarbonDioxide:
+                case Matter.CarbonMonoxide:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
 

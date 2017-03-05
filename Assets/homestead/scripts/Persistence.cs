@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
 using System;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using RedHomestead.EVA;
+using System.Linq;
 
 namespace RedHomestead.Persistence
 {
@@ -19,10 +15,12 @@ namespace RedHomestead.Persistence
     [Serializable]
     public abstract class RedHomesteadData
     {
-        protected abstract void BeforeMarshal(UnityEngine.MonoBehaviour container);
-        public RedHomesteadData Marshal(UnityEngine.MonoBehaviour container)
+        protected abstract void BeforeMarshal(Transform t);
+        public abstract void AfterDeserialize(Transform t = null);
+
+        public RedHomesteadData Marshal(Transform t)
         {
-            this.BeforeMarshal(container);
+            this.BeforeMarshal(t);
             return this;
         }
     }
@@ -35,10 +33,20 @@ namespace RedHomestead.Persistence
         [HideInInspector]
         public Quaternion Rotation;
 
-        protected override void BeforeMarshal(MonoBehaviour container)
+        [NonSerialized]
+        internal Transform Transform;
+
+        public override void AfterDeserialize(Transform t)
         {
-            Position = container.transform.position;
-            Rotation = container.transform.rotation;
+            Transform = t;
+            Transform.position = this.Position;
+            Transform.rotation = this.Rotation;
+        }
+
+        protected override void BeforeMarshal(Transform t = null)
+        {
+            Position = (t ?? this.Transform).position;
+            Rotation = (t ?? this.Transform).rotation;
         }
     }
 
@@ -51,9 +59,9 @@ namespace RedHomestead.Persistence
         public PackData PackData;
         public int BankAccount;
 
-        protected override void BeforeMarshal(MonoBehaviour container)
+        protected override void BeforeMarshal(Transform t = null)
         {
-            base.BeforeMarshal(container);
+            base.BeforeMarshal(t);
             this.PackData = SurvivalTimer.Instance.Data;
         }
     }
@@ -86,13 +94,26 @@ namespace RedHomestead.Persistence
         //module data
         ////container data
         ////pipe data
-
-        public void Marshal()
-        {
-        }
-
+        
         public void OnAfterDeserialize()
         {
+            DeserializeCrates();
+        }
+
+        private void DeserializeCrates()
+        {
+            ResourceComponent[] starterCrates = UnityEngine.Transform.FindObjectsOfType<ResourceComponent>();
+            for (int i = starterCrates.Length - 1; i > -1; i--)
+            {
+                GameObject.Destroy(starterCrates[i].gameObject);
+            }
+
+            foreach (CrateData data in Crates)
+            {
+                Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.ResourceType), data.Position, data.Rotation) as Transform;
+                ResourceComponent r = t.GetComponent<ResourceComponent>();
+                r.Data = data;
+            }
         }
 
         public void OnBeforeSerialize()
@@ -105,7 +126,7 @@ namespace RedHomestead.Persistence
         {
             setter(Array.ConvertAll(UnityEngine.Transform.FindObjectsOfType<C>(),
                 container =>
-                (D)container.Data.Marshal(container)
+                (D)container.Data.Marshal(container.transform)
             ));
         }
     }
@@ -121,18 +142,19 @@ namespace RedHomestead.Persistence
 
         public void OnBeforeSerialize()
         {
-            this.Player = Player.Marshal(PlayerInput.Instance) as PlayerData;
+            this.Player = Player.Marshal(PlayerInput.Instance.transform.root) as PlayerData;
         }
 
         public void OnAfterDeserialize()
         {
-            throw new NotImplementedException();
+            this.Player.AfterDeserialize(PlayerInput.Instance.transform.root);
         }
     }
 
     public static class PersistentDataManager
     {
         public const string baseGameFileName = "game.json";
+        public const string savesFolderName = "Saves";
         public static BinaryFormatter _formatter = new BinaryFormatter();
 
         public static void SaveGame(Game gameToSave)
@@ -140,7 +162,7 @@ namespace RedHomestead.Persistence
             try
             {
                 string json = JsonUtility.ToJson(gameToSave);
-                File.WriteAllText(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(gameToSave.Player.Name)), json);
+                File.WriteAllText(Path.Combine(GetSavesFolderPath(), GetGameFileName(gameToSave.Player.Name)), json);
             }
             catch(Exception e)
             {
@@ -155,19 +177,33 @@ namespace RedHomestead.Persistence
             return String.Format("{0}.{1}", name, baseGameFileName);
         }
 
+        private static string GetSavesFolderPath()
+        {
+            return Path.Combine(UnityEngine.Application.persistentDataPath, savesFolderName);
+        }
+
         public static Game LoadGame(string playerName)
         {
-            return JsonUtility.FromJson<Game>(File.ReadAllText(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(playerName))));
+            return JsonUtility.FromJson<Game>(File.ReadAllText(Path.Combine(GetSavesFolderPath(), GetGameFileName(playerName))));
         }
 
         public static string[] GetPlayerNames()
         {
-            throw new NotImplementedException();
+            return new DirectoryInfo(GetSavesFolderPath()).GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).Select(x => x.Name.Split('.')[0]).ToArray();
         }
 
         public static string GetLastPlayedPlayerName()
         {
-            throw new NotImplementedException();
+            FileInfo lastFile = new DirectoryInfo(GetSavesFolderPath()).GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
+
+            if (lastFile != null)
+            {
+                return lastFile.Name.Split('.')[0];
+            }
+            else
+            {
+                return null;
+            }
         }
 
         //todo: pass in perk/equipment selections from screen

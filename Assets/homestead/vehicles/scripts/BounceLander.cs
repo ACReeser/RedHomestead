@@ -220,7 +220,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
                     (i % 2) == 0 ? .8f : -.8f
                     );
 
-                Transform newT = GameObject.Instantiate<Transform>(cratePrefab);
+                Transform newT = GameObject.Instantiate<Transform>(EconomyManager.Instance.GetResourceCratePrefab(kvp.Key));
                 newT.SetParent(payloadRoot);
                 newT.localPosition = localPos;
                 newT.localRotation = Quaternion.identity;

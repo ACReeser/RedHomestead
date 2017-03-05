@@ -30,7 +30,13 @@ namespace RedHomestead.EVA
         public PackResourceData Water;
         public PackResourceData Food;
 
-        protected override void BeforeMarshal(MonoBehaviour container) { }
+        protected override void BeforeMarshal(Transform t)
+        {
+        }
+
+        public override void AfterDeserialize(Transform t = null)
+        {
+        }
     }
 
     public enum ConsumptionPeriod { Daily, Hourly }

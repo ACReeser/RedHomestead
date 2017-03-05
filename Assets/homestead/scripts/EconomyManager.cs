@@ -2,6 +2,7 @@
 using System.Collections;
 using RedHomestead.Economy;
 using System;
+using RedHomestead.Simulation;
 
 public class EconomyManager : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class EconomyManager : MonoBehaviour
     public event EconomyHandler OnBankAccountChange;
     
     public LandingZone LandingZone;
+
+#warning todo: make crate/vessel the same prefab, just swap out meshes
+    public Transform ResourceCratePrefab, ResourceVesselPrefab;
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
 
@@ -111,5 +115,17 @@ public class EconomyManager : MonoBehaviour
 
         if (this.OnBankAccountChange != null)
             this.OnBankAccountChange();
+    }
+
+    internal Transform GetResourceCratePrefab(Matter m)
+    {
+        if (m.IsPressureVessel())
+        {
+            return ResourceVesselPrefab;
+        }
+        else
+        {
+            return ResourceCratePrefab;
+        }
     }
 }

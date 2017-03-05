@@ -5,11 +5,22 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 
+public enum HabitatType { LuxuryLander, Burrow } //Lander, Tent
+
 [Serializable]
 public class HabitatData : RedHomesteadData
 {
-    protected override void BeforeMarshal(MonoBehaviour container)
+    public string Name;
+    public HabitatType Type;
+
+    public override void AfterDeserialize(Transform t = null)
     {
+
+    }
+
+    protected override void BeforeMarshal(Transform t)
+    {
+        Name = t.name;
     }
 }
 

@@ -11,7 +11,6 @@ public class Autosave : MonoBehaviour
 	void Awake ()
     {
         Instance = this;
-        DontDestroyOnLoad(this.gameObject);
 #if UNITY_EDITOR
         if (Game.Current == null)
         {

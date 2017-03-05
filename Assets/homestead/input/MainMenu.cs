@@ -17,7 +17,6 @@ public class MainMenu : MonoBehaviour {
     private const string RadioTagPostfix = "radio";
     private float transitionTime = 0f;
     private int smallLogoW, smallLogoH;
-    private Vector3 mainMenuCameraPosition;
     private LerpContext cameraLerp;
 
 	// Use this for initialization
