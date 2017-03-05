@@ -150,7 +150,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
 
         if (res != null &&
             this.SinkType != Matter.Unspecified &&
-            this.SinkType == res.Info.ResourceType &&
+            this.SinkType == res.Data.ResourceType &&
             capturedResource == null &&
             (res != lastCapturedResource || CrateInterferenceTimer == null))
         {
@@ -210,17 +210,17 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
         {
             if (pumpIn)
             {
-                if (capturedResource.Info.Quantity < PumpPerUpdateInterval)
+                if (capturedResource.Data.Quantity < PumpPerUpdateInterval)
                     break;
                 else
                 {
-                    capturedResource.Info.Quantity -= PumpPerUpdateInterval;
+                    capturedResource.Data.Quantity -= PumpPerUpdateInterval;
 
                     float excess = Container.Push(PumpPerUpdateInterval);
 
                     if (excess > 0)
                     {
-                        capturedResource.Info.Quantity = excess;
+                        capturedResource.Data.Quantity = excess;
                         break;
                     }
                 }
@@ -229,7 +229,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
             {
                 float amount = Container.Pull(PumpPerUpdateInterval);
 
-                capturedResource.Info.Quantity += amount;
+                capturedResource.Data.Quantity += amount;
 
                 if (amount <= 0f)
                     break;

@@ -3,8 +3,17 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
+using RedHomestead.Persistence;
 
-public class Habitat : Converter
+[Serializable]
+public class HabitatData : RedHomesteadData
+{
+    protected override void BeforeMarshal(MonoBehaviour container)
+    {
+    }
+}
+
+public class Habitat : Converter, IDataContainer<HabitatData>
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
@@ -29,6 +38,8 @@ public class Habitat : Converter
             return _CurrentPowerRequirements;
         }
     }
+
+    public HabitatData Data { get; set; }
 
     public override void ClearHooks()
     {
@@ -121,9 +132,9 @@ public class Habitat : Converter
 
     public void ImportResource(ResourceComponent r)
     {
-        if (r.Info.ResourceType.IsStoredInHabitat())
+        if (r.Data.ResourceType.IsStoredInHabitat())
         {
-            float amountLeft = MatterTotals[r.Info.ResourceType].Push(r.Info.Quantity);
+            float amountLeft = MatterTotals[r.Data.ResourceType].Push(r.Data.Quantity);
             
             if (amountLeft <= 0)
             {
@@ -131,7 +142,7 @@ public class Habitat : Converter
             }
             else
             {
-                r.Info.Quantity = amountLeft;
+                r.Data.Quantity = amountLeft;
             }
         }
     }

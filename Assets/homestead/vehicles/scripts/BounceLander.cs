@@ -226,8 +226,8 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
                 newT.localRotation = Quaternion.identity;
 
                 var rc = newT.GetComponent<ResourceComponent>();
-                rc.Info.ResourceType = kvp.Key;
-                rc.Info.Quantity = kvp.Value;
+                rc.Data.ResourceType = kvp.Key;
+                rc.Data.Quantity = kvp.Value;
 
                 newT.GetComponent<Collider>().enabled = false;
                 var rigibody = newT.GetComponent<Rigidbody>();

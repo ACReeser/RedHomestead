@@ -8,6 +8,7 @@ using RedHomestead.Simulation;
 using RedHomestead.Equipment;
 using RedHomestead.Interiors;
 using RedHomestead.Geography;
+using RedHomestead.Persistence;
 
 namespace RedHomestead.Equipment
 {
@@ -107,20 +108,25 @@ namespace RedHomestead.Equipment
     }
 }
 
+[Serializable]
+public class PlayerPerkData
+{
+}
+
 /// <summary>
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
-public class PlayerInput : MonoBehaviour {
+public class PlayerInput : MonoBehaviour, IDataContainer<PlayerData> {
     public static PlayerInput Instance;
 
     public enum InputMode { Normal, PostIt, Sleep }
 
     private const float InteractionRaycastDistance = 10f;
-    private const float EVAChargerPerSecond = 7.5f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
-    private const float ExcavationPerSecond = 1f;
-    private float ConstructionPerSecond = 1f;
+    private const float EVAChargerPerSecond = 7.5f;
+
+    public PlayerData Data { get; set; }
 
     public Camera AlternativeCamera;
     public Light Headlamp1, Headlamp2;
@@ -672,7 +678,7 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (Input.GetKey(KeyCode.E))
                         {
-                            zone.WorkOnConstruction(Time.deltaTime * this.ConstructionPerSecond);
+                            zone.WorkOnConstruction(Time.deltaTime * this.Data.ConstructionPerSecond);
                         }
                         Prompts.ConstructHint.Progress = zone.ProgressPercentage;
                         newPrompt = Prompts.ConstructHint;
@@ -712,7 +718,7 @@ public class PlayerInput : MonoBehaviour {
                         {
                             if (Input.GetKey(KeyCode.E))
                             {
-                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * ExcavationPerSecond);
+                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * Data.ExcavationPerSecond);
                             }
                             else
                             {
