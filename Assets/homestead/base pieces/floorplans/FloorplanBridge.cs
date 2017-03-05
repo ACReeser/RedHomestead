@@ -66,12 +66,12 @@ public abstract class InteriorFields<G, C> where C : IConvertible
 }
 
 [Serializable]
-public class FloorplanPrefabs: InteriorFields<FloorplanGroup, FloorplanSubGroup>
+public class FloorplanPrefabs: InteriorFields<FloorplanGroup, Floorplan>
 {
     public Material[] Materials;
     internal Material SelectedMaterial;
 
-    protected override Dictionary<FloorplanGroup, FloorplanSubGroup[]> Map
+    protected override Dictionary<FloorplanGroup, Floorplan[]> Map
     {
         get
         {
@@ -142,54 +142,43 @@ public class FloorplanBridge : MonoBehaviour {
 
     public void SelectFloorplanToBuild()
     {
+        Floorplan whatToBuild = (Floorplan)Enum.Parse(typeof(Floorplan), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
 
+        this.Floorplans.GroupDetailPanel.gameObject.SetActive(false);
+        ToggleFloorplanPanel(false);
+
+        PlayerInput.Instance.PlanFloor(whatToBuild);
+        //code smell! :(
+        PlayerInput.Instance.FPSController.FreezeLook = false;
     }
 
-    internal Transform GetPrefab(out Material matchingMaterial)
+    internal Transform GetPrefab(Floorplan s)
     {
-        return GetPrefab(GuiBridge.Instance.selectedFloorplanGroup, GuiBridge.Instance.selectedFloorplanSubgroup, GuiBridge.Instance.selectedFloorplanMaterial, out matchingMaterial);
-    }
-
-    internal Transform GetPrefab(FloorplanGroup g, FloorplanSubGroup s, FloorplanMaterial mat, out Material matchingMaterial)
-    {
-        matchingMaterial = ConcreteMaterial;
-
-        switch (g)
+        switch (s)
         {
-            case FloorplanGroup.Floor:
-                if (s == FloorplanSubGroup.Mesh)
-                    return MeshFloorPrefab;
-                else
-                    return FloorPrefab;
-            case FloorplanGroup.Edge:
-                return GetEdgePrefab(s);
-            case FloorplanGroup.Corner:
-                return GetCornerPrefab(s);
+            case Floorplan.SolidFloor:
+                return FloorPrefab;
+            case Floorplan.MeshFloor:
+                return FloorPrefab;
+
+            case Floorplan.SolidWall:
+                return WallPrefab;
+            case Floorplan.MeshWall:
+                return WallPrefab;
+            case Floorplan.Door:
+                return DoorPrefab;
+            case Floorplan.Window:
+                return WallPrefab;
+            case Floorplan.SingleColumnWall:
+                return EdgeColumnPrefab;
+            case Floorplan.DoubleColumnWall:
+                return EdgeColumnPrefab;
+
+            case Floorplan.Column:
+                return SingleCornerColumnPrefab;
         }
 
         return null;
-    }
-
-    private Transform GetCornerPrefab(FloorplanSubGroup s)
-    {
-        switch (s)
-        {
-            default:
-                return SingleCornerColumnPrefab;
-        }
-    }
-
-    private Transform GetEdgePrefab(FloorplanSubGroup s)
-    {
-        switch (s)
-        {
-            case FloorplanSubGroup.Door:
-                return DoorPrefab;
-            case FloorplanSubGroup.SingleColumn:
-                return EdgeColumnPrefab;
-            default:
-                return WallPrefab;
-        }
     }
 }
 
@@ -200,7 +189,7 @@ public static class InteriorExtensions
         return FloorplanBridge.Instance.StuffFields.Sprites[(int)s];
     }
 
-    internal static Sprite Sprite(this FloorplanSubGroup s)
+    internal static Sprite Sprite(this Floorplan s)
     {
         return FloorplanBridge.Instance.Floorplans.Sprites[(int)s];
     }

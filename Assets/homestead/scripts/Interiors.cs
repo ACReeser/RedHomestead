@@ -35,7 +35,7 @@ namespace RedHomestead.Interiors
     /// <summary>
     /// Second level groups that organize floorplans
     /// </summary>
-    public enum FloorplanSubGroup { Solid, Mesh, Door, Window, SingleColumn, DoubleColumn }
+    public enum Floorplan { SolidFloor, MeshFloor, SolidWall, MeshWall, Door, Window, Column, SingleColumnWall, DoubleColumnWall }
 
     public enum FloorplanMaterial { Concrete, Brick, Metal, Plastic, Rock, Glass }
 
@@ -112,32 +112,33 @@ namespace RedHomestead.Interiors
         };
 
 
-        public static Dictionary<FloorplanGroup, FloorplanSubGroup[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, FloorplanSubGroup[]>()
+        public static Dictionary<FloorplanGroup, Floorplan[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, Floorplan[]>()
         {
             {
                 FloorplanGroup.Floor,
-                new FloorplanSubGroup[]
+                new Floorplan[]
                 {
-                    FloorplanSubGroup.Solid,
-                    FloorplanSubGroup.Mesh
+                    Floorplan.SolidFloor,
+                    Floorplan.MeshFloor
                 }
             },
             {
                 FloorplanGroup.Edge,
-                new FloorplanSubGroup[]
+                new Floorplan[]
                 {
-                    FloorplanSubGroup.Solid,
-                    FloorplanSubGroup.Window,
-                    FloorplanSubGroup.Door,
-                    FloorplanSubGroup.SingleColumn,
-                    FloorplanSubGroup.DoubleColumn
+                    Floorplan.SolidWall,
+                    Floorplan.MeshWall,
+                    Floorplan.Window,
+                    Floorplan.Door,
+                    Floorplan.SingleColumnWall,
+                    Floorplan.DoubleColumnWall
                 }
             },
             {
                 FloorplanGroup.Corner,
-                new FloorplanSubGroup[]
+                new Floorplan[]
                 {
-                    FloorplanSubGroup.SingleColumn
+                    Floorplan.Column
                 }
             }
         };

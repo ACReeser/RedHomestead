@@ -91,6 +91,10 @@ public class PrefabCache<T> where T : IConvertible {
         {
             return FloorplanBridge.Instance.StuffFields.Prefabs[GetIndex(key)];
         }
+        if (typeof(T) == typeof(Floorplan))
+        {
+            return FloorplanBridge.Instance.GetPrefab((Floorplan)Enum.Parse(typeof(Floorplan), key.ToString()));
+        }
         else
             return null;
     }

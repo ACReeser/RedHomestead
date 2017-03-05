@@ -502,7 +502,7 @@ public class GuiBridge : MonoBehaviour {
     }
 
     public FloorplanGroup selectedFloorplanGroup = FloorplanGroup.Undecided;
-    public FloorplanSubGroup selectedFloorplanSubgroup;
+    public Floorplan selectedFloorplanSubgroup;
     public FloorplanMaterial selectedFloorplanMaterial;
 
 

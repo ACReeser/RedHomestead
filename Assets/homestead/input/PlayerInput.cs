@@ -142,6 +142,7 @@ public class PlayerInput : MonoBehaviour {
     /// the FPS input script (usually on the parent transform)
     /// </summary>
     public CustomFPSController FPSController;
+
     /// <summary>
     /// The prefab for a construction zone
     /// </summary>
@@ -186,8 +187,8 @@ public class PlayerInput : MonoBehaviour {
 
     private Planning<Module> ModulePlan = new Planning<Module>();
     private Planning<Stuff> StuffPlan = new Planning<Stuff>();
-
-    private Transform PlannedFloorplanVisualization;
+    private Planning<Floorplan> FloorPlan = new Planning<Floorplan>();
+    
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
 
@@ -205,6 +206,7 @@ public class PlayerInput : MonoBehaviour {
         Equip(Slot.Unequipped);
         PrefabCache<Module>.TranslucentPlanningMat = translucentPlanningMat;
         PrefabCache<Stuff>.TranslucentPlanningMat = translucentPlanningMat;
+        PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
     }
 
@@ -459,135 +461,72 @@ public class PlayerInput : MonoBehaviour {
 
     private void HandleInteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
-        if (Input.GetMouseButtonUp(0))
+        if (FloorPlan.IsActive)
         {
-            CurrentPlanningDirection.Rotate(true);
-        }
-        else if (Input.GetMouseButtonUp(1))
-        {
-            CurrentPlanningDirection.Rotate(false);
-        }
-
-        if (Input.GetKeyUp(KeyCode.G))
-        {
-            FloorplanBridge.Instance.ToggleFloorplanPanel(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            FloorplanBridge.Instance.ToggleFloorplanPanel(false);
-        }
-
-        if (Input.GetKeyUp(KeyCode.T))
-        {
-            DisableAndForgetFloorplanVisualization();
-            CycleSubGroup();
-            Material mat;
-            Transform prefab = FloorplanBridge.Instance.GetPrefab(out mat);
-            if (prefab != null)
+            if (Input.GetMouseButtonUp(0))
             {
-                if (FloorplanVisCache.ContainsKey(prefab))
-                {
-                    PlannedFloorplanVisualization = FloorplanVisCache[prefab];
-                    PlannedFloorplanVisualization.gameObject.SetActive(true);
-                }
-                else
-                {
-                    Transform t = GameObject.Instantiate(prefab);
-                    FloorplanVisCache[prefab] = t;
-                    PlannedFloorplanVisualization = t;
-                }
-                PlannedFloorplanVisualization.GetChild(0).GetComponent<Renderer>().material = mat;
+                FloorPlan.Rotate(true, false);
             }
-        }
-
-        RaycastHit hitInfo;
-        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
-        {
-            if (hitInfo.collider != null)
+            else if (Input.GetMouseButtonUp(1))
             {
-                if (hitInfo.collider.gameObject.CompareTag("cavern"))
-                {
-                    if (doInteract)
-                    {
-                        PlaceFloorplanHere(hitInfo.collider);
-                    }
-                    else
-                    {
-                        if (PlannedFloorplanVisualization != null)
-                        {
-                            PlannedFloorplanVisualization.position = hitInfo.collider.transform.parent.position;
-                            PlannedFloorplanVisualization.localRotation = CurrentPlanningDirection.ToQuaternion();
+                FloorPlan.Rotate(false, false);
+            }
 
-                            newPrompt = Prompts.PlaceFloorplanHint;
+            RaycastHit hitInfo;
+            if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
+            {
+                if (hitInfo.collider != null)
+                {
+                    if (hitInfo.collider.gameObject.CompareTag("cavern"))
+                    {
+                        if (doInteract)
+                        {
+                            PlaceFloorplanHere(hitInfo.collider);
+                        }
+                        else
+                        {
+                            if (FloorPlan.IsActive && FloorPlan.Visualization.parent != hitInfo.collider.transform)
+                            {
+                                FloorPlan.Visualization.position = hitInfo.collider.transform.parent.position;
+                                FloorPlan.Visualization.localRotation = Quaternion.identity;
+
+                                newPrompt = Prompts.PlaceFloorplanHint;
+                            }
                         }
                     }
                 }
-                else if (hitInfo.collider.CompareTag("cavernstuff"))
-                {
-                    if (doInteract)
-                    {
-                        PlaceStuffHere(hitInfo.collider);
-                    }
-                    else
-                    {
-                        newPrompt = Prompts.PlaceStuffHint;
-                    }
-                }
             }
-        }
-    }
-
-    private void CycleSubGroup()
-    {
-        if (GuiBridge.Instance.selectedFloorplanGroup == FloorplanGroup.Undecided)
-        {
-            GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
-            GuiBridge.Instance.selectedFloorplanSubgroup = InteriorMap.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
         }
         else
         {
-            int nextSubGroup = (int)GuiBridge.Instance.selectedFloorplanSubgroup + 1;
-            if (nextSubGroup >= InteriorMap.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup].Length)
+            if (Input.GetKeyUp(KeyCode.G))
             {
-                CycleGroup();
+                FloorplanBridge.Instance.ToggleFloorplanPanel(true);
             }
-            else
+            else if (Input.GetKeyDown(KeyCode.Tab))
             {
-                GuiBridge.Instance.selectedFloorplanSubgroup = (FloorplanSubGroup)nextSubGroup;
+                FloorplanBridge.Instance.ToggleFloorplanPanel(false);
+                FloorPlan.Reset();
             }
-        }
-
-        GuiBridge.Instance.PlacingPanel.gameObject.SetActive(true);
-        GuiBridge.Instance.PlacingText.text = GuiBridge.Instance.selectedFloorplanMaterial + " " + GuiBridge.Instance.selectedFloorplanSubgroup + " " + GuiBridge.Instance.selectedFloorplanGroup;
-    }
-
-    private void CycleGroup()
-    {
-        int nextGroup = (int)GuiBridge.Instance.selectedFloorplanGroup + 1;
-        if (nextGroup >= InteriorMap.FloorplanGroupmap.Keys.Count)
-        {
-            GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
-        }
-        else
-        {
-            GuiBridge.Instance.selectedFloorplanGroup = (FloorplanGroup)nextGroup;
-            GuiBridge.Instance.selectedFloorplanSubgroup = InteriorMap.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
         }
     }
-
+    
     private TextMesh PostItText;
 
     private void PlaceFloorplanHere(Collider place)
     {
-        Transform t = GameObject.Instantiate<Transform>(PlannedFloorplanVisualization);
+        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Floorplan>.Cache.GetPrefab(FloorPlan.Type), FloorPlan.Visualization.position, FloorPlan.Visualization.rotation);
+        t.GetChild(0).GetComponent<MeshRenderer>().material = FloorplanBridge.Instance.ConcreteMaterial;
         t.SetParent(place.transform.parent);
         t.localEulerAngles = Round(t.localEulerAngles);
-        //DisableAndForgetFloorplanVisualization();
+        t.localPosition = Vector3.zero;
+        Equip(Slot.Unequipped);
+        FloorPlan.Reset();
     }
 
     private void PlaceStuffHere(Collider place)
     {
-        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Stuff>.Cache.GetPrefab(StuffPlan.Type));
+        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Stuff>.Cache.GetPrefab(StuffPlan.Type), StuffPlan.Visualization.position, StuffPlan.Visualization.rotation);
         t.SetParent(place.transform.parent);
         t.localEulerAngles = Round(t.localEulerAngles);
         t.localPosition = Vector3.down * .5f;
@@ -603,16 +542,7 @@ public class PlayerInput : MonoBehaviour {
 
         return localEulerAngles;
     }
-
-    private void DisableAndForgetFloorplanVisualization()
-    {
-        if (PlannedFloorplanVisualization != null)
-        {
-            PlannedFloorplanVisualization.gameObject.SetActive(false);
-            PlannedFloorplanVisualization = null;
-        }
-    }
-
+    
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
         RaycastHit hitInfo;
@@ -1341,7 +1271,6 @@ public class PlayerInput : MonoBehaviour {
                 FloorplanBridge.Instance.ToggleFloorplanPanel(true);
                 break;
             default:
-                DisableAndForgetFloorplanVisualization();
                 AlternativeCamera.enabled = false;
                 break;
         }
@@ -1480,6 +1409,11 @@ public class PlayerInput : MonoBehaviour {
     internal void PlanStuff(Stuff s)
     {
         this.StuffPlan.SetVisualization(s);
+    }
+
+    internal void PlanFloor(Floorplan whatToBuild)
+    {
+        this.FloorPlan.SetVisualization(whatToBuild);
     }
 
     public void KillPlayer()
