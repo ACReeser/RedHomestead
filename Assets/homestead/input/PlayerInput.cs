@@ -113,6 +113,12 @@ public class PlayerPerkData
 {
 }
 
+[Serializable]
+public struct InteractionClips
+{
+    public AudioClip Drill, Construction;
+}
+
 /// <summary>
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
@@ -147,6 +153,7 @@ public class PlayerInput : MonoBehaviour {
     public Material translucentPlanningMat;
 
     public AudioSource InteractionSource;
+    public InteractionClips Sfx;
     
     internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
@@ -675,6 +682,9 @@ public class PlayerInput : MonoBehaviour {
 
                     if (zone != null && carriedObject == null && zone.CanConstruct)
                     {
+                        if (Input.GetKeyDown(KeyCode.E))
+                            PlayInteractionClip(zone.transform.position, Sfx.Construction);
+
                         if (Input.GetKey(KeyCode.E))
                         {
                             zone.WorkOnConstruction(Time.deltaTime * Game.Current.Player.ConstructionPerSecond);
@@ -715,6 +725,9 @@ public class PlayerInput : MonoBehaviour {
 
                         if (lastHobbitHole != null)
                         {
+                            if (Input.GetKeyDown(KeyCode.E))
+                                PlayInteractionClip(hitInfo.collider.transform.position, Sfx.Drill);
+
                             if (Input.GetKey(KeyCode.E))
                             {
                                 Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * Game.Current.Player.ExcavationPerSecond);
