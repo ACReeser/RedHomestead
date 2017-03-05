@@ -97,6 +97,7 @@ namespace RedHomestead.Persistence
         
         public void OnAfterDeserialize()
         {
+            UnityEngine.Debug.Log("creating crates");
             DeserializeCrates();
         }
 
@@ -162,7 +163,14 @@ namespace RedHomestead.Persistence
             try
             {
                 string json = JsonUtility.ToJson(gameToSave);
-                File.WriteAllText(Path.Combine(GetSavesFolderPath(), GetGameFileName(gameToSave.Player.Name)), json);
+                string savesFolderPath = GetSavesFolderPath();
+
+                if (!Directory.Exists(savesFolderPath))
+                {
+                    Directory.CreateDirectory(savesFolderPath);
+                }
+
+                File.WriteAllText(Path.Combine(savesFolderPath, GetGameFileName(gameToSave.Player.Name)), json);
             }
             catch(Exception e)
             {

@@ -10,6 +10,7 @@ public class MainMenu : MonoBehaviour {
     public Image BigLogo;
     public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
     public Transform OrbitCameraAnchor;
+    public Button LoadButton;
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
@@ -18,6 +19,8 @@ public class MainMenu : MonoBehaviour {
     private float transitionTime = 0f;
     private int smallLogoW, smallLogoH;
     private LerpContext cameraLerp;
+    private string lastPlayerName;
+    private string[] savedPlayerNames;
 
 	// Use this for initialization
 	void Start ()
@@ -30,6 +33,27 @@ public class MainMenu : MonoBehaviour {
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+
+        loadSavedPlayers();
+    }
+
+    private void loadSavedPlayers()
+    {
+        try
+        {
+            lastPlayerName = PersistentDataManager.GetLastPlayedPlayerName();
+            savedPlayerNames = PersistentDataManager.GetPlayerNames();
+
+            if (!String.IsNullOrEmpty(lastPlayerName))
+            {
+                LoadButton.interactable = true;
+                LoadButton.transform.GetChild(0).GetComponent<Text>().text = "LOAD GAME as " + lastPlayerName;
+            }
+
+        }
+        catch (Exception e){
+            UnityEngine.Debug.LogError(e.ToString());
+        }
     }
 
     private GameObject[] defaultQuickstartClones = new GameObject[2];
@@ -215,6 +239,17 @@ public class MainMenu : MonoBehaviour {
         this.activeRadioTransform[radioGroup] = thisT;
 
         thisT.GetChild(0).gameObject.SetActive(true);
+    }
+
+    public void LoadLastGame()
+    {
+        if (!String.IsNullOrEmpty(lastPlayerName))
+        {
+            GameObject g = new GameObject("loadBridge");
+            LoadGameBridge loadScript = g.AddComponent<LoadGameBridge>();
+            loadScript.playerNameToLoad = lastPlayerName;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
     }
 
     private struct LerpContext

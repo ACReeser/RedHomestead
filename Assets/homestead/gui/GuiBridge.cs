@@ -255,6 +255,11 @@ public class GuiBridge : MonoBehaviour {
         Autosave.Instance.AutosaveEnabled = false;
         UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
+    public void ConfirmSaveAndQuit()
+    {
+        Autosave.Instance.Save();
+        this.ConfirmQuit();
+    }
 
     internal void ToggleReportMenu(bool isOn)
     {

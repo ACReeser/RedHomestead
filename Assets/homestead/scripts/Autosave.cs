@@ -7,8 +7,11 @@ public class Autosave : MonoBehaviour
     public static Autosave Instance;
     internal bool AutosaveEnabled = false;
     private float AutsaveSeconds = 2 * 60;
-    
-	void Awake ()
+#if UNITY_EDITOR
+    private bool editorAutoMadeThisGame = false;
+#endif
+
+    void Awake ()
     {
         Instance = this;
 #if UNITY_EDITOR
@@ -16,6 +19,7 @@ public class Autosave : MonoBehaviour
         {
             print("Starting new game for editor session");
             PersistentDataManager.StartNewGame();
+            editorAutoMadeThisGame = true;
         }
 #endif
     }
@@ -25,7 +29,8 @@ public class Autosave : MonoBehaviour
         StartCoroutine(DoAutosave());
 
 #if UNITY_EDITOR
-        StartCoroutine(DebugAutosave());
+        if (editorAutoMadeThisGame)
+            StartCoroutine(DebugAutosave());
     }
 
 
