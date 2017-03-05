@@ -13,7 +13,11 @@ public class CrateData : FacingData
 
 [RequireComponent(typeof(Rigidbody))]
 public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
-    public CrateData Data { get; set; }
+    public CrateData data;
+    public CrateData Data {
+        get { return data;  }
+        set { data = value; }
+    }
 
     public AudioClip MetalBang;
     public ICrateSnapper SnappedTo;

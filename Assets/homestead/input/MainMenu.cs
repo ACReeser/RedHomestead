@@ -4,6 +4,7 @@ using System;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using RedHomestead.Persistence;
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
@@ -171,6 +172,7 @@ public class MainMenu : MonoBehaviour {
 
     public void LaunchGame()
     {
+        PersistentDataManager.StartNewGame();
         UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 

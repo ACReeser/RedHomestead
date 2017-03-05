@@ -200,6 +200,7 @@ public class PlayerInput : MonoBehaviour, IDataContainer<PlayerData> {
         Equip(Slot.Unequipped);
         PrefabCache<Module>.TranslucentPlanningMat = translucentPlanningMat;
         PrefabCache<Stuff>.TranslucentPlanningMat = translucentPlanningMat;
+        Autosave.Instance.AutosaveEnabled = true;
     }
 
     // Update is called once per frame

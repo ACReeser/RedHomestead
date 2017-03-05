@@ -99,7 +99,7 @@ public class EconomyManager : MonoBehaviour
 
     private void Payday()
     {
-        Player.BankAccount += BasePaydayAmount;
+        RedHomestead.Persistence.Game.Current.Player.BankAccount += BasePaydayAmount;
 
         if (this.OnBankAccountChange != null)
             this.OnBankAccountChange();
@@ -107,7 +107,7 @@ public class EconomyManager : MonoBehaviour
 
     internal void Purchase(int amount)
     {
-        Player.BankAccount -= amount;
+        RedHomestead.Persistence.Game.Current.Player.BankAccount -= amount;
 
         if (this.OnBankAccountChange != null)
             this.OnBankAccountChange();

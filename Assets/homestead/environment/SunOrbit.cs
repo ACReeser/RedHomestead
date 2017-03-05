@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using RedHomestead.Economy;
+using RedHomestead.Persistence;
 
 public delegate void HandleHourChange(int sol, float hour);
 public delegate void HandleSolChange(int sol);
@@ -23,17 +24,6 @@ public class SunOrbit : MonoBehaviour {
 
     private const int MaximumSpeedTiers = 6;
     private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;
-
-    internal float CurrentHour = 9;
-    internal float CurrentMinute = 0;
-    internal int CurrentSol = 1;
-    public float HoursSinceSol0
-    {
-        get
-        {
-            return CurrentSol * MartianHoursPerDay + CurrentHour;
-        }
-    }
 
     internal bool RunTilMorning { get; private set; }
 
@@ -67,40 +57,40 @@ public class SunOrbit : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        CurrentMinute += Time.deltaTime * GameSecondsPerMartianMinute;
+        Game.Current.Environment.CurrentMinute += Time.deltaTime * GameSecondsPerMartianMinute;
 
-        if (CurrentMinute > 60f)
+        if (Game.Current.Environment.CurrentMinute > 60f)
         {
-            CurrentHour++;
-            CurrentMinute = 60f - CurrentMinute;
+            Game.Current.Environment.CurrentHour++;
+            Game.Current.Environment.CurrentMinute = 60f - Game.Current.Environment.CurrentMinute;
 
             if (OnHourChange != null)
-                OnHourChange(CurrentSol, CurrentHour);
+                OnHourChange(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour);
 
-            if (RunTilMorning && CurrentHour == 6)
+            if (RunTilMorning && Game.Current.Environment.CurrentHour == 6)
             {
                 ToggleSleepUntilMorning(false);
             }
         }
 
-        if (CurrentHour > 24 && CurrentMinute > 40f)
+        if (Game.Current.Environment.CurrentHour > 24 && Game.Current.Environment.CurrentMinute > 40f)
         {
-            CurrentSol += 1;
-            CurrentHour = 0;
-            CurrentMinute = 40 - CurrentMinute;
+            Game.Current.Environment.CurrentSol += 1;
+            Game.Current.Environment.CurrentHour = 0;
+            Game.Current.Environment.CurrentMinute = 40 - Game.Current.Environment.CurrentMinute;
             dawnMilestone = duskMilestone = dawnEnded = duskEnded = false;
 
             if (OnSolChange != null)
-                OnSolChange(CurrentSol);
+                OnSolChange(Game.Current.Environment.CurrentSol);
         }
 
-        float percentOfDay = ((CurrentHour * 60) + CurrentMinute) / MartianMinutesPerDay;
+        float percentOfDay = ((Game.Current.Environment.CurrentHour * 60) + Game.Current.Environment.CurrentMinute) / MartianMinutesPerDay;
         
         //todo: also set strength of shadows - strong at dawn/dust, much less strong around noon
         GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
         StarsParent.transform.localRotation = GlobalLight.transform.localRotation;
 
-        if (CurrentHour > 12f)
+        if (Game.Current.Environment.CurrentHour > 12f)
         {
             GlobalLight.intensity = Mathfx.Hermite(1, 0f, percentOfDay);
             Skybox.SetFloat("_Exposure", Mathfx.Hermite(8, 0f, percentOfDay));
@@ -111,28 +101,28 @@ public class SunOrbit : MonoBehaviour {
             Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, percentOfDay));
         }
 
-        if (CurrentHour > 6 && !dawnMilestone)
+        if (Game.Current.Environment.CurrentHour > 6 && !dawnMilestone)
         {
             dawnMilestone = true;
             Dawn(true);
         }
-        else if (CurrentHour > 7 && !dawnEnded)
+        else if (Game.Current.Environment.CurrentHour > 7 && !dawnEnded)
         {
             dawnEnded = true;
             Dawn(false);
         }
-        else if (CurrentHour > 18 && !duskMilestone)
+        else if (Game.Current.Environment.CurrentHour > 18 && !duskMilestone)
         {
             duskMilestone = true;
             Dusk(true);
         }
-        else if (CurrentHour > 18 && !duskEnded)
+        else if (Game.Current.Environment.CurrentHour > 18 && !duskEnded)
         {
             duskEnded = true;
             Dusk(false);
         }
 
-        string textTime = String.Format("M{0}:{1}", ((int)Math.Truncate(CurrentHour)).ToString("D2"), ((int)Math.Truncate(CurrentMinute)).ToString("D2"));
+        string textTime = String.Format("M{0}:{1}", ((int)Math.Truncate(Game.Current.Environment.CurrentHour)).ToString("D2"), ((int)Math.Truncate(Game.Current.Environment.CurrentMinute)).ToString("D2"));
 
         GuiBridge.Instance.TimeText.text = textTime;
         UpdateClocks(textTime);

@@ -90,7 +90,7 @@ public struct BuyFields
     {
         RefreshBuyTabsTabs(true);
         CheckoutVendorName.text = v.Name;
-        CheckoutAccount.text = String.Format("${0:n0}", EconomyManager.Instance.Player.BankAccount);
+        CheckoutAccount.text = String.Format("${0:n0}", RedHomestead.Persistence.Game.Current.Player.BankAccount);
         foreach(DeliveryType delivery in Enum.GetValues(typeof(DeliveryType)))
         {
             DeliveryTimeLabels[(int)delivery].text = SolsAndHours.SolHoursFromNow(delivery.ShippingTimeHours(v.DistanceFromPlayerKilometersRounded)).ToString();
@@ -203,7 +203,7 @@ public class Terminal : MonoBehaviour {
 
     private void OnBankAccountChange()
     {
-        finance.BankAccountText.text = String.Format("${0:n0}", EconomyManager.Instance.Player.BankAccount);
+        finance.BankAccountText.text = String.Format("${0:n0}", RedHomestead.Persistence.Game.Current.Player.BankAccount);
     }
 
     void Destroy()
@@ -354,7 +354,7 @@ public class Terminal : MonoBehaviour {
 
     public void PlaceOrder()
     {
-        if (EconomyManager.Instance.Player.BankAccount < CurrentOrder.GrandTotal)
+        if (RedHomestead.Persistence.Game.Current.Player.BankAccount < CurrentOrder.GrandTotal)
             return;
         else
         {

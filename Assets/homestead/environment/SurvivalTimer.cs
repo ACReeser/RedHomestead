@@ -157,7 +157,7 @@ public class SurvivalTimer : MonoBehaviour {
 
     public DoubleSurvivalResource Power = new DoubleSurvivalResource();
 
-    internal PackData Data;
+    internal PackData Data { get; private set; }
 
     public bool UsingPackResources
     {
@@ -183,6 +183,12 @@ public class SurvivalTimer : MonoBehaviour {
 
     void Start()
     {
+        this.Data = Game.Current.Player.PackData;
+        Oxygen.Data = this.Data.Oxygen;
+        Power.Data = this.Data.Power;
+        Water.Data = this.Data.Water;
+        Food.Data = this.Data.Food;
+
         Oxygen.UpdateUI = GuiBridge.Instance.RefreshOxygenBar;
         Water.UpdateUI = GuiBridge.Instance.RefreshWaterBar;
         Food.UpdateUI = GuiBridge.Instance.RefreshFoodBar;
@@ -229,7 +235,7 @@ public class SurvivalTimer : MonoBehaviour {
         }
     }
 
-    internal void Assign(PackData data)
+    internal void SetData(PackData data)
     {
         this.Data = data;
         Oxygen.Data = data.Oxygen;

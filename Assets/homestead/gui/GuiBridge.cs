@@ -106,7 +106,7 @@ public class GuiBridge : MonoBehaviour {
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
+    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage, AutosaveIcon;
     public AudioSource ComputerAudioSource;
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
     public ReportIORow ReportRowTemplate;
@@ -141,9 +141,15 @@ public class GuiBridge : MonoBehaviour {
         PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
+        ToggleAutosave(false);
         //same as ToggleEscapeMenu(false) basically
         this.EscapeMenuPanel.gameObject.SetActive(false);
         ShowNews(null);
+    }
+
+    internal void ToggleAutosave(bool state)
+    {
+        this.AutosaveIcon.gameObject.SetActive(state);
     }
 
     void Start()
@@ -246,6 +252,7 @@ public class GuiBridge : MonoBehaviour {
 
     public void ConfirmQuit()
     {
+        Autosave.Instance.AutosaveEnabled = false;
         UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 

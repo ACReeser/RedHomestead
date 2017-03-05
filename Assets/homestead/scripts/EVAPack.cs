@@ -8,9 +8,9 @@ namespace RedHomestead.EVA
     [Serializable]
     public class PackResourceData
     {
-        public float Maximum { get; set; }
-        public float Current { get; set; }
-        public float ConsumptionPerSecond { get; set; }
+        public float Maximum;
+        public float Current;
+        public float ConsumptionPerSecond;
 
         public PackResourceData() { }
         public PackResourceData(float max, float consumption)
@@ -25,10 +25,10 @@ namespace RedHomestead.EVA
     [Serializable]
     public class PackData : RedHomesteadData
     {
-        public PackResourceData Oxygen { get; set; }
-        public PackResourceData Power { get; set; }
-        public PackResourceData Water { get; set; }
-        public PackResourceData Food { get; set; }
+        public PackResourceData Oxygen;
+        public PackResourceData Power;
+        public PackResourceData Water;
+        public PackResourceData Food;
 
         protected override void BeforeMarshal(MonoBehaviour container) { }
     }
@@ -44,7 +44,7 @@ namespace RedHomestead.EVA
             public const float SuitHeatingWattsPerHour = 1000f;
         }
 
-        public static PackData GetDefault()
+        public static PackData GetDefaultPackData()
         {
             return new PackData()
             {

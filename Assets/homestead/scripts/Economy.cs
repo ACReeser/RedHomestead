@@ -5,11 +5,11 @@ using RedHomestead.Geography;
 using RedHomestead.Simulation;
 using System.Collections.Generic;
 using System.Linq;
+using RedHomestead.Persistence;
 
 namespace RedHomestead.Economy{
     public class PersistentPlayer
     {
-        public int BankAccount = 350000;
         public List<Order> EnRouteOrders = new List<Order>();
     }
 
@@ -225,8 +225,8 @@ namespace RedHomestead.Economy{
         {
             return new SolHourStamp()
             {
-                Sol = SunOrbit.Instance.CurrentSol,
-                Hour = Mathf.RoundToInt(SunOrbit.Instance.CurrentHour)
+                Sol = Game.Current.Environment.CurrentSol,
+                Hour = Mathf.RoundToInt(Game.Current.Environment.CurrentHour)
             };
         }
         
@@ -333,7 +333,7 @@ namespace RedHomestead.Economy{
 
         private void RecalcDeliveryTime()
         {
-            ETA = SolHourStamp.FromFractionalHours(SunOrbit.Instance.CurrentSol, SunOrbit.Instance.CurrentHour, 
+            ETA = SolHourStamp.FromFractionalHours(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour, 
                 this.Via.ShippingTimeHours(this.Vendor.DistanceFromPlayerKilometersRounded));
             UnityEngine.Debug.Log(ETA);
         }
@@ -343,7 +343,7 @@ namespace RedHomestead.Economy{
             UnityEngine.Debug.Log("Finalizing order");
             RecalcDeliveryTime();
             Ordered = SolHourStamp.Now();
-            EconomyManager.Instance.Player.BankAccount -= GrandTotal;
+            RedHomestead.Persistence.Game.Current.Player.BankAccount -= GrandTotal;
         }
 
         internal Matter[] GetKeyArray()
@@ -360,7 +360,7 @@ namespace RedHomestead.Economy{
         
         public float DeliveryWaitPercentage()
         {
-            float elapsed = SunOrbit.Instance.HoursSinceSol0 - this.Ordered.HoursSinceSol0;
+            float elapsed = Game.Current.Environment.HoursSinceSol0 - this.Ordered.HoursSinceSol0;
             float duration = this.ETA.HoursSinceSol0 - this.Ordered.HoursSinceSol0;
 
             return elapsed / duration;

@@ -30,7 +30,9 @@ namespace RedHomestead.Persistence
     [Serializable]
     public class FacingData : RedHomesteadData
     {
+        [HideInInspector]
         public Vector3 Position;
+        [HideInInspector]
         public Quaternion Rotation;
 
         protected override void BeforeMarshal(MonoBehaviour container)
@@ -43,9 +45,11 @@ namespace RedHomestead.Persistence
     [Serializable]
     public class PlayerData: FacingData
     {
-        public float ExcavationPerSecond = 1f;
+        public string Name;
+        public float ExcavationPerSecond;
         public float ConstructionPerSecond = 1f;
         public PackData PackData;
+        public int BankAccount;
 
         protected override void BeforeMarshal(MonoBehaviour container)
         {
@@ -57,16 +61,25 @@ namespace RedHomestead.Persistence
     [Serializable]
     public class EnvironmentData
     {
+        internal float CurrentHour = 9;
+        internal float CurrentMinute = 0;
+        internal int CurrentSol = 1;
 
+        public float HoursSinceSol0
+        {
+            get
+            {
+                return CurrentSol * SunOrbit.MartianHoursPerDay + CurrentHour;
+            }
+        }
     }
 
     [Serializable]
     public class Base {
         public static Base Current;
 
-        public PlayerData Player { get; set; }
-        public CrateData[] Crates { get; set; }
-        public HabitatData[] Habitats { get; set; }
+        public CrateData[] Crates;
+        public HabitatData[] Habitats;
         //hobbit hole data
         //floorplan data
         //stuff data
@@ -76,12 +89,11 @@ namespace RedHomestead.Persistence
 
         public void Marshal()
         {
-            this.Player = PlayerInput.Instance.Data.Marshal(PlayerInput.Instance) as PlayerData;
-            this._MarshalMany<ResourceComponent, CrateData>((crates) => this.Crates = crates);
-            this._MarshalMany<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
+            this._MarshalManyFromScene<ResourceComponent, CrateData>((crates) => this.Crates = crates);
+            this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
         }
 
-        private void _MarshalMany<C, D>(Action<D[]> setter) where C : UnityEngine.MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
+        private void _MarshalManyFromScene<C, D>(Action<D[]> setter) where C : UnityEngine.MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
         {
             setter(Array.ConvertAll(UnityEngine.Transform.FindObjectsOfType<C>(),
                 container =>
@@ -94,29 +106,95 @@ namespace RedHomestead.Persistence
     public class Game
     {
         public static Game Current { get; set; }
+
         public EnvironmentData Environment;
-        public Base[] Bases { get; set; }
+        public PlayerData Player;
+        public Base[] Bases;
+
+        public void Marshal()
+        {
+            this.Player = PlayerInput.Instance.Data.Marshal(PlayerInput.Instance) as PlayerData;
+        }
     }
 
     public static class PersistentDataManager
     {
-        public const string baseFileName = "base.dat";
+        public const string baseGameFileName = "game.json";
         public static BinaryFormatter _formatter = new BinaryFormatter();
 
-        public static void SaveBase(Base toSave)
+        public static void SaveGame(Game gameToSave)
         {
-            using(FileStream file = File.Open(Path.Combine(UnityEngine.Application.persistentDataPath, baseFileName), FileMode.OpenOrCreate))
+            try
             {
-                _formatter.Serialize(file, toSave);
+                string json = JsonUtility.ToJson(gameToSave);
+                File.WriteAllText(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(gameToSave.Player.Name)), json);
             }
+            catch(Exception e)
+            {
+                UnityEngine.Debug.LogError(e.ToString());
+            }
+
+            //using (FileStream file = File.Open(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(gameToSave.Player.Name)), FileMode.OpenOrCreate))
+            //{
+            //    _formatter.Serialize(file, gameToSave);
+            //}
+
+            //todo: save slot file
         }
 
-        public static Base LoadBase()
+        private static string GetGameFileName(string name)
         {
-            using (FileStream file = File.Open(Path.Combine(UnityEngine.Application.persistentDataPath, baseFileName), FileMode.Open))
+            return String.Format("{0}.{1}", name, baseGameFileName);
+        }
+
+        public static Game LoadGame(string playerName)
+        {
+            return JsonUtility.FromJson<Game>(File.ReadAllText(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(playerName))));
+
+            //using (FileStream file = File.Open(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(playerName)), FileMode.Open))
+            //{
+            //    return _formatter.Deserialize(file) as Base;
+            //}
+        }
+
+        public static string[] GetPlayerNames()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string GetLastPlayedPlayerName()
+        {
+            throw new NotImplementedException();
+        }
+
+        //todo: pass in perk/equipment selections from screen
+        public static void StartNewGame()
+        {
+            Game.Current = new Game()
             {
-                return _formatter.Deserialize(file) as Base;
-            }
+                Bases = new Base[]
+                {
+                    new Base()
+                    {
+                        Crates = new CrateData[] { },
+                        Habitats = new HabitatData[] { }
+                    }
+                },
+                Environment = new EnvironmentData()
+                {
+                    CurrentHour = 9,
+                    CurrentMinute = 0,
+                    CurrentSol = 0
+                },
+                Player = new PlayerData()
+                {
+                    Name = "Ares",
+                    BankAccount = 350000,
+                    ExcavationPerSecond = 1f,
+                    ConstructionPerSecond = 1f,
+                    PackData = EVA.EVA.GetDefaultPackData()
+                }
+            };
         }
     }
 
