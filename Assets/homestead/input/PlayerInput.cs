@@ -152,6 +152,7 @@ public class PlayerInput : MonoBehaviour {
     /// when planning where to put them on the ground
     /// </summary>
     public Material translucentPlanningMat;
+    public ParticleSystem DrillSparks;
 
     public AudioSource InteractionSource;
     public InteractionClips Sfx;
@@ -208,6 +209,7 @@ public class PlayerInput : MonoBehaviour {
         PrefabCache<Stuff>.TranslucentPlanningMat = translucentPlanningMat;
         PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
+        DrillSparks.transform.SetParent(null);
     }
 
     // Update is called once per frame
@@ -487,7 +489,8 @@ public class PlayerInput : MonoBehaviour {
                         {
                             if (FloorPlan.IsActive && FloorPlan.Visualization.parent != hitInfo.collider.transform)
                             {
-                                FloorPlan.Visualization.position = hitInfo.collider.transform.parent.position;
+                                FloorPlan.Visualization.SetParent(hitInfo.collider.transform);
+                                FloorPlan.Visualization.localPosition = Vector3.zero;
                                 FloorPlan.Visualization.localRotation = Quaternion.identity;
 
                                 newPrompt = Prompts.PlaceFloorplanHint;
@@ -656,14 +659,28 @@ public class PlayerInput : MonoBehaviour {
                         if (lastHobbitHole != null)
                         {
                             if (Input.GetKeyDown(KeyCode.E))
-                                PlayInteractionClip(hitInfo.collider.transform.position, Sfx.Drill);
+                            {
+                                PlayInteractionClip(hitInfo.collider.transform.position, Sfx.Drill, false);
+                                DrillSparks.Play();
+                            }
 
                             if (Input.GetKey(KeyCode.E))
                             {
                                 Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * Game.Current.Player.ExcavationPerSecond);
+                                if (Prompts.ExcavateHint.Progress >= 1f)
+                                {
+                                    DrillSparks.Stop();
+                                    InteractionSource.Stop();
+                                }
+                                else
+                                {
+                                    DrillSparks.transform.position = hitInfo.point + hitInfo.normal.normalized * .02f;
+                                }
                             }
                             else
                             {
+                                DrillSparks.Stop();
+                                InteractionSource.Stop();
                                 Prompts.ExcavateHint.Progress = lastHobbitHole.ExcavationProgress(hitInfo.collider.transform.localPosition);
                             }
                         }
@@ -934,10 +951,17 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip)
+    public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip, bool oneShot = true)
     {
         this.InteractionSource.transform.position = point;
-        this.InteractionSource.PlayOneShot(handleChangeClip);
+        if (oneShot)
+            this.InteractionSource.PlayOneShot(handleChangeClip);
+        else
+        {
+            this.InteractionSource.clip = handleChangeClip;
+            this.InteractionSource.loop = true;
+            this.InteractionSource.Play();
+        }
     }
 
     private void ToggleReport(ModuleGameplay moduleGameplay)
