@@ -26,9 +26,20 @@ public class Autosave : MonoBehaviour
         StartCoroutine(DoAutosave());
 
 #if UNITY_EDITOR
-        Save();
-#endif
+        StartCoroutine(DebugAutosave());
     }
+
+
+    private IEnumerator DebugAutosave()
+    {
+        yield return null;
+        yield return null;
+
+        Save();
+    }
+#else
+    }
+#endif
 
     private IEnumerator DoAutosave()
     {
@@ -40,6 +51,8 @@ public class Autosave : MonoBehaviour
                 Save();
         }
     }
+
+
 
     public void Save()
     {

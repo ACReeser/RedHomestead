@@ -123,6 +123,7 @@ public class Habitat : Converter, IDataContainer<HabitatData>
             LastTickRateOfChange = 0,
             TotalCapacity = 36f
         };
+        Data = new HabitatData();
     }
 	
 	// Update is called once per frame

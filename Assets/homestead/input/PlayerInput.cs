@@ -116,7 +116,7 @@ public class PlayerPerkData
 /// <summary>
 /// Responsible for raycasting, modes, and gameplay input
 /// </summary>
-public class PlayerInput : MonoBehaviour, IDataContainer<PlayerData> {
+public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
     public enum InputMode { Normal, PostIt, Sleep }
@@ -125,8 +125,6 @@ public class PlayerInput : MonoBehaviour, IDataContainer<PlayerData> {
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
     private const float EVAChargerPerSecond = 7.5f;
-
-    public PlayerData Data { get; set; }
 
     public Camera AlternativeCamera;
     public Light Headlamp1, Headlamp2;
@@ -679,7 +677,7 @@ public class PlayerInput : MonoBehaviour, IDataContainer<PlayerData> {
                     {
                         if (Input.GetKey(KeyCode.E))
                         {
-                            zone.WorkOnConstruction(Time.deltaTime * this.Data.ConstructionPerSecond);
+                            zone.WorkOnConstruction(Time.deltaTime * Game.Current.Player.ConstructionPerSecond);
                         }
                         Prompts.ConstructHint.Progress = zone.ProgressPercentage;
                         newPrompt = Prompts.ConstructHint;
@@ -719,7 +717,7 @@ public class PlayerInput : MonoBehaviour, IDataContainer<PlayerData> {
                         {
                             if (Input.GetKey(KeyCode.E))
                             {
-                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * Data.ExcavationPerSecond);
+                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * Game.Current.Player.ExcavationPerSecond);
                             }
                             else
                             {

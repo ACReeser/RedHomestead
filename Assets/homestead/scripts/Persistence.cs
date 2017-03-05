@@ -75,7 +75,7 @@ namespace RedHomestead.Persistence
     }
 
     [Serializable]
-    public class Base {
+    public class Base: ISerializationCallbackReceiver {
         public static Base Current;
 
         public CrateData[] Crates;
@@ -88,6 +88,14 @@ namespace RedHomestead.Persistence
         ////pipe data
 
         public void Marshal()
+        {
+        }
+
+        public void OnAfterDeserialize()
+        {
+        }
+
+        public void OnBeforeSerialize()
         {
             this._MarshalManyFromScene<ResourceComponent, CrateData>((crates) => this.Crates = crates);
             this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
@@ -103,7 +111,7 @@ namespace RedHomestead.Persistence
     }
 
     [Serializable]
-    public class Game
+    public class Game : ISerializationCallbackReceiver
     {
         public static Game Current { get; set; }
 
@@ -111,9 +119,14 @@ namespace RedHomestead.Persistence
         public PlayerData Player;
         public Base[] Bases;
 
-        public void Marshal()
+        public void OnBeforeSerialize()
         {
-            this.Player = PlayerInput.Instance.Data.Marshal(PlayerInput.Instance) as PlayerData;
+            this.Player = Player.Marshal(PlayerInput.Instance) as PlayerData;
+        }
+
+        public void OnAfterDeserialize()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -134,11 +147,6 @@ namespace RedHomestead.Persistence
                 UnityEngine.Debug.LogError(e.ToString());
             }
 
-            //using (FileStream file = File.Open(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(gameToSave.Player.Name)), FileMode.OpenOrCreate))
-            //{
-            //    _formatter.Serialize(file, gameToSave);
-            //}
-
             //todo: save slot file
         }
 
@@ -150,11 +158,6 @@ namespace RedHomestead.Persistence
         public static Game LoadGame(string playerName)
         {
             return JsonUtility.FromJson<Game>(File.ReadAllText(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(playerName))));
-
-            //using (FileStream file = File.Open(Path.Combine(UnityEngine.Application.persistentDataPath, GetGameFileName(playerName)), FileMode.Open))
-            //{
-            //    return _formatter.Deserialize(file) as Base;
-            //}
         }
 
         public static string[] GetPlayerNames()
