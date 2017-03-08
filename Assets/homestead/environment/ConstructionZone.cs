@@ -5,40 +5,48 @@ using System;
 using System.Linq;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
+using RedHomestead.Persistence;
 
-public class ConstructionZone : MonoBehaviour {
-    public Module UnderConstruction;
-    public Transform ModulePrefab;
+[Serializable]
+public class ResourceCountDictionary: SerializableDictionary<Matter, int> { }
 
+[Serializable]
+public class ConstructionData: FacingData
+{
+    public Module ModuleTypeUnderConstruction;
+    public Dictionary<Matter, int> ResourceCount;
     public float CurrentProgressSeconds = 0;
+}
+
+public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> {
+    internal Transform ModulePrefab;
+
     private float RequiredProgressSeconds = 10f;
-    public float ProgressPercentage
+    internal float ProgressPercentage
     {
         get
         {
-            return CurrentProgressSeconds / RequiredProgressSeconds;
+            return Data.CurrentProgressSeconds / RequiredProgressSeconds;
         }
     }
 
-    internal static ConstructionZone CurrentZone;
-    internal Dictionary<Matter, int> ResourceCount;
+    internal static ConstructionZone ZoneThatPlayerIsStandingIn;
     internal List<ResourceComponent> ResourceList;
     internal bool CanConstruct { get; private set; }
+
+    public ConstructionData data;
+    public ConstructionData Data { get { return data; } set { data = value; } }
+
     internal Matter[] RequiredResourceMask;
 
 	// Use this for initialization
 	void Start () {
         InitializeRequirements();
 	}
-	
-	// Update is called once per frame
-	//void Update () {
-	//
-	//}
 
     public void Initialize(Module toBuild)
     {
-        this.UnderConstruction = toBuild;
+        Data.ModuleTypeUnderConstruction = toBuild;
         ModulePrefab = PrefabCache<Module>.Cache.GetPrefab(toBuild);
 
         InitializeRequirements();
@@ -46,17 +54,17 @@ public class ConstructionZone : MonoBehaviour {
     
     public void InitializeRequirements()
     {
-        if (UnderConstruction != Module.Unspecified)
+        if (Data.ModuleTypeUnderConstruction != Module.Unspecified)
         {
-            ResourceCount = new Dictionary<Matter, int>();
+            Data.ResourceCount = new Dictionary<Matter, int>();
             ResourceList = new List<ResourceComponent>();
             //todo: change to Construction.Requirements[underconstruction].keys when that's a dict of <resource, entry> and not a list
-            RequiredResourceMask = new Matter[Construction.Requirements[this.UnderConstruction].Count];
+            RequiredResourceMask = new Matter[Construction.Requirements[Data.ModuleTypeUnderConstruction].Count];
 
             int i = 0;
-            foreach(ResourceEntry required in Construction.Requirements[this.UnderConstruction])
+            foreach(ResourceEntry required in Construction.Requirements[Data.ModuleTypeUnderConstruction])
             {
-                ResourceCount[required.Type] = 0;
+                Data.ResourceCount[required.Type] = 0;
                 RequiredResourceMask[i] = required.Type;
                 i++;
             }
@@ -67,12 +75,12 @@ public class ConstructionZone : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if (ResourceCount != null)
+        if (Data.ResourceCount != null)
         {
             if (other.CompareTag("Player"))
             {
-                GuiBridge.Instance.ShowConstruction(Construction.Requirements[this.UnderConstruction], ResourceCount, this.UnderConstruction);
-                CurrentZone = this;
+                GuiBridge.Instance.ShowConstruction(Construction.Requirements[Data.ModuleTypeUnderConstruction], Data.ResourceCount, Data.ModuleTypeUnderConstruction);
+                ZoneThatPlayerIsStandingIn = this;
             }
             else if (other.CompareTag("movable"))
             {
@@ -81,11 +89,11 @@ public class ConstructionZone : MonoBehaviour {
                 if (addedResources != null && !addedResources.IsInConstructionZone)
                 {
 #warning rounding error
-                    ResourceCount[addedResources.Data.ResourceType] += (int)addedResources.Data.Quantity;
+                    Data.ResourceCount[addedResources.Data.ResourceType] += (int)addedResources.Data.Quantity;
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
-                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[this.UnderConstruction], ResourceCount, this.UnderConstruction);
+                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[Data.ModuleTypeUnderConstruction], Data.ResourceCount, Data.ModuleTypeUnderConstruction);
                 }
             }
         }
@@ -93,12 +101,12 @@ public class ConstructionZone : MonoBehaviour {
 
     void OnTriggerExit(Collider other)
     {
-        if (ResourceCount != null)
+        if (Data.ResourceCount != null)
         {
             if (other.CompareTag("Player"))
             {
                 GuiBridge.Instance.HideConstruction();
-                CurrentZone = null;
+                ZoneThatPlayerIsStandingIn = null;
             }
             else if (other.CompareTag("movable"))
             {
@@ -107,11 +115,11 @@ public class ConstructionZone : MonoBehaviour {
                 if (removedResources != null && removedResources.IsInConstructionZone)
                 {
 #warning rounding error
-                    ResourceCount[removedResources.Data.ResourceType] -= (int)removedResources.Data.Quantity;
+                    Data.ResourceCount[removedResources.Data.ResourceType] -= (int)removedResources.Data.Quantity;
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();
-                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[this.UnderConstruction], ResourceCount, this.UnderConstruction);
+                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[Data.ModuleTypeUnderConstruction], Data.ResourceCount, Data.ModuleTypeUnderConstruction);
                 }
             }
         }
@@ -121,11 +129,11 @@ public class ConstructionZone : MonoBehaviour {
     {
         CanConstruct = true;
 
-        foreach(ResourceEntry resourceEntry in Construction.Requirements[this.UnderConstruction])
+        foreach(ResourceEntry resourceEntry in Construction.Requirements[Data.ModuleTypeUnderConstruction])
         {
-            if (ResourceCount[resourceEntry.Type] < resourceEntry.Count)
+            if (Data.ResourceCount[resourceEntry.Type] < resourceEntry.Count)
             {
-                print("missing " + (resourceEntry.Count - ResourceCount[resourceEntry.Type]) + " " + resourceEntry.Type.ToString());
+                print("missing " + (resourceEntry.Count - Data.ResourceCount[resourceEntry.Type]) + " " + resourceEntry.Type.ToString());
                 CanConstruct = false;
                 break;
             }
@@ -136,9 +144,9 @@ public class ConstructionZone : MonoBehaviour {
     {
         if (CanConstruct)
         {
-            this.CurrentProgressSeconds += constructionTime;
+            Data.CurrentProgressSeconds += constructionTime;
 
-            if (this.CurrentProgressSeconds >= this.RequiredProgressSeconds)
+            if (Data.CurrentProgressSeconds >= this.RequiredProgressSeconds)
             {
                 this.Complete();
             }
@@ -152,9 +160,9 @@ public class ConstructionZone : MonoBehaviour {
         //is outside the zone looking in, so maybe not
         
         GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
-        if (CurrentZone == this)
+        if (ZoneThatPlayerIsStandingIn == this)
         {
-            CurrentZone = null;
+            ZoneThatPlayerIsStandingIn = null;
             GuiBridge.Instance.HideConstruction();
         }
 
@@ -180,7 +188,7 @@ public class ConstructionZone : MonoBehaviour {
                     deletedCount[component.Data.ResourceType] = 0;
                 }
 
-                if (numDeleted < Construction.Requirements[this.UnderConstruction].Where(r => r.Type == component.Data.ResourceType).Count())
+                if (numDeleted < Construction.Requirements[Data.ModuleTypeUnderConstruction].Where(r => r.Type == component.Data.ResourceType).Count())
                 {
                     this.ResourceList.Remove(component);
                     Destroy(component.gameObject);

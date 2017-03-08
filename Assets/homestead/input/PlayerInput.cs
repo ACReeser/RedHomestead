@@ -146,7 +146,7 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// The prefab for a construction zone
     /// </summary>
-    public Transform ConstructionZonePrefab, PostItNotePrefab;
+    public Transform PostItNotePrefab;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
@@ -1244,7 +1244,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceConstructionHere(Vector3 point)
     {
-        Transform zoneT = (Transform)GameObject.Instantiate(ConstructionZonePrefab, ModulePlan.Visualization.position, ModulePlan.Visualization.rotation);
+        Transform zoneT = (Transform)GameObject.Instantiate(ModuleBridge.Instance.ConstructionZonePrefab, ModulePlan.Visualization.position, ModulePlan.Visualization.rotation);
 
         ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
 

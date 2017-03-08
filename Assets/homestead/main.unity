@@ -2135,7 +2135,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -130
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -2143,7 +2143,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x
@@ -12905,6 +12905,8 @@ MonoBehaviour:
   - {fileID: 437340, guid: d8eb26328004dae46aeec480519e0cf6, type: 2}
   - {fileID: 446350, guid: 26c204ce33575d441b5698153296ded1, type: 2}
   - {fileID: 485270, guid: 694967410ff31a848bc00f23c81c914b, type: 2}
+  ConstructionZonePrefab: {fileID: 484780, guid: 321c08093368d234292c4d1189edd6be,
+    type: 2}
 --- !u!114 &297514241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21166,6 +21168,108 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 0}
+  EnergyHistory:
+    _history:
+      _Buckets: 0000000001000000ffffffff
+      _HashCodes: 000000000100000000000000
+      _Next: ffffffffffffffff00000000
+      _Count: 2
+      _Version: 2
+      _FreeList: -1
+      _FreeCount: 0
+      _Keys: 000000000100000000000000
+      _Values:
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+  MatterHistory:
+    _history:
+      _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000130000001400000015000000160000001700000018000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+      _HashCodes: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000faffff7ffbffff7ffcffff7ffdffff7ffeffff7fffffff7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Next: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff100000001100000012000000ffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Count: 25
+      _Version: 25
+      _FreeList: -1
+      _FreeCount: 0
+      _Keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000fafffffffbfffffffcfffffffdfffffffeffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Values:
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
 --- !u!4 &484247137
 Transform:
   m_ObjectHideFlags: 0
@@ -40149,7 +40253,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -174
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -40157,7 +40261,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x
@@ -53361,6 +53465,108 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 0}
+  EnergyHistory:
+    _history:
+      _Buckets: 0000000001000000ffffffff
+      _HashCodes: 000000000100000000000000
+      _Next: ffffffffffffffff00000000
+      _Count: 2
+      _Version: 2
+      _FreeList: -1
+      _FreeCount: 0
+      _Keys: 000000000100000000000000
+      _Values:
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+  MatterHistory:
+    _history:
+      _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000130000001400000015000000160000001700000018000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+      _HashCodes: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000faffff7ffbffff7ffcffff7ffdffff7ffeffff7fffffff7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Next: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff100000001100000012000000ffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Count: 25
+      _Version: 25
+      _FreeList: -1
+      _FreeCount: 0
+      _Keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000fafffffffbfffffffcfffffffdfffffffeffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Values:
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
 --- !u!1 &1225317305
 GameObject:
   m_ObjectHideFlags: 0
@@ -64914,8 +65120,6 @@ MonoBehaviour:
   gasPipePrefab: {fileID: 437088, guid: db8d1bd857e5eba43920361d81b6c731, type: 2}
   powerlinePrefab: {fileID: 429478, guid: e07415a2b8c5bed4abc47aae1f8b7ffc, type: 2}
   FPSController: {fileID: 761862297}
-  ConstructionZonePrefab: {fileID: 484780, guid: 321c08093368d234292c4d1189edd6be,
-    type: 2}
   PostItNotePrefab: {fileID: 407182, guid: b414ae3cf623a354f8b6eed66ed28175, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
@@ -71299,7 +71503,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -86
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -71307,7 +71511,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x
@@ -81036,6 +81240,108 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PowerIndicator: {fileID: 0}
+  EnergyHistory:
+    _history:
+      _Buckets: 0000000001000000ffffffff
+      _HashCodes: 000000000100000000000000
+      _Next: ffffffffffffffff00000000
+      _Count: 2
+      _Version: 2
+      _FreeList: -1
+      _FreeCount: 0
+      _Keys: 000000000100000000000000
+      _Values:
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+  MatterHistory:
+    _history:
+      _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000130000001400000015000000160000001700000018000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+      _HashCodes: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000faffff7ffbffff7ffcffff7ffdffff7ffeffff7fffffff7f000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Next: ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff100000001100000012000000ffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Count: 25
+      _Version: 25
+      _FreeList: -1
+      _FreeCount: 0
+      _Keys: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000fafffffffbfffffffcfffffffdfffffffeffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      _Values:
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
+      - Produced: 0
+        Consumed: 0
 --- !u!1 &1776834963
 GameObject:
   m_ObjectHideFlags: 0
@@ -84418,7 +84724,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -218
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -84426,7 +84732,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 44
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x

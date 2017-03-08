@@ -88,6 +88,7 @@ namespace RedHomestead.Persistence
 
         public CrateData[] Crates;
         public HabitatData[] Habitats;
+        public ConstructionData[] ConstructionZones;
         //hobbit hole data
         //floorplan data
         //stuff data
@@ -99,6 +100,13 @@ namespace RedHomestead.Persistence
         {
             UnityEngine.Debug.Log("creating crates");
             DeserializeCrates();
+            UnityEngine.Debug.Log("creating con zones");
+            DeserializeConstructionZones();
+        }
+
+        private void DeserializeConstructionZones()
+        {
+            _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
         }
 
         private void DeserializeCrates()
@@ -109,6 +117,9 @@ namespace RedHomestead.Persistence
                 GameObject.Destroy(starterCrates[i].gameObject);
             }
 
+            //this would be
+            //_InstantiateMany<ResourceComponent, CrateData>(Crates, EconomyManager.Instance.GetResourceCratePrefab(data.ResourceType));
+            //but we have to look at each data to figure out which prefab to use
             foreach (CrateData data in Crates)
             {
                 Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.ResourceType), data.Position, data.Rotation) as Transform;
@@ -117,15 +128,26 @@ namespace RedHomestead.Persistence
             }
         }
 
+        private void _InstantiateMany<T, D>(D[] list, Transform prefab) where T : MonoBehaviour, IDataContainer<D> where D : FacingData
+        {
+            foreach (D data in list)
+            {
+                Transform t = GameObject.Instantiate(prefab, data.Position, data.Rotation) as Transform;
+                T c = t.GetComponent<T>();
+                c.Data = data;
+            }
+        }
+
         public void OnBeforeSerialize()
         {
             this._MarshalManyFromScene<ResourceComponent, CrateData>((crates) => this.Crates = crates);
             this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
+            this._MarshalManyFromScene<ConstructionZone, ConstructionData>((zones) => this.ConstructionZones = zones);
         }
 
-        private void _MarshalManyFromScene<C, D>(Action<D[]> setter) where C : UnityEngine.MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
+        private void _MarshalManyFromScene<C, D>(Action<D[]> setter) where C : MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
         {
-            setter(Array.ConvertAll(UnityEngine.Transform.FindObjectsOfType<C>(),
+            setter(Array.ConvertAll(Transform.FindObjectsOfType<C>(),
                 container =>
                 (D)container.Data.Marshal(container.transform)
             ));
