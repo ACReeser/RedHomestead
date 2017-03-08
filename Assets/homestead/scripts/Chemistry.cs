@@ -130,17 +130,20 @@ namespace RedHomestead.Simulation
         }
     }
 
-
+    [Serializable]
     public class Tracker
     {
-        public float Produced { get; set; }
-        public float Consumed { get; set; }
+        public float Produced;
+        public float Consumed;
     }
     
+    [Serializable]
+    public class SerializableHistory : SerializableDictionary<int, Tracker> { }
+
     //wish we could where T: enum
-    public class History<T> where T : struct
+    public class History<T> where T : struct, IConvertible
     {
-        private Dictionary<T, Tracker> _history = new Dictionary<T, Tracker>();
+        public SerializableHistory _history = new SerializableHistory();
 
         public History()
         {
@@ -148,66 +151,73 @@ namespace RedHomestead.Simulation
             if (!seed.IsEnum)
                 throw new ArgumentException("Cannot use non enum");
 
-            foreach(T e in System.Enum.GetValues(seed))
+            foreach (T e in System.Enum.GetValues(seed))
             {
-                _history[e] = new Tracker();
+                _history[Convert.ToInt32(e)] = new Tracker();
             }
         }
 
         public virtual void Produce(T type, float additionalAmount)
         {
-            _history[type].Produced += additionalAmount;
+            _history[Convert.ToInt32(type)].Produced += additionalAmount;
         }
 
         public virtual void Consume(T type, float additionalAmount)
         {
-            _history[type].Consumed += additionalAmount;
+            _history[Convert.ToInt32(type)].Consumed += additionalAmount;
         }
 
         public Tracker this[T key]
         {
             get
             {
-                return _history[key];
+                return _history[Convert.ToInt32(key)];
             }
         }
     }
+    
+    [Serializable]
+    public class EnergyHistory: History<Energy> { }
+    [Serializable]
+    public class MatterHistory : History<Matter> { }
 
-    public class LocalEnergyHistory : History<Energy>
+    [Serializable]
+    public class LocalEnergyHistory : EnergyHistory
     {
         public override void Produce(Energy type, float additionalAmount)
         {
             base.Produce(type, additionalAmount);
-            GlobalHistory.Energy.Produce(type, additionalAmount);
+            Persistence.Game.Current.History.Energy.Produce(type, additionalAmount);
         }
 
         public override void Consume(Energy type, float additionalAmount)
         {
             base.Consume(type, additionalAmount);
-            GlobalHistory.Energy.Consume(type, additionalAmount);
+            Persistence.Game.Current.History.Energy.Consume(type, additionalAmount);
         }
     }
 
-    public class LocalMatterHistory : History<Matter>
+    [Serializable]
+    public class LocalMatterHistory : MatterHistory
     {
         public override void Produce(Matter type, float additionalAmount)
         {
             base.Produce(type, additionalAmount);
-            GlobalHistory.Compound.Produce(type, additionalAmount);
+            Persistence.Game.Current.History.Matter.Produce(type, additionalAmount);
         }
 
         public override void Consume(Matter type, float additionalAmount)
         {
             base.Consume(type, additionalAmount);
-            GlobalHistory.Compound.Consume(type, additionalAmount);
+            Persistence.Game.Current.History.Matter.Consume(type, additionalAmount);
         }
     }
 
-    public static class GlobalHistory
+    [Serializable]
+    public class GlobalHistory
     {
-        public static History<Energy> Energy = new History<Simulation.Energy>();
-        public static History<Matter> Compound = new History<Simulation.Matter>();
-        public static History<Matter> Resource = new History<Simulation.Matter>();
+        public EnergyHistory Energy = new EnergyHistory();
+        public MatterHistory Matter = new MatterHistory();
     }
 
     public interface ICrateSnapper

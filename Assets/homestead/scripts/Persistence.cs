@@ -136,7 +136,8 @@ namespace RedHomestead.Persistence
     public class Game : ISerializationCallbackReceiver
     {
         public static Game Current { get; set; }
-
+        
+        public Simulation.GlobalHistory History;
         public EnvironmentData Environment;
         public PlayerData Player;
         public Base[] Bases;
