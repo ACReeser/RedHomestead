@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Simulation;
+using RedHomestead.Buildings;
 
 public class SolarPanel : PowerSupply
 {
@@ -41,5 +43,14 @@ public class SolarPanel : PowerSupply
     public override void Report()
     {
         throw new NotImplementedException();
+    }
+
+    public override void InitializeStartingData()
+    {
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.SolarPanelSmall;
     }
 }

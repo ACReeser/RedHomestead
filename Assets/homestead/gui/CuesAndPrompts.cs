@@ -4,7 +4,8 @@ using System.Collections;
 public class News
 {
     public string Text { get; set; }
-    public float Duration { get; set; }
+    public float DelayMilliseconds { get; set; }
+    public float DurationMilliseconds { get; set; }
     public Sprite Icon;
 }
 
@@ -51,12 +52,23 @@ public static class NewsSource
     public static News DroppodHere = new News()
     {
         Text = "Incoming Drop Pod",
-        Duration = 10000
+        DurationMilliseconds = 10000
     };
     public static News AlgaeHarvestable = new News()
     {
         Text = "Algae Harvest Ready",
-        Duration = 10000
+        DurationMilliseconds = 10000
+    };
+    public static News ToolOpenHint = new News()
+    {
+        Text = "[TAB] for tools",
+        DurationMilliseconds = 10000
+    };
+    public static News FOneHint = new News()
+    {
+        Text = "[F1] for help",
+        DelayMilliseconds = 10000,
+        DurationMilliseconds = 10000
     };
 }
 
@@ -76,7 +88,7 @@ public static class Prompts {
     public static News BulkheadBridgeCompleted = new News()
     {
         Text = "Bulkheads connected",
-        Duration = 1500
+        DurationMilliseconds = 1500
     };
     public static PromptInfo StartGasPipeHint = new PromptInfo()
     {
@@ -91,7 +103,7 @@ public static class Prompts {
     public static News GasPipeCompleted = new News()
     {
         Text = "Gas Pipe connected",
-        Duration = 1500
+        DurationMilliseconds = 1500
     };
     public static PromptInfo StartPowerPlugHint = new PromptInfo()
     {
@@ -106,7 +118,7 @@ public static class Prompts {
     public static News PowerPlugCompleted = new News()
     {
         Text = "Power connected",
-        Duration = 1500
+        DurationMilliseconds = 1500
     };
     public static PromptInfo DriveRoverPrompt = new PromptInfo()
     {
@@ -309,7 +321,7 @@ public static class Prompts {
     public static PromptInfo DrillHint = new PromptInfo()
     {
         Description = "(Requires Drill)",
-        Key = " "
+        Key = "Tab"
     };
     internal static PromptInfo HarvestHint = new PromptInfo()
     {

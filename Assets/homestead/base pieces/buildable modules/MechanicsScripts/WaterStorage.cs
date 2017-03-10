@@ -3,8 +3,9 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
 
-public class WaterStorage : SingleResourceSink {
+public class WaterStorage : SingleResourceModuleGameplay {
 
     public override float WattRequirementsPerTick
     {
@@ -14,23 +15,32 @@ public class WaterStorage : SingleResourceSink {
         }
     }
 
-    public override void Report()
+    public override Module GetModuleType()
     {
-        throw new NotImplementedException();
+        return Module.SmallWaterTank;
     }
 
-    // Use this for initialization
-    protected override void OnStart()
+    public override ResourceContainer GetStartingDataContainer()
     {
-        base.OnStart();
-        this.SinkType = Matter.Water;
-        this.Container = new ResourceContainer(StartAmount)
+        return new ResourceContainer()
         {
-            TotalCapacity = Capacity,
-            MatterType = Matter.Water
+            MatterType = Matter.Water,
+            TotalCapacity = 10f,
         };
     }
-    
+
+    public override void OnAdjacentChanged()
+    {
+    }
+
+    public override void Report()
+    {
+    }
+
+    public override void Tick()
+    {
+    }
+
     // Update is called once per frame
     void Update()
     {

@@ -39,16 +39,16 @@ public class HabitatResourceInterface : HabitatModule
 
     private void DisplaySingleContainer()
     {
-        SumContainer container = LinkedHab.MatterTotals[DisplayResource];
+        ResourceContainer container = LinkedHab.Get(DisplayResource);
 
-        DisplayOut.text = string.Format("{0}: {1}\n{2}/{3}kg\n{4}{5} {6}",
+        DisplayOut.text = string.Format("{0}: {1}\n{2}/{3}kg",
             HeaderText,
             container.UtilizationPercentageString(),
             container.CurrentAmount,
-            container.TotalCapacity,
-            container.LastTickRateOfChange == 0 ? " " : container.LastTickRateOfChange > 0 ? "+" : "-",
-            container.LastTickRateOfChange,
-            "g/s" //todo: make human readable with large/small quants and scales
+            container.TotalCapacity
+            //container.LastTickRateOfChange == 0 ? " " : container.LastTickRateOfChange > 0 ? "+" : "-",
+            //container.LastTickRateOfChange,
+            //"g/s" //todo: make human readable with large/small quants and scales
             );
     }
 }

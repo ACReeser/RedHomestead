@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
 
 public class Sabatier : Converter, IPowerToggleable
 {
@@ -60,9 +61,9 @@ public class Sabatier : Converter, IPowerToggleable
     private void PushMethaneAndWater()
     {
         MethaneOut.Get(Matter.Methane).Push(MethanePerSecond * Time.fixedDeltaTime);
-        MatterHistory.Produce(Matter.Methane, MethanePerSecond * Time.fixedDeltaTime);
+        Data.MatterHistory.Produce(Matter.Methane, MethanePerSecond * Time.fixedDeltaTime);
         WaterOut.Get(Matter.Water).Push(WaterPerSecond * Time.fixedDeltaTime);
-        MatterHistory.Produce(Matter.Water, MethanePerSecond * Time.fixedDeltaTime);
+        Data.MatterHistory.Produce(Matter.Water, MethanePerSecond * Time.fixedDeltaTime);
     }
 
     private float hydrogenBuffer = 0f;
@@ -72,7 +73,7 @@ public class Sabatier : Converter, IPowerToggleable
         {
             float newHydrogen = HydrogenSource.Get(Matter.Hydrogen).Pull(HydrogenPerSecond * Time.fixedDeltaTime);
             hydrogenBuffer += newHydrogen;
-            MatterHistory.Consume(Matter.Hydrogen, newHydrogen);
+            Data.MatterHistory.Consume(Matter.Hydrogen, newHydrogen);
 
             float hydrogenThisTick = HydrogenPerSecond * Time.fixedDeltaTime;
 
@@ -118,15 +119,15 @@ public class Sabatier : Converter, IPowerToggleable
             "1 kWh + 1kg H2 => 1kg CH4 + 1kg H2O",
             "100%",
             "100%",
-            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
+            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = Data.EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = MatterHistory[Matter.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
+                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = MatterHistory[Matter.Methane].Produced + " kg", Connected = MethaneOut != null },
-                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = MatterHistory[Matter.Water].Produced + " kg", Connected = WaterOut != null }
+                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Methane].Produced + " kg", Connected = MethaneOut != null },
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Water].Produced + " kg", Connected = WaterOut != null }
             }
             );
     }
@@ -157,5 +158,35 @@ public class Sabatier : Converter, IPowerToggleable
             SoundSource.Play();
         else
             SoundSource.Stop();
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.SabatierReactor;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary()
+        {
+            {
+                Matter.Water,  new ResourceContainer() {
+                    MatterType = Matter.Water,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Hydrogen,  new ResourceContainer() {
+                    MatterType = Matter.Hydrogen,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Methane,  new ResourceContainer() {
+                    MatterType = Matter.Methane,
+                    TotalCapacity = 1f
+                }
+            }
+        };
     }
 }

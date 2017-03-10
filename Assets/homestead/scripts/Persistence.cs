@@ -92,30 +92,51 @@ namespace RedHomestead.Persistence
         //hobbit hole data
         //floorplan data
         //stuff data
-        //module data
-        ////container data
+        public PoweredModuleData[] ResourcelessData;
+        public MultipleResourceModuleData[] MultiResourceContainerData;
+        public SingleResourceModuleData[] SingleResourceContainerData;
         ////pipe data
-        
+
         public void OnAfterDeserialize()
         {
             UnityEngine.Debug.Log("creating crates");
             DeserializeCrates();
             UnityEngine.Debug.Log("creating con zones");
-            DeserializeConstructionZones();
+            _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
+            UnityEngine.Debug.Log("creating modules");
+            DeserializeModules();
         }
 
-        private void DeserializeConstructionZones()
+        private void DeserializeModules()
         {
-            _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
+            _DestroyCurrent<ResourcelessGameplay>();
+            _DestroyCurrent<SingleResourceModuleGameplay>();
+            _DestroyCurrent<MultipleResourceModuleGameplay>(typeof(Habitat));
+
+            //we have to look at each data to figure out which prefab to use
+            foreach (PoweredModuleData data in ResourcelessData)
+            {
+                Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+                ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
+                r.Data = data;
+            }
+            foreach (SingleResourceModuleData data in SingleResourceContainerData)
+            {
+                Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+                SingleResourceModuleGameplay r = t.GetComponent<SingleResourceModuleGameplay>();
+                r.Data = data;
+            }
+            foreach (MultipleResourceModuleData data in MultiResourceContainerData)
+            {
+                Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+                MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
+                r.Data = data;
+            }
         }
 
         private void DeserializeCrates()
         {
-            ResourceComponent[] starterCrates = UnityEngine.Transform.FindObjectsOfType<ResourceComponent>();
-            for (int i = starterCrates.Length - 1; i > -1; i--)
-            {
-                GameObject.Destroy(starterCrates[i].gameObject);
-            }
+            _DestroyCurrent<ResourceComponent>();
 
             //this would be
             //_InstantiateMany<ResourceComponent, CrateData>(Crates, EconomyManager.Instance.GetResourceCratePrefab(data.ResourceType));
@@ -125,6 +146,22 @@ namespace RedHomestead.Persistence
                 Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.ResourceType), data.Position, data.Rotation) as Transform;
                 ResourceComponent r = t.GetComponent<ResourceComponent>();
                 r.Data = data;
+            }
+        }
+
+        private void _DestroyCurrent<T>(Type exceptThisType = null) where T : MonoBehaviour
+        {
+            T[] things = UnityEngine.Transform.FindObjectsOfType<T>();
+            for (int i = things.Length - 1; i > -1; i--)
+            {
+                if (exceptThisType != null && things[i].GetType() == exceptThisType)
+                {
+                    //noop
+                }
+                else
+                {
+                    GameObject.Destroy(things[i].gameObject);
+                }
             }
         }
 
@@ -141,8 +178,12 @@ namespace RedHomestead.Persistence
         public void OnBeforeSerialize()
         {
             this._MarshalManyFromScene<ResourceComponent, CrateData>((crates) => this.Crates = crates);
-            this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
+            //this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
             this._MarshalManyFromScene<ConstructionZone, ConstructionData>((zones) => this.ConstructionZones = zones);
+
+            this._MarshalManyFromScene<ResourcelessGameplay, PoweredModuleData>((modules) => this.ResourcelessData = modules);
+            this._MarshalManyFromScene<MultipleResourceModuleGameplay, MultipleResourceModuleData>((modules) => this.MultiResourceContainerData = modules);
+            this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
         }
 
         private void _MarshalManyFromScene<C, D>(Action<D[]> setter) where C : MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
@@ -163,6 +204,8 @@ namespace RedHomestead.Persistence
         public EnvironmentData Environment;
         public PlayerData Player;
         public Base[] Bases;
+
+        internal bool IsNewGame { get; set; }
 
         public void OnBeforeSerialize()
         {
@@ -242,6 +285,7 @@ namespace RedHomestead.Persistence
         {
             Game.Current = new Game()
             {
+                IsNewGame = true,
                 Bases = new Base[]
                 {
                     new Base()

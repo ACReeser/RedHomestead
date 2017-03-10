@@ -3,8 +3,9 @@ using System.Collections;
 using RedHomestead.Simulation;
 using System;
 using System.Collections.Generic;
+using RedHomestead.Buildings;
 
-public class Warehouse : MonoBehaviour, ICrateSnapper, ITriggerSubscriber
+public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 {
     private class WarehouseRow
     {
@@ -81,6 +82,14 @@ public class Warehouse : MonoBehaviour, ICrateSnapper, ITriggerSubscriber
     private Dictionary<WarehouseRow, Coroutine> CrateInterferenceTimers = new Dictionary<WarehouseRow, Coroutine>();
     private const float SnapInterferenceTimerSeconds = 1.25f;
 
+    public override float WattRequirementsPerTick
+    {
+        get
+        {
+            return 0f;
+        }
+    }
+
     // Use this for initialization
     void Start() {
         left = new WarehouseRow(transform.GetChild(0).position);
@@ -137,5 +146,18 @@ public class Warehouse : MonoBehaviour, ICrateSnapper, ITriggerSubscriber
         yield return new WaitForSeconds(SnapInterferenceTimerSeconds);
 
         this.CrateInterferenceTimers.Remove(row);
+    }
+
+    public override void OnAdjacentChanged() { }
+
+    public override void Tick() { }
+
+    public override void Report() { }
+
+    public override void InitializeStartingData() { }
+
+    public override Module GetModuleType()
+    {
+        return Module.Warehouse;
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
+using RedHomestead.Buildings;
 
 public enum HabitatType { LuxuryLander, Burrow } //Lander, Tent
 
@@ -24,7 +25,7 @@ public class HabitatData : RedHomesteadData
     }
 }
 
-public class Habitat : Converter, IDataContainer<HabitatData>
+public class Habitat : Converter
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
@@ -38,7 +39,7 @@ public class Habitat : Converter, IDataContainer<HabitatData>
     //    }
     //}
     
-    internal Dictionary<Matter, SumContainer> MatterTotals = new Dictionary<Matter, SumContainer>();
+    public HabitatData HabitatData;
 
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
@@ -50,7 +51,6 @@ public class Habitat : Converter, IDataContainer<HabitatData>
         }
     }
 
-    public HabitatData Data { get; set; }
 
     public override void ClearHooks()
     {
@@ -66,7 +66,7 @@ public class Habitat : Converter, IDataContainer<HabitatData>
 
     private void FlowWithExternal(Matter compound, List<ISink> externals, float pullPerTick)
     {
-        if (externals.Count > 0 && MatterTotals[compound].AvailableCapacity >= pullPerTick)
+        if (externals.Count > 0 && Data.Containers[compound].AvailableCapacity >= pullPerTick)
         {
             float pulled = 0f;
             foreach (ISink s in externals)
@@ -77,7 +77,7 @@ public class Habitat : Converter, IDataContainer<HabitatData>
                     break;
                 }
             }
-            MatterTotals[compound].Push(pulled);
+            Data.Containers[compound].Push(pulled);
         }
     }
 
@@ -91,50 +91,12 @@ public class Habitat : Converter, IDataContainer<HabitatData>
     }
     
     void Awake () {
-        //todo: move this to individual Stuff adds
-        MatterTotals[Matter.Water] = new SumContainer(10f)
+        if (Game.Current.IsNewGame)
         {
-            MatterType = Matter.Water,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 20f
-        };
-        MatterTotals[Matter.Oxygen] = new SumContainer(20f)
-        {
-            MatterType = Matter.Oxygen,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 20f
-        };
-        MatterTotals[Matter.Biomass] = new SumContainer(0f)
-        {
-            MatterType = Matter.Biomass,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 0
-        };
-        MatterTotals[Matter.OrganicMeal] = new SumContainer(10f)
-        {
-            MatterType = Matter.OrganicMeal,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 18f
-        };
-        MatterTotals[Matter.RationMeal] = new SumContainer(10f)
-        {
-            MatterType = Matter.RationMeal,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 18f
-        };
-        MatterTotals[Matter.MealPowder] = new SumContainer(20f)
-        {
-            MatterType = Matter.MealPowder,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 36f
-        };
-        MatterTotals[Matter.MealShake] = new SumContainer(6f)
-        {
-            MatterType = Matter.MealShake,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 36f
-        };
-        Data = new HabitatData();
+            print("Starting up new hab");
+            HabitatData = new HabitatData();
+            InitializeStartingData();
+        }
     }
 	
 	// Update is called once per frame
@@ -146,7 +108,7 @@ public class Habitat : Converter, IDataContainer<HabitatData>
     {
         if (r.Data.ResourceType.IsStoredInHabitat())
         {
-            float amountLeft = MatterTotals[r.Data.ResourceType].Push(r.Data.Quantity);
+            float amountLeft = Data.Containers[r.Data.ResourceType].Push(r.Data.Quantity);
             
             if (amountLeft <= 0)
             {
@@ -161,24 +123,73 @@ public class Habitat : Converter, IDataContainer<HabitatData>
 
     public void PrepareBiomassToPreparedMeal()
     {
-        if (MatterTotals[Matter.Biomass].CurrentAmount > 0 && MatterTotals[Matter.OrganicMeal].AvailableCapacity >= 1f)
+        if (Data.Containers[Matter.Biomass].CurrentAmount > 0 && Data.Containers[Matter.OrganicMeal].AvailableCapacity >= 1f)
         {
-            MatterTotals[Matter.Biomass].Pull(1f);
-            MatterTotals[Matter.OrganicMeal].Push(1f);
+            Data.Containers[Matter.Biomass].Pull(1f);
+            Data.Containers[Matter.OrganicMeal].Push(1f);
         }
     }
 
     public void PreparePowderToShake()
     {
-        if (MatterTotals[Matter.MealPowder].CurrentAmount > 0 && MatterTotals[Matter.MealShake].AvailableCapacity >= 1f)
+        if (Data.Containers[Matter.MealPowder].CurrentAmount > 0 && Data.Containers[Matter.MealShake].AvailableCapacity >= 1f)
         {
-            MatterTotals[Matter.MealPowder].Pull(1f);
-            MatterTotals[Matter.MealShake].Push(1f);
+            Data.Containers[Matter.MealPowder].Pull(1f);
+            Data.Containers[Matter.MealShake].Push(1f);
         }
     }
     
     public override void Report()
     {
         
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.Habitat;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary()
+        {
+            { Matter.Water, new ResourceContainer(10f)
+                {
+                    MatterType = Matter.Water,
+                    TotalCapacity = 20f
+                }
+            },
+            { Matter.Oxygen, new ResourceContainer(20f)
+            {
+                MatterType = Matter.Oxygen,
+                TotalCapacity = 20f
+            }},
+            { Matter.Biomass, new ResourceContainer(0f)
+            {
+                MatterType = Matter.Biomass,
+                TotalCapacity = 0
+            }},
+            { Matter.OrganicMeal, new ResourceContainer(10f)
+            {
+                MatterType = Matter.OrganicMeal,
+                TotalCapacity = 18f
+            }},
+            { Matter.RationMeal, new ResourceContainer(10f)
+            {
+                MatterType = Matter.RationMeal,
+                TotalCapacity = 18f
+            }},
+            { Matter.MealPowder, new ResourceContainer(20f)
+            {
+                MatterType = Matter.MealPowder,
+                TotalCapacity = 36f
+            }},
+            { Matter.MealShake, new ResourceContainer(6f)
+            {
+                MatterType = Matter.MealShake,
+                TotalCapacity = 36f
+            }},
+
+        };
     }
 }

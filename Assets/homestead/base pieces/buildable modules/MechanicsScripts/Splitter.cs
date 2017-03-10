@@ -2,20 +2,14 @@
 using System.Collections;
 using System;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
+using System.Linq;
 
 //acts like a sink
 //but actually converts internal amount to half amounts
 public class Splitter : Converter, ISink
 {
     internal float FlowPerSecond = .1f;
-    internal const int ContainerBufferFlowSeconds = 4;
-    internal float ContainerBufferAmount
-    {
-        get
-        {
-            return FlowPerSecond * ContainerBufferFlowSeconds;
-        }
-    }
 
     public override float WattRequirementsPerTick
     {
@@ -25,21 +19,44 @@ public class Splitter : Converter, ISink
         }
     }
 
-    private ResourceContainer SplitterTank;
-    private bool HaveMatterType
+    private ModuleGameplay Input, OutputOne, OutputTwo;
+
+    private Matter SplitterMatterType
     {
         get
         {
-            return SplitterTank != null && SplitterTank.MatterType != Matter.Unspecified;
+            if (Data.Containers.Keys.Count == 1)
+            {
+                return Data.Containers.Values.First().MatterType;
+            }
+            else
+            {
+                return Matter.Unspecified;
+            }
         }
     }
-    private ISink OutSinkOne, OutSinkTwo;
+    
+    private ResourceContainer Container
+    {
+        get
+        {
+            if (Data.Containers.Keys.Count == 1)
+            {
+                return Data.Containers.Values.First();
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+    }
 
     private bool IsFullyConnected
     {
         get
         {
-            return HaveMatterType && OutSinkOne != null && OutSinkTwo != null;
+            return Input != null && OutputOne != null && OutputTwo != null;
         }
     }
 
@@ -47,7 +64,7 @@ public class Splitter : Converter, ISink
     {
         get
         {
-            return HaveMatterType && (OutSinkOne != null || OutSinkTwo != null);
+            return Input != null && (OutputOne != null || OutputTwo != null);
         }
     }
 
@@ -72,9 +89,9 @@ public class Splitter : Converter, ISink
     private float matterBuffer = 0f;
     private bool PullFromTank()
     {
-        if (SplitterTank != null)
+        if (Container != null)
         {
-            float newWater = SplitterTank.Pull(FlowPerSecond * Time.fixedDeltaTime);
+            float newWater = Container.Pull(FlowPerSecond * Time.fixedDeltaTime);
             matterBuffer += newWater;
 
             float matterThisTick = FlowPerSecond * Time.fixedDeltaTime;
@@ -96,28 +113,31 @@ public class Splitter : Converter, ISink
 
     private void PushSplit()
     {
-        OutSinkOne.Get(SplitterTank.MatterType).Push(FlowPerSecond / 2f * Time.fixedDeltaTime);
-        OutSinkTwo.Get(SplitterTank.MatterType).Push(FlowPerSecond / 2f * Time.fixedDeltaTime);
+        Matter m = SplitterMatterType;
+        OutputOne.Get(m).Push(FlowPerSecond / 2f * Time.fixedDeltaTime);
+        OutputTwo.Get(m).Push(FlowPerSecond / 2f * Time.fixedDeltaTime);
     }
 
     private void PushSingle()
     {
-        if (OutSinkOne != null)
-            OutSinkOne.Get(SplitterTank.MatterType).Push(FlowPerSecond * Time.fixedDeltaTime);
-        else if (OutSinkTwo != null)
-            OutSinkTwo.Get(SplitterTank.MatterType).Push(FlowPerSecond * Time.fixedDeltaTime);
+        Matter m = SplitterMatterType;
+
+        if (OutputOne != null)
+            OutputOne.Get(m).Push(FlowPerSecond * Time.fixedDeltaTime);
+        else if (OutputTwo != null)
+            OutputTwo.Get(m).Push(FlowPerSecond * Time.fixedDeltaTime);
     }
 
     public override void ClearHooks()
     {
-        OutSinkOne = OutSinkTwo = null;
+        OutputOne = OutputTwo = null;
     }
 
     public override void OnAdjacentChanged()
     {
         if (Adjacent.Count == 0)
         {
-            SplitterTank = null;
+            this.Data.Containers.Clear();
             RefreshValveTags();
         }
 
@@ -130,25 +150,27 @@ public class Splitter : Converter, ISink
 
     public override void OnSinkConnected(ISink s)
     {
-        if (this.SplitterTank == null)
+        if (this.Data.Containers.Keys.Count == 0)
         {
-            SplitterTank = new ResourceContainer(ContainerBufferAmount)
+            if (s is SingleResourceModuleGameplay)
             {
-                //???
-                //how do we know what this tank holds? what this connection is?
-                //we could brute force it
-                //MatterType =
-            };
+                this.Data.Containers.Add((s as SingleResourceModuleGameplay).Data.Container.MatterType, new ResourceContainer()
+                {
+                    MatterType = (s as SingleResourceModuleGameplay).Data.Container.MatterType,
+                    TotalCapacity = 1f
+                });
+            }
+
             RefreshValveTags();
         }
         else
         {
-            if (s.HasContainerFor(this.SplitterTank.MatterType))
+            if (s.HasContainerFor(this.SplitterMatterType) && s is ModuleGameplay)
             {
-                if (OutSinkOne == null)
-                    OutSinkOne = s;
-                else if (OutSinkTwo == null)
-                    OutSinkTwo = s;
+                if (OutputOne == null)
+                    OutputOne = s as ModuleGameplay;
+                else if (OutputTwo == null)
+                    OutputTwo = s as ModuleGameplay;
             }
         }
     }
@@ -157,24 +179,18 @@ public class Splitter : Converter, ISink
     {
         throw new NotImplementedException();
     }
+    
 
-    public ResourceContainer Get(Matter c)
+    public override Module GetModuleType()
     {
-        if (HaveMatterType && SplitterTank.MatterType == c)
-        {
-            return SplitterTank;
-        }
-        else
-        {
-            return null;
-        }
+        return Module.Splitter;
     }
 
-    public bool HasContainerFor(Matter c)
+    public override ResourceContainerDictionary GetStartingDataContainers()
     {
-        if (SplitterTank == null)
-            return false;
-        else
-            return c == SplitterTank.MatterType;
+        return new ResourceContainerDictionary()
+        {
+
+        };
     }
 }

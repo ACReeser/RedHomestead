@@ -3,14 +3,40 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using RedHomestead.Simulation;
+using RedHomestead.Persistence;
 
-public abstract class ModuleGameplay : MonoBehaviour
+[Serializable]
+public abstract class PoweredModuleData : FacingData
+{ 
+    public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
+    public RedHomestead.Buildings.Module ModuleType;
+}
+
+[Serializable]
+public abstract class ModuleData: PoweredModuleData
+{
+    public LocalMatterHistory MatterHistory = new LocalMatterHistory();
+}
+
+[Serializable]
+public class ResourceContainerDictionary: SerializableDictionary<Matter, ResourceContainer> { }
+
+[Serializable]
+public class MultipleResourceModuleData: ModuleData
+{
+    public ResourceContainerDictionary Containers;
+}
+
+[Serializable]
+public class SingleResourceModuleData : ModuleData
+{
+    public ResourceContainer Container;
+}
+
+public abstract class ModuleGameplay : MonoBehaviour, ISink
 {
     public SpriteRenderer PowerIndicator;
     protected AudioSource SoundSource;
-
-    public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
-    public LocalMatterHistory MatterHistory = new LocalMatterHistory();
 
     private bool _hasPower;
     public bool HasPower {
@@ -48,14 +74,34 @@ public abstract class ModuleGameplay : MonoBehaviour
     public virtual void OnPowerChanged() { }
     public abstract void OnAdjacentChanged();
     public abstract void Tick();
-
     public abstract void Report();
+    public abstract ResourceContainer Get(Matter c);
+    public abstract bool HasContainerFor(Matter c);
+    public abstract void InitializeStartingData();
+    public abstract RedHomestead.Buildings.Module GetModuleType();
 }
 
-public abstract class PowerSupply : ModuleGameplay
+public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<PoweredModuleData>
+{
+    private PoweredModuleData data;
+    public PoweredModuleData Data { get { return data; } set { data = value; } }
+
+    public override ResourceContainer Get(Matter c)
+    {
+        return null;
+    }
+
+    public override bool HasContainerFor(Matter c)
+    {
+        return false;
+    }
+}
+
+public abstract class PowerSupply : ResourcelessGameplay
 {
     public abstract float WattsPerTick { get; }
 }
+
 
 public interface ISink
 {
@@ -63,75 +109,77 @@ public interface ISink
     bool HasContainerFor(Matter c);
 }
 
-public abstract class Sink : ModuleGameplay, ISink
+public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataContainer<MultipleResourceModuleData>
 {
-    protected List<Sink> SimilarAdjacentSinks = new List<Sink>();
-    
-    protected override void OnStart()
-    {
-        FlowManager.Instance.Sinks.Add(this);
-    }
-
-    public override void Tick()
-    {
-        this.Equalize();
-    }
-
-    public bool HasContainerFor(Matter c)
-    {
-        return Get(c) != null;
-    }
-
-    public abstract ResourceContainer Get(Matter c);
-    public abstract void Equalize();
-}
-
-public abstract class SingleResourceSink : Sink
-{
-    public Matter SinkType;
-    public ResourceContainer Container;
-    public SpriteRenderer flowAmountRenderer;
-    public float StartAmount, Capacity;
+    [SerializeField]
+    private MultipleResourceModuleData data;
+    public MultipleResourceModuleData Data { get { return data; } set { data = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
-        if (SinkType == c)
-        {
-            return Container;
-        }
-        return null;
+        if (Data.Containers.ContainsKey(c))
+            return data.Containers[c];
+        else
+            return null;
     }
 
-    public override void Equalize()
+    public override bool HasContainerFor(Matter c)
     {
-        //float totalAmount; int sinkCount;
-        //foreach(Sink s in SimilarAdjacentSinks)
-        //{
-        //    ResourceContainer rc = s.Get(SinkType);
-        //}
-
-        if (flowAmountRenderer != null && Container != null)
-            flowAmountRenderer.transform.localScale = new Vector3(1, Container.UtilizationPercentage, 1);
+        return Data.Containers.ContainsKey(c);
     }
 
-    public override void OnAdjacentChanged()
+    public override void InitializeStartingData()
     {
-        this.SimilarAdjacentSinks.Clear();
-
-        foreach(ModuleGameplay m in Adjacent)
+        this.Data = new MultipleResourceModuleData()
         {
-            if (m is Sink)
-            {
-                if ((m as Sink).HasContainerFor(SinkType))
-                {
-                    this.SimilarAdjacentSinks.Add(m as Sink);
-                }
-            }
-        }
+            EnergyHistory = new LocalEnergyHistory(),
+            MatterHistory = new LocalMatterHistory(),
+            ModuleType = GetModuleType(),
+            Containers = GetStartingDataContainers()
+        };
     }
+
+    public abstract ResourceContainerDictionary GetStartingDataContainers();
 }
 
-public abstract class Converter : ModuleGameplay
+public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContainer<SingleResourceModuleData>
+{
+    [SerializeField]
+    private SingleResourceModuleData data;
+    public SingleResourceModuleData Data { get { return data; } set { data = value; } }
+
+    public SpriteRenderer flowAmountRenderer;
+
+    protected Matter ResourceType { get { return this.data.Container == null ? Matter.Unspecified : this.data.Container.MatterType; } }
+
+    public override ResourceContainer Get(Matter c)
+    {
+        if (Data.Container.MatterType == c)
+            return data.Container;
+        else
+            return null;
+    }
+
+    public override bool HasContainerFor(Matter c)
+    {
+        return (Data.Container.MatterType == c);
+    }
+
+    public override void InitializeStartingData()
+    {
+        this.Data = new SingleResourceModuleData()
+        {
+            EnergyHistory = new LocalEnergyHistory(),
+            MatterHistory = new LocalMatterHistory(),
+            ModuleType = GetModuleType(),
+            Container = GetStartingDataContainer()
+        };
+    }
+    
+    public abstract ResourceContainer GetStartingDataContainer();
+}
+
+public abstract class Converter : MultipleResourceModuleGameplay
 {
     protected override void OnStart()
     {
@@ -162,6 +210,7 @@ public abstract class Converter : ModuleGameplay
     public virtual void OnSinkConnected(ISink s) { }
 }
 
+[Serializable]
 public class ResourceContainer
 {
     public ResourceContainer() { }
@@ -173,7 +222,11 @@ public class ResourceContainer
     public Matter MatterType;
 
     public float TotalCapacity = 1f;
+    [SerializeField]
     protected float Amount;
+
+    public float CurrentAmount { get { return Amount; } }
+
     public float UtilizationPercentage
     {
         get
@@ -184,6 +237,7 @@ public class ResourceContainer
             return Amount / TotalCapacity;
         }
     }
+
     public string UtilizationPercentageString()
     {
         return (int)(UtilizationPercentage * 100) + "%";
@@ -246,21 +300,6 @@ public class ResourceContainer
             }
         }
     }
-}
-
-public class SumContainer : ResourceContainer
-{
-    public float LastTickRateOfChange;
-    public float CurrentAmount
-    {
-        get
-        {
-            return Amount;
-        }
-    }
-
-    public SumContainer() { }
-    public SumContainer(float initialAmount): base(initialAmount) { }
 }
 
 public interface IPowerToggleable

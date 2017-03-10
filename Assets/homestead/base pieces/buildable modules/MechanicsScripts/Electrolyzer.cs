@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
+using System;
 
 public class Electrolyzer : Converter, IPowerToggleable
 {
@@ -57,10 +59,10 @@ public class Electrolyzer : Converter, IPowerToggleable
     private void PushOxygenAndHydrogen()
     {
         OxygenOut.Get(Matter.Oxygen).Push(OxygenPerSecond * Time.fixedDeltaTime);
-        MatterHistory.Produce(Matter.Oxygen, OxygenPerSecond * Time.fixedDeltaTime);
+        Data.MatterHistory.Produce(Matter.Oxygen, OxygenPerSecond * Time.fixedDeltaTime);
 
         HydrogenOut.Get(Matter.Hydrogen).Push(HydrogenPerSecond * Time.fixedDeltaTime);
-        MatterHistory.Produce(Matter.Hydrogen, HydrogenPerSecond * Time.fixedDeltaTime);
+        Data.MatterHistory.Produce(Matter.Hydrogen, HydrogenPerSecond * Time.fixedDeltaTime);
     }
 
     private float waterBuffer = 0f;
@@ -70,7 +72,7 @@ public class Electrolyzer : Converter, IPowerToggleable
         {
             float newWater = WaterIn.Get(Matter.Water).Pull(WaterPerSecond * Time.fixedDeltaTime);
             waterBuffer += newWater;
-            MatterHistory.Consume(Matter.Water, newWater);
+            Data.MatterHistory.Consume(Matter.Water, newWater);
 
             float waterThisTick = WaterPerSecond * Time.fixedDeltaTime;
 
@@ -115,15 +117,15 @@ public class Electrolyzer : Converter, IPowerToggleable
             "1 kWh + 1kg H20 => .3kg O2 + .6kg H2",
             "100%",
             "100%",
-            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
+            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = Data.EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = MatterHistory[Matter.Water].Consumed + " kg", Connected = WaterIn != null  }
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Water].Consumed + " kg", Connected = WaterIn != null  }
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Oxygen", Flow = ".3kg kg/d", Amount = MatterHistory[Matter.Oxygen].Produced + " kg", Connected = OxygenOut != null },
-                new ReportIOData() { Name = "Hydrogen", Flow = ".6kg kg/d", Amount = MatterHistory[Matter.Hydrogen].Produced + " kg", Connected = HydrogenOut != null }
+                new ReportIOData() { Name = "Oxygen", Flow = ".3kg kg/d", Amount = Data.MatterHistory[Matter.Oxygen].Produced + " kg", Connected = OxygenOut != null },
+                new ReportIOData() { Name = "Hydrogen", Flow = ".6kg kg/d", Amount = Data.MatterHistory[Matter.Hydrogen].Produced + " kg", Connected = HydrogenOut != null }
             }
             );
     }
@@ -148,5 +150,35 @@ public class Electrolyzer : Converter, IPowerToggleable
     {
         PowerCabinet.mesh = IsOn ? OnMesh : OffMesh;
         PowerCabinet.transform.GetChild(0).name = IsOn ? "on" : "off";
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.WaterElectrolyzer;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary()
+        {
+            {
+                Matter.Water,  new ResourceContainer() {
+                    MatterType = Matter.Water,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Oxygen,  new ResourceContainer() {
+                    MatterType = Matter.Oxygen,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Hydrogen,  new ResourceContainer() {
+                    MatterType = Matter.Hydrogen,
+                    TotalCapacity = 1f
+                }
+            }
+        };
     }
 }

@@ -159,7 +159,9 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         //actually, we _should_ only be able to complete construction when the player
         //is outside the zone looking in, so maybe not
         
-        GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
+        Transform newT = (Transform)GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
+        newT.GetComponent<ModuleGameplay>().InitializeStartingData();
+
         if (ZoneThatPlayerIsStandingIn == this)
         {
             ZoneThatPlayerIsStandingIn = null;

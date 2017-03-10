@@ -101,7 +101,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         {
             float newWater = WaterIn.Get(Matter.Water).Pull(WaterPerSecond * Time.fixedDeltaTime);
             waterBuffer += newWater;
-            MatterHistory.Consume(Matter.Water, newWater);
+            Data.MatterHistory.Consume(Matter.Water, newWater);
 
             float waterThisTick = WaterPerSecond * Time.fixedDeltaTime;
 
@@ -139,14 +139,14 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
             "1 kWh + 2kg H2O => 1kg Biomass + 1kg O2",
             "100%",
             "100%",
-            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
+            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = Data.EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = MatterHistory[Matter.Water].Consumed + " kg", Connected = WaterIn != null },
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Water].Consumed + " kg", Connected = WaterIn != null },
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Biomass", Flow = "1 kg/d", Amount = MatterHistory[Matter.Biomass].Produced + " kg", Connected = true },
+                new ReportIOData() { Name = "Biomass", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Biomass].Produced + " kg", Connected = true },
             }
             );
     }
@@ -219,6 +219,30 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     {
         yield return new WaitForSeconds(1f);
         detachTimer = null;
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.AlgaeTank;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary()
+        {
+            {
+                Matter.Water,  new ResourceContainer() {
+                    MatterType = Matter.Water,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Biomass,  new ResourceContainer() {
+                    MatterType = Matter.Biomass,
+                    TotalCapacity = 1f
+                }
+            },
+        };
     }
 }
 

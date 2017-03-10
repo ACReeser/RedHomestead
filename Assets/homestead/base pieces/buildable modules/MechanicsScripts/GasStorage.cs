@@ -3,8 +3,9 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
 
-public class GasStorage : SingleResourceSink, ICrateSnapper {
+public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
     public MeshFilter MeshFilter;
     public Mesh[] CompoundUVSet = new Mesh[6];
     public Mesh UnspecifiedUV;
@@ -35,16 +36,12 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     protected override void OnStart()
     {
         base.OnStart();
-
-        if (this.SinkType != Matter.Unspecified)
-            _SpecifyCompound(this.SinkType);
-        else
-            SyncMeshToCompoundType();
-
+        
+        SyncObjectsToCompound();
         RefreshPumpState();
     }
 
-    private void SyncMeshToCompoundType()
+    private void SyncObjectsToCompound()
     {
         RefreshMeshToCompound();
         SetValveTagsToCompound(this.transform);
@@ -58,7 +55,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
             //8 == interaction
             if (child.gameObject.layer == 8)
             {
-                child.tag = PlayerInput.GetValveFromCompound(this.SinkType);
+                child.tag = PlayerInput.GetValveFromCompound(this.Data.Container.MatterType);
             }
 
             SetValveTagsToCompound(child);
@@ -67,14 +64,14 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
 
     private void RefreshMeshToCompound()
     {
-        if (this.SinkType == Matter.Unspecified)
+        if (this.ResourceType == Matter.Unspecified)
         {
             this.MeshFilter.mesh = UnspecifiedUV;
             flowAmountRenderer.color = CompoundColors[0];
         }
         else
         {
-            int index = (int)this.SinkType + 6;
+            int index = (int)this.ResourceType + 6;
             if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
             {
                 this.MeshFilter.mesh = CompoundUVSet[index];
@@ -87,9 +84,9 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     void Update()
     {
         float percentage = 0f;
-        if (Container != null)
+        if (this.Data.Container != null)
         {
-            percentage = Container.UtilizationPercentage;
+            percentage = this.Data.Container.UtilizationPercentage;
         }
 
         flowAmountRenderer.transform.localScale = new Vector3(1, percentage, 1);
@@ -97,32 +94,14 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
 
     public void SpecifyCompound(Matter c)
     {
-        if (this.SinkType == Matter.Unspecified)
+        if (this.ResourceType == Matter.Unspecified)
         {
-            _SpecifyCompound(c);
+            this.Data.Container.MatterType = c;
+            SyncObjectsToCompound();
         }
         else
         {
             print("cannot set this storage to compound type "+c.ToString());
-        }
-    }
-
-    private void _SpecifyCompound(Matter c)
-    {
-        this.SinkType = c;
-        SyncMeshToCompoundType();
-
-        if (c == Matter.Unspecified)
-        {
-            this.Container = null;
-        }
-        else
-        {
-            this.Container = new ResourceContainer(StartAmount)
-            {
-                TotalCapacity = Capacity,
-                MatterType = this.SinkType
-            };
         }
     }
 
@@ -133,11 +112,10 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
 
     public override void OnAdjacentChanged()
     {
-        base.OnAdjacentChanged();
-
-        if (Adjacent.Count == 0 && Container != null && Container.UtilizationPercentage <= 0f)
+        if (Adjacent.Count == 0 && this.Data.Container != null && this.Data.Container.UtilizationPercentage <= 0f)
         {
-            _SpecifyCompound(Matter.Unspecified);
+            this.Data.Container.MatterType = Matter.Unspecified;
+            SyncObjectsToCompound();
         }
     }
 
@@ -149,8 +127,8 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
         ResourceComponent res = other.GetComponent<ResourceComponent>();
 
         if (res != null &&
-            this.SinkType != Matter.Unspecified &&
-            this.SinkType == res.Data.ResourceType &&
+            this.ResourceType != Matter.Unspecified &&
+            this.ResourceType == res.Data.ResourceType &&
             capturedResource == null &&
             (res != lastCapturedResource || CrateInterferenceTimer == null))
         {
@@ -216,7 +194,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
                 {
                     capturedResource.Data.Quantity -= PumpPerUpdateInterval;
 
-                    float excess = Container.Push(PumpPerUpdateInterval);
+                    float excess = this.Data.Container.Push(PumpPerUpdateInterval);
 
                     if (excess > 0)
                     {
@@ -227,7 +205,7 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
             }
             else
             {
-                float amount = Container.Pull(PumpPerUpdateInterval);
+                float amount = this.Data.Container.Pull(PumpPerUpdateInterval);
 
                 capturedResource.Data.Quantity += amount;
 
@@ -287,5 +265,23 @@ public class GasStorage : SingleResourceSink, ICrateSnapper {
     {
         yield return new WaitForSeconds(SnapInterferenceTimerSeconds);
         this.CrateInterferenceTimer = null;
+    }
+
+    public override void Tick()
+    {
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.SmallGasTank;
+    }
+
+    public override ResourceContainer GetStartingDataContainer()
+    {
+        return new ResourceContainer()
+        {
+            MatterType = Matter.Unspecified,
+            TotalCapacity = 10f
+        };
     }
 }

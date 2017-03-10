@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Interiors;
+using RedHomestead.Persistence;
 
 [Serializable]
 public struct ReportIORow
@@ -144,7 +145,7 @@ public class GuiBridge : MonoBehaviour {
         ToggleAutosave(false);
         //same as ToggleEscapeMenu(false) basically
         this.EscapeMenuPanel.gameObject.SetActive(false);
-        ShowNews(null);
+        News.Panel.gameObject.SetActive(false);
     }
 
     internal void ToggleAutosave(bool state)
@@ -155,38 +156,45 @@ public class GuiBridge : MonoBehaviour {
     void Start()
     {
         this.RefreshPlanningUI();
+
+        if (Game.Current.IsNewGame)
+        {
+            print("hello new gamer");
+            ShowNews(NewsSource.ToolOpenHint);
+            ShowNews(NewsSource.FOneHint);
+        }
     }
 
     private Coroutine newsTimer;
 
     internal void ShowNews(News news)
     {
-        News.Panel.gameObject.SetActive(news != null);
-
         if (news != null)
         {
-            News.Description.text = news.Text;
-            
-            News.Icon.sprite = news.Icon;
-            News.Icon.gameObject.SetActive(news.Icon != null);
-
-#warning news progressbar unimplemented
-            News.ProgressBar.gameObject.SetActive(false);
-
-            if (newsTimer != null)
-            {
-                StopCoroutine(newsTimer);
-            }
-
-            newsTimer = StartCoroutine(HideNewsAfter(news.Duration));
+            newsTimer = StartCoroutine(StartShowNews(news));
         }
     }
 
-    private IEnumerator HideNewsAfter(float duration)
+    private IEnumerator StartShowNews(News news)
     {
-        yield return new WaitForSeconds(duration / 1000f);
+        if (news.DelayMilliseconds > 0f)
+        {
+            yield return new WaitForSeconds(news.DelayMilliseconds / 1000f);
+        }
 
-        ShowNews(null);
+        print("News: " + news.Text);
+        News.Panel.gameObject.SetActive(true);
+        News.Description.text = news.Text;
+
+        News.Icon.sprite = news.Icon;
+        News.Icon.gameObject.SetActive(news.Icon != null);
+
+#warning news progressbar unimplemented
+        News.ProgressBar.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(news.DurationMilliseconds / 1000f);
+
+        News.Panel.gameObject.SetActive(false);
     }
 
     private void TogglePromptPanel(bool isActive)
