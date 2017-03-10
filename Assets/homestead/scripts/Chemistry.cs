@@ -133,8 +133,13 @@ namespace RedHomestead.Simulation
     [Serializable]
     public class Tracker
     {
-        public float Produced;
-        public float Consumed;
+        //minifying to save us some size on disk and cycles
+        [SerializeField]
+        private float P;
+        public float Produced { get { return P; } set { P = value; } }
+        [SerializeField]
+        private float C;
+        public float Consumed { get { return C; } set { C = value; } }
     }
     
     [Serializable]
