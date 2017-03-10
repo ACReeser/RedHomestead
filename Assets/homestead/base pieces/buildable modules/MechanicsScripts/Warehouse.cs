@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
 
+[Serializable]
+public class WarehouseData: PoweredModuleData { }
+
 public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 {
     private class WarehouseRow
@@ -91,7 +94,7 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
     }
 
     // Use this for initialization
-    void Start() {
+    protected override void OnStart() {
         left = new WarehouseRow(transform.GetChild(0).position);
         middle = new WarehouseRow(transform.GetChild(1).position);
         right = new WarehouseRow(transform.GetChild(2).position);
@@ -154,7 +157,9 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 
     public override void Report() { }
 
-    public override void InitializeStartingData() { }
+    public override void InitializeStartingData() {
+        this.Data = new WarehouseData();
+    }
 
     public override Module GetModuleType()
     {

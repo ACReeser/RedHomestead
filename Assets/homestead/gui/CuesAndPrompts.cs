@@ -6,7 +6,7 @@ public class News
     public string Text { get; set; }
     public float DelayMilliseconds { get; set; }
     public float DurationMilliseconds { get; set; }
-    public Sprite Icon;
+    public MiscIcon Icon;
 }
 
 
@@ -52,23 +52,27 @@ public static class NewsSource
     public static News DroppodHere = new News()
     {
         Text = "Incoming Drop Pod",
-        DurationMilliseconds = 10000
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Rocket
     };
     public static News AlgaeHarvestable = new News()
     {
         Text = "Algae Harvest Ready",
-        DurationMilliseconds = 10000
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Rocket
     };
     public static News ToolOpenHint = new News()
     {
         Text = "[TAB] for tools",
-        DurationMilliseconds = 10000
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
     };
     public static News FOneHint = new News()
     {
         Text = "[F1] for help",
         DelayMilliseconds = 10000,
-        DurationMilliseconds = 10000
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
     };
 }
 

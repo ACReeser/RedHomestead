@@ -60,10 +60,12 @@ public struct ReportFields
     public Sprite Connected, Disconnected;
 }
 
+public enum MiscIcon { Information, Rocket, Pipe, Plug }
+
 [Serializable]
 public struct Icons
 {
-    public Sprite[] ResourceIcons, CompoundIcons;
+    public Sprite[] ResourceIcons, CompoundIcons, MiscIcons;
 }
 
 [Serializable]
@@ -186,8 +188,7 @@ public class GuiBridge : MonoBehaviour {
         News.Panel.gameObject.SetActive(true);
         News.Description.text = news.Text;
 
-        News.Icon.sprite = news.Icon;
-        News.Icon.gameObject.SetActive(news.Icon != null);
+        News.Icon.sprite = this.Icons.MiscIcons[(int)news.Icon];
 
 #warning news progressbar unimplemented
         News.ProgressBar.gameObject.SetActive(false);

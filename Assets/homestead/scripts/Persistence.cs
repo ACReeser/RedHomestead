@@ -190,7 +190,16 @@ namespace RedHomestead.Persistence
         {
             setter(Array.ConvertAll(Transform.FindObjectsOfType<C>(),
                 container =>
-                (D)container.Data.Marshal(container.transform)
+                {
+                    if (container == null)
+                        UnityEngine.Debug.LogWarning("Null container for data type: " + typeof(D).ToString());
+                    else if (container.transform == null)
+                        UnityEngine.Debug.LogWarning("Null transform for data type: " + typeof(D).ToString());
+                    else if (container.Data == null)
+                        UnityEngine.Debug.LogWarning(container.transform.name + " gameobject has no Data of type: " + typeof(D).ToString());
+
+                    return (D)container.Data.Marshal(container.transform);
+                }
             ));
         }
     }
@@ -291,7 +300,11 @@ namespace RedHomestead.Persistence
                     new Base()
                     {
                         Crates = new CrateData[] { },
-                        Habitats = new HabitatData[] { }
+                        Habitats = new HabitatData[] { },
+                        ConstructionZones = new ConstructionData[] { },
+                        ResourcelessData = new PoweredModuleData[] { },
+                        SingleResourceContainerData = new SingleResourceModuleData[] { },
+                        MultiResourceContainerData = new MultipleResourceModuleData[] { },
                     }
                 },
                 Environment = new EnvironmentData()

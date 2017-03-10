@@ -100,7 +100,7 @@ public static class Corporations {
         new Vendor()
         {
             //Specializes in: bio-anything
-            Name = "Utopia Biochemical",
+            Name = "Utopia Biochem",
             AvailableDelivery = DeliveryType.Drop | DeliveryType.Lander | DeliveryType.Rover,
             Location = new LatLong()
             {

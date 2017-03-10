@@ -51,7 +51,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
 
     public abstract float WattRequirementsPerTick { get; }
     protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
-	
+    
     public void LinkToModule(ModuleGameplay adjacent)
     {
         Adjacent.Add(adjacent);
@@ -67,6 +67,13 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
     void Start()
     {
         SoundSource = this.GetComponent<AudioSource>();
+
+        if (Game.Current.IsNewGame)
+        {
+            print(this.GetType().ToString() + " loading up for new game");
+            InitializeStartingData();
+        }
+
         this.OnStart();
     }
 
@@ -83,6 +90,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
 
 public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<PoweredModuleData>
 {
+    [SerializeField]
     private PoweredModuleData data;
     public PoweredModuleData Data { get { return data; } set { data = value; } }
 

@@ -91,12 +91,6 @@ public class Habitat : Converter
     }
     
     void Awake () {
-        if (Game.Current.IsNewGame)
-        {
-            print("Starting up new hab");
-            HabitatData = new HabitatData();
-            InitializeStartingData();
-        }
     }
 	
 	// Update is called once per frame
@@ -151,6 +145,8 @@ public class Habitat : Converter
 
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
+        HabitatData = new HabitatData();
+
         return new ResourceContainerDictionary()
         {
             { Matter.Water, new ResourceContainer(10f)

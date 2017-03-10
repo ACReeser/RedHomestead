@@ -278,10 +278,13 @@ public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
 
     public override ResourceContainer GetStartingDataContainer()
     {
-        return new ResourceContainer()
-        {
-            MatterType = Matter.Unspecified,
-            TotalCapacity = 10f
-        };
+        if (this.Data == null)
+            return new ResourceContainer()
+            {
+                MatterType = Matter.Unspecified,
+                TotalCapacity = 10f
+            };
+        else
+            return this.Data.Container;
     }
 }
