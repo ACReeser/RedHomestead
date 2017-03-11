@@ -29,6 +29,7 @@ namespace RedHomestead.EVA
         public PackResourceData Power;
         public PackResourceData Water;
         public PackResourceData Food;
+        public string CurrentHabitatModuleInstanceID;
 
         protected override void BeforeMarshal(Transform t)
         {

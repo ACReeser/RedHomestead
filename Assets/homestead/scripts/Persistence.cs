@@ -155,6 +155,9 @@ namespace RedHomestead.Persistence
             Habitat matchingHab = allHabs.FirstOrDefault(x => x.Data.ModuleInstanceID == data.ModuleInstanceID);
             matchingHab.Data = data;
             matchingHab.HabitatData = matchingHabData;
+
+            if (matchingHab.OnResourceChange != null)
+                matchingHab.OnResourceChange(Simulation.Matter.Biomass, Simulation.Matter.OrganicMeal, Simulation.Matter.MealShake, Simulation.Matter.RationMeal, Simulation.Matter.MealPowder);
         }
 
         private void DeserializeCrates()
@@ -293,9 +296,14 @@ namespace RedHomestead.Persistence
             return Path.Combine(UnityEngine.Application.persistentDataPath, savesFolderName);
         }
 
-        public static Game LoadGame(string playerName)
+        private static Game _LoadGame(string playerName)
         {
             return JsonUtility.FromJson<Game>(File.ReadAllText(Path.Combine(GetSavesFolderPath(), GetGameFileName(playerName))));
+        }
+
+        public static void LoadGame(string playerName)
+        {
+            Game.Current = _LoadGame(playerName);
         }
 
         public static string[] GetPlayerNames()
@@ -320,6 +328,7 @@ namespace RedHomestead.Persistence
         //todo: pass in perk/equipment selections from screen
         public static void StartNewGame()
         {
+            UnityEngine.Debug.Log("Starting new game");
             Game.Current = new Game()
             {
                 IsNewGame = true,

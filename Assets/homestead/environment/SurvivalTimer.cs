@@ -4,6 +4,7 @@ using System;
 using RedHomestead.Persistence;
 using RedHomestead.Simulation;
 using RedHomestead.EVA;
+using System.Linq;
 
 namespace RedHomestead
 {
@@ -184,6 +185,14 @@ public class SurvivalTimer : MonoBehaviour {
     void Start()
     {
         this.Data = Game.Current.Player.PackData;
+
+        if (!String.IsNullOrEmpty(this.Data.CurrentHabitatModuleInstanceID))
+        {
+            CurrentHabitat = GameObject.FindObjectsOfType<Habitat>().FirstOrDefault(x => x.Data.ModuleInstanceID == Data.CurrentHabitatModuleInstanceID);
+            PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
+            PlayerInput.Instance.SetPressure(true);
+        }
+
         Oxygen.Data = this.Data.Oxygen;
         Power.Data = this.Data.Power;
         Water.Data = this.Data.Water;
@@ -256,7 +265,9 @@ public class SurvivalTimer : MonoBehaviour {
         Power.ResetToMaximum();
 
         CurrentHabitat = hab;
+        Data.CurrentHabitatModuleInstanceID = hab.Data.ModuleInstanceID;
         PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
+        PlayerInput.Instance.SetPressure(true);
     }
 
     internal void FillWater()
@@ -273,5 +284,6 @@ public class SurvivalTimer : MonoBehaviour {
     {
         CurrentHabitat = null;
         PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
+        PlayerInput.Instance.SetPressure(false);
     }
 }

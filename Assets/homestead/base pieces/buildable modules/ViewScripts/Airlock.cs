@@ -49,7 +49,6 @@ public class Airlock : MonoBehaviour {
             SurvivalTimer.Instance.EnterHabitat(attachedHab);
             OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
-            PlayerInput.Instance.SetPressure(true);
             RefreshSealedButtons();
         }
     }
@@ -73,7 +72,6 @@ public class Airlock : MonoBehaviour {
             SurvivalTimer.Instance.BeginEVA();
             OutsideVisuals.ToggleAllParticles(true);
             SetPlayerTerrainCollision(false);
-            PlayerInput.Instance.SetPressure(false);
             RefreshSealedButtons();
         }
     }

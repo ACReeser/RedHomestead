@@ -11,14 +11,14 @@ public class HabitatResourceInterface : HabitatModule
     public string HeaderText = "";
 
     private bool useResource;
-
+    
 	// Use this for initialization
 	protected override void OnStart () {
         if (LinkedHab != null)
         {
+            LinkedHab.OnResourceChange += OnResourceChange;
             //todo- change to event-based
             OnResourceChange();
-            LinkedHab.OnResourceChange += OnResourceChange;
         }
 
         useResource = (DisplayCompound == Matter.Unspecified);

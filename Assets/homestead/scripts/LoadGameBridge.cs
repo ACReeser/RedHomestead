@@ -17,6 +17,7 @@ public class LoadGameBridge : MonoBehaviour {
     {
         if (scene.name == "main")
         {
+            print("loading game from bridge");
             PersistentDataManager.LoadGame(playerNameToLoad);
             SceneManager.sceneLoaded -= OnLevelFinishedLoading;
             GameObject.Destroy(this.gameObject);
