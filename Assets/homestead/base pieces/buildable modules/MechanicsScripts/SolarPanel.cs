@@ -4,9 +4,6 @@ using System;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
-[Serializable]
-public class SolarData : PoweredModuleData { }
-
 public class SolarPanel : PowerSupply
 {
     public float Efficiency = .22f;
@@ -50,9 +47,10 @@ public class SolarPanel : PowerSupply
 
     public override void InitializeStartingData()
     {
-        this.Data = new SolarData()
+        this.Data = new ResourcelessModuleData()
         {
-
+            ModuleInstanceID = Guid.NewGuid().ToString(),
+            ModuleType = GetModuleType()
         };
     }
 

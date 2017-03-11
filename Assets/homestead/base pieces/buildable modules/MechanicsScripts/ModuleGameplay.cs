@@ -5,30 +5,36 @@ using System;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 
-[Serializable]
-public abstract class PoweredModuleData : FacingData
+/// <summary>
+/// Base abstract class for all modules
+/// All modules are assumed to be powered, have a module type, and a ModuleInstanceID
+/// </summary>
+public abstract class ModuleData : FacingData
 { 
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public RedHomestead.Buildings.Module ModuleType;
+    public string ModuleInstanceID;
 }
 
-[Serializable]
-public abstract class ModuleData: PoweredModuleData
+public abstract class ResourcefullModuleData: ModuleData
 {
     public LocalMatterHistory MatterHistory = new LocalMatterHistory();
 }
 
 [Serializable]
+public class ResourcelessModuleData : ModuleData { }
+
+[Serializable]
 public class ResourceContainerDictionary: SerializableDictionary<Matter, ResourceContainer> { }
 
 [Serializable]
-public class MultipleResourceModuleData: ModuleData
+public class MultipleResourceModuleData: ResourcefullModuleData
 {
     public ResourceContainerDictionary Containers;
 }
 
 [Serializable]
-public class SingleResourceModuleData : ModuleData
+public class SingleResourceModuleData : ResourcefullModuleData
 {
     public ResourceContainer Container;
 }
@@ -84,15 +90,19 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
     public abstract void Report();
     public abstract ResourceContainer Get(Matter c);
     public abstract bool HasContainerFor(Matter c);
+    /// <summary>
+    /// Initializes the Data object
+    /// Called in exactly two places: on construction, and on new game start
+    /// </summary>
     public abstract void InitializeStartingData();
     public abstract RedHomestead.Buildings.Module GetModuleType();
 }
 
-public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<PoweredModuleData>
+public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<ResourcelessModuleData>
 {
     [SerializeField]
-    private PoweredModuleData data;
-    public PoweredModuleData Data { get { return data; } set { data = value; } }
+    private ResourcelessModuleData data;
+    public ResourcelessModuleData Data { get { return data; } set { data = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -140,6 +150,7 @@ public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataConta
     {
         this.Data = new MultipleResourceModuleData()
         {
+            ModuleInstanceID = Guid.NewGuid().ToString(),
             EnergyHistory = new LocalEnergyHistory(),
             MatterHistory = new LocalMatterHistory(),
             ModuleType = GetModuleType(),
@@ -177,6 +188,7 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     {
         this.Data = new SingleResourceModuleData()
         {
+            ModuleInstanceID = Guid.NewGuid().ToString(),
             EnergyHistory = new LocalEnergyHistory(),
             MatterHistory = new LocalMatterHistory(),
             ModuleType = GetModuleType(),

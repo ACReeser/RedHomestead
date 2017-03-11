@@ -92,7 +92,7 @@ namespace RedHomestead.Persistence
         //hobbit hole data
         //floorplan data
         //stuff data
-        public PoweredModuleData[] ResourcelessData;
+        public ResourcelessModuleData[] ResourcelessData;
         public MultipleResourceModuleData[] MultiResourceContainerData;
         public SingleResourceModuleData[] SingleResourceContainerData;
         ////pipe data
@@ -114,7 +114,7 @@ namespace RedHomestead.Persistence
             _DestroyCurrent<MultipleResourceModuleGameplay>(typeof(Habitat));
 
             //we have to look at each data to figure out which prefab to use
-            foreach (PoweredModuleData data in ResourcelessData)
+            foreach (ResourcelessModuleData data in ResourcelessData)
             {
                 Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
                 ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
@@ -128,9 +128,16 @@ namespace RedHomestead.Persistence
             }
             foreach (MultipleResourceModuleData data in MultiResourceContainerData)
             {
-                Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
-                MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
-                r.Data = data;
+                if (data.ModuleType == Buildings.Module.Habitat)
+                {
+
+                }
+                else
+                {
+                    Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+                    MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
+                    r.Data = data;
+                }
             }
         }
 
@@ -181,7 +188,7 @@ namespace RedHomestead.Persistence
             //this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
             this._MarshalManyFromScene<ConstructionZone, ConstructionData>((zones) => this.ConstructionZones = zones);
 
-            this._MarshalManyFromScene<ResourcelessGameplay, PoweredModuleData>((modules) => this.ResourcelessData = modules);
+            this._MarshalManyFromScene<ResourcelessGameplay, ResourcelessModuleData>((modules) => this.ResourcelessData = modules);
             this._MarshalManyFromScene<MultipleResourceModuleGameplay, MultipleResourceModuleData>((modules) => this.MultiResourceContainerData = modules);
             this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
         }
@@ -302,7 +309,7 @@ namespace RedHomestead.Persistence
                         Crates = new CrateData[] { },
                         Habitats = new HabitatData[] { },
                         ConstructionZones = new ConstructionData[] { },
-                        ResourcelessData = new PoweredModuleData[] { },
+                        ResourcelessData = new ResourcelessModuleData[] { },
                         SingleResourceContainerData = new SingleResourceModuleData[] { },
                         MultiResourceContainerData = new MultipleResourceModuleData[] { },
                     }

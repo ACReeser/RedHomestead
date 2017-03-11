@@ -165,9 +165,6 @@ public class PlayerInput : MonoBehaviour {
         FPSController.PlaceBootprints = !pressurized;
     }
 
-    //todo: same kind of cache for floorplan
-    private Dictionary<Transform, Transform> FloorplanVisCache = new Dictionary<Transform, Transform>();
-
     private RoverInput DrivingRoverInput;
     private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket;
     private Rigidbody carriedObject;

@@ -89,9 +89,6 @@ public class Habitat : Converter
         if (s.HasContainerFor(Matter.Oxygen))
             OxygenSinks.Add(s);
     }
-    
-    void Awake () {
-    }
 	
 	// Update is called once per frame
 	void Update () {

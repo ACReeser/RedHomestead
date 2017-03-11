@@ -5,9 +5,6 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
 
-[Serializable]
-public class WarehouseData: PoweredModuleData { }
-
 public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 {
     private class WarehouseRow
@@ -158,7 +155,11 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
     public override void Report() { }
 
     public override void InitializeStartingData() {
-        this.Data = new WarehouseData();
+        this.Data = new ResourcelessModuleData()
+        {
+            ModuleInstanceID = Guid.NewGuid().ToString(),
+            ModuleType = GetModuleType()
+        };
     }
 
     public override Module GetModuleType()
