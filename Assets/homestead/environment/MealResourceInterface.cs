@@ -6,7 +6,7 @@ using RedHomestead.Simulation;
 public class MealResourceInterface : HabitatResourceInterface {
     public Transform RationMeals, OrganicMeals, ShakeMeals, ShakePowders;
     
-    protected override void OnResourceChange()
+    protected override void OnResourceChange(params Matter[] changedMatter)
     {
         ShowPantry(RationMeals, LinkedHab.Get(Matter.RationMeal));
         ShowPantry(OrganicMeals, LinkedHab.Get(Matter.OrganicMeal));
@@ -16,9 +16,10 @@ public class MealResourceInterface : HabitatResourceInterface {
 
     private void ShowPantry(Transform visualizationRoot, ResourceContainer sumContainer)
     {
+        float meals = sumContainer.CurrentAmount * sumContainer.MatterType.MealsPerCubicMeter();
         for (int i = 0; i < visualizationRoot.childCount; i++)
         {
-            visualizationRoot.GetChild(i).gameObject.SetActive(sumContainer.CurrentAmount >= i + 1);
+            visualizationRoot.GetChild(i).gameObject.SetActive(meals >= i + 1);
         }
     }
 
@@ -30,21 +31,31 @@ public class MealResourceInterface : HabitatResourceInterface {
         ResourceContainer powderC = LinkedHab.Get(Matter.MealPowder);
         ResourceContainer shakeC = LinkedHab.Get(Matter.MealShake);
 
-        string days = (Math.Truncate(100 * ((bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) / 2f + (powderC.CurrentAmount + shakeC.CurrentAmount) / 4f)) / 100).ToString();
+        float days = (
+            (
+                (
+                    (bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) * Matter.OrganicMeal.MealsPerCubicMeter()
+                ) / 2f
+                +
+                (
+                    (powderC.CurrentAmount + shakeC.CurrentAmount) * Matter.MealShake.MealsPerCubicMeter()
+                ) / 4f
+            )
+        );
 
-        DisplayOut.text = string.Format("Meals: {0} day{9}\nBiomass:    {1}/{2}\nOrganic:  {3}/{4}\nRation:  {10}/{11}\nPowdered: {5}/{6}\nShakes:      {7}/{8}",
+        DisplayOut.text = string.Format("Meals: {0:0.##} day{9}\nBiomass:    {1:0.##}/{2:0.##}\nOrganic:  {3:0.##}/{4:0.##}\nRation:  {10:0.##}/{11:0.##}\nPowdered: {5:0.##}/{6:0.##}\nShakes:      {7:0.##}/{8:0.##}",
             days,    
-            bioC.CurrentAmount,
-            bioC.TotalCapacity,
-            organicC.CurrentAmount,
-            organicC.TotalCapacity,
-            powderC.CurrentAmount,
-            powderC.TotalCapacity,
-            shakeC.CurrentAmount,
-            shakeC.TotalCapacity,
-            (days == "1") ? "" : "s",
-            rationC.CurrentAmount,
-            rationC.TotalCapacity
+            bioC.CurrentAmount * Matter.Biomass.MealsPerCubicMeter(),
+            bioC.TotalCapacity * Matter.Biomass.MealsPerCubicMeter(),
+            organicC.CurrentAmount * Matter.OrganicMeal.MealsPerCubicMeter(),
+            organicC.TotalCapacity * Matter.OrganicMeal.MealsPerCubicMeter(),
+            powderC.CurrentAmount * Matter.MealPowder.MealsPerCubicMeter(),
+            powderC.TotalCapacity * Matter.MealPowder.MealsPerCubicMeter(),
+            shakeC.CurrentAmount * Matter.MealShake.MealsPerCubicMeter(),
+            shakeC.TotalCapacity * Matter.MealShake.MealsPerCubicMeter(),
+            (days == 1) ? "" : "s",
+            rationC.CurrentAmount * Matter.RationMeal.MealsPerCubicMeter(),
+            rationC.TotalCapacity * Matter.RationMeal.MealsPerCubicMeter()
             );
     }
 }

@@ -87,7 +87,7 @@ namespace RedHomestead.Persistence
         public static Base Current;
 
         public CrateData[] Crates;
-        public HabitatData[] Habitats;
+        public HabitatExtraData[] Habitats;
         public ConstructionData[] ConstructionZones;
         //hobbit hole data
         //floorplan data
@@ -112,6 +112,7 @@ namespace RedHomestead.Persistence
             _DestroyCurrent<ResourcelessGameplay>();
             _DestroyCurrent<SingleResourceModuleGameplay>();
             _DestroyCurrent<MultipleResourceModuleGameplay>(typeof(Habitat));
+            Habitat[] allHabs = Transform.FindObjectsOfType<Habitat>();
 
             //we have to look at each data to figure out which prefab to use
             foreach (ResourcelessModuleData data in ResourcelessData)
@@ -130,7 +131,7 @@ namespace RedHomestead.Persistence
             {
                 if (data.ModuleType == Buildings.Module.Habitat)
                 {
-
+                    SyncToHabitat(allHabs, data);
                 }
                 else
                 {
@@ -139,6 +140,21 @@ namespace RedHomestead.Persistence
                     r.Data = data;
                 }
             }
+        }
+
+        /// <summary>
+        /// Given a habitat module data and a list of all inscene habs
+        /// Finds the matching habitat and the matching hab extra data
+        /// And sets both data objects to the habitat script
+        /// </summary>
+        /// <param name="allHabs"></param>
+        /// <param name="data"></param>
+        private void SyncToHabitat(Habitat[] allHabs, MultipleResourceModuleData data)
+        {
+            HabitatExtraData matchingHabData = Habitats.FirstOrDefault(x => x.ModuleInstanceID == data.ModuleInstanceID);
+            Habitat matchingHab = allHabs.FirstOrDefault(x => x.Data.ModuleInstanceID == data.ModuleInstanceID);
+            matchingHab.Data = data;
+            matchingHab.HabitatData = matchingHabData;
         }
 
         private void DeserializeCrates()
@@ -185,12 +201,17 @@ namespace RedHomestead.Persistence
         public void OnBeforeSerialize()
         {
             this._MarshalManyFromScene<ResourceComponent, CrateData>((crates) => this.Crates = crates);
-            //this._MarshalManyFromScene<Habitat, HabitatData>((habitats) => this.Habitats = habitats);
             this._MarshalManyFromScene<ConstructionZone, ConstructionData>((zones) => this.ConstructionZones = zones);
-
             this._MarshalManyFromScene<ResourcelessGameplay, ResourcelessModuleData>((modules) => this.ResourcelessData = modules);
             this._MarshalManyFromScene<MultipleResourceModuleGameplay, MultipleResourceModuleData>((modules) => this.MultiResourceContainerData = modules);
             this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
+
+            this._MarshalHabitats();
+        }
+
+        private void _MarshalHabitats()
+        {
+            this.Habitats = Array.ConvertAll(Transform.FindObjectsOfType<Habitat>(), hab => (HabitatExtraData)hab.HabitatData.Marshal(hab.transform));
         }
 
         private void _MarshalManyFromScene<C, D>(Action<D[]> setter) where C : MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
@@ -307,7 +328,7 @@ namespace RedHomestead.Persistence
                     new Base()
                     {
                         Crates = new CrateData[] { },
-                        Habitats = new HabitatData[] { },
+                        Habitats = new HabitatExtraData[] { },
                         ConstructionZones = new ConstructionData[] { },
                         ResourcelessData = new ResourcelessModuleData[] { },
                         SingleResourceContainerData = new SingleResourceModuleData[] { },

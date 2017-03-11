@@ -11,6 +11,7 @@ using RedHomestead.Persistence;
 /// </summary>
 public abstract class ModuleData : FacingData
 { 
+    [HideInInspector]
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public RedHomestead.Buildings.Module ModuleType;
     public string ModuleInstanceID;
@@ -18,6 +19,7 @@ public abstract class ModuleData : FacingData
 
 public abstract class ResourcefullModuleData: ModuleData
 {
+    [HideInInspector]
     public LocalMatterHistory MatterHistory = new LocalMatterHistory();
 }
 
@@ -54,7 +56,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
             }
         }
     }
-
+    
     public abstract float WattRequirementsPerTick { get; }
     protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
     
@@ -76,11 +78,18 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
 
         if (Game.Current.IsNewGame)
         {
+#if UNITY_EDITOR
             print(this.GetType().ToString() + " loading up for new game");
+#endif
             InitializeStartingData();
         }
 
         this.OnStart();
+    }
+
+    protected virtual string GetModuleInstanceID()
+    {
+        return Guid.NewGuid().ToString();
     }
 
     protected virtual void OnStart() { }
@@ -112,6 +121,16 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     public override bool HasContainerFor(Matter c)
     {
         return false;
+    }
+
+    public override void InitializeStartingData()
+    {
+        this.Data = new ResourcelessModuleData()
+        {
+            ModuleInstanceID = GetModuleInstanceID(),
+            EnergyHistory = new LocalEnergyHistory(),
+            ModuleType = GetModuleType(),
+        };
     }
 }
 
@@ -150,7 +169,7 @@ public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataConta
     {
         this.Data = new MultipleResourceModuleData()
         {
-            ModuleInstanceID = Guid.NewGuid().ToString(),
+            ModuleInstanceID = GetModuleInstanceID(),
             EnergyHistory = new LocalEnergyHistory(),
             MatterHistory = new LocalMatterHistory(),
             ModuleType = GetModuleType(),
@@ -188,7 +207,7 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     {
         this.Data = new SingleResourceModuleData()
         {
-            ModuleInstanceID = Guid.NewGuid().ToString(),
+            ModuleInstanceID = GetModuleInstanceID(),
             EnergyHistory = new LocalEnergyHistory(),
             MatterHistory = new LocalMatterHistory(),
             ModuleType = GetModuleType(),

@@ -764,15 +764,15 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("mealorganic"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealOrganicEatHint, MealType.Organic);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealOrganicEatHint, Matter.OrganicMeal);
                 }
                 else if (hitInfo.collider.CompareTag("mealprepared"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealPreparedEatHint, MealType.Prepared);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealPreparedEatHint, Matter.RationMeal);
                 }
                 else if (hitInfo.collider.CompareTag("mealshake"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealShakeEatHint, MealType.Shake);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealShakeEatHint, Matter.MealShake);
                 }
                 else if (hitInfo.collider.CompareTag("bed"))
                 {
@@ -1089,11 +1089,11 @@ public class PlayerInput : MonoBehaviour {
         return Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask(layerNames), triggerInteraction);
     }
 
-    private PromptInfo OnFoodHover(bool doInteract, PromptInfo eatHint, MealType mealType)
+    private PromptInfo OnFoodHover(Collider collider, bool doInteract, PromptInfo eatHint, Matter mealType)
     {
         if (doInteract)
         {
-            SurvivalTimer.Instance.EatFood(mealType);
+            collider.transform.root.GetComponent<Habitat>().Eat(mealType);
             return null;
         }
         else

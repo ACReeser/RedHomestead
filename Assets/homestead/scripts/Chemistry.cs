@@ -84,6 +84,64 @@ namespace RedHomestead.Simulation
             }
         }
 
+        public static float KgPerMeal(this Matter meal)
+        {
+            float denominator = meal.MealsPerCubicMeter();
+
+            if (denominator != 0)
+            {
+                return meal.Kilograms() / denominator;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public static float MealsPerCubicMeter(this Matter meal, float cubicMeters = 1f)
+        {
+            switch (meal)
+            {
+                case Matter.MealShake:
+                case Matter.MealPowder:
+                    return 36f;
+                case Matter.OrganicMeal:
+                case Matter.RationMeal:
+                case Matter.Biomass:
+                    return 18f;
+                default:
+                    return 0;
+            }
+        }
+
+        public static float CubicMetersPerMeal(this Matter meal)
+        {
+            float denominator = meal.MealsPerCubicMeter();
+
+            if (denominator != 0)
+            {
+                return 1 / denominator;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public static float Calories(this Matter meal)
+        {
+            switch (meal)
+            {
+                case Matter.MealShake:
+                    return 600f;
+                case Matter.OrganicMeal:
+                case Matter.RationMeal:
+                    return 1200f;
+                default:
+                    return 0f;
+            }
+        }
+
         public static float BaseCubicMeters(this Matter r)
         {
             return 1f;

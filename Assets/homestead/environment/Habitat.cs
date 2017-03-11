@@ -9,10 +9,12 @@ using RedHomestead.Buildings;
 public enum HabitatType { LuxuryLander, Burrow } //Lander, Tent
 
 [Serializable]
-public class HabitatData : RedHomesteadData
+public class HabitatExtraData : RedHomesteadData
 {
     public string Name;
     public HabitatType Type;
+    [HideInInspector]
+    public string ModuleInstanceID;
 
     public override void AfterDeserialize(Transform t = null)
     {
@@ -21,6 +23,7 @@ public class HabitatData : RedHomesteadData
 
     protected override void BeforeMarshal(Transform t)
     {
+        this.ModuleInstanceID = t.GetComponent<Habitat>().Data.ModuleInstanceID;
         Name = t.name;
     }
 }
@@ -31,15 +34,10 @@ public class Habitat : Converter
     private const float OxygenPullPerTick = 1f;
     private float _CurrentPowerRequirements = 1f;
 
-    //public override float WattRequirementsPerTick
-    //{
-    //    get
-    //    {
-    //        return _CurrentPowerRequirements;
-    //    }
-    //}
+    internal ResourceChangeHandler OnResourceChange;
+    public delegate void ResourceChangeHandler(params Matter[] type);
     
-    public HabitatData HabitatData;
+    public HabitatExtraData HabitatData;
 
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
@@ -118,6 +116,8 @@ public class Habitat : Converter
         {
             Data.Containers[Matter.Biomass].Pull(1f);
             Data.Containers[Matter.OrganicMeal].Push(1f);
+
+            OnResourceChange(Matter.Biomass, Matter.OrganicMeal);
         }
     }
 
@@ -127,12 +127,22 @@ public class Habitat : Converter
         {
             Data.Containers[Matter.MealPowder].Pull(1f);
             Data.Containers[Matter.MealShake].Push(1f);
+
+            OnResourceChange(Matter.MealPowder, Matter.MealShake);
         }
     }
     
     public override void Report()
     {
         
+    }
+
+    protected override string GetModuleInstanceID()
+    {
+        if (this.Data != null)
+            return this.Data.ModuleInstanceID;
+        else
+            return base.GetModuleInstanceID();
     }
 
     public override Module GetModuleType()
@@ -142,7 +152,7 @@ public class Habitat : Converter
 
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
-        HabitatData = new HabitatData();
+        HabitatData = new HabitatExtraData();
 
         return new ResourceContainerDictionary()
         {
@@ -152,37 +162,44 @@ public class Habitat : Converter
                     TotalCapacity = 20f
                 }
             },
-            { Matter.Oxygen, new ResourceContainer(20f)
+            { Matter.Oxygen, new ResourceContainer(10f)
             {
                 MatterType = Matter.Oxygen,
-                TotalCapacity = 20f
+                TotalCapacity = 10f
             }},
             { Matter.Biomass, new ResourceContainer(0f)
             {
                 MatterType = Matter.Biomass,
-                TotalCapacity = 0
+                TotalCapacity = 1f
             }},
-            { Matter.OrganicMeal, new ResourceContainer(10f)
+            { Matter.OrganicMeal, new ResourceContainer(0f)
             {
                 MatterType = Matter.OrganicMeal,
-                TotalCapacity = 18f
+                TotalCapacity = 1f
             }},
-            { Matter.RationMeal, new ResourceContainer(10f)
+            { Matter.RationMeal, new ResourceContainer(Matter.RationMeal.CubicMetersPerMeal() * 6)
             {
                 MatterType = Matter.RationMeal,
-                TotalCapacity = 18f
+                TotalCapacity = 1f
             }},
-            { Matter.MealPowder, new ResourceContainer(20f)
+            { Matter.MealPowder, new ResourceContainer(Matter.RationMeal.CubicMetersPerMeal() * 12)
             {
                 MatterType = Matter.MealPowder,
-                TotalCapacity = 36f
+                TotalCapacity = 1f
             }},
-            { Matter.MealShake, new ResourceContainer(6f)
+            { Matter.MealShake, new ResourceContainer(0f)
             {
                 MatterType = Matter.MealShake,
-                TotalCapacity = 36f
+                TotalCapacity = 1f
             }},
 
         };
+    }
+
+    internal void Eat(Matter mealType)
+    {
+        Get(mealType).Pull(mealType.CubicMetersPerMeal());
+        SurvivalTimer.Instance.EatFood(mealType);
+        OnResourceChange(mealType);
     }
 }

@@ -18,6 +18,7 @@ public class HabitatResourceInterface : HabitatModule
         {
             //todo- change to event-based
             OnResourceChange();
+            LinkedHab.OnResourceChange += OnResourceChange;
         }
 
         useResource = (DisplayCompound == Matter.Unspecified);
@@ -33,7 +34,7 @@ public class HabitatResourceInterface : HabitatModule
         DisplaySingleContainer();
     }
 
-    protected virtual void OnResourceChange()
+    protected virtual void OnResourceChange(params Matter[] changedMatter)
     {
     }
 

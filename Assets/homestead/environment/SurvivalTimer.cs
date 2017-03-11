@@ -264,30 +264,14 @@ public class SurvivalTimer : MonoBehaviour {
         Water.ResetToMaximum();
     }
 
-    internal void EatFood(MealType meal)
+    internal void EatFood(Matter meal)
     {
-        Food.Increment(meal.GetCalories());
+        Food.Increment(meal.Calories());
     }
 
     internal void BeginEVA()
     {
         CurrentHabitat = null;
         PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
-    }
-}
-
-public enum MealType { Prepared = 0, Organic, Shake }
-
-public static class MealTypeExtensions
-{
-    public static float GetCalories(this MealType meal)
-    {
-        switch (meal)
-        {
-            case MealType.Shake:
-                return 600f;
-            default:
-                return 1200f;
-        }
     }
 }
