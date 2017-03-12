@@ -7,10 +7,7 @@ public class HabitatResourceInterface : HabitatModule
 {
     public TextMesh DisplayOut;
     public Matter DisplayResource;
-    public Matter DisplayCompound = Matter.Unspecified;
     public string HeaderText = "";
-
-    private bool useResource;
     
 	// Use this for initialization
 	protected override void OnStart () {
@@ -20,22 +17,11 @@ public class HabitatResourceInterface : HabitatModule
             //todo- change to event-based
             OnResourceChange();
         }
-
-        useResource = (DisplayCompound == Matter.Unspecified);
 	}
-	
-	void FixedUpdate()
-    {
-        DoDisplay();
-    }
-
-    protected virtual void DoDisplay()
-    {
-        DisplaySingleContainer();
-    }
 
     protected virtual void OnResourceChange(params Matter[] changedMatter)
     {
+        DisplaySingleContainer();
     }
 
     private void DisplaySingleContainer()

@@ -8,10 +8,12 @@ public class MealResourceInterface : HabitatResourceInterface {
     
     protected override void OnResourceChange(params Matter[] changedMatter)
     {
+        print("showing pantry contents");
         ShowPantry(RationMeals, LinkedHab.Get(Matter.RationMeal));
         ShowPantry(OrganicMeals, LinkedHab.Get(Matter.OrganicMeal));
         ShowPantry(ShakePowders, LinkedHab.Get(Matter.MealPowder));
         ShowPantry(ShakeMeals, LinkedHab.Get(Matter.MealShake));
+        Display();
     }
 
     private void ShowPantry(Transform visualizationRoot, ResourceContainer sumContainer)
@@ -23,7 +25,7 @@ public class MealResourceInterface : HabitatResourceInterface {
         }
     }
 
-    protected override void DoDisplay()
+    private void Display()
     {
         ResourceContainer bioC = LinkedHab.Get(Matter.Biomass);
         ResourceContainer organicC = LinkedHab.Get(Matter.OrganicMeal);

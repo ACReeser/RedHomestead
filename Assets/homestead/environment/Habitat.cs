@@ -87,11 +87,6 @@ public class Habitat : Converter
         if (s.HasContainerFor(Matter.Oxygen))
             OxygenSinks.Add(s);
     }
-	
-	// Update is called once per frame
-	//void Update () {
-	
-	//}
 
     public void ImportResource(ResourceComponent r)
     {
@@ -129,7 +124,6 @@ public class Habitat : Converter
 
             OnResourceChange(from, to);
         }
-
     }
     
     public override void Report()

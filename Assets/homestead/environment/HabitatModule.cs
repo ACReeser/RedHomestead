@@ -2,7 +2,7 @@
 using System.Collections;
 
 public abstract class HabitatModule : MonoBehaviour {
-    public Habitat LinkedHab;
+    internal Habitat LinkedHab;
 
     // Use this for initialization
     void Start () {
