@@ -96,33 +96,35 @@ public static class Prompts {
     };
     public static PromptInfo StartGasPipeHint = new PromptInfo()
     {
-        Description = "Select gas valve to connect",
+        Description = "Run new pipeline",
         Key = "E"
     };
     public static PromptInfo EndGasPipeHint = new PromptInfo()
     {
-        Description = "Connect gas pipe",
+        Description = "End pipeline here",
         Key = "E"
     };
     public static News GasPipeCompleted = new News()
     {
         Text = "Gas Pipe connected",
-        DurationMilliseconds = 1500
+        DurationMilliseconds = 1500,
+        Icon = MiscIcon.Pipe
     };
     public static PromptInfo StartPowerPlugHint = new PromptInfo()
     {
-        Description = "Select power socket to connect",
+        Description = "Run new powerline",
         Key = "E"
     };
     public static PromptInfo EndPowerPlugHint = new PromptInfo()
     {
-        Description = "Connect power",
+        Description = "Connect powerline here",
         Key = "E"
     };
     public static News PowerPlugCompleted = new News()
     {
         Text = "Power connected",
-        DurationMilliseconds = 1500
+        DurationMilliseconds = 1500,
+        Icon = MiscIcon.Plug
     };
     public static PromptInfo DriveRoverPrompt = new PromptInfo()
     {
@@ -336,5 +338,15 @@ public static class Prompts {
     {
         Description = "Terminal",
         Key = "E"
+    };
+    internal static PromptInfo StopPowerPlugHint = new PromptInfo()
+    {
+        Description = "Stop running powerline",
+        Key = "Esc"
+    };
+    internal static PromptInfo StopGasPipeHint = new PromptInfo()
+    {
+        Description = "Stop running pipeline",
+        Key = "Esc"
     };
 }

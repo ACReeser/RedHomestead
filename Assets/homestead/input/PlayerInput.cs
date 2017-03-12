@@ -125,7 +125,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Normal, PostIt, Sleep, Terminal }
+    public enum InputMode { Normal, PostIt, Sleep, Terminal, Pipeline, Powerline }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -282,6 +282,12 @@ public class PlayerInput : MonoBehaviour {
             case InputMode.Terminal:
                 HandleTerminalInput(ref newPrompt, doInteract);
                 break;
+            case InputMode.Pipeline:
+                HandlePipelineInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Powerline:
+                HandlePowerlineInput(ref newPrompt, doInteract);
+                break;
         }
 
         //if we were hovering or doing something that has a prompt
@@ -296,6 +302,74 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandlePowerlineInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            selectedPowerSocket = null;
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
+        }
+
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.gameObject.CompareTag("powerplug"))
+                {
+                    newPrompt = OnPowerPlug(newPrompt, doInteract, hitInfo);
+                }
+                else
+                {
+                    newPrompt = Prompts.StopPowerPlugHint;
+                }
+            }
+            else
+            {
+                newPrompt = Prompts.StopPowerPlugHint;
+            }
+        }
+        else
+        {
+            newPrompt = Prompts.StopPowerPlugHint;
+        }
+    }
+
+    private void HandlePipelineInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            selectedGasValve = null;
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
+        }
+
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (IsGasValve(hitInfo.collider))
+                {
+                    newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
+                }
+                else
+                {
+                    newPrompt = Prompts.StopGasPipeHint;
+                }
+            }
+            else
+            {
+                newPrompt = Prompts.StopGasPipeHint;
+            }
+        }
+        else
+        {
+            newPrompt = Prompts.StopGasPipeHint;
+        }
+    }
 
     private void HandleStuffPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
@@ -1127,7 +1201,15 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnPowerPlug(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => selectedPowerSocket = value, PlacePowerPlug, Prompts.PowerPlugPrompts);
+        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => {
+            selectedPowerSocket = value;
+
+            if (value != null)
+            {
+                CurrentMode = InputMode.Powerline;
+                GuiBridge.Instance.RefreshMode();
+            }
+        }, PlacePowerPlug, Prompts.PowerPlugPrompts);
     }
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
@@ -1152,10 +1234,12 @@ public class PlayerInput : MonoBehaviour {
             selectedGasValve = value;
 
             if (value == null)
-                //todo: bug this actually should be nullable
                 selectedCompound = Matter.Unspecified;
-            else 
+            else {
                 selectedCompound = other;
+                CurrentMode = InputMode.Pipeline;
+                GuiBridge.Instance.RefreshMode();
+            }
 
         }, PlaceGasPipe, Prompts.GasPipePrompts);
     }
@@ -1397,6 +1481,9 @@ public class PlayerInput : MonoBehaviour {
         pipeScript.to = collider.transform;
 
         selectedCompound = Matter.Unspecified;
+
+        CurrentMode = InputMode.Normal;
+        GuiBridge.Instance.RefreshMode();
     }
 
     private void PlacePowerPlug(Collider collider)
@@ -1415,6 +1502,9 @@ public class PlayerInput : MonoBehaviour {
                 g1.HasPower = g2.HasPower = true;
             }
         }
+
+        CurrentMode = InputMode.Normal;
+        GuiBridge.Instance.RefreshMode();
     }
 
     private static Transform PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)

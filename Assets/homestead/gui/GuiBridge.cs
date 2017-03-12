@@ -429,8 +429,21 @@ public class GuiBridge : MonoBehaviour {
     /// </summary>
     internal void RefreshMode()
     {
-        this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
-        this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
+        switch (PlayerInput.Instance.CurrentMode)
+        {
+            default:
+                this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
+                this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
+                break;
+            case PlayerInput.InputMode.Pipeline:
+                this.EquippedText.text = "Pipeline";
+                this.EquippedImage.sprite = Icons.MiscIcons[(int)MiscIcon.Pipe];
+                break;
+            case PlayerInput.InputMode.Powerline:
+                this.EquippedText.text = "Powerline";
+                this.EquippedImage.sprite = Icons.MiscIcons[(int)MiscIcon.Plug];
+                break;
+        }
 
         if (PlayerInput.Instance.Loadout.Equipped != RedHomestead.Equipment.Equipment.Blueprints)
         {
