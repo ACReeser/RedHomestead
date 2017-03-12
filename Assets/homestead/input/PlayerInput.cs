@@ -211,18 +211,19 @@ public class PlayerInput : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-
 	    if (Input.GetKeyUp(KeyCode.Escape))
         {
             if (reportMenuOpen)
-                ToggleReport(null);
-            else if (CurrentMode == InputMode.Normal)
             {
-                GuiBridge.Instance.ToggleEscapeMenu();
+                ToggleReport(null);
             }
             else if (playerInVehicle)
             {
                 ToggleVehicle(null);
+            }
+            else if (CurrentMode == InputMode.Normal)
+            {
+                GuiBridge.Instance.ToggleEscapeMenu();
             }
         }
 
@@ -1341,7 +1342,7 @@ public class PlayerInput : MonoBehaviour {
         if (roverInput == null && DrivingRoverInput != null)
         {
             playerIsOnFoot = true;
-            DrivingRoverInput.enabled = false;
+            DrivingRoverInput.AcceptInput = false;
             FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
             FPSController.transform.SetParent(null);
             FPSController.SuspendInput = false;
@@ -1351,7 +1352,7 @@ public class PlayerInput : MonoBehaviour {
             playerIsOnFoot = false;
             //FPSController.enabled = false;
             DrivingRoverInput = roverInput;
-            DrivingRoverInput.enabled = true;
+            DrivingRoverInput.AcceptInput = true;
             FPSController.transform.SetParent(DrivingRoverInput.transform.Find("Enter").transform);
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;

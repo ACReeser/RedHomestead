@@ -67,6 +67,12 @@ namespace RedHomestead.Persistence
     }
 
     [Serializable]
+    public class RoverData : FacingData
+    {
+
+    }
+
+    [Serializable]
     public class EnvironmentData
     {
         internal float CurrentHour = 9;
@@ -95,6 +101,7 @@ namespace RedHomestead.Persistence
         public ResourcelessModuleData[] ResourcelessData;
         public MultipleResourceModuleData[] MultiResourceContainerData;
         public SingleResourceModuleData[] SingleResourceContainerData;
+        public RoverData RoverData;
         ////pipe data
 
         public void OnAfterDeserialize()
@@ -105,6 +112,15 @@ namespace RedHomestead.Persistence
             _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
             UnityEngine.Debug.Log("creating modules");
             DeserializeModules();
+            DeserializeRover();
+        }
+
+        private void DeserializeRover()
+        {
+            Rovers.RoverInput rovIn = GameObject.FindObjectOfType<Rovers.RoverInput>();
+            rovIn.Data = this.RoverData;
+            rovIn.transform.position = this.RoverData.Position;
+            rovIn.transform.rotation = this.RoverData.Rotation;
         }
 
         private void DeserializeModules()
@@ -210,6 +226,10 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
 
             this._MarshalHabitats();
+
+            Rovers.RoverInput rovIn = GameObject.FindObjectOfType<Rovers.RoverInput>();
+            if (rovIn != null)
+                this.RoverData = (RoverData)rovIn.Data.Marshal(rovIn.transform);
         }
 
         private void _MarshalHabitats()
