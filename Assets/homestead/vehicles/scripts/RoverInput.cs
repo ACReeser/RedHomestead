@@ -10,6 +10,7 @@ namespace RedHomestead.Rovers
     public class RoverInput : MonoBehaviour, IDataContainer<RoverData>
     {
         private SixWheelCarController m_Car; // the car controller we want to use
+        private Rigidbody carRigid;
 
         public RoverData data;
         public RoverData Data { get { return data; } set { data = value; } }
@@ -20,6 +21,7 @@ namespace RedHomestead.Rovers
         {
             // get the car controller
             m_Car = GetComponent<SixWheelCarController>();
+            carRigid = GetComponent<Rigidbody>();
         }
 
         private void FixedUpdate()
@@ -30,11 +32,28 @@ namespace RedHomestead.Rovers
                 float h = CrossPlatformInputManager.GetAxis("Horizontal");
                 float v = CrossPlatformInputManager.GetAxis("Vertical");
     #if !MOBILE_INPUT
-                float handbrake = CrossPlatformInputManager.GetAxis("Jump");
-                m_Car.Move(h, v, v, handbrake);
+                float brake = CrossPlatformInputManager.GetAxis("Jump");
+                m_Car.Move(h, v, -brake, 0f);
     #else
                 m_Car.Move(h, v, v, 0f);
     #endif
+            }
+        }
+
+        public void ExitBrake()
+        {
+            StartCoroutine(BrakeABit());
+        }
+
+        private IEnumerator BrakeABit()
+        {
+            float duration = 2f;
+            float time = 0f;
+            while(time < duration)
+            {
+                time += Time.deltaTime;
+                carRigid.velocity = Vector3.zero;
+                yield return null;
             }
         }
     }

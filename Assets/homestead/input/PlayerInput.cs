@@ -1343,8 +1343,10 @@ public class PlayerInput : MonoBehaviour {
         {
             playerIsOnFoot = true;
             DrivingRoverInput.AcceptInput = false;
+            DrivingRoverInput.ExitBrake();
             FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
             FPSController.transform.SetParent(null);
+            FPSController.CharacterController.enabled = true;
             FPSController.SuspendInput = false;
         }
         else //entering vehicle
@@ -1358,6 +1360,7 @@ public class PlayerInput : MonoBehaviour {
             FPSController.transform.localRotation = Quaternion.identity;
             FPSController.InitializeMouseLook();
             FPSController.SuspendInput = true;
+            FPSController.CharacterController.enabled = false;
         }
     }
 

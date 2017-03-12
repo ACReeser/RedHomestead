@@ -58,6 +58,7 @@ public class CustomFPSController : MonoBehaviour
     private const float ladderMoveDuration = .25f;
 
     private CharacterController m_CharacterController;
+    internal CharacterController CharacterController { get { return m_CharacterController; } }
     private CollisionFlags m_CollisionFlags;
     private bool m_PreviouslyGrounded;
     private Vector3 m_OriginalCameraPosition;
@@ -187,10 +188,12 @@ public class CustomFPSController : MonoBehaviour
             }
 
             if (!SuspendInput)
+            {
                 m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
-            ProgressStepCycle(speed);
-            UpdateCameraHeadBob(speed);
+                ProgressStepCycle(speed);
+                UpdateCameraHeadBob(speed);
+            }
         }
 
         //alex
