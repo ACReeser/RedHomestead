@@ -89,9 +89,9 @@ public class Habitat : Converter
     }
 	
 	// Update is called once per frame
-	void Update () {
+	//void Update () {
 	
-	}
+	//}
 
     public void ImportResource(ResourceComponent r)
     {
@@ -112,24 +112,24 @@ public class Habitat : Converter
 
     public void PrepareBiomassToPreparedMeal()
     {
-        if (Data.Containers[Matter.Biomass].CurrentAmount > 0 && Data.Containers[Matter.OrganicMeal].AvailableCapacity >= 1f)
-        {
-            Data.Containers[Matter.Biomass].Pull(1f);
-            Data.Containers[Matter.OrganicMeal].Push(1f);
-
-            OnResourceChange(Matter.Biomass, Matter.OrganicMeal);
-        }
+        ConvertMealMatter(Matter.Biomass, Matter.OrganicMeal);
     }
 
     public void PreparePowderToShake()
     {
-        if (Data.Containers[Matter.MealPowder].CurrentAmount > 0 && Data.Containers[Matter.MealShake].AvailableCapacity >= 1f)
-        {
-            Data.Containers[Matter.MealPowder].Pull(1f);
-            Data.Containers[Matter.MealShake].Push(1f);
+        ConvertMealMatter(Matter.MealPowder, Matter.MealShake);
+    }
 
-            OnResourceChange(Matter.MealPowder, Matter.MealShake);
+    private void ConvertMealMatter(Matter from, Matter to)
+    {
+        if (Data.Containers[from].CurrentAmount >= from.CubicMetersPerMeal()  && Data.Containers[to].AvailableCapacity >= to.CubicMetersPerMeal())
+        {
+            Data.MatterHistory.Consume(from, Data.Containers[from].Pull(from.CubicMetersPerMeal()));
+            Data.MatterHistory.Produce(to, Data.Containers[to].Push(to.CubicMetersPerMeal()));
+
+            OnResourceChange(from, to);
         }
+
     }
     
     public override void Report()
@@ -152,6 +152,7 @@ public class Habitat : Converter
 
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
+        print("Getting new habitat data");
         HabitatData = new HabitatExtraData();
 
         return new ResourceContainerDictionary()
@@ -198,7 +199,7 @@ public class Habitat : Converter
 
     internal void Eat(Matter mealType)
     {
-        Get(mealType).Pull(mealType.CubicMetersPerMeal());
+        Data.MatterHistory.Consume(mealType,  Get(mealType).Pull(mealType.CubicMetersPerMeal()));
         SurvivalTimer.Instance.EatFood(mealType);
         OnResourceChange(mealType);
     }

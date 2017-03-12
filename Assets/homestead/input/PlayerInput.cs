@@ -125,7 +125,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Normal, PostIt, Sleep }
+    public enum InputMode { Normal, PostIt, Sleep, Terminal }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -216,7 +216,7 @@ public class PlayerInput : MonoBehaviour {
         {
             if (reportMenuOpen)
                 ToggleReport(null);
-            else if (playerIsOnFoot)
+            else if (CurrentMode == InputMode.Normal)
             {
                 GuiBridge.Instance.ToggleEscapeMenu();
             }
@@ -245,41 +245,11 @@ public class PlayerInput : MonoBehaviour {
             Loadout.PutEquipmentInSlot(Slot.SecondaryGadget, Equipment.Wheelbarrow);
         }
 #endif
-
-        if (CurrentMode != InputMode.PostIt)
+        if (Input.GetKeyUp(KeyCode.F1))
         {
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                GuiBridge.Instance.ToggleRadialMenu(true);
-                FPSController.FreezeLook = true;
-            }
-            else if (Input.GetKeyUp(KeyCode.Tab))
-            {
-                FPSController.FreezeLook = false;
-                Equip(GuiBridge.Instance.ToggleRadialMenu(false));
-            }
-            else if (GuiBridge.Instance.RadialMenuOpen)
-            {
-                HandleRadialInput();
-            }
-
-            if (Input.GetKeyUp(KeyCode.F))
-            {
-                Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
-            }
-
-            if (Input.GetKeyUp(KeyCode.F1))
-            {
-                GuiBridge.Instance.ToggleHelpMenu();
-            }
-
-            if (Input.GetKeyUp(KeyCode.V))
-            {
-                AlternativeCamera.enabled = !AlternativeCamera.enabled;
-            }
+            GuiBridge.Instance.ToggleHelpMenu();
         }
-
-
+        
         PromptInfo newPrompt = null;
         bool doInteract = Input.GetKeyUp(KeyCode.E);
 
@@ -307,6 +277,9 @@ public class PlayerInput : MonoBehaviour {
                 break;
             case InputMode.Sleep:
                 HandleSleepInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Terminal:
+                HandleTerminalInput(ref newPrompt, doInteract);
                 break;
         }
 
@@ -545,6 +518,30 @@ public class PlayerInput : MonoBehaviour {
     
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            GuiBridge.Instance.ToggleRadialMenu(true);
+            FPSController.FreezeLook = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            FPSController.FreezeLook = false;
+            Equip(GuiBridge.Instance.ToggleRadialMenu(false));
+        }
+        else if (GuiBridge.Instance.RadialMenuOpen)
+        {
+            HandleRadialInput();
+        }
+
+        if (Input.GetKeyUp(KeyCode.F))
+        {
+            Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
+        }
+        if (Input.GetKeyUp(KeyCode.V))
+        {
+            AlternativeCamera.enabled = !AlternativeCamera.enabled;
+        }
+
         RaycastHit hitInfo;
         if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
         {
@@ -773,6 +770,21 @@ public class PlayerInput : MonoBehaviour {
                 else if (hitInfo.collider.CompareTag("mealshake"))
                 {
                     newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealShakeEatHint, Matter.MealShake);
+                }
+                else if (hitInfo.collider.CompareTag("terminal"))
+                {
+                    if (doInteract)
+                    {
+                        CurrentTerminal = hitInfo.collider.GetComponent<Terminal>();
+                        if (CurrentTerminal == null)
+                            CurrentTerminal = hitInfo.collider.transform.parent.GetChild(0).GetChild(0).GetComponent<Terminal>();
+
+                        BeginTerminal();
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.TerminalEnter;
+                    }
                 }
                 else if (hitInfo.collider.CompareTag("bed"))
                 {
@@ -1447,24 +1459,23 @@ public class PlayerInput : MonoBehaviour {
     }
 
     #region sleep mechanic
-    private SleepLerpContext sleerpCtx;
-    private Vector2 lastRadialInputDirection;
+    private PlayerLerpContext lerpCtx;
 
-    private struct SleepLerpContext
+    private struct PlayerLerpContext
     {
-        public Vector3 FromPosition, ToPosition;
-        public Quaternion FromRotation, ToRotation;
+        public Vector3 FromPosition, ToPosition, ExitPosition;
+        public Quaternion FromRotation, ToRotation, ExitRotation;
         public float Duration;
         private float Time;
-        public Transform SleepExit;
         public bool Done;
+        public bool RotateCam;
 
         public void StandUp()
         {
             FromPosition = ToPosition;
             FromRotation = ToRotation;
-            ToPosition = SleepExit.position;
-            ToRotation = SleepExit.rotation;
+            ToPosition = ExitPosition;
+            ToRotation = ExitRotation;
             Done = false;
             Time = 0f;
         }
@@ -1475,37 +1486,80 @@ public class PlayerInput : MonoBehaviour {
             if (this.Time > this.Duration)
             {
                 body.position = ToPosition;
-                //camera.rotation = ToRotation;
+
+                if (RotateCam)
+                    camera.rotation = ToRotation;
+
                 Done = true;
             }
             else
             {
                 body.position = Vector3.Lerp(FromPosition, ToPosition, Time / Duration);
-                //camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
+
+                if (RotateCam)
+                    camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
             }
         }
     }
 
     private void BeginSleep(Transform enterTranform, Transform exitTransform)
     {
-        sleerpCtx = new SleepLerpContext()
+        lerpCtx = new PlayerLerpContext()
         {
             FromPosition = FPSController.transform.position,
             ToPosition = enterTranform.position,
             FromRotation = Camera.main.transform.rotation,
             ToRotation = enterTranform.rotation,
             Duration = .5f,
-            SleepExit = exitTransform
+            ExitPosition = exitTransform.position,
+            ExitRotation = exitTransform.rotation
         };
 
         ToggleSleep(true);
 
-        StartCoroutine(BedLerp());
+        StartCoroutine(LerpTick());
     }
 
     private void ExitSleep()
     {
         ToggleSleep(false);
+    }
+
+    private Terminal CurrentTerminal;
+    private void BeginTerminal()
+    {
+        lerpCtx = new PlayerLerpContext()
+        {
+            FromPosition = FPSController.transform.position,
+            ToPosition = CurrentTerminal.transform.position + CurrentTerminal.transform.TransformDirection(Vector3.back) + (Vector3.down * 0.8f),
+            FromRotation = Camera.main.transform.rotation,
+            ToRotation = Quaternion.LookRotation(CurrentTerminal.transform.TransformDirection(Vector3.forward), CurrentTerminal.transform.TransformDirection(Vector3.up)),
+            Duration = .5f,
+            ExitPosition = FPSController.transform.position,
+            ExitRotation = FPSController.transform.rotation,
+            RotateCam = true
+        };
+
+        ToggleTerminal(true);
+
+        StartCoroutine(LerpTick());
+    }
+
+    private void ExitTerminal()
+    {
+        ToggleTerminal(false);
+    }
+
+    private void ToggleTerminal(bool inTerminal)
+    {
+        this.CurrentMode = inTerminal ? InputMode.Terminal : InputMode.Normal;
+
+        FPSController.SuspendInput = inTerminal;
+        FPSController.FreezeLook = inTerminal;
+        Cursor.visible = inTerminal;
+        Cursor.lockState = CursorLockMode.None;
+
+        this.RefreshEquipmentState();
     }
 
     private void ToggleSleep(bool isAsleep)
@@ -1532,8 +1586,8 @@ public class PlayerInput : MonoBehaviour {
         if (wakeyWakeySignal || doInteract)
         {
             wakeyWakeySignal = false;
-            sleerpCtx.StandUp(); //reset ctx
-            StartCoroutine(BedLerp(true));
+            lerpCtx.StandUp(); //reset ctx
+            StartCoroutine(LerpTick(ExitSleep));
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {
@@ -1545,11 +1599,20 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private IEnumerator BedLerp(bool exitStateOnDone = false)
+    private void HandleTerminalInput(ref PromptInfo newPrompt, bool doInteract)
     {
-        while (!sleerpCtx.Done)
+        if (Input.GetKeyUp(KeyCode.Escape))
         {
-            sleerpCtx.Tick(FPSController.transform, Camera.main.transform);
+            lerpCtx.StandUp(); //reset ctx
+            StartCoroutine(LerpTick(ExitTerminal));
+        }
+    }
+
+    private IEnumerator LerpTick(Action onDone = null)
+    {
+        while (!lerpCtx.Done)
+        {
+            lerpCtx.Tick(FPSController.transform, Camera.main.transform);
 
             //every time we modify the camera via script we need to do this call
             FPSController.InitializeMouseLook();
@@ -1557,11 +1620,9 @@ public class PlayerInput : MonoBehaviour {
             yield return null;
         }
 
-
-
-        if (exitStateOnDone)
+        if (onDone != null)
         {
-            ExitSleep();
+            onDone();
         }
     }
     #endregion

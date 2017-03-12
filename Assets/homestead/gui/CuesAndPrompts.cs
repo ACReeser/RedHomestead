@@ -332,4 +332,9 @@ public static class Prompts {
         Description = "Harvest",
         Key = "E"
     };
+    internal static PromptInfo TerminalEnter = new PromptInfo()
+    {
+        Description = "Terminal",
+        Key = "E"
+    };
 }
