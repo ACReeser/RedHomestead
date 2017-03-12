@@ -16474,9 +16474,7 @@ Transform:
   m_LocalPosition: {x: -0.060984626, y: 3.7780006, z: 2.8439837}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1651726138}
   - {fileID: 417912102}
-  - {fileID: 913528660}
   - {fileID: 665608655}
   - {fileID: 1922695910}
   - {fileID: 1835929752}
@@ -16495,8 +16493,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df1c602047de11749b5129dcfe059225, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PowderVisualization: {fileID: 913528660}
-  BiomassVisualization: {fileID: 1651726138}
+  PowderVisualization: {fileID: 1835929752}
+  BiomassVisualization: {fileID: 1922695910}
   BiomassStorageRoot: {fileID: 665608655}
 --- !u!1 &372782159
 GameObject:
@@ -18315,7 +18313,7 @@ Transform:
   m_LocalScale: {x: 0.21594444, y: 0.45999974, z: 0.081631355}
   m_Children: []
   m_Father: {fileID: 366174600}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &417912103
 MeshRenderer:
@@ -27826,7 +27824,7 @@ Transform:
   - {fileID: 293075250}
   - {fileID: 876692642}
   m_Father: {fileID: 366174600}
-  m_RootOrder: 3
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &666367419
 GameObject:
@@ -40870,7 +40868,7 @@ GameObject:
   - component: {fileID: 913528662}
   - component: {fileID: 913528661}
   m_Layer: 0
-  m_Name: powder
+  m_Name: powderVisualization
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40882,12 +40880,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 913528659}
-  m_LocalRotation: {x: -0.6789518, y: 0.19754615, z: 0.19754604, w: 0.6789518}
-  m_LocalPosition: {x: -0.08697519, y: 0.12100053, z: 0.7869973}
-  m_LocalScale: {x: 0.124999896, y: 0.12499986, z: 0.24999978}
+  m_LocalRotation: {x: -0.6789518, y: 0.1975462, z: 0.19754604, w: 0.6789518}
+  m_LocalPosition: {x: 0.4035814, y: 0.3987344, z: 0.7869971}
+  m_LocalScale: {x: 0.0979196, y: 0.11405513, z: 0.82382864}
   m_Children: []
-  m_Father: {fileID: 366174600}
-  m_RootOrder: 2
+  m_Father: {fileID: 1835929752}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &913528661
 MeshRenderer:
@@ -75622,7 +75620,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1645179890}
-  m_LocalRotation: {x: 0.34467041, y: 0.61032325, z: 0.3531751, w: 0.6196573}
+  m_LocalRotation: {x: 0.34467044, y: 0.6103233, z: 0.35317513, w: 0.61965734}
   m_LocalPosition: {x: -0.08692455, y: -1.3249998, z: 2.7482095}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -76037,11 +76035,11 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1651726137}
-  m_LocalRotation: {x: 0.5679185, y: -0.42127025, z: -0.42127025, w: -0.5679185}
-  m_LocalPosition: {x: 1.239, y: 0.12, z: 0.58}
-  m_LocalScale: {x: 0.2499999, y: 0.12499993, z: 0.24999988}
+  m_LocalRotation: {x: 0.5679185, y: -0.42127022, z: -0.42127022, w: -0.5679185}
+  m_LocalPosition: {x: 0.48901343, y: 0.39543694, z: 0.5799861}
+  m_LocalScale: {x: 0.24999985, y: 0.12499991, z: 0.82382894}
   m_Children: []
-  m_Father: {fileID: 366174600}
+  m_Father: {fileID: 1922695910}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &1651726139
@@ -84667,9 +84665,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.667, y: 0, z: -0}
   m_LocalScale: {x: 1.437194, y: 0.30346087, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 913528660}
   m_Father: {fileID: 366174600}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1835929753
 BoxCollider:
@@ -88842,9 +88841,10 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.75, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 0.30346087, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1651726138}
   m_Father: {fileID: 366174600}
-  m_RootOrder: 4
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &1922695911
 BoxCollider:
