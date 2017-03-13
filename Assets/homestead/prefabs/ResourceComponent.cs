@@ -64,13 +64,21 @@ public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
 
     //}
 
-    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition)
+    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Transform newParent = null)
     {
         PlayerInput.Instance.DropObject();
         this.SnappedTo = snapParent;
         myRigidbody.isKinematic = true;
         myRigidbody.useGravity = false;
-        transform.position = snapPosition;
+        if (newParent != null)
+        {
+            transform.SetParent(newParent);
+            transform.localPosition = snapPosition;
+        }
+        else
+        {
+            transform.position = snapPosition;
+        }
         transform.localRotation = Quaternion.identity;
         PlayerInput.Instance.PlayInteractionClip(snapPosition, MetalBang);
     }
@@ -82,6 +90,8 @@ public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
         this.SnappedTo = null;
         myRigidbody.isKinematic = false;
         myRigidbody.useGravity = true;
+        if (this.transform.parent != null)
+            this.transform.SetParent(null);
         PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
     }
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using UnityObject = UnityEngine.Object;
 using System.Linq;
@@ -583,6 +585,7 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>
     }
 }
 
+#if UNITY_EDITOR
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 {
     private SerializableDictionary<TK, TV> _Dictionary;
@@ -750,7 +753,7 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
         }
     }
 }
-
+#endif
 
 //[CustomPropertyDrawer(typeof(MyDictionary1))]
 //public class MyDictionaryDrawer1 : DictionaryDrawer<string, int> { }

@@ -103,9 +103,9 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
     //}
 
 
-    public void OnChildTriggerEnter(string childName, Collider other, ResourceComponent res)
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider other, ResourceComponent res)
     {
-        WarehouseRow whichRow = GetRow(childName);
+        WarehouseRow whichRow = GetRow(child.name);
         if (whichRow != null && !CrateInterferenceTimers.ContainsKey(whichRow))
         {
             whichRow.Capture(this, res);

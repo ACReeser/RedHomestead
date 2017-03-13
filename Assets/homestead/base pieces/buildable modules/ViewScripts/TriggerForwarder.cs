@@ -3,7 +3,7 @@ using System.Collections;
 
 public interface ITriggerSubscriber
 {
-    void OnChildTriggerEnter(string childName, Collider c, ResourceComponent res);
+    void OnChildTriggerEnter(TriggerForwarder child, Collider c, ResourceComponent res);
 }
 
 //only used for warehouse so far
@@ -21,7 +21,7 @@ public class TriggerForwarder : MonoBehaviour {
 
         if (res != null)
         {
-            this.dad.OnChildTriggerEnter(this.name, other, res);
+            this.dad.OnChildTriggerEnter(this, other, res);
         }
     }
 }

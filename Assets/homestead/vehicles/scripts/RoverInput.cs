@@ -3,11 +3,13 @@ using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
 using RedHomestead.Persistence;
 using System;
+using RedHomestead.Simulation;
+using System.Collections.Generic;
 
 namespace RedHomestead.Rovers
 { 
     [RequireComponent(typeof(SixWheelCarController))]
-    public class RoverInput : MonoBehaviour, IDataContainer<RoverData>
+    public class RoverInput : MonoBehaviour, IDataContainer<RoverData>, ICrateSnapper, ITriggerSubscriber
     {
         private SixWheelCarController m_Car; // the car controller we want to use
         private Rigidbody carRigid;
@@ -55,6 +57,61 @@ namespace RedHomestead.Rovers
                 carRigid.velocity = Vector3.zero;
                 yield return null;
             }
+        }
+
+        public void DetachCrate(ResourceComponent detaching)
+        {
+            for (int i = 0; i < attachedCrates.Length; i++)
+            {
+                if (attachedCrates[i] == detaching)
+                {
+                    attachedCrates[i] = null;
+                    break;
+                }
+            }
+            detachTimer = StartCoroutine(DetachTimer());
+        }
+
+        private IEnumerator DetachTimer()
+        {
+            yield return new WaitForSeconds(1f);
+            detachTimer = null;
+        }
+
+        private ResourceComponent[] attachedCrates = new ResourceComponent[4];
+
+        private Coroutine detachTimer;
+        public void OnChildTriggerEnter(TriggerForwarder child, Collider c, ResourceComponent res)
+        {
+            if (detachTimer == null && res != null)
+            {
+                if (child.name == "LeftLatch")
+                {
+                    int index = 0;
+                    if (attachedCrates[index] != null)
+                        index = 1;
+
+                    attachedCrates[index] = res;
+
+                    SnapToLatch(child, res, (index * -1));
+                }
+                else
+                //if (childName == "RightLatch")
+                {
+                    int index = 2;
+                    if (attachedCrates[index] != null)
+                        index = 3;
+
+                    attachedCrates[index] = res;
+
+                    SnapToLatch(child, res, (index % 2 * -1));
+                }
+            }
+        }
+
+        private void SnapToLatch(TriggerForwarder child, ResourceComponent res, int offset)
+        {
+            res.SnapCrate(this, new Vector3(0, 0, .5f - offset), child.transform);
         }
     }
 }

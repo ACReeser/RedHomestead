@@ -197,7 +197,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     }
 
     private Coroutine detachTimer;
-    public void OnChildTriggerEnter(string childName, Collider c, ResourceComponent res)
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, ResourceComponent res)
     {
         if (detachTimer == null && res != null)
         {
