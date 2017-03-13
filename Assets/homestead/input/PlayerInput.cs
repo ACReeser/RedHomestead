@@ -1340,12 +1340,13 @@ public class PlayerInput : MonoBehaviour {
 
     private void Equip(Slot s)
     {
+        Slot lastActive = Loadout.ActiveSlot;
         if (Loadout[s] == Equipment.Locked)
             s = Slot.Unequipped;
 
         Loadout.ActiveSlot = s;
 
-        RefreshEquipmentState();
+        RefreshEquipmentState(lastActive);
     }
 
     private void CommonInteriorEquipmentState()
@@ -1355,7 +1356,7 @@ public class PlayerInput : MonoBehaviour {
         AlternativeCamera.enabled = true;
     }
 
-    private void RefreshEquipmentState()
+    private void RefreshEquipmentState(Slot? lastActive = null)
     {
         switch (Loadout.Equipped)
         {
@@ -1379,6 +1380,24 @@ public class PlayerInput : MonoBehaviour {
             default:
                 AlternativeCamera.enabled = false;
                 break;
+        }
+
+        //if we're switching from one to another
+        //we want to do cleanup on objects
+        if (lastActive.HasValue && lastActive.Value != Loadout.ActiveSlot)
+        {
+            switch (Loadout[lastActive.Value])
+            {
+                case Equipment.Blueprints:
+                    ModulePlan.Reset();
+                    break;
+                case Equipment.Wheelbarrow:
+                    FloorPlan.Reset();
+                    break;
+                case Equipment.Screwdriver:
+                    StuffPlan.Reset();
+                    break;
+            }
         }
         GuiBridge.Instance.RefreshMode();
     }

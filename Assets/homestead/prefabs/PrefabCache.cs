@@ -137,7 +137,7 @@ public class Planning<T> where T : IConvertible
 
     public void Reset()
     {
-        if (Visualization)
+        if (Visualization != null)
         {
             Visualization.gameObject.SetActive(false);
             Visualization = null;
