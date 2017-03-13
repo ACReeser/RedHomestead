@@ -22,6 +22,14 @@ namespace RedHomestead.Buildings
         AlgaeTank
     }
 
+    /// <summary>
+    /// Top level groups that organize modules
+    /// "None" means no groups should show
+    /// "Undecided" means groups can show but no group is selected
+    /// TODO: remove None and Undecided into their own booleans ShowingGroups and HasGroupSelected
+    /// </summary>
+    public enum ConstructionGroup { Undecided = -1, LifeSupport, Power, Extraction, Refinement, Storage, Other }
+
     public static class Construction
     {
         private const int DefaultBuildTimeSeconds = 10;
@@ -131,6 +139,64 @@ namespace RedHomestead.Buildings
                     new ResourceEntry(4, Matter.Canvas)
                 }
             }
+        };
+
+
+        /// <summary>
+        /// from group to list of modules
+        /// </summary>
+        public static Dictionary<ConstructionGroup, Module[]> ConstructionGroupmap = new Dictionary<ConstructionGroup, Module[]>()
+        {
+            {
+                ConstructionGroup.LifeSupport,
+                new Module[]
+                {
+                    //Module.Habitat,
+                    //Module.Workspace
+                }
+            },
+            {
+                ConstructionGroup.Other,
+                new Module[]
+                {
+                    //Module.Habitat,
+                    //Module.Workspace
+                }
+            },
+            {
+                ConstructionGroup.Power,
+                new Module[]
+                {
+                    Module.SolarPanelSmall
+                }
+            },
+            {
+                ConstructionGroup.Extraction,
+                new Module[]
+                {
+                    Module.SabatierReactor,
+                    Module.AlgaeTank
+                    //Module.OreExtractor,
+                }
+            },
+            {
+                ConstructionGroup.Refinement,
+                new Module[]
+                {
+                    Module.WaterElectrolyzer
+                }
+            },
+            {
+                ConstructionGroup.Storage,
+                new Module[]
+                {
+                    //Module.Splitter,
+                    Module.SmallGasTank,
+                    //Module.LargeGasTank,
+                    Module.SmallWaterTank,
+                    Module.Warehouse
+                }
+            },
         };
     }
 

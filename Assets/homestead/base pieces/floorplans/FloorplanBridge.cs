@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using RedHomestead.Interiors;
 using UnityEngine.UI;
+using RedHomestead.Buildings;
 
 [Serializable]
 public abstract class InteriorFields<G, C> where C : IConvertible
@@ -30,8 +31,14 @@ public abstract class InteriorFields<G, C> where C : IConvertible
         this.GroupDetailPanel.gameObject.SetActive(true);
     }
 
+    protected virtual Transform[] GetPrefabs()
+    {
+        return Prefabs;
+    }
+
     public void FillDetail(G group)
     {
+        Transform[] allPrefabs = GetPrefabs();
         int i = 0;
         C[] children = Map[group];
         foreach (Transform t in this.DetailButtonsParent)
@@ -41,7 +48,7 @@ public abstract class InteriorFields<G, C> where C : IConvertible
                 C child = children[i];
 
                 int index = Convert.ToInt32(child);
-                if (index < Prefabs.Length && Prefabs[index] != null)
+                if (index < allPrefabs.Length && allPrefabs[index] != null)
                 {
                     t.gameObject.SetActive(true);
                     //cheat and set the name to the enum value;
@@ -83,13 +90,29 @@ public class FloorplanPrefabs: InteriorFields<FloorplanGroup, Floorplan>
 [Serializable]
 public class StuffFields: InteriorFields<StuffGroup, Stuff>
 {
-
     protected override Dictionary<StuffGroup, Stuff[]> Map
     {
         get
         {
             return InteriorMap.StuffGroups;
         }
+    }
+}
+
+[Serializable]
+public class ModuleFields : InteriorFields<ConstructionGroup, Module>
+{
+    protected override Dictionary<ConstructionGroup, Module[]> Map
+    {
+        get
+        {
+            return Construction.ConstructionGroupmap;
+        }
+    }
+
+    protected override Transform[] GetPrefabs()
+    {
+        return ModuleBridge.Instance.Modules;
     }
 }
 
@@ -100,12 +123,14 @@ public class FloorplanBridge : MonoBehaviour {
     public Material ConcreteMaterial;
     public FloorplanPrefabs Floorplans;
     public StuffFields StuffFields;
+    public ModuleFields ModuleFields;
 
 	// Use this for initialization
 	void Awake () {
         Instance = this;
         ToggleStuffPanel(false);
         ToggleFloorplanPanel(false);
+        ToggleModulePanel(false);
     }
 
     internal void ToggleStuffPanel(bool state)
@@ -118,6 +143,11 @@ public class FloorplanBridge : MonoBehaviour {
         this.Floorplans.Toggle(state);
     }
 
+    internal void ToggleModulePanel(bool state)
+    {
+        this.ModuleFields.Toggle(state);
+    }
+
     public void SelectStuffGroup(int index)
     {
         this.StuffFields.SelectGroup(index);
@@ -126,6 +156,11 @@ public class FloorplanBridge : MonoBehaviour {
     public void SelectFloorplanGroup(int index)
     {
         this.Floorplans.SelectGroup(index);
+    }
+
+    public void SelectModuleGroup(int index)
+    {
+        this.ModuleFields.SelectGroup(index);
     }
 
     public void SelectStuffToBuild()
@@ -148,6 +183,18 @@ public class FloorplanBridge : MonoBehaviour {
         ToggleFloorplanPanel(false);
 
         PlayerInput.Instance.PlanFloor(whatToBuild);
+        //code smell! :(
+        PlayerInput.Instance.FPSController.FreezeLook = false;
+    }
+
+    public void SelectModuleToBuild()
+    {
+        Module whatToBuild = (Module)Enum.Parse(typeof(Module), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+
+        this.ModuleFields.GroupDetailPanel.gameObject.SetActive(false);
+        ToggleModulePanel(false);
+
+        PlayerInput.Instance.PlanModule(whatToBuild);
         //code smell! :(
         PlayerInput.Instance.FPSController.FreezeLook = false;
     }
@@ -192,5 +239,10 @@ public static class InteriorExtensions
     internal static Sprite Sprite(this Floorplan s)
     {
         return FloorplanBridge.Instance.Floorplans.Sprites[(int)s];
+    }
+
+    internal static Sprite Sprite(this Module m)
+    {
+        return FloorplanBridge.Instance.ModuleFields.Sprites[(int)m];
     }
 }

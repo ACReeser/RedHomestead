@@ -60,7 +60,7 @@ public struct ReportFields
     public Sprite Connected, Disconnected;
 }
 
-public enum MiscIcon { Information, Rocket, Pipe, Plug }
+public enum MiscIcon { Information, Rocket, Pipe, Plug, Harvest }
 
 [Serializable]
 public struct Icons
@@ -298,131 +298,75 @@ public class GuiBridge : MonoBehaviour {
     /// cycle the selected construction group button up or down
     /// </summary>
     /// <param name="delta"></param>
-    public void CycleConstruction(int delta)
-    {
-        //negative means up the list
-        if ((delta < 0 && currentlySelectedGroup > ConstructionGroup.Habitation) ||
-        //positive means down the list
-            (delta > 0 && currentlySelectedGroup < ConstructionGroup.Storage))
-        {
-            ConstructionGroupButtons[(int)currentlySelectedGroup + delta].onClick.Invoke();
-        }
-    }
+    //public void CycleConstruction(int delta)
+    //{
+    //    //negative means up the list
+    //    if ((delta < 0 && currentlySelectedGroup > Construction.ConstructionGroup.Habitation) ||
+    //    //positive means down the list
+    //        (delta > 0 && currentlySelectedGroup < Construction.ConstructionGroup.Storage))
+    //    {
+    //        ConstructionGroupButtons[(int)currentlySelectedGroup + delta].onClick.Invoke();
+    //    }
+    //}
 
-    /// <summary>
-    /// Top level groups that organize modules
-    /// "None" means no groups should show
-    /// "Undecided" means groups can show but no group is selected
-    /// TODO: remove None and Undecided into their own booleans ShowingGroups and HasGroupSelected
-    /// </summary>
-    public enum ConstructionGroup { Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
-
-    /// <summary>
-    /// from group to list of modules
-    /// </summary>
-    public static Dictionary<ConstructionGroup, Module[]> ConstructionGroupmap = new Dictionary<ConstructionGroup, Module[]>()
-    {
-        {
-            ConstructionGroup.Habitation,
-            new Module[]
-            {
-                //Module.Habitat,
-                //Module.Workspace
-            }
-        },
-        {
-            ConstructionGroup.Power,
-            new Module[]
-            {
-                Module.SolarPanelSmall
-            }
-        },
-        {
-            ConstructionGroup.Extraction,
-            new Module[]
-            {
-                Module.SabatierReactor,
-                Module.AlgaeTank
-                //Module.OreExtractor,
-            }
-        },
-        {
-            ConstructionGroup.Refinement,
-            new Module[]
-            {
-                Module.WaterElectrolyzer
-            }
-        },
-        {
-            ConstructionGroup.Storage,
-            new Module[]
-            {
-                //Module.Splitter,
-                Module.SmallGasTank,
-                //Module.LargeGasTank,
-                Module.SmallWaterTank
-            }
-        },
-    };
-    
-    private ConstructionGroup currentlySelectedGroup = ConstructionGroup.Undecided;
+    //private Construction.ConstructionGroup currentlySelectedGroup = Construction.ConstructionGroup.Undecided;
 
     public void RefreshPlanningUI()
     {
-        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior);
-        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior && currentlySelectedGroup != ConstructionGroup.Undecided);
+        //ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior);
+        //ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior && currentlySelectedGroup != Construction.ConstructionGroup.Undecided);
 
         FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior);
         FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior && selectedFloorplanGroup != FloorplanGroup.Undecided);
     }
 
-    public void SetConstructionGroup(int index)
-    {
-        ConstructionGroup newGroup = (ConstructionGroup)index;
-        currentlySelectedGroup = newGroup;
+    //public void SetConstructionGroup(int index)
+    //{
+    //    Construction.ConstructionGroup newGroup = (Construction.ConstructionGroup)index;
+    //    currentlySelectedGroup = newGroup;
 
-        RefreshPlanningUI();
+    //    RefreshPlanningUI();
 
-        if (currentlySelectedGroup == ConstructionGroup.Undecided)
-        {
-            RefreshButtonKeyHints();
-        }
-        else if (index > -1)
-        {
-            Module[] lists = ConstructionGroupmap[currentlySelectedGroup];
-            for (int i = 0; i < this.ConstructionModuleButtons.Length; i++)
-            {
-                if (i < lists.Length)
-                {
-                    this.ConstructionModuleButtons[i].gameObject.SetActive(true);
-                    this.ConstructionModuleButtons[i].transform.GetChild(0).GetComponent<Text>().text = lists[i].ToString();
-                }
-                else
-                {
-                    this.ConstructionModuleButtons[i].gameObject.SetActive(false);
-                }
-            }
+    //    if (currentlySelectedGroup == Construction.ConstructionGroup.Undecided)
+    //    {
+    //        RefreshButtonKeyHints();
+    //    }
+    //    else if (index > -1)
+    //    {
+    //        Module[] lists = ConstructionGroupmap[currentlySelectedGroup];
+    //        for (int i = 0; i < this.ConstructionModuleButtons.Length; i++)
+    //        {
+    //            if (i < lists.Length)
+    //            {
+    //                this.ConstructionModuleButtons[i].gameObject.SetActive(true);
+    //                this.ConstructionModuleButtons[i].transform.GetChild(0).GetComponent<Text>().text = lists[i].ToString();
+    //            }
+    //            else
+    //            {
+    //                this.ConstructionModuleButtons[i].gameObject.SetActive(false);
+    //            }
+    //        }
 
-            RefreshButtonKeyHints();
-        }
-    }
+    //        RefreshButtonKeyHints();
+    //    }
+    //}
 
     /// <summary>
     /// to the left of the group names there are hints for which key to use to move to that group
     /// this shows and hides those
     /// </summary>
-    private void RefreshButtonKeyHints()
-    {
-        for (int i = 0; i < this.ConstructionGroupHints.Length; i++)
-        {
-            bool previousHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup - 1;
-            bool nextHint = currentlySelectedGroup < ConstructionGroup.Storage && i == (int)currentlySelectedGroup + 1;
-            //bool exitHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup;
-            
-            this.ConstructionGroupHints[i].transform.parent.gameObject.SetActive(previousHint || nextHint);
-            this.ConstructionGroupHints[i].text = previousHint ? "Q" : nextHint ? "Z" : "";
-        }
-    }
+    //private void RefreshButtonKeyHints()
+    //{
+    //    for (int i = 0; i < this.ConstructionGroupHints.Length; i++)
+    //    {
+    //        bool previousHint = currentlySelectedGroup > Construction.ConstructionGroup.Habitation && i == (int)currentlySelectedGroup - 1;
+    //        bool nextHint = currentlySelectedGroup < Construction.ConstructionGroup.Storage && i == (int)currentlySelectedGroup + 1;
+    //        //bool exitHint = currentlySelectedGroup > Construction.ConstructionGroup.Habitation && i == (int)currentlySelectedGroup;
+
+    //        this.ConstructionGroupHints[i].transform.parent.gameObject.SetActive(previousHint || nextHint);
+    //        this.ConstructionGroupHints[i].text = previousHint ? "Q" : nextHint ? "Z" : "";
+    //    }
+    //}
 
     /// <summary>
     /// syncs player input mode
@@ -448,7 +392,7 @@ public class GuiBridge : MonoBehaviour {
         if (PlayerInput.Instance.Loadout.Equipped != RedHomestead.Equipment.Equipment.Blueprints)
         {
             this.PlacingPanel.gameObject.SetActive(false);
-            this.SetConstructionGroup(-1);
+            //this.SetConstructionGroup(-1);
         }
 
         this.RefreshPlanningUI();
@@ -458,14 +402,14 @@ public class GuiBridge : MonoBehaviour {
     /// called when a specific module is selected to plan
     /// </summary>
     /// <param name="index"></param>
-    public void SelectConstructionPlan(int index)
-    {
-        Module planModule = ConstructionGroupmap[currentlySelectedGroup][index];
-        this.PlacingPanel.gameObject.SetActive(true);
-        this.PlacingText.text = planModule.ToString();
-        PlayerInput.Instance.PlanModule(planModule);
-        this.RefreshPlanningUI();
-    }
+    //public void SelectConstructionPlan(int index)
+    //{
+    //    Module planModule = ConstructionGroupmap[currentlySelectedGroup][index];
+    //    this.PlacingPanel.gameObject.SetActive(true);
+    //    this.PlacingText.text = planModule.ToString();
+    //    PlayerInput.Instance.PlanModule(planModule);
+    //    this.RefreshPlanningUI();
+    //}
 
     internal void ShowKillMenu()
     {

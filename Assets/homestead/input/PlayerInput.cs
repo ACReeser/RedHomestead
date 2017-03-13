@@ -1116,59 +1116,46 @@ public class PlayerInput : MonoBehaviour {
             {
                 ModulePlan.Rotate(false);
             }
-        } else {
-            if (Input.GetKeyUp(KeyCode.Q))
-            {
-                GuiBridge.Instance.CycleConstruction(-1);
-            }
-            else if (Input.GetKeyUp(KeyCode.Z))
-            {
-                GuiBridge.Instance.CycleConstruction(1);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha1))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(0);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha2))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(1);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha3))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(2);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha4))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(3);
-            }
-        }
 
-        RaycastHit hitInfo;
-        if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
-        {
-            if (hitInfo.collider != null)
+            RaycastHit hitInfo;
+            if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
             {
-                if (hitInfo.collider.CompareTag("terrain"))
+                if (hitInfo.collider != null)
                 {
-                    if (Loadout.Equipped == Equipment.Blueprints && ModulePlan.IsActive)
+                    if (hitInfo.collider.CompareTag("terrain"))
                     {
-                        //TODO: raycast 3 more times (other 3 corners)
-                        //then take the average height between them
-                        //and invalidate the placement if it passes some threshold
-                        ModulePlan.Visualization.position = hitInfo.point;
+                        if (Loadout.Equipped == Equipment.Blueprints && ModulePlan.IsActive)
+                        {
+                            //TODO: raycast 3 more times (other 3 corners)
+                            //then take the average height between them
+                            //and invalidate the placement if it passes some threshold
+                            ModulePlan.Visualization.position = hitInfo.point;
 
-                        if (doInteract)
-                        {
-                            PlaceConstructionHere(hitInfo.point);
-                        }
-                        else
-                        {
-                            newPrompt = Prompts.PlanConstructionZoneHint;
+                            if (doInteract)
+                            {
+                                PlaceConstructionHere(hitInfo.point);
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.PlanConstructionZoneHint;
+                            }
                         }
                     }
                 }
             }
         }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.G))
+            {
+                FloorplanBridge.Instance.ToggleModulePanel(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                FloorplanBridge.Instance.ToggleModulePanel(false);
+                ModulePlan.Reset();
+            }
+        }        
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)
@@ -1379,6 +1366,7 @@ public class PlayerInput : MonoBehaviour {
             case Equipment.Blueprints:
                 AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
                 AlternativeCamera.enabled = true;
+                FloorplanBridge.Instance.ToggleModulePanel(true);
                 break;
             case Equipment.Screwdriver:
                 this.CommonInteriorEquipmentState();

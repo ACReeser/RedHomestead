@@ -59,7 +59,7 @@ public static class NewsSource
     {
         Text = "Algae Harvest Ready",
         DurationMilliseconds = 10000,
-        Icon = MiscIcon.Rocket
+        Icon = MiscIcon.Harvest
     };
     public static News ToolOpenHint = new News()
     {
