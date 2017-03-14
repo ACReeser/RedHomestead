@@ -1082,8 +1082,8 @@ public class PlayerInput : MonoBehaviour {
         {
             //pipe script is on parent object
             Pipe pipeScript = hitInfo.collider.transform.parent.GetComponent<Pipe>();
-            ModuleGameplay from = pipeScript.from.root.GetComponent<ModuleGameplay>();
-            ModuleGameplay to = pipeScript.to.root.GetComponent<ModuleGameplay>();
+            ModuleGameplay from = pipeScript.Data.From;
+            ModuleGameplay to = pipeScript.Data.To;
 
             if (from == null || to == null)
             {
@@ -1462,7 +1462,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceGasPipe(Collider collider)
     {
-        Transform newPipe = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
+        Transform newPipeTransform = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
 
         if (selectedCompound == Matter.Unspecified)
             selectedCompound = GetCompoundFromValve(collider);
@@ -1478,19 +1478,17 @@ public class PlayerInput : MonoBehaviour {
             {
                 (g1 as GasStorage).SpecifyCompound(selectedCompound);
             }
+
             g1.LinkToModule(g2);
             g2.LinkToModule(g1);
+
+            newPipeTransform.GetComponent<Pipe>().AssignConnections(selectedCompound, g1, g2);
+
+            selectedCompound = Matter.Unspecified;
+
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
         }
-
-        Pipe pipeScript = newPipe.GetComponent<Pipe>();
-        pipeScript.PipeType = selectedCompound;
-        pipeScript.from = selectedGasValve.transform;
-        pipeScript.to = collider.transform;
-
-        selectedCompound = Matter.Unspecified;
-
-        CurrentMode = InputMode.Normal;
-        GuiBridge.Instance.RefreshMode();
     }
 
     private void PlacePowerPlug(Collider collider)

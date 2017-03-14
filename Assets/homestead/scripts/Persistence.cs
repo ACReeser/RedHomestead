@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using RedHomestead.EVA;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace RedHomestead.Persistence
 {
@@ -72,6 +73,37 @@ namespace RedHomestead.Persistence
 
     }
 
+    public abstract class ConnectionData : FacingData
+    {
+        [HideInInspector]
+        public Vector3 LocalScale;
+        [NonSerialized]
+        public ModuleGameplay From, To;
+        public string FromModuleInstanceID, ToModuleInstanceID;
+
+        protected override void BeforeMarshal(Transform t = null)
+        {
+            base.BeforeMarshal(t);
+
+            if (From != null)
+                FromModuleInstanceID = From.ModuleInstanceID;
+            if (To != null)
+                ToModuleInstanceID = To.ModuleInstanceID;
+
+            LocalScale = t.localScale;
+        }
+    }
+
+    [Serializable]
+    public class PipelineData : ConnectionData
+    {
+        [HideInInspector]
+        public Simulation.Matter MatterType;
+    }
+
+    [Serializable]
+    public class PowerlineData: ConnectionData { }
+
     [Serializable]
     public class EnvironmentData
     {
@@ -102,6 +134,8 @@ namespace RedHomestead.Persistence
         public MultipleResourceModuleData[] MultiResourceContainerData;
         public SingleResourceModuleData[] SingleResourceContainerData;
         public RoverData RoverData;
+        public PipelineData[] PipeData;
+        public PowerlineData[] PowerData;
         ////pipe data
 
         public void OnAfterDeserialize()
@@ -130,31 +164,45 @@ namespace RedHomestead.Persistence
             _DestroyCurrent<MultipleResourceModuleGameplay>(typeof(Habitat));
             Habitat[] allHabs = Transform.FindObjectsOfType<Habitat>();
 
+            Dictionary<string, ModuleGameplay> moduleMap = new Dictionary<string, ModuleGameplay>();
+
             //we have to look at each data to figure out which prefab to use
             foreach (ResourcelessModuleData data in ResourcelessData)
             {
                 Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
                 ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
                 r.Data = data;
+                moduleMap.Add(data.ModuleInstanceID, r);
             }
             foreach (SingleResourceModuleData data in SingleResourceContainerData)
             {
                 Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
                 SingleResourceModuleGameplay r = t.GetComponent<SingleResourceModuleGameplay>();
                 r.Data = data;
+                moduleMap.Add(data.ModuleInstanceID, r);
             }
             foreach (MultipleResourceModuleData data in MultiResourceContainerData)
             {
                 if (data.ModuleType == Buildings.Module.Habitat)
                 {
-                    SyncToHabitat(allHabs, data);
+                    SyncToHabitat(allHabs, data, moduleMap);
                 }
                 else
                 {
                     Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
                     MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
                     r.Data = data;
+                    moduleMap.Add(data.ModuleInstanceID, r);
                 }
+            }
+            foreach (PipelineData data in PipeData)
+            {
+                Transform t = GameObject.Instantiate(PlayerInput.Instance.gasPipePrefab, data.Position, data.Rotation) as Transform;
+                t.localScale = data.LocalScale;
+
+                Pipe r = t.GetComponent<Pipe>();
+                r.Data = data;
+                r.AssignConnections(data.MatterType, moduleMap[data.FromModuleInstanceID], moduleMap[data.ToModuleInstanceID]);
             }
         }
 
@@ -165,7 +213,7 @@ namespace RedHomestead.Persistence
         /// </summary>
         /// <param name="allHabs"></param>
         /// <param name="data"></param>
-        private void SyncToHabitat(Habitat[] allHabs, MultipleResourceModuleData data)
+        private void SyncToHabitat(Habitat[] allHabs, MultipleResourceModuleData data, Dictionary<string, ModuleGameplay> moduleMap)
         {
             HabitatExtraData matchingHabData = Habitats.FirstOrDefault(x => x.ModuleInstanceID == data.ModuleInstanceID);
             Habitat matchingHab = allHabs.FirstOrDefault(x => x.Data.ModuleInstanceID == data.ModuleInstanceID);
@@ -174,6 +222,8 @@ namespace RedHomestead.Persistence
 
             if (matchingHab.OnResourceChange != null)
                 matchingHab.OnResourceChange(Simulation.Matter.Biomass, Simulation.Matter.OrganicMeal, Simulation.Matter.MealShake, Simulation.Matter.RationMeal, Simulation.Matter.MealPowder);
+
+            moduleMap.Add(data.ModuleInstanceID, matchingHab);
         }
 
         private void DeserializeCrates()
@@ -224,6 +274,7 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<ResourcelessGameplay, ResourcelessModuleData>((modules) => this.ResourcelessData = modules);
             this._MarshalManyFromScene<MultipleResourceModuleGameplay, MultipleResourceModuleData>((modules) => this.MultiResourceContainerData = modules);
             this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
+            this._MarshalManyFromScene<Pipe, PipelineData>((pipes) => this.PipeData = pipes);
 
             this._MarshalHabitats();
 

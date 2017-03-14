@@ -58,6 +58,8 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
     }
     
     public abstract float WattRequirementsPerTick { get; }
+    public abstract string ModuleInstanceID { get; }
+
     protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
     
     public void LinkToModule(ModuleGameplay adjacent)
@@ -112,6 +114,7 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     [SerializeField]
     private ResourcelessModuleData data;
     public ResourcelessModuleData Data { get { return data; } set { data = value; } }
+    public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -151,6 +154,7 @@ public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataConta
     [SerializeField]
     private MultipleResourceModuleData data;
     public MultipleResourceModuleData Data { get { return data; } set { data = value; } }
+    public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -185,6 +189,7 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     [SerializeField]
     private SingleResourceModuleData data;
     public SingleResourceModuleData Data { get { return data; } set { data = value; } }
+    public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
 
     public SpriteRenderer flowAmountRenderer;
 

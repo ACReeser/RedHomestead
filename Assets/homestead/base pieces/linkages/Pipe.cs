@@ -2,33 +2,29 @@
 using System.Collections;
 using System;
 using RedHomestead.Simulation;
+using RedHomestead.Persistence;
 
-public class Pipe : MonoBehaviour {
+public class Pipe : MonoBehaviour, IDataContainer<PipelineData> {
     public MeshFilter MeshFilter, NorthVis, SouthVis;
     public Mesh[] CompoundUVSet = new Mesh[7];
     public Mesh[] NorthFlowVisualizationUVSet = new Mesh[7];
     public Mesh[] SouthFlowVisualizationUVSet = new Mesh[7];
-    private Matter _pipeType = Matter.Unspecified;
-    internal Matter PipeType
-    {
-        get
-        {
-            return _pipeType;
-        }
-        set
-        {
-            SetPipeType(value);
-        }
-    }
 
-    internal Transform from, to;
+    private PipelineData data;
+    public PipelineData Data { get { return data; } set { data = value; } }
 
-    private void SetPipeType(Matter value)
+    internal void AssignConnections(Matter matterType, ModuleGameplay from, ModuleGameplay to)
     {
-        _pipeType = value;
-        if (_pipeType != Matter.Unspecified)
+        Data = new PipelineData()
         {
-            int index = Math.Abs((int)_pipeType);
+            MatterType = matterType,
+            From = from,
+            To = to
+        };
+
+        if (data.MatterType != Matter.Unspecified)
+        {
+            int index = Math.Abs((int)data.MatterType);
 
             if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
             {
