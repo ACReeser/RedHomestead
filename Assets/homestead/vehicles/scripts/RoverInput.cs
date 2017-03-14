@@ -19,7 +19,7 @@ namespace RedHomestead.Rovers
 
         internal bool AcceptInput;
 
-        private void Awake()
+        void Awake()
         {
             // get the car controller
             m_Car = GetComponent<SixWheelCarController>();
@@ -111,7 +111,7 @@ namespace RedHomestead.Rovers
 
         private void SnapToLatch(TriggerForwarder child, ResourceComponent res, int offset)
         {
-            res.SnapCrate(this, new Vector3(0, 0, .5f - offset), child.transform);
+            res.SnapCrate(this, child.transform.position + child.transform.TransformDirection(new Vector3(0, 0, -offset)), carRigid);
         }
     }
 }

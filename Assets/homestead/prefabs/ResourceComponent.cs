@@ -59,27 +59,32 @@ public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
         }
     }
 
-    //void OnCollisionEnter(Collision c)
-    //{
+    private FixedJoint parentJoint;
 
-    //}
-
-    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Transform newParent = null)
+    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null)
     {
         PlayerInput.Instance.DropObject();
         this.SnappedTo = snapParent;
-        myRigidbody.isKinematic = true;
-        myRigidbody.useGravity = false;
-        if (newParent != null)
+        transform.position = snapPosition;
+#warning snap crate rotation does not inherit from trigger forwarder
+        transform.rotation = snapParent.transform.rotation;
+
+        if (jointRigid != null)
         {
-            transform.SetParent(newParent);
-            transform.localPosition = snapPosition;
+            myRigidbody.velocity = Vector3.zero;
+            parentJoint = gameObject.AddComponent<FixedJoint>();
+            parentJoint.connectedBody = jointRigid;
+            parentJoint.breakForce = Mathf.Infinity;
+            parentJoint.breakTorque = Mathf.Infinity;
+            parentJoint.enableCollision = false;
         }
         else
         {
-            transform.position = snapPosition;
+            myRigidbody.useGravity = false;
+            myRigidbody.isKinematic = true;
         }
-        transform.localRotation = Quaternion.identity;
+
+
         PlayerInput.Instance.PlayInteractionClip(snapPosition, MetalBang);
     }
 
@@ -88,10 +93,14 @@ public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
     {
         this.SnappedTo.DetachCrate(this);
         this.SnappedTo = null;
+
+        if (this.parentJoint != null)
+        {
+            GameObject.Destroy(parentJoint);
+        }
+
         myRigidbody.isKinematic = false;
         myRigidbody.useGravity = true;
-        if (this.transform.parent != null)
-            this.transform.SetParent(null);
         PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
     }
 
