@@ -24,6 +24,8 @@ public class SunOrbit : MonoBehaviour {
 
     private const int MaximumSpeedTiers = 6;
     private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;
+    private const float NoonShadowIntensity = .4f;
+    private const float MidnightSolarIntensity = -.4f;
 
     internal bool RunTilMorning { get; private set; }
 
@@ -92,13 +94,15 @@ public class SunOrbit : MonoBehaviour {
 
         if (Game.Current.Environment.CurrentHour > 12f)
         {
-            GlobalLight.intensity = Mathfx.Hermite(1, 0f, percentOfDay);
-            Skybox.SetFloat("_Exposure", Mathfx.Hermite(8, 0f, percentOfDay));
+            GlobalLight.intensity = Mathf.Max(0f, Mathfx.Hermite(1, MidnightSolarIntensity, (percentOfDay - .5f) * 2));
+            GlobalLight.shadowStrength = Mathfx.Hermite(NoonShadowIntensity, 1f, (percentOfDay - .5f) * 2);
+            Skybox.SetFloat("_Exposure", Mathf.Max(0f, Mathfx.Hermite(8, -.2f, percentOfDay)));
         }
         else
         {
-            GlobalLight.intensity = Mathfx.Hermite(0, 1f, percentOfDay);
-            Skybox.SetFloat("_Exposure", Mathfx.Hermite(0f, 8f, percentOfDay));
+            GlobalLight.intensity = Mathf.Max(0f, Mathfx.Hermite(MidnightSolarIntensity, 1f, percentOfDay * 2));
+            GlobalLight.shadowStrength = Mathfx.Hermite(1f, NoonShadowIntensity, percentOfDay * 2);
+            Skybox.SetFloat("_Exposure", Mathf.Max(0f, Mathfx.Hermite(-.2f, 8f, percentOfDay)));
         }
 
         if (Game.Current.Environment.CurrentHour > 6 && !dawnMilestone)
