@@ -1685,6 +1685,10 @@ public class PlayerInput : MonoBehaviour {
         if (wakeyWakeySignal || doInteract)
         {
             wakeyWakeySignal = false;
+
+            if (SunOrbit.Instance.RunTilMorning)
+                SunOrbit.Instance.ToggleSleepUntilMorning(false);
+
             lerpCtx.StandUp(); //reset ctx
             StartCoroutine(LerpTick(ExitSleep));
         }
@@ -1694,7 +1698,14 @@ public class PlayerInput : MonoBehaviour {
         }
         else
         {
-            newPrompt = Prompts.BedExitHint;
+            if (SunOrbit.Instance.RunTilMorning)
+            {
+                newPrompt = Prompts.SleepTilMorningExitHint;
+            }
+            else
+            {
+                newPrompt = Prompts.BedExitHint;
+            }
         }
     }
 
