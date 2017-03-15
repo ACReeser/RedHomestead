@@ -107,9 +107,9 @@ namespace RedHomestead.Persistence
     [Serializable]
     public class EnvironmentData
     {
-        internal float CurrentHour = 9;
-        internal float CurrentMinute = 0;
-        internal int CurrentSol = 1;
+        public float CurrentHour = 9;
+        public float CurrentMinute = 0;
+        public int CurrentSol = 1;
 
         public float HoursSinceSol0
         {

@@ -22,7 +22,7 @@ public class WaterStorage : SingleResourceModuleGameplay {
 
     public override ResourceContainer GetStartingDataContainer()
     {
-        return new ResourceContainer()
+        return new ResourceContainer(0f)
         {
             MatterType = Matter.Water,
             TotalCapacity = 10f,
@@ -44,6 +44,12 @@ public class WaterStorage : SingleResourceModuleGameplay {
     // Update is called once per frame
     void Update()
     {
+        float percentage = 0f;
+        if (this.Data.Container != null)
+        {
+            percentage = this.Data.Container.UtilizationPercentage;
+        }
 
+        flowAmountRenderer.transform.localScale = new Vector3(1, percentage, 1);
     }
 }
