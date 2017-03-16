@@ -215,7 +215,7 @@ public class SunOrbit : MonoBehaviour {
         else
         {
             Time.timeScale = 1f;
-            SpeedTier = 1f;
+            SpeedTier = 1;
             UpdateClockSpeedArrows();
             RunTilMorning = false;
             PlayerInput.Instance.wakeyWakeySignal = true;
