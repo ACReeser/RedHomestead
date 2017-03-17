@@ -1458,6 +1458,7 @@ public class PlayerInput : MonoBehaviour {
         else //entering vehicle
         {
             playerIsOnFoot = false;
+            Headlamp1.enabled = Headlamp2.enabled = false;
             //FPSController.enabled = false;
             DrivingRoverInput = roverInput;
             DrivingRoverInput.AcceptInput = true;
