@@ -184,19 +184,22 @@ public class SurvivalTimer : MonoBehaviour {
 
     void Start()
     {
-        this.Data = Game.Current.Player.PackData;
+        UnityEngine.Debug.Log("Starting up survival timer");
+
+        SetData(Game.Current.Player.PackData);
 
         if (!String.IsNullOrEmpty(this.Data.CurrentHabitatModuleInstanceID))
         {
             CurrentHabitat = GameObject.FindObjectsOfType<Habitat>().FirstOrDefault(x => x.Data.ModuleInstanceID == Data.CurrentHabitatModuleInstanceID);
-            PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
-            PlayerInput.Instance.SetPressure(true);
-        }
+            
+            Airlock[] airlocks = CurrentHabitat.transform.GetComponentsInChildren<Airlock>();
 
-        Oxygen.Data = this.Data.Oxygen;
-        Power.Data = this.Data.Power;
-        Water.Data = this.Data.Water;
-        Food.Data = this.Data.Food;
+            this.skipEnterHabitatPackRefill = true;
+            foreach (Airlock a in airlocks)
+            {
+                a.Pressurize();
+            }
+        }
 
         Oxygen.UpdateUI = GuiBridge.Instance.RefreshOxygenBar;
         Water.UpdateUI = GuiBridge.Instance.RefreshWaterBar;
@@ -259,13 +262,27 @@ public class SurvivalTimer : MonoBehaviour {
         this.enabled = false;
     }
 
+    private bool skipEnterHabitatPackRefill = false;
     internal void EnterHabitat(Habitat hab)
     {
-        Oxygen.ResetToMaximum();
-        Power.ResetToMaximum();
+        if (skipEnterHabitatPackRefill)
+        {
+            this.skipEnterHabitatPackRefill = false;
+        }
+        else
+        {
+            Oxygen.ResetToMaximum();
+            Power.ResetToMaximum();
+        }
 
-        CurrentHabitat = hab;
-        Data.CurrentHabitatModuleInstanceID = hab.Data.ModuleInstanceID;
+        //hab should only be null if the Airlock making this call hasn't finished its Start method
+        //which can happen on game load
+        if (hab != null)
+        {
+            CurrentHabitat = hab;
+            Data.CurrentHabitatModuleInstanceID = hab.Data.ModuleInstanceID;
+        }
+
         PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
         PlayerInput.Instance.SetPressure(true);
     }

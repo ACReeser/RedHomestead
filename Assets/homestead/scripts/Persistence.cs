@@ -326,6 +326,7 @@ namespace RedHomestead.Persistence
         public void OnAfterDeserialize()
         {
             this.Player.AfterDeserialize(PlayerInput.Instance.transform.root);
+            UnityEngine.Debug.Log("Finished deserializing game");
         }
     }
 
