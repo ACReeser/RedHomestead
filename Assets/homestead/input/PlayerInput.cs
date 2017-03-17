@@ -716,6 +716,17 @@ public class PlayerInput : MonoBehaviour {
                             break;
                     }
                 }
+                else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("hatchback"))
+                {
+                    if (doInteract)
+                    {
+                        hitInfo.collider.transform.root.GetComponent<RoverInput>().ToggleHatchback();
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.RoverDoorPrompt;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("cavernwall"))
                 {
                     if (Loadout.Equipped == Equipment.Drill)
@@ -1446,6 +1457,8 @@ public class PlayerInput : MonoBehaviour {
             //FPSController.enabled = false;
             DrivingRoverInput = roverInput;
             DrivingRoverInput.AcceptInput = true;
+            if (DrivingRoverInput.Data.HatchOpen)
+                DrivingRoverInput.ToggleHatchback(false);
             FPSController.transform.SetParent(DrivingRoverInput.transform.Find("Enter").transform);
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;

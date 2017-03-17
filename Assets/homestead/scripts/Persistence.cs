@@ -70,7 +70,7 @@ namespace RedHomestead.Persistence
     [Serializable]
     public class RoverData : FacingData
     {
-
+        public bool HatchOpen;
     }
 
     public abstract class ConnectionData : FacingData

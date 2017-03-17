@@ -131,6 +131,11 @@ public static class Prompts {
         Description = "Drive Rover",
         Key = "E"
     };
+    public static PromptInfo RoverDoorPrompt = new PromptInfo()
+    {
+        Description = "Move Hatch",
+        Key = "E"
+    };
     public static PromptInfo PickupHint = new PromptInfo()
     {
         Description = "Pick up",

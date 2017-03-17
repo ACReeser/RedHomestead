@@ -17,13 +17,54 @@ namespace RedHomestead.Rovers
         public RoverData data;
         public RoverData Data { get { return data; } set { data = value; } }
 
+        public Transform Hatch;
+
         internal bool AcceptInput;
+        private const float HatchOpenDegrees = 142;
+        private const float HatchClosedRotationX = 0f;
+        private const float HatchOpenRotationX = -HatchOpenDegrees;
+        private float HatchDegrees = 0f;
 
         void Awake()
         {
             // get the car controller
             m_Car = GetComponent<SixWheelCarController>();
             carRigid = GetComponent<Rigidbody>();
+        }
+
+        void Start()
+        {
+            HatchDegrees = GetRotationXFromHatchState();
+            Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);
+        }
+
+        private float GetRotationXFromHatchState()
+        {
+            return Data.HatchOpen ? HatchOpenRotationX : HatchClosedRotationX;
+        }
+
+        private Coroutine hatchMovement;
+        internal void ToggleHatchback(bool? state = null)
+        {
+            if (!state.HasValue)
+                state = !Data.HatchOpen;
+
+            Data.HatchOpen = state.Value;
+
+            if (hatchMovement == null)
+                hatchMovement = StartCoroutine(MoveHatch());
+        }
+
+        private IEnumerator MoveHatch()
+        {
+            //we aren't using hatch.rotate here because reading from localRotation.eulerAngles is super unreliable
+            while (HatchDegrees != GetRotationXFromHatchState())
+            {
+                HatchDegrees += Data.HatchOpen ? -1 : 1;
+                Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);
+                yield return null;
+            }
+            hatchMovement = null;
         }
 
         private void FixedUpdate()
@@ -87,9 +128,9 @@ namespace RedHomestead.Rovers
             {
                 if (child.name == "LeftLatch")
                 {
-                    int index = 0;
+                    int index = 1;
                     if (attachedCrates[index] != null)
-                        index = 1;
+                        index = 0;
 
                     attachedCrates[index] = res;
 
@@ -98,9 +139,9 @@ namespace RedHomestead.Rovers
                 else
                 //if (childName == "RightLatch")
                 {
-                    int index = 2;
+                    int index = 3;
                     if (attachedCrates[index] != null)
-                        index = 3;
+                        index = 2;
 
                     attachedCrates[index] = res;
 
