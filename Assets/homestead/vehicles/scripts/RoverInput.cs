@@ -18,6 +18,10 @@ namespace RedHomestead.Rovers
         public RoverData Data { get { return data; } set { data = value; } }
 
         public Transform Hatch;
+        public Transform[] CameraMounts;
+        public Camera RoverCam;
+        public TextMesh roverCamTextMesh;
+        private int cameraMountIndex = 0;
 
         internal bool AcceptInput;
         private const float HatchOpenDegrees = 142;
@@ -53,6 +57,18 @@ namespace RedHomestead.Rovers
 
             if (hatchMovement == null)
                 hatchMovement = StartCoroutine(MoveHatch());
+        }
+
+        internal void ChangeCameraMount()
+        {
+            cameraMountIndex++;
+            if (cameraMountIndex > CameraMounts.Length - 1)
+                cameraMountIndex = 0;
+
+            RoverCam.transform.SetParent(CameraMounts[cameraMountIndex]);
+            RoverCam.transform.localPosition = Vector3.zero;
+            RoverCam.transform.localRotation = Quaternion.identity;
+            roverCamTextMesh.text = CameraMounts[cameraMountIndex].name;
         }
 
         private IEnumerator MoveHatch()
@@ -134,7 +150,7 @@ namespace RedHomestead.Rovers
 
                     attachedCrates[index] = res;
 
-                    SnapToLatch(child, res, (index * -1));
+                    SnapToLatch(child, res, (index * -1)+.5f);
                 }
                 else
                 //if (childName == "RightLatch")
@@ -145,12 +161,12 @@ namespace RedHomestead.Rovers
 
                     attachedCrates[index] = res;
 
-                    SnapToLatch(child, res, (index % 2 * -1));
+                    SnapToLatch(child, res, (index % 2 * -1)+.5f);
                 }
             }
         }
 
-        private void SnapToLatch(TriggerForwarder child, ResourceComponent res, int offset)
+        private void SnapToLatch(TriggerForwarder child, ResourceComponent res, float offset)
         {
             res.SnapCrate(this, child.transform.position + child.transform.TransformDirection(new Vector3(0, 0, -offset)), carRigid);
         }

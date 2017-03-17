@@ -175,7 +175,7 @@ public class PlayerInput : MonoBehaviour {
     private bool playerIsOnFoot = true;
     private bool reportMenuOpen = false;
 
-    private bool playerInVehicle
+    private bool playerIsInVehicle
     {
         get
         {
@@ -217,7 +217,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 ToggleReport(null);
             }
-            else if (playerInVehicle)
+            else if (playerIsInVehicle)
             {
                 ToggleVehicle(null);
             }
@@ -615,6 +615,10 @@ public class PlayerInput : MonoBehaviour {
         if (Input.GetKeyUp(KeyCode.V))
         {
             AlternativeCamera.enabled = !AlternativeCamera.enabled;
+        }
+        if (playerIsInVehicle && Input.GetKeyUp(KeyCode.C))
+        {
+            DrivingRoverInput.ChangeCameraMount();
         }
 
         RaycastHit hitInfo;
