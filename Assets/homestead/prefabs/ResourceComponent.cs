@@ -11,31 +11,18 @@ public class CrateData : FacingData
     public float Quantity = 1;
 }
 
-public interface IMovableSnappable
-{
-    ICrateSnapper SnappedTo { get; }
-    void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null);
-    void UnsnapCrate();
-    string GetText();
-}
-
 [RequireComponent(typeof(Rigidbody))]
-public class ResourceComponent : MonoBehaviour, IMovableSnappable, IDataContainer<CrateData> {
+public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
     public CrateData data;
     public CrateData Data {
         get { return data;  }
         set { data = value; }
     }
 
-    public AudioClip MetalBang;
-    public ICrateSnapper SnappedTo { get; private set; }
-
     public Mesh[] ResourceLabelMeshes, CompoundLabelMeshes;
     public MeshFilter LabelMeshFilter;
 
-    private Rigidbody myRigidbody;
     private Collider myCollider;
-
     //todo: could be CurrentConstructionZone reference instead
     internal bool IsInConstructionZone = false;
     internal bool IsOutsideConstructionZone
@@ -49,7 +36,6 @@ public class ResourceComponent : MonoBehaviour, IMovableSnappable, IDataContaine
 
     void Start()
     {
-        myRigidbody = GetComponent<Rigidbody>();
         myCollider = GetComponent<Collider>();
         RefreshLabel();
     }
@@ -67,52 +53,7 @@ public class ResourceComponent : MonoBehaviour, IMovableSnappable, IDataContaine
         }
     }
 
-    private FixedJoint parentJoint;
-
-    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null)
-    {
-        PlayerInput.Instance.DropObject();
-        this.SnappedTo = snapParent;
-        transform.position = snapPosition;
-#warning snap crate rotation does not inherit from trigger forwarder
-        transform.rotation = snapParent.transform.rotation;
-
-        if (jointRigid != null)
-        {
-            myRigidbody.velocity = Vector3.zero;
-            parentJoint = gameObject.AddComponent<FixedJoint>();
-            parentJoint.connectedBody = jointRigid;
-            parentJoint.breakForce = Mathf.Infinity;
-            parentJoint.breakTorque = Mathf.Infinity;
-            parentJoint.enableCollision = false;
-        }
-        else
-        {
-            myRigidbody.useGravity = false;
-            myRigidbody.isKinematic = true;
-        }
-
-
-        PlayerInput.Instance.PlayInteractionClip(snapPosition, MetalBang);
-    }
-
-    //called in pick up object
-    public void UnsnapCrate()
-    {
-        this.SnappedTo.DetachCrate(this);
-        this.SnappedTo = null;
-
-        if (this.parentJoint != null)
-        {
-            GameObject.Destroy(parentJoint);
-        }
-
-        myRigidbody.isKinematic = false;
-        myRigidbody.useGravity = true;
-        PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
-    }
-
-    public string GetText()
+    public override string GetText()
     {
         return this.Data.ResourceType.ToString() + String.Format(" {0:0.##}kg", this.Data.Quantity * this.Data.ResourceType.Kilograms());
     }

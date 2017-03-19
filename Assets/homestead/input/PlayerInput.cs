@@ -959,6 +959,15 @@ public class PlayerInput : MonoBehaviour {
                             }
                         }
                     }
+                    else
+                    {
+                        IceDrill drill = hitInfo.collider.transform.root.GetComponent<IceDrill>();
+
+                        if (drill != null)
+                        {
+                            drill.ToggleDrilling();
+                        }
+                    }
 
                 }
                 else if (hitInfo.collider.CompareTag("powerSwitch"))

@@ -10,24 +10,15 @@ public class IceDrillData: FacingData
 
 }
 
-public class IceDrill : MonoBehaviour, IMovableSnappable {
-    public ICrateSnapper SnappedTo { get; }
+public class IceDrill : MovableSnappable {
     public Transform Drill;
     public Transform OnOffHandle;
     public bool Drilling;
 
     private const float DrillDownLocalY = -.709f;
-    public string GetText()
+    public override string GetText()
     {
         return "Ice Drill";
-    }
-
-    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null)
-    {
-    }
-
-    public void UnsnapCrate()
-    {
     }
 
     // Use this for initialization
@@ -43,7 +34,13 @@ public class IceDrill : MonoBehaviour, IMovableSnappable {
     public void ToggleDrilling()
     {
         Drilling = !Drilling;
+        RefreshHandle();
         StartCoroutine(MoveDrill());
+    }
+
+    private void RefreshHandle()
+    {
+        OnOffHandle.rotation = Quaternion.Euler(0, Drilling ? -180 : -90, 0);
     }
 
     private IEnumerator MoveDrill()
