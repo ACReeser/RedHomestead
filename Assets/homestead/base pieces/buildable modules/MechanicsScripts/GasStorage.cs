@@ -253,7 +253,7 @@ public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
         }
     }
 
-    public void DetachCrate(ResourceComponent detaching)
+    public void DetachCrate(IMovableSnappable detaching)
     {
         this.lastCapturedResource = this.capturedResource;
         this.capturedResource = null;

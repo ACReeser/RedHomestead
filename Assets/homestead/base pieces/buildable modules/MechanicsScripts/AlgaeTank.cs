@@ -209,7 +209,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         }
     }
 
-    public void DetachCrate(ResourceComponent detaching)
+    public void DetachCrate(IMovableSnappable detaching)
     {
         capturedResource = null;
         detachTimer = StartCoroutine(DetachTimer());

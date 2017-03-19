@@ -127,15 +127,15 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
         return null;
     }
 
-    public void DetachCrate(ResourceComponent detaching)
+    public void DetachCrate(IMovableSnappable detaching)
     {
         WarehouseRow wasAttachedTo = null;
         //we don't know which row we are detaching from! so...
         //we have to search them all possibly
         //short circuit hack = if one of them returns true, the remaining calls will not be made
-        if(this.left.Release(detaching, out wasAttachedTo) || 
-           this.middle.Release(detaching, out wasAttachedTo) || 
-           this.right.Release(detaching, out wasAttachedTo))
+        if(this.left.Release(detaching as ResourceComponent, out wasAttachedTo) || 
+           this.middle.Release(detaching as ResourceComponent, out wasAttachedTo) || 
+           this.right.Release(detaching as ResourceComponent, out wasAttachedTo))
         {
             this.CrateInterferenceTimers.Add(wasAttachedTo, StartCoroutine(CrateInterferenceCountdown(wasAttachedTo)));
         }

@@ -116,7 +116,7 @@ namespace RedHomestead.Rovers
             }
         }
 
-        public void DetachCrate(ResourceComponent detaching)
+        public void DetachCrate(IMovableSnappable detaching)
         {
             for (int i = 0; i < attachedCrates.Length; i++)
             {
