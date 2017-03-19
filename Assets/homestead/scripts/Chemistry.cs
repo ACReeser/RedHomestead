@@ -186,6 +186,17 @@ namespace RedHomestead.Simulation
                     return false;
             }
         }
+
+        public static bool IsTankVessel(this Matter r)
+        {
+            switch (r)
+            {
+                case Matter.Water:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 
     [Serializable]

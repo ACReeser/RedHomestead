@@ -15,7 +15,7 @@ public class EconomyManager : MonoBehaviour
     public LandingZone LandingZone;
 
 #warning todo: make crate/vessel the same prefab, just swap out meshes
-    public Transform ResourceCratePrefab, ResourceVesselPrefab;
+    public Transform ResourceCratePrefab, ResourceVesselPrefab, ResourceTankPrefab;
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
 
@@ -122,6 +122,10 @@ public class EconomyManager : MonoBehaviour
         if (m.IsPressureVessel())
         {
             return ResourceVesselPrefab;
+        }
+        else if (m.IsTankVessel())
+        {
+            return ResourceTankPrefab;
         }
         else
         {

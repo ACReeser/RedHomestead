@@ -11,8 +11,16 @@ public class CrateData : FacingData
     public float Quantity = 1;
 }
 
+public interface IMovableSnappable
+{
+    ICrateSnapper SnappedTo { get; }
+    void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null);
+    void UnsnapCrate();
+    string GetText();
+}
+
 [RequireComponent(typeof(Rigidbody))]
-public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
+public class ResourceComponent : MonoBehaviour, IMovableSnappable, IDataContainer<CrateData> {
     public CrateData data;
     public CrateData Data {
         get { return data;  }
@@ -20,7 +28,7 @@ public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
     }
 
     public AudioClip MetalBang;
-    public ICrateSnapper SnappedTo;
+    public ICrateSnapper SnappedTo { get; private set; }
 
     public Mesh[] ResourceLabelMeshes, CompoundLabelMeshes;
     public MeshFilter LabelMeshFilter;
@@ -104,7 +112,7 @@ public class ResourceComponent : MonoBehaviour, IDataContainer<CrateData> {
         PlayerInput.Instance.PlayInteractionClip(transform.position, MetalBang);
     }
 
-    internal string GetText()
+    public string GetText()
     {
         return this.Data.ResourceType.ToString() + String.Format(" {0:0.##}kg", this.Data.Quantity * this.Data.ResourceType.Kilograms());
     }

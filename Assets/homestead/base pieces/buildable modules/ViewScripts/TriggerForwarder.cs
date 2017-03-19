@@ -3,7 +3,7 @@ using System.Collections;
 
 public interface ITriggerSubscriber
 {
-    void OnChildTriggerEnter(TriggerForwarder child, Collider c, ResourceComponent res);
+    void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res);
 }
 
 //only used for warehouse so far
@@ -17,7 +17,7 @@ public class TriggerForwarder : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        ResourceComponent res = other.GetComponent<ResourceComponent>();
+        IMovableSnappable res = other.GetComponent<IMovableSnappable>();
 
         if (res != null)
         {

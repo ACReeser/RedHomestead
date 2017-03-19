@@ -628,7 +628,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 if (hitInfo.collider.gameObject.CompareTag("movable"))
                 {
-                    ResourceComponent res = hitInfo.collider.GetComponent<ResourceComponent>();
+                    IMovableSnappable res = hitInfo.collider.GetComponent<IMovableSnappable>();
 
                     if (carriedObject == null)
                     {
@@ -1417,7 +1417,7 @@ public class PlayerInput : MonoBehaviour {
         GuiBridge.Instance.RefreshMode();
     }
 
-    internal void PickUpObject(Rigidbody rigid, ResourceComponent res)
+    internal void PickUpObject(Rigidbody rigid, IMovableSnappable res)
     {
         if (res != null && res.SnappedTo != null)
         {

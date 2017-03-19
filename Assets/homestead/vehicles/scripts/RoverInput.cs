@@ -135,10 +135,10 @@ namespace RedHomestead.Rovers
             detachTimer = null;
         }
 
-        private ResourceComponent[] attachedCrates = new ResourceComponent[4];
+        private IMovableSnappable[] attachedCrates = new IMovableSnappable[4];
 
         private Coroutine detachTimer;
-        public void OnChildTriggerEnter(TriggerForwarder child, Collider c, ResourceComponent res)
+        public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
         {
             if (detachTimer == null && res != null)
             {
@@ -166,7 +166,7 @@ namespace RedHomestead.Rovers
             }
         }
 
-        private void SnapToLatch(TriggerForwarder child, ResourceComponent res, float offset)
+        private void SnapToLatch(TriggerForwarder child, IMovableSnappable res, float offset)
         {
             res.SnapCrate(this, child.transform.position + child.transform.TransformDirection(new Vector3(0, 0, -offset)), carRigid);
         }

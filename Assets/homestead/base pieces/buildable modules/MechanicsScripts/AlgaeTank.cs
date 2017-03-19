@@ -197,13 +197,13 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     }
 
     private Coroutine detachTimer;
-    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, ResourceComponent res)
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
-        if (detachTimer == null && res != null)
+        if (detachTimer == null && res is ResourceComponent)
         {
-            if (res.Data.ResourceType == Matter.Biomass)
+            if ((res as ResourceComponent).Data.ResourceType == Matter.Biomass)
             {
-                capturedResource = res;
+                capturedResource = res as ResourceComponent;
                 capturedResource.SnapCrate(this, CrateAnchor.position);
             }
         }
