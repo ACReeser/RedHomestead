@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public interface IMovableSnappable
 {
@@ -51,6 +52,15 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
 
 
         PlayerInput.Instance.PlayInteractionClip(snapPosition, BangSoundClip);
+        OnSnap();
+    }
+
+    protected virtual void OnSnap()
+    {
+    }
+
+    protected virtual void OnDetach()
+    {
     }
 
     //called in pick up object
@@ -67,6 +77,7 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
         movableRigidbody.isKinematic = false;
         movableRigidbody.useGravity = true;
         PlayerInput.Instance.PlayInteractionClip(transform.position, BangSoundClip);
+        OnDetach();
     }
 
     public abstract string GetText();

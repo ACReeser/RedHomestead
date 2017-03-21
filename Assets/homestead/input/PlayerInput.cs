@@ -965,7 +965,14 @@ public class PlayerInput : MonoBehaviour {
 
                         if (drill != null)
                         {
-                            drill.ToggleDrilling();
+                            if (doInteract)
+                            {
+                                drill.ToggleDrilling();
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.StartDrillHint;
+                            }
                         }
                     }
 
@@ -1021,6 +1028,14 @@ public class PlayerInput : MonoBehaviour {
                             newPrompt = Prompts.HarvestHint;
                         }
                     }
+                }
+                else if (hitInfo.collider.CompareTag("deposit"))
+                {
+                    Deposit deposit = hitInfo.collider.GetComponent<Deposit>();
+
+                    newPrompt = Prompts.DepositHint;
+                    newPrompt.Progress = deposit.Data.Extractable.UtilizationPercentage;
+                    newPrompt.Description = deposit.Data.ExtractableHint;
                 }
             }
             else if (doInteract)

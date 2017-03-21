@@ -359,4 +359,15 @@ public static class Prompts {
         Description = "Stop running pipeline",
         Key = "Esc"
     };
+    internal static PromptInfo StartDrillHint = new PromptInfo()
+    {
+        Description = "Start Drill",
+        Key = "E"
+    };
+    internal static PromptInfo DepositHint = new PromptInfo()
+    {
+        Description = "Deposit",
+        Key = "",
+        UsesProgress  = true
+    };
 }

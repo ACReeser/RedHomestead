@@ -13,7 +13,8 @@ public class IceDrillData: FacingData
 public class IceDrill : MovableSnappable {
     public Transform Drill;
     public Transform OnOffHandle;
-    public bool Drilling;
+    public Collider LegCollider;
+    public bool Drilling, LegsDown;
 
     private const float DrillDownLocalY = -.709f;
     public override string GetText()
@@ -28,8 +29,17 @@ public class IceDrill : MovableSnappable {
 
     // Update is called once per frame
     void Update () {
-		
+		if (Drilling)
+        {
+            Drill.Rotate(Vector3.forward, 2f, Space.Self);
+        }
 	}
+
+    public void ToggleLegs()
+    {
+        LegsDown = !LegsDown;
+        LegCollider.enabled = LegsDown;
+    }
 
     public void ToggleDrilling()
     {
@@ -40,7 +50,7 @@ public class IceDrill : MovableSnappable {
 
     private void RefreshHandle()
     {
-        OnOffHandle.rotation = Quaternion.Euler(0, Drilling ? -180 : -90, 0);
+        OnOffHandle.localRotation = Quaternion.Euler(0, Drilling ? -180 : -90, 0);
     }
 
     private IEnumerator MoveDrill()
@@ -48,7 +58,31 @@ public class IceDrill : MovableSnappable {
         while (Drilling && Drill.localPosition.y > DrillDownLocalY)
         {
             yield return null;
-            Drill.localPosition = Drill.localPosition + Vector3.down * .2f * Time.deltaTime;
+            Drill.localPosition = Drill.localPosition + Vector3.down * .3f * Time.deltaTime;
         }
+        while (!Drilling && Drill.localPosition.y < 0f)
+        {
+            yield return null;
+            Drill.localPosition = Drill.localPosition - Vector3.down * .3f * Time.deltaTime;
+        }
+    }
+
+    protected override void OnSnap()
+    {
+        if (this.SnappedTo is Deposit)
+        {
+            ToggleLegs();
+            OnOffHandle.tag = "pumpHandle";
+        }
+    }
+
+    protected override void OnDetach()
+    {
+        if (Drilling)
+            ToggleDrilling();
+
+        ToggleLegs();
+
+        OnOffHandle.tag = "Untagged";
     }
 }
