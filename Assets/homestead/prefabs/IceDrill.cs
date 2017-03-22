@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using UnityEngine;
 using RedHomestead.Persistence;
+using UnityEditor.Animations;
 
 public class IceDrillData: FacingData
 {
@@ -13,10 +14,11 @@ public class IceDrillData: FacingData
 public class IceDrill : MovableSnappable {
     public Transform Drill;
     public Transform OnOffHandle;
-    public Collider LegCollider;
     public bool Drilling, LegsDown;
+    public Animator[] LegControllers;
 
     private const float DrillDownLocalY = -.709f;
+    
     public override string GetText()
     {
         return "Ice Drill";
@@ -25,7 +27,11 @@ public class IceDrill : MovableSnappable {
     // Use this for initialization
     void Start () {
         Drill.localPosition = Vector3.zero;
-	}
+        foreach (Animator LegController in LegControllers)
+        {
+            LegController.SetBool("LegDown", LegsDown);
+        }
+    }
 
     // Update is called once per frame
     void Update () {
@@ -38,7 +44,11 @@ public class IceDrill : MovableSnappable {
     public void ToggleLegs()
     {
         LegsDown = !LegsDown;
-        LegCollider.enabled = LegsDown;
+        print("legs down now " + LegsDown);
+        foreach(Animator LegController in LegControllers)
+        {
+            LegController.SetBool("LegDown", LegsDown);
+        }
     }
 
     public void ToggleDrilling()
@@ -81,7 +91,8 @@ public class IceDrill : MovableSnappable {
         if (Drilling)
             ToggleDrilling();
 
-        ToggleLegs();
+        if (LegsDown)
+            ToggleLegs();
 
         OnOffHandle.tag = "Untagged";
     }

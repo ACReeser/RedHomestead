@@ -16,7 +16,7 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
 {
     public DepositData data;
     public DepositData Data { get { return data; } set { data = value; } }
-    private const float VerticalDrillOffset = .33f;
+    private const float VerticalDrillOffset = 1.11f;
     private IceDrill snappedDrill;
     private Coroutine unsnapTimer;
 

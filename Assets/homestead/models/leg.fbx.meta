@@ -1,40 +1,62 @@
 fileFormatVersion: 2
-guid: 4ceb27d33f9effb4e802c566398e5e71
-timeCreated: 1488428752
+guid: 4719fd19b6c6686458abfb27e6e71958
+timeCreated: 1490122081
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
-    100000: Armature
-    100002: Bone
-    100004: braces
-    100006: foot
-    100008: leg
-    100010: //RootNode
-    100012: Plane
-    400000: Armature
-    400002: Bone
-    400004: braces
-    400006: foot
-    400008: leg
-    400010: //RootNode
-    400012: Plane
-    2300000: braces
-    2300002: Plane
-    2300004: foot
-    2300006: leg
-    3300000: braces
-    3300002: Plane
-    3300004: foot
-    3300006: leg
-    4300000: Plane
-    4300002: leg
+    100000: foot
+    100002: hinge
+    100004: //RootNode
+    100006: Armature
+    100008: FootBone
+    100010: FootBone_end
+    100012: leg
+    100014: LegBone
+    400000: foot
+    400002: hinge
+    400004: //RootNode
+    400006: Armature
+    400008: FootBone
+    400010: FootBone_end
+    400012: leg
+    400014: LegBone
+    2300000: foot
+    2300002: hinge
+    2300004: //RootNode
+    3300000: foot
+    3300002: hinge
+    3300004: //RootNode
+    4300000: leg
+    4300002: hinge
     4300004: foot
-    4300006: braces
-    7400000: Default Take
+    7400000: leg|hingeAction
+    7400002: leg|legAction
+    7400004: leg|legAction.001
+    7400006: hinge|hingeAction
+    7400008: hinge|legAction
+    7400010: hinge|legAction.001
+    7400012: foot|hingeAction
+    7400014: foot|legAction
+    7400016: foot|legAction.001
+    7400018: Armature|hingeGoesDown
+    7400020: Armature|legAction
+    7400022: Armature|LegDown
+    7400024: Armature|LeggyDown
+    7400026: Armature|LeggyUp
+    7400028: Armature|LegUp
+    7400030: Armature|Untitled
+    7400032: hinge|hingeGoesDown
+    7400034: hinge|LegDown
+    7400036: hinge|LegUp
+    7400038: hinge|Untitled
+    7400040: leg|hingeGoesDown
+    7400042: leg|LegDown
+    7400044: leg|LegUp
+    7400046: leg|Untitled
+    7400048: LeggyDown.001
     9500000: //RootNode
-    11100000: //RootNode
-    13700000: foot
+    13700000: hinge
     13700002: leg
   materials:
     importMaterials: 0
@@ -43,14 +65,14 @@ ModelImporter:
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
-    resampleRotations: 1
+    resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
-    animationCompression: 3
+    animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -60,7 +82,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.5
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1
@@ -79,9 +101,10 @@ ModelImporter:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
-  importAnimation: 0
+  importAnimation: 1
   copyAvatar: 0
   humanDescription:
+    serializedVersion: 2
     human: []
     skeleton: []
     armTwist: 0.5
@@ -92,9 +115,12 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
