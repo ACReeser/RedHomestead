@@ -21,7 +21,8 @@ namespace RedHomestead.Buildings
         WaterElectrolyzer,
         AlgaeTank,
         RTG,
-        GreenhouseHall
+        GreenhouseHall,
+        JunctionBox
     }
 
     /// <summary>
