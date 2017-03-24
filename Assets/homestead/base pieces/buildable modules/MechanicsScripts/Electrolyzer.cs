@@ -3,18 +3,20 @@ using System.Collections;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using System;
+using RedHomestead.Electricity;
 
-public class Electrolyzer : Converter, IPowerToggleable
+public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
 {
     internal float OxygenPerSecond = .03f;
     internal float HydrogenPerSecond = .06f;
     internal float WaterPerSecond = .1f;
-    internal bool _isOn = false;
+
+    public bool IsOn { get; set; }
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
 
-    public override float WattRequirementsPerTick
+    public override float WattsConsumedPerTick
     {
         get
         {
@@ -28,14 +30,6 @@ public class Electrolyzer : Converter, IPowerToggleable
         get
         {
             return HydrogenOut != null && OxygenOut != null && WaterIn != null;
-        }
-    }
-
-    public bool IsOn
-    {
-        get
-        {
-            return _isOn;
         }
     }
 
@@ -133,14 +127,14 @@ public class Electrolyzer : Converter, IPowerToggleable
     public void TogglePower()
     {
         //only allow power to turn on when power is connected
-        bool newPowerState = !_isOn;
+        bool newPowerState = !IsOn;
         if (newPowerState && HasPower)
         {
-            _isOn = newPowerState;
+            IsOn = newPowerState;
         }
         else
         {
-            _isOn = false;
+            IsOn = false;
         }
 
         RefreshPowerSwitch();
@@ -180,5 +174,9 @@ public class Electrolyzer : Converter, IPowerToggleable
                 }
             }
         };
+    }
+
+    public void OnEmergencyShutdown()
+    {
     }
 }

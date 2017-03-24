@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 using RedHomestead.Buildings;
+using RedHomestead.Electricity;
 
 public enum HabitatType { LuxuryLander, Burrow } //Lander, Tent
 
@@ -28,7 +29,7 @@ public class HabitatExtraData : RedHomesteadData
     }
 }
 
-public class Habitat : Converter
+public class Habitat : Converter, IPowerConsumer
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
@@ -38,10 +39,11 @@ public class Habitat : Converter
     public delegate void ResourceChangeHandler(params Matter[] type);
     
     public HabitatExtraData HabitatData;
+    public bool IsOn { get; set; }
 
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
-    public override float WattRequirementsPerTick
+    public override float WattsConsumedPerTick
     {
         get
         {
@@ -196,5 +198,9 @@ public class Habitat : Converter
         Data.MatterHistory.Consume(mealType,  Get(mealType).Pull(mealType.CubicMetersPerMeal()));
         SurvivalTimer.Instance.EatFood(mealType);
         OnResourceChange(mealType);
+    }
+
+    public void OnEmergencyShutdown()
+    {
     }
 }

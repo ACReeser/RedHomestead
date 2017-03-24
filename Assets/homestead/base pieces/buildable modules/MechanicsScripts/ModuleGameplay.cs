@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
+using RedHomestead.Electricity;
 
 /// <summary>
 /// Base abstract class for all modules
@@ -42,23 +43,15 @@ public class SingleResourceModuleData : ResourcefullModuleData
     public ResourceContainer Container;
 }
 
-public abstract class ModuleGameplay : MonoBehaviour, ISink
+public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
 {
     public SpriteRenderer PowerIndicator;
     protected AudioSource SoundSource;
-
-    private bool _hasPower;
-    public bool HasPower {
-        get { return _hasPower; }
-        set {
-            _hasPower = value;
-            if (PowerIndicator != null) {
-                PowerIndicator.enabled = !_hasPower;
-            }
-        }
-    }
     
-    public abstract float WattRequirementsPerTick { get; }
+    public bool HasPower { get; set; }
+    
+    public float WattsAvailablePerTick { get; set; }
+    public abstract float WattsConsumedPerTick { get; }
     public abstract string ModuleInstanceID { get; }
     public abstract string PowerGridInstanceID { get; set; }
 
@@ -294,6 +287,11 @@ public class Container
         }
     }
 
+    /// <summary>
+    /// tries to push an amount into the container
+    /// </summary>
+    /// <param name="pushAmount"></param>
+    /// <returns>the amount unable to be stored in the container</returns>
     public float Push(float pushAmount)
     {
         if (AvailableCapacity > 0)
@@ -319,6 +317,11 @@ public class Container
         }
     }
 
+    /// <summary>
+    /// tries to pull an amount from the container
+    /// </summary>
+    /// <param name="pullAmount"></param>
+    /// <returns>the amount actually pulled</returns>
     public float Pull(float pullAmount)
     {
         if (Amount <= 0)

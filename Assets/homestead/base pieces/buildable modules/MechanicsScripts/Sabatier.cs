@@ -3,20 +3,21 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
+using RedHomestead.Electricity;
 
-public class Sabatier : Converter, IPowerToggleable
+public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
 {
     public AudioClip HandleChangeClip;
 
     internal float HydrogenPerSecond = .1f;
     internal float MethanePerSecond = .1f;
     internal float WaterPerSecond = .1f;
-    internal bool _isOn = false;
+    public bool IsOn { get; set; }
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
 
-    public override float WattRequirementsPerTick
+    public override float WattsConsumedPerTick
     {
         get
         {
@@ -33,13 +34,6 @@ public class Sabatier : Converter, IPowerToggleable
         }
     }
 
-    public bool IsOn
-    {
-        get
-        {
-            return _isOn;
-        }
-    }
 
     public override void Convert()
     {
@@ -135,14 +129,14 @@ public class Sabatier : Converter, IPowerToggleable
     public void TogglePower()
     {
         //only allow power to turn on when power is connected
-        bool newPowerState = !_isOn;
+        bool newPowerState = !IsOn;
         if (newPowerState && HasPower)
         {
-            _isOn = newPowerState;
+            IsOn = newPowerState;
         }
         else
         {
-            _isOn = false;
+            IsOn = false;
         }
 
 
@@ -188,5 +182,9 @@ public class Sabatier : Converter, IPowerToggleable
                 }
             }
         };
+    }
+
+    public void OnEmergencyShutdown()
+    {
     }
 }

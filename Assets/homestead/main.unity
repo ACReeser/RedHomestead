@@ -1659,6 +1659,7 @@ MonoBehaviour:
           C: 0
     ModuleType: 12
     ModuleInstanceID: 
+    PowerGridInstanceID: 
 --- !u!1 &29140157
 GameObject:
   m_ObjectHideFlags: 0
@@ -2306,7 +2307,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -130
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -2314,7 +2315,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 44
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x
@@ -16139,7 +16140,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f740a40b1557d344e8231219c1e9ed7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PowerSupplies: []
   Sinks: []
   Converters: []
 --- !u!4 &297514237
@@ -25186,6 +25186,7 @@ MonoBehaviour:
           C: 0
     ModuleType: 5
     ModuleInstanceID: 6a8054ee-e161-47ca-94ad-d2c799171a8d
+    PowerGridInstanceID: 
     MatterHistory:
       _history:
         _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000130000001400000015000000160000001700000018000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -25281,15 +25282,15 @@ MonoBehaviour:
       _FreeCount: 0
       _Keys: 000000000000000000000000
       _Values:
-      - MatterType: 0
-        TotalCapacity: 1
+      - TotalCapacity: 1
         Amount: 0
-      - MatterType: 0
-        TotalCapacity: 1
+        MatterType: 0
+      - TotalCapacity: 1
         Amount: 0
-      - MatterType: 0
-        TotalCapacity: 1
+        MatterType: 0
+      - TotalCapacity: 1
         Amount: 0
+        MatterType: 0
   HabitatData:
     Name: 
     Type: 0
@@ -44828,7 +44829,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -174
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -44836,7 +44837,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 44
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x
@@ -77797,7 +77798,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -86
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -77805,7 +77806,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 44
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x
@@ -83364,9 +83365,9 @@ MonoBehaviour:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
     Extractable:
-      MatterType: -1
       TotalCapacity: 10
       Amount: 10
+      MatterType: -1
 --- !u!1 &1669444150
 GameObject:
   m_ObjectHideFlags: 0
@@ -88512,6 +88513,7 @@ MonoBehaviour:
           C: 0
     ModuleType: 5
     ModuleInstanceID: 6291e701-52ba-463c-a31d-85b37df6a9cf
+    PowerGridInstanceID: 
     MatterHistory:
       _history:
         _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000130000001400000015000000160000001700000018000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -88607,15 +88609,15 @@ MonoBehaviour:
       _FreeCount: 0
       _Keys: 000000000000000000000000
       _Values:
-      - MatterType: 0
-        TotalCapacity: 1
+      - TotalCapacity: 1
         Amount: 0
-      - MatterType: 0
-        TotalCapacity: 1
+        MatterType: 0
+      - TotalCapacity: 1
         Amount: 0
-      - MatterType: 0
-        TotalCapacity: 1
+        MatterType: 0
+      - TotalCapacity: 1
         Amount: 0
+        MatterType: 0
   HabitatData:
     Name: 
     Type: 0
@@ -92073,7 +92075,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -218
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.x
@@ -92081,7 +92083,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 44
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22457894, guid: 0ab121ac90dbf3a45863ae9517bcc268, type: 2}
       propertyPath: m_AnchorMin.x

@@ -10,12 +10,7 @@ public class SolarPanel : ResourcelessGameplay, IPowerSupply
     public float Efficiency = .22f;
     public float GrossSolarWattagePerTick = 20f;
 
-    void Awake()
-    {
-        HasPower = true;
-    }
-
-    public override float WattRequirementsPerTick
+    public override float WattsConsumedPerTick
     {
         get
         {
@@ -23,7 +18,7 @@ public class SolarPanel : ResourcelessGameplay, IPowerSupply
         }
     }
 
-    public float WattsPerTick
+    public float WattsGeneratedPerTick
     {
         get
         {

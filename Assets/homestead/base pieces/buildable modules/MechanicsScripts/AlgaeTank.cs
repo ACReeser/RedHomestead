@@ -3,8 +3,9 @@ using System.Collections;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using System;
+using RedHomestead.Electricity;
 
-public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnapper, ITriggerSubscriber
+public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnapper, ITriggerSubscriber, IPowerConsumer
 {
     public AudioClip HandleChangeClip;
 
@@ -20,14 +21,12 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     internal float WaterPerSecond = .001f;
     internal float OxygenPerSecond = .001f;
 
-    internal bool _isOn = false;
-
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
     public Transform CratePrefab, CrateAnchor;
     private ResourceComponent capturedResource;
 
-    public override float WattRequirementsPerTick
+    public override float WattsConsumedPerTick
     {
         get
         {
@@ -44,13 +43,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         }
     }
 
-    public bool IsOn
-    {
-        get
-        {
-            return _isOn;
-        }
-    }
+    public bool IsOn { get; set; }
 
     public bool CanHarvest
     {
@@ -154,14 +147,14 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     public void TogglePower()
     {
         //only allow power to turn on when power is connected
-        bool newPowerState = !_isOn;
+        bool newPowerState = !IsOn;
         if (newPowerState && HasPower)
         {
-            _isOn = newPowerState;
+            IsOn = newPowerState;
         }
         else
         {
-            _isOn = false;
+            IsOn = false;
         }
 
         RefreshPowerSwitch();
@@ -243,6 +236,10 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
                 }
             },
         };
+    }
+
+    public void OnEmergencyShutdown()
+    {
     }
 }
 

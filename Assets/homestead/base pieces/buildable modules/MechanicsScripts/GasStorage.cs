@@ -24,7 +24,7 @@ public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
     public const float PumpPerUpdateInterval = PumpPerSecond / PumpUpdateIntervalSeconds;
     private const float SnapInterferenceTimerSeconds = 1.25f;
 
-    public override float WattRequirementsPerTick
+    public override float WattsConsumedPerTick
     {
         get
         {
