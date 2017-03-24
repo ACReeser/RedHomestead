@@ -1544,10 +1544,7 @@ public class PlayerInput : MonoBehaviour {
         ModuleGameplay g1 = selectedPowerSocket.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            if (g1.HasPower || g2.HasPower)
-            {
-                g1.HasPower = g2.HasPower = true;
-            }
+            FlowManager.Instance.PowerGrids.Attach(g1, g2);
         }
 
         CurrentMode = InputMode.Normal;

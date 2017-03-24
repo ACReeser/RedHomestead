@@ -3,8 +3,9 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
+using RedHomestead.Electricity;
 
-public class SolarPanel : PowerSupply
+public class SolarPanel : ResourcelessGameplay, IPowerSupply
 {
     public float Efficiency = .22f;
     public float GrossSolarWattagePerTick = 20f;
@@ -22,7 +23,7 @@ public class SolarPanel : PowerSupply
         }
     }
 
-    public override float WattsPerTick
+    public float WattsPerTick
     {
         get
         {

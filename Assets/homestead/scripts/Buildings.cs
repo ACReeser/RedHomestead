@@ -19,7 +19,9 @@ namespace RedHomestead.Buildings
         SmallWaterTank,
         Splitter,
         WaterElectrolyzer,
-        AlgaeTank
+        AlgaeTank,
+        RTG,
+        GreenhouseHall
     }
 
     /// <summary>

@@ -15,6 +15,7 @@ public abstract class ModuleData : FacingData
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public RedHomestead.Buildings.Module ModuleType;
     public string ModuleInstanceID;
+    public string PowerGridInstanceID;
 }
 
 public abstract class ResourcefullModuleData: ModuleData
@@ -59,6 +60,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink
     
     public abstract float WattRequirementsPerTick { get; }
     public abstract string ModuleInstanceID { get; }
+    public abstract string PowerGridInstanceID { get; set; }
 
     protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
     
@@ -115,6 +117,7 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     private ResourcelessModuleData data;
     public ResourcelessModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
+    public override string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -137,11 +140,6 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     }
 }
 
-public abstract class PowerSupply : ResourcelessGameplay
-{
-    public abstract float WattsPerTick { get; }
-}
-
 
 public interface ISink
 {
@@ -155,6 +153,7 @@ public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataConta
     private MultipleResourceModuleData data;
     public MultipleResourceModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
+    public override string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -190,6 +189,7 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     private SingleResourceModuleData data;
     public SingleResourceModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
+    public override string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
 
     public SpriteRenderer flowAmountRenderer;
 
@@ -255,16 +255,15 @@ public abstract class Converter : MultipleResourceModuleGameplay
 }
 
 [Serializable]
-public class ResourceContainer
+public class Container
 {
-    public ResourceContainer() { }
-    public ResourceContainer(float initialAmount)
+    public Container() { }
+    public Container(float initialAmount)
     {
         this.Amount = initialAmount;
     }
 
-    public Matter MatterType;
-
+    //Serializable
     public float TotalCapacity = 1f;
     [SerializeField]
     protected float Amount;
@@ -344,6 +343,27 @@ public class ResourceContainer
             }
         }
     }
+
+}
+
+[Serializable]
+public class ResourceContainer: Container
+{
+    public ResourceContainer() { }
+    public ResourceContainer(float initialAmount) : base(initialAmount) { }
+
+    //Serializable
+    public Matter MatterType;
+}
+
+[Serializable]
+public class EnergyContainer : Container
+{
+    public EnergyContainer() { }
+    public EnergyContainer(float initialAmount) : base(initialAmount) { }
+
+    //Serializable
+    public Energy EnergyType;
 }
 
 public interface IPowerToggleable
