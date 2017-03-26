@@ -22,7 +22,10 @@ namespace RedHomestead.Buildings
         AlgaeTank,
         RTG,
         GreenhouseHall,
-        JunctionBox
+        JunctionBox,
+        Workshop,
+        HallwayNode,
+        Flywheel
     }
 
     /// <summary>
@@ -141,6 +144,12 @@ namespace RedHomestead.Buildings
                     new ResourceEntry(2, Matter.Steel),
                     new ResourceEntry(4, Matter.Canvas)
                 }
+            },
+            {
+                Module.JunctionBox, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Matter.Copper)
+                }
             }
         };
 
@@ -170,7 +179,8 @@ namespace RedHomestead.Buildings
                 ConstructionGroup.Power,
                 new Module[]
                 {
-                    Module.SolarPanelSmall
+                    Module.SolarPanelSmall,
+                    Module.JunctionBox
                 }
             },
             {

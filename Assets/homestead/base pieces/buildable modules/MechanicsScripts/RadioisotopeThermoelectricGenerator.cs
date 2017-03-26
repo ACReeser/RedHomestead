@@ -29,17 +29,63 @@ namespace RedHomestead.Electricity
 #warning todo: add a priority field for shutdown
     }
 
+    public static class ElectricityExtensions
+    {
+        public static bool HasPowerGrid(this IPowerable node)
+        {
+            return !String.IsNullOrEmpty(node.PowerGridInstanceID);
+        }
+
+        public static void TurnOnPower(this List<IPowerConsumer> list)
+        {
+            foreach(IPowerConsumer c in list)
+            {
+                if (!c.HasPower)
+                {
+                    c.HasPower = true;
+                    c.OnPowerChanged();
+                }
+            }
+        }
+
+        public static void EmergencyShutdown(this IPowerConsumer c)
+        {
+            if (c.HasPower)
+            {
+                c.HasPower = false;
+                c.OnPowerChanged();
+            }
+            if (c.IsOn)
+            {
+                c.IsOn = false;
+                c.OnEmergencyShutdown();
+            }
+        }
+    }
+
     public class PowerGrids
     {
         private Dictionary<string, PowerGrid> grids = new Dictionary<string, PowerGrid>();
 
         internal void Attach(IPowerable node1, IPowerable node2)
         {
-            if (!String.IsNullOrEmpty(node1.PowerGridInstanceID))
+            bool node1Powered = node1.HasPowerGrid();
+            bool node2Powered = node2.HasPowerGrid();
+
+            if (node1Powered && node2Powered)
             {
+                //deprecate node2's power grid by having node1's power grid usurp it
+                PowerGrid deprecatedPowergrid = grids[node2.PowerGridInstanceID];
+
+                grids[node1.PowerGridInstanceID].Usurp(deprecatedPowergrid);
+
+                grids.Remove(deprecatedPowergrid.PowerGridInstanceID);
+            }
+            else if (node1Powered)
+            { 
                 grids[node1.PowerGridInstanceID].Add(node2);
             }
-            else if (!String.IsNullOrEmpty(node2.PowerGridInstanceID))
+            else if (node2Powered)
             {
                 grids[node2.PowerGridInstanceID].Add(node1);
             }
@@ -115,7 +161,7 @@ namespace RedHomestead.Electricity
                     case GridMode.Blackout:
                         foreach(IPowerConsumer c in Consumers)
                         {
-                            EmergencyShutdown(c);
+                            c.EmergencyShutdown();
                         }
                         loadWatts = 0f;
                         surplusWatts = 0f;
@@ -125,7 +171,7 @@ namespace RedHomestead.Electricity
                         {
 #warning todo: reference priority field during shutdown, sort by it probably
 
-                            EmergencyShutdown(c);
+                            c.EmergencyShutdown();
 
                             deficitWatts -= c.WattsConsumedPerTick;
 
@@ -136,22 +182,13 @@ namespace RedHomestead.Electricity
                         }
                         break;
                     case GridMode.BatteryDrain:
-                        foreach (IPowerConsumer c in Consumers)
-                        {
-                            TurnOnPower(c);
-                        }
+                        Consumers.TurnOnPower();
                         break;
                     case GridMode.Nominal:
-                        foreach (IPowerConsumer c in Consumers)
-                        {
-                            TurnOnPower(c);
-                        }
+                        Consumers.TurnOnPower();
                         break;
                     case GridMode.BatteryRecharge:
-                        foreach (IPowerConsumer c in Consumers)
-                        {
-                            TurnOnPower(c);
-                        }
+                        Consumers.TurnOnPower();
                         break;
                 }
             }
@@ -179,29 +216,6 @@ namespace RedHomestead.Electricity
                     if (drained <= 0)
                         break;
                 }
-            }
-        }
-
-        private static void TurnOnPower(IPowerConsumer c)
-        {
-            if (!c.HasPower)
-            {
-                c.HasPower = true;
-                c.OnPowerChanged();
-            }
-        }
-
-        private static void EmergencyShutdown(IPowerConsumer c)
-        {
-            if (c.HasPower)
-            {
-                c.HasPower = false;
-                c.OnPowerChanged();
-            }
-            if (c.IsOn)
-            {
-                c.IsOn = false;
-                c.OnEmergencyShutdown();
             }
         }
 
@@ -240,6 +254,19 @@ namespace RedHomestead.Electricity
             }
 
             mod.PowerGridInstanceID = "";
+        }
+
+        private void SetPowerableParentToMe(IPowerable p) { p.PowerGridInstanceID = this.PowerGridInstanceID; }
+        internal void Usurp(PowerGrid other)
+        {
+            other.Consumers.ForEach(SetPowerableParentToMe);
+            Consumers.AddRange(other.Consumers);
+
+            other.Producers.ForEach(SetPowerableParentToMe);
+            Producers.AddRange(other.Producers);
+
+            other.Batteries.ForEach(SetPowerableParentToMe);
+            Batteries.AddRange(other.Batteries);
         }
     }
 }

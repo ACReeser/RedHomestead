@@ -29,6 +29,12 @@ public static class Corporations {
                 },
                 new Stock()
                 {
+                    ListPrice = 800,
+                    StockAvailable = 100,
+                    Matter = Matter.Copper
+                },
+                new Stock()
+                {
                     ListPrice = 100,
                     StockAvailable = 100,
                     Matter = Matter.RationMeal
