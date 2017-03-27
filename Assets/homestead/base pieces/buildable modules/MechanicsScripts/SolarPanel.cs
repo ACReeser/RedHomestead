@@ -9,6 +9,8 @@ public class SolarPanel : ResourcelessGameplay, IPowerSupply
 {
     public float Efficiency = .22f;
     public float GrossSolarWattagePerTick = 20f;
+    public MeshFilter powerBacking { get; set; }
+    public Transform powerMask { get; set; }
 
     public override float WattsConsumedPerTick
     {

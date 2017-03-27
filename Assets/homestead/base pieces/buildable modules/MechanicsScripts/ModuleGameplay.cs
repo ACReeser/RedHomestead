@@ -45,7 +45,6 @@ public class SingleResourceModuleData : ResourcefullModuleData
 
 public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
 {
-    public SpriteRenderer PowerIndicator;
     protected AudioSource SoundSource;
     
     public bool HasPower { get; set; }
@@ -54,6 +53,8 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
     public abstract float WattsConsumedPerTick { get; }
     public abstract string ModuleInstanceID { get; }
     public abstract string PowerGridInstanceID { get; set; }
+    public PowerVisualization powerViz;
+    public PowerVisualization PowerViz { get { return powerViz; } }
 
     protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
     

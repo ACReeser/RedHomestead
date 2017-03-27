@@ -13,6 +13,9 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
     internal float MethanePerSecond = .1f;
     internal float WaterPerSecond = .1f;
     public bool IsOn { get; set; }
+    public MeshFilter powerBacking { get; set; }
+    public Transform powerMask { get; set; }
+    public Transform powerActive { get; set; }
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;

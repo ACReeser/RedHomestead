@@ -14,6 +14,8 @@ public class HabitatExtraData : RedHomesteadData
 {
     public string Name;
     public HabitatType Type;
+    public EnergyContainer EnergyContainer;
+
     [HideInInspector]
     public string ModuleInstanceID;
 
@@ -29,7 +31,7 @@ public class HabitatExtraData : RedHomesteadData
     }
 }
 
-public class Habitat : Converter, IPowerConsumer
+public class Habitat : Converter, IPowerConsumer, IBattery
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
@@ -40,6 +42,8 @@ public class Habitat : Converter, IPowerConsumer
     
     public HabitatExtraData HabitatData;
     public bool IsOn { get; set; }
+
+    public EnergyContainer EnergyContainer { get { return HabitatData.EnergyContainer; } }
 
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 

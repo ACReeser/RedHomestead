@@ -10,15 +10,27 @@ namespace RedHomestead.Electricity
     public interface IPowerable
     {
         string PowerGridInstanceID { get; set; }
+        PowerVisualization PowerViz { get; }
     }
+
+    [Serializable]
+    public struct PowerVisualization
+    {
+        public MeshFilter PowerBacking;
+        public Transform PowerMask;
+        public Transform PowerActive;
+    }
+
     public interface IPowerSupply: IPowerable
     {
         float WattsGeneratedPerTick { get; }
     }
+
     public interface IBattery: IPowerable
     {
         EnergyContainer EnergyContainer { get; }
     }
+
     public interface IPowerConsumer: IPowerable
     {
         float WattsConsumedPerTick { get; }
@@ -106,7 +118,21 @@ namespace RedHomestead.Electricity
             }
         }
     }
-    
+
+    [Serializable]
+    public struct ElectricityIndicatorMeshes
+    {
+        public Mesh[] BackingMeshes;
+        public Mesh ActiveMesh;
+    }
+
+    [Serializable]
+    public struct ElectricityIndicatorMeshesForConsumers
+    {
+        public Mesh[] BackingMeshes;
+        public Mesh[] ActiveMeshes;
+    }
+
     public class PowerGrid
     {
         public enum GridMode { Unknown = -99, Blackout = -3, Brownout, BatteryDrain, Nominal = 0, BatteryRecharge }
@@ -273,6 +299,10 @@ namespace RedHomestead.Electricity
 
 public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHomestead.Electricity.IPowerSupply
 {
+    public const float WattHoursGeneratedPerDay = 3200f;
+
+    public MeshFilter powerBacking { get; set; }
+    public Transform powerMask { get; set; }
     public override float WattsConsumedPerTick
     {
         get
@@ -285,7 +315,7 @@ public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHome
     {
         get
         {
-            return 130;
+            return 130 * Time.fixedDeltaTime;
         }
     }
 
