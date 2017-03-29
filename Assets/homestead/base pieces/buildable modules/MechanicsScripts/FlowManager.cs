@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using RedHomestead.Electricity;
-
+using System;
 
 public class FlowManager : MonoBehaviour
 {
@@ -19,10 +19,21 @@ public class FlowManager : MonoBehaviour
     public List<Converter> Converters = new List<Converter>();
 
     void Awake() {
-        Instance = this;    
-	}	
-	
-	void FixedUpdate() {
+        Instance = this;
+        StartCoroutine(PowerGridUpdate());
+	}
+
+    private IEnumerator PowerGridUpdate()
+    {
+        while (isActiveAndEnabled)
+        {
+            PowerGrids.Tick();
+
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    void FixedUpdate() {
 	    foreach(Converter c in Converters)
         {
             if (c.isActiveAndEnabled)
@@ -34,7 +45,5 @@ public class FlowManager : MonoBehaviour
             if (s.isActiveAndEnabled)
                 s.Tick();
         }
-
-        PowerGrids.Tick();
     }
 }
