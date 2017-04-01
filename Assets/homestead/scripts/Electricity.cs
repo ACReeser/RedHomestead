@@ -23,7 +23,8 @@ namespace RedHomestead.Electricity
 
     public interface IPowerSupply : IPowerable
     {
-        float WattsGeneratedPerTick { get; }
+        bool VariablePowerSupply { get; }
+        float WattsGenerated { get; }
     }
 
     public interface IBattery : IPowerable
@@ -33,12 +34,18 @@ namespace RedHomestead.Electricity
 
     public interface IPowerConsumer : IPowerable
     {
-        float WattsConsumedPerTick { get; }
+        float WattsConsumed { get; }
         bool HasPower { get; set; }
         void OnPowerChanged();
         bool IsOn { get; set; }
         void OnEmergencyShutdown();
 #warning todo: add a priority field for shutdown
+    }
+
+    public static class ElectricityConstants
+    {
+        public const float WattHoursPerBatteryBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f / 2f;
+        public static Vector3 _BackingScale = new Vector3(1.2f, 1.2f, 0f);
     }
 
     public static class ElectricityExtensions
@@ -72,6 +79,30 @@ namespace RedHomestead.Electricity
                 c.IsOn = false;
                 c.OnEmergencyShutdown();
             }
+        }
+
+        public static void RefreshVisualization(this IPowerConsumer c)
+        {
+        }
+
+        public static void RefreshVisualization(this IPowerSupply s)
+        {
+
+        }
+
+        public static void RefreshVisualization(this IBattery b)
+        {
+            b.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward *  (10 - b.CurrentBatteryUnits());
+        }
+
+        public static int BatteryUnitCapacity(this IBattery b)
+        {
+            return Mathf.RoundToInt(b.EnergyContainer.AvailableCapacity / ElectricityConstants.WattHoursPerBatteryBlock);
+        }
+
+        public static float CurrentBatteryUnits(this IBattery b)
+        {
+            return b.EnergyContainer.CurrentAmount / ElectricityConstants.WattHoursPerBatteryBlock;
         }
     }
 
@@ -141,6 +172,7 @@ namespace RedHomestead.Electricity
         internal GridMode Mode = GridMode.Unknown;
         protected List<IPowerConsumer> Consumers = new List<IPowerConsumer>();
         protected List<IPowerSupply> Producers = new List<IPowerSupply>();
+        protected List<IPowerSupply> VariableProducers = new List<IPowerSupply>();
         protected List<IBattery> Batteries = new List<IBattery>();
 
         public PowerGrid()
@@ -152,8 +184,8 @@ namespace RedHomestead.Electricity
         {
             GridMode newGridMode = GridMode.Unknown;
 
-            float capacityWatts = Producers.Sum(x => x.WattsGeneratedPerTick) * Time.fixedDeltaTime;
-            float loadWatts = Consumers.Sum(x => x.IsOn ? x.WattsConsumedPerTick : 0f) * Time.fixedDeltaTime;
+            float capacityWatts = Producers.Sum(x => x.WattsGenerated) * Time.fixedDeltaTime;
+            float loadWatts = Consumers.Sum(x => x.IsOn ? x.WattsConsumed : 0f) * Time.fixedDeltaTime;
             float batteryWatts = Batteries.Sum(x => x.EnergyContainer.CurrentAmount);
 
             float surplusWatts = capacityWatts - loadWatts;
@@ -199,7 +231,7 @@ namespace RedHomestead.Electricity
 
                             c.EmergencyShutdown();
 
-                            deficitWatts -= c.WattsConsumedPerTick;
+                            deficitWatts -= c.WattsConsumed;
 
                             //stop the brownout when we have a new equilibrium
                             if (capacityWatts + batteryWatts > deficitWatts)
@@ -224,25 +256,30 @@ namespace RedHomestead.Electricity
                 float recharged = surplusWatts;
                 //todo: some sort of priority
                 //so you can recharge your rover faster probably
-                foreach (IBattery c in Batteries)
+                foreach (IBattery batt in Batteries)
                 {
-                    recharged = c.EnergyContainer.Push(recharged);
+                    recharged = batt.EnergyContainer.Push(recharged);
+                    batt.RefreshVisualization();
 
                     if (recharged <= 0)
                         break;
+
                 }
             }
             else if (Mode == GridMode.BatteryDrain)
             {
                 float drained = deficitWatts;
-                foreach (IBattery c in Batteries)
+                foreach (IBattery batt in Batteries)
                 {
-                    drained -= c.EnergyContainer.Pull(drained);
+                    drained -= batt.EnergyContainer.Pull(drained);
+                    batt.RefreshVisualization();
 
                     if (drained <= 0)
                         break;
                 }
             }
+
+
         }
 
         internal void Add(IPowerable mod)
@@ -250,6 +287,11 @@ namespace RedHomestead.Electricity
             if (mod is IPowerSupply)
             {
                 Producers.Add(mod as IPowerSupply);
+
+                if ((mod as IPowerSupply).VariablePowerSupply)
+                {
+                    VariableProducers.Add(mod as IPowerSupply);
+                }
             }
             else if (mod is IPowerConsumer)
             {
@@ -268,6 +310,11 @@ namespace RedHomestead.Electricity
             if (mod is IPowerSupply)
             {
                 Producers.Remove(mod as IPowerSupply);
+
+                if ((mod as IPowerSupply).VariablePowerSupply)
+                {
+                    VariableProducers.Remove(mod as IPowerSupply);
+                }
             }
             else if (mod is IPowerConsumer)
             {

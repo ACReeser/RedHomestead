@@ -7,7 +7,7 @@ using RedHomestead.Buildings;
 
 public class WaterStorage : SingleResourceModuleGameplay {
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {

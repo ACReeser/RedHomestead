@@ -26,7 +26,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     public Transform CratePrefab, CrateAnchor;
     private ResourceComponent capturedResource;
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {

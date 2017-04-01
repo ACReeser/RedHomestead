@@ -47,7 +47,7 @@ public class Habitat : Converter, IPowerConsumer, IBattery
 
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {

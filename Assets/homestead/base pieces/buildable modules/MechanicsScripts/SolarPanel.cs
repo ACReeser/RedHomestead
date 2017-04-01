@@ -12,7 +12,7 @@ public class SolarPanel : ResourcelessGameplay, IPowerSupply
     public MeshFilter powerBacking { get; set; }
     public Transform powerMask { get; set; }
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {
@@ -20,7 +20,8 @@ public class SolarPanel : ResourcelessGameplay, IPowerSupply
         }
     }
 
-    public float WattsGeneratedPerTick
+    public bool VariablePowerSupply { get { return true; } }
+    public float WattsGenerated
     {
         get
         {

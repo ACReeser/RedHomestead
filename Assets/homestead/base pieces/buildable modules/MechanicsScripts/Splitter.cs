@@ -11,7 +11,7 @@ public class Splitter : Converter, ISink
 {
     internal float FlowPerSecond = .1f;
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {

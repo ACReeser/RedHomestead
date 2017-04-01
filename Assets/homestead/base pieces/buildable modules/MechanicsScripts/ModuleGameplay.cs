@@ -50,7 +50,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
     public bool HasPower { get; set; }
     
     public float WattsAvailablePerTick { get; set; }
-    public abstract float WattsConsumedPerTick { get; }
+    public abstract float WattsConsumed { get; }
     public abstract string ModuleInstanceID { get; }
     public abstract string PowerGridInstanceID { get; set; }
     public PowerVisualization powerViz;

@@ -5,7 +5,7 @@ using RedHomestead.Buildings;
 using UnityEngine;
 
 public class JunctionBox : ResourcelessGameplay {
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {

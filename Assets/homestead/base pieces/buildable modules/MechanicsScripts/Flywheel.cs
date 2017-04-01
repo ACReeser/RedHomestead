@@ -19,7 +19,7 @@ public class Flywheel : ResourcelessGameplay, IBattery {
         }
     }
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {
@@ -27,7 +27,7 @@ public class Flywheel : ResourcelessGameplay, IBattery {
         }
     }
 
-    public float WattsGeneratedPerTick
+    public float WattsGenerated
     {
         get
         {

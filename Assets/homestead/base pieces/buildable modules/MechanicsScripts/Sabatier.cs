@@ -20,7 +20,7 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {

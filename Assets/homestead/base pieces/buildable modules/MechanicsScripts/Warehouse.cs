@@ -82,7 +82,7 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
     private Dictionary<WarehouseRow, Coroutine> CrateInterferenceTimers = new Dictionary<WarehouseRow, Coroutine>();
     private const float SnapInterferenceTimerSeconds = 1.25f;
 
-    public override float WattsConsumedPerTick
+    public override float WattsConsumed
     {
         get
         {
