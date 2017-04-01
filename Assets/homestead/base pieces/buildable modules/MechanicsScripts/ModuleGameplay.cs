@@ -82,6 +82,9 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
             InitializeStartingData();
         }
 
+        if (this.powerViz.IsAssigned)
+            this.InitializePowerVisualization();
+
         this.OnStart();
     }
 

@@ -19,6 +19,14 @@ namespace RedHomestead.Electricity
         public MeshFilter PowerBacking;
         public Transform PowerMask;
         public Transform PowerActive;
+
+        public bool IsAssigned
+        {
+            get
+            {
+                return PowerBacking != null && PowerMask != null && PowerActive != null;
+            }
+        }
     }
 
     public interface IPowerSupply : IPowerable
@@ -44,7 +52,8 @@ namespace RedHomestead.Electricity
 
     public static class ElectricityConstants
     {
-        public const float WattHoursPerBatteryBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f / 2f;
+        public const float WattHoursPerBatteryBlock = WattsPerBlock / 2f;
+        public const float WattsPerBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f;
         public static Vector3 _BackingScale = new Vector3(1.2f, 1.2f, 0f);
     }
 
@@ -62,6 +71,7 @@ namespace RedHomestead.Electricity
                 if (!c.HasPower)
                 {
                     c.HasPower = true;
+                    c.RefreshVisualization();
                     c.OnPowerChanged();
                 }
             }
@@ -79,15 +89,36 @@ namespace RedHomestead.Electricity
                 c.IsOn = false;
                 c.OnEmergencyShutdown();
             }
+
+            c.RefreshVisualization();
+        }
+
+        public static void InitializePowerVisualization(this IPowerable powerable)
+        {
+            if (powerable is IPowerConsumer)
+            {
+                powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.ConsumerMeshes.BackingMeshes[(powerable as IPowerConsumer).ConsumptionInPowerUnits() - 1];
+                (powerable as IPowerConsumer).RefreshVisualization();
+            }
+
+            if (powerable is IBattery)
+            {
+                powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.BatteryMeshes.BackingMeshes[(powerable as IBattery).BatteryUnitCapacity() - 1];
+                (powerable as IBattery).RefreshVisualization();
+            }
         }
 
         public static void RefreshVisualization(this IPowerConsumer c)
         {
+            c.PowerViz.PowerActive.gameObject.SetActive(c.IsOn);
         }
 
         public static void RefreshVisualization(this IPowerSupply s)
         {
-
+            if (s.VariablePowerSupply)
+            {
+                s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - s.GenerationInPowerUnits());
+            }
         }
 
         public static void RefreshVisualization(this IBattery b)
@@ -97,12 +128,22 @@ namespace RedHomestead.Electricity
 
         public static int BatteryUnitCapacity(this IBattery b)
         {
-            return Mathf.RoundToInt(b.EnergyContainer.AvailableCapacity / ElectricityConstants.WattHoursPerBatteryBlock);
+            return Math.Max(1, Mathf.RoundToInt(b.EnergyContainer.AvailableCapacity / ElectricityConstants.WattHoursPerBatteryBlock));
         }
 
         public static float CurrentBatteryUnits(this IBattery b)
         {
             return b.EnergyContainer.CurrentAmount / ElectricityConstants.WattHoursPerBatteryBlock;
+        }
+
+        public static int ConsumptionInPowerUnits(this IPowerConsumer c)
+        {
+            return Math.Max(1, Mathf.RoundToInt(c.WattsConsumed / ElectricityConstants.WattsPerBlock));
+        }
+
+        public static int GenerationInPowerUnits(this IPowerSupply c)
+        {
+            return Math.Max(1, Mathf.RoundToInt(c.WattsGenerated / ElectricityConstants.WattsPerBlock));
         }
     }
 
@@ -233,6 +274,8 @@ namespace RedHomestead.Electricity
 
                             deficitWatts -= c.WattsConsumed;
 
+                            c.RefreshVisualization();
+
                             //stop the brownout when we have a new equilibrium
                             if (capacityWatts + batteryWatts > deficitWatts)
                                 break;
@@ -279,7 +322,10 @@ namespace RedHomestead.Electricity
                 }
             }
 
-
+            foreach(IPowerSupply s in VariableProducers)
+            {
+                s.RefreshVisualization();
+            }
         }
 
         internal void Add(IPowerable mod)

@@ -8,7 +8,7 @@ using RedHomestead.Buildings;
 public class Flywheel : ResourcelessGameplay, IBattery {
     private EnergyContainer e = new EnergyContainer(0)
     {
-        TotalCapacity = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay
+        TotalCapacity = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 2
     };
 
     public EnergyContainer EnergyContainer
