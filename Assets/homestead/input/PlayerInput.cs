@@ -245,6 +245,10 @@ public class PlayerInput : MonoBehaviour {
         {
             Loadout.PutEquipmentInSlot(Slot.SecondaryGadget, Equipment.Wheelbarrow);
         }
+        else if (Input.GetKeyUp(KeyCode.S) && Input.GetKey(KeyCode.RightShift))
+        {
+            Autosave.Instance.Save();
+        }
 #endif
         if (Input.GetKeyUp(KeyCode.F1))
         {
@@ -1512,18 +1516,6 @@ public class PlayerInput : MonoBehaviour {
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            if (g2 is GasStorage)
-            {
-                (g2 as GasStorage).SpecifyCompound(selectedCompound);
-            }
-            else if (g1 is GasStorage)
-            {
-                (g1 as GasStorage).SpecifyCompound(selectedCompound);
-            }
-
-            g1.LinkToModule(g2);
-            g2.LinkToModule(g1);
-
             newPipeTransform.GetComponent<Pipe>().AssignConnections(selectedCompound, g1, g2);
 
             selectedCompound = Matter.Unspecified;
@@ -1535,7 +1527,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlacePowerPlug(Collider collider)
     {
-        PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
+        Transform power = PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
 
         //turn on "plug" cylinders
         collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
@@ -1544,7 +1536,7 @@ public class PlayerInput : MonoBehaviour {
         ModuleGameplay g1 = selectedPowerSocket.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            FlowManager.Instance.PowerGrids.Attach(g1, g2);
+            power.GetComponent<Powerline>().AssignConnections(g1, g2);
         }
 
         CurrentMode = InputMode.Normal;

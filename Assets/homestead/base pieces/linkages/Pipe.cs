@@ -22,6 +22,18 @@ public class Pipe : MonoBehaviour, IDataContainer<PipelineData> {
             To = to
         };
 
+        if (from is GasStorage)
+        {
+            (from as GasStorage).SpecifyCompound(matterType);
+        }
+        else if (to is GasStorage)
+        {
+            (to as GasStorage).SpecifyCompound(matterType);
+        }
+
+        from.LinkToModule(to);
+        to.LinkToModule(from);
+
         if (data.MatterType != Matter.Unspecified)
         {
             int index = Math.Abs((int)data.MatterType);

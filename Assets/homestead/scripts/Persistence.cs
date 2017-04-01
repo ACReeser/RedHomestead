@@ -204,6 +204,15 @@ namespace RedHomestead.Persistence
                 r.Data = data;
                 r.AssignConnections(data.MatterType, moduleMap[data.FromModuleInstanceID], moduleMap[data.ToModuleInstanceID]);
             }
+            foreach (PowerlineData data in PowerData)
+            {
+                Transform t = GameObject.Instantiate(PlayerInput.Instance.powerlinePrefab, data.Position, data.Rotation) as Transform;
+                t.localScale = data.LocalScale;
+
+                Powerline r = t.GetComponent<Powerline>();
+                r.Data = data;
+                r.AssignConnections(moduleMap[data.FromModuleInstanceID], moduleMap[data.ToModuleInstanceID]);
+            }
         }
 
         /// <summary>
@@ -275,6 +284,7 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<MultipleResourceModuleGameplay, MultipleResourceModuleData>((modules) => this.MultiResourceContainerData = modules);
             this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
             this._MarshalManyFromScene<Pipe, PipelineData>((pipes) => this.PipeData = pipes);
+            this._MarshalManyFromScene<Powerline, PowerlineData>((powerline) => this.PowerData = powerline);
 
             this._MarshalHabitats();
 
