@@ -36,7 +36,7 @@ public class Pipe : MonoBehaviour, IDataContainer<PipelineData> {
 
         if (data.MatterType != Matter.Unspecified)
         {
-            int index = Math.Abs((int)data.MatterType);
+            int index = (int)data.MatterType + 6;
 
             if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
             {

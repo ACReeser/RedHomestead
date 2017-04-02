@@ -153,7 +153,13 @@ public class Habitat : Converter, IPowerConsumer, IBattery
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
         print("Getting new habitat data");
-        HabitatData = new HabitatExtraData();
+        HabitatData = new HabitatExtraData()
+        {
+            EnergyContainer = new EnergyContainer()
+            {
+                TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 5f
+            }
+        };
 
         return new ResourceContainerDictionary()
         {
