@@ -1457,6 +1457,7 @@ public class PlayerInput : MonoBehaviour {
         GuiBridge.Instance.RefreshMode();
     }
 
+    private float oldMass;
     internal void PickUpObject(Rigidbody rigid, IMovableSnappable res)
     {
         if (res != null && res.SnappedTo != null)
@@ -1467,6 +1468,8 @@ public class PlayerInput : MonoBehaviour {
         carriedObject = rigid;
         carriedObject.useGravity = false;
         //carriedObject.isKinematic = true;
+        oldMass = rigid.mass;
+        carriedObject.mass = 0f;
         carriedObject.transform.SetParent(this.transform);
     }
 
@@ -1474,9 +1477,10 @@ public class PlayerInput : MonoBehaviour {
     {
         if (carriedObject != null)
         {
-            carriedObject.useGravity = true;
-            carriedObject.isKinematic = false;
+            //carriedObject.isKinematic = false;
             carriedObject.transform.SetParent(null);
+            carriedObject.useGravity = true;
+            carriedObject.mass = oldMass;
         }
 
         carriedObject = null;
