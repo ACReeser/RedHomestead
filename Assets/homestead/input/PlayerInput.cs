@@ -125,7 +125,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Normal, PostIt, Sleep, Terminal, Pipeline, Powerline }
+    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -211,23 +211,6 @@ public class PlayerInput : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-	    if (Input.GetKeyUp(KeyCode.Escape))
-        {
-            if (reportMenuOpen)
-            {
-                ToggleReport(null);
-            }
-            else if (playerIsInVehicle)
-            {
-                ToggleVehicle(null);
-            }
-            else if (CurrentMode == InputMode.Normal)
-            {
-                GuiBridge.Instance.ToggleEscapeMenu();
-            }
-        }
-
-
 #if UNITY_EDITOR
         if (Input.GetKeyUp(KeyCode.Comma))
         {
@@ -291,6 +274,10 @@ public class PlayerInput : MonoBehaviour {
                 break;
             case InputMode.Powerline:
                 HandlePowerlineInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Menu:
+                if (Input.GetKeyUp(KeyCode.Escape))
+                    ToggleMenu();
                 break;
         }
 
@@ -597,6 +584,23 @@ public class PlayerInput : MonoBehaviour {
     
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            if (reportMenuOpen)
+            {
+                ToggleReport(null);
+            }
+            else if (playerIsInVehicle)
+            {
+                ToggleVehicle(null);
+            }
+            else
+            {
+                ToggleMenu();
+                return;
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             GuiBridge.Instance.ToggleRadialMenu(true);
@@ -1076,6 +1080,14 @@ public class PlayerInput : MonoBehaviour {
         {
             PlacePostIt();
         }
+    }
+
+    internal void ToggleMenu()
+    {
+        CurrentMode = CurrentMode == InputMode.Menu ? InputMode.Normal : InputMode.Menu;
+        GuiBridge.Instance._ToggleEscapeMenuProgrammatically();
+        FPSController.FreezeLook = CurrentMode == InputMode.Menu;
+        Time.timeScale = CurrentMode == InputMode.Menu ? 0 : 1f;
     }
 
     public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip, bool oneShot = true)
