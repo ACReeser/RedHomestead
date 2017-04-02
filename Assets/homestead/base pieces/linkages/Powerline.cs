@@ -18,4 +18,18 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
 
         FlowManager.Instance.PowerGrids.Attach(from, to);
     }
+
+    internal void Remove()
+    {
+        if (Data == null || Data.From == null || Data.To == null)
+        {
+            UnityEngine.Debug.LogWarning("Powerline in removal mode not fully connected!");
+        }
+        else
+        {
+            FlowManager.Instance.PowerGrids.RemoveLink(Data.From, Data.To);
+
+            GameObject.Destroy(gameObject);
+        }
+    }
 }

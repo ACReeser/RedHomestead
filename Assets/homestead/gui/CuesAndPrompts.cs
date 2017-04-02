@@ -252,6 +252,11 @@ public static class Prompts {
         Description = "Remove Connection",
         Key = "E"
     };
+    internal static PromptInfo ExistingPowerlineRemovalHint = new PromptInfo()
+    {
+        Description = "Remove Powerline",
+        Key = "E"
+    };
     internal static PromptInfo PayloadDisassembleHint = new PromptInfo()
     {
         Description = "Disassemble Lander",

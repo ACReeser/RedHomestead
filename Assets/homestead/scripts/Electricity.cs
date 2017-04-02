@@ -182,6 +182,13 @@ namespace RedHomestead.Electricity
             }
         }
 
+        internal void RemoveLink(IPowerable node1, IPowerable node2)
+        {
+            PowerGrid splittingPowerGrid = grids[node1.PowerGridInstanceID];
+
+
+        }
+
         internal void Tick()
         {
             foreach (PowerGrid g in grids.Values)

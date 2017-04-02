@@ -679,6 +679,10 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnExistingPipe(doInteract, hitInfo);
                 }
+                else if (hitInfo.collider.gameObject.CompareTag("powerline"))
+                {
+                    newPrompt = OnExistingPowerline(doInteract, hitInfo);
+                }
                 else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
                     if (doInteract)
@@ -1156,6 +1160,20 @@ public class PlayerInput : MonoBehaviour {
         else
         {
             return Prompts.ExistingPipeRemovalHint;
+        }
+    }
+
+    private PromptInfo OnExistingPowerline(bool doInteract, RaycastHit hitInfo)
+    {
+        if (doInteract)
+        {
+            Powerline powerline = hitInfo.collider.transform.GetComponent<Powerline>();
+            powerline.Remove();
+            return null;
+        }
+        else
+        {
+            return Prompts.ExistingPowerlineRemovalHint;
         }
     }
 

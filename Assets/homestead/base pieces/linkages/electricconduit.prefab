@@ -9,9 +9,10 @@ GameObject:
   m_Component:
   - component: {fileID: 429478}
   - component: {fileID: 114781790533347566}
+  - component: {fileID: 65116442207475432}
   m_Layer: 0
   m_Name: electricconduit
-  m_TagString: Untagged
+  m_TagString: powerline
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -26,7 +27,6 @@ GameObject:
   - component: {fileID: 466020}
   - component: {fileID: 3386568}
   - component: {fileID: 2329278}
-  - component: {fileID: 6577202}
   m_Layer: 0
   m_Name: electricconduit
   m_TagString: Untagged
@@ -41,7 +41,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 113564}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 702.344, y: 0.6, z: 998.514}
+  m_LocalPosition: {x: 706.5348, y: 0.3662331, z: 996.4021}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 466020}
@@ -99,18 +99,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 121478}
   m_Mesh: {fileID: 4300000, guid: 5d62b37661d725f43b3ddd3fc02f6d08, type: 3}
---- !u!65 &6577202
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 121478}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.02, y: 0.02, z: 0.02}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -122,6 +110,18 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 113564}
   m_IsPrefabParent: 1
+--- !u!65 &65116442207475432
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 113564}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.2, y: 0.2, z: 2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &114781790533347566
 MonoBehaviour:
   m_ObjectHideFlags: 1
