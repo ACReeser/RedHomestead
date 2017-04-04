@@ -67,6 +67,7 @@ namespace RedHomestead.Rovers
         private float m_CurrentTorque;
         private Rigidbody m_Rigidbody;
         private const float k_ReversingThreshold = 0.01f;
+        private const int WheelCount = 6;
 
         public bool Skidding { get; private set; }
         public float BrakeInput { get; private set; }
@@ -79,8 +80,8 @@ namespace RedHomestead.Rovers
         // Use this for initialization
         private void Start()
         {
-            m_WheelMeshLocalRotations = new Quaternion[6];
-            for (int i = 0; i < 6; i++)
+            m_WheelMeshLocalRotations = new Quaternion[WheelCount];
+            for (int i = 0; i < WheelCount; i++)
             {
                 m_WheelMeshLocalRotations[i] = m_WheelMeshes[i].transform.localRotation;
             }
@@ -149,7 +150,7 @@ namespace RedHomestead.Rovers
 
         public void Move(float steering, float accel, float footbrake, float handbrake)
         {
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < WheelCount; i++)
             {
                 Quaternion quat;
                 Vector3 position;
@@ -169,6 +170,8 @@ namespace RedHomestead.Rovers
             m_SteerAngle = steering * m_MaximumSteerAngle;
             m_WheelColliders[0].steerAngle = m_SteerAngle;
             m_WheelColliders[1].steerAngle = m_SteerAngle;
+            m_WheelColliders[4].steerAngle = -m_SteerAngle;
+            m_WheelColliders[5].steerAngle = -m_SteerAngle;
 
             SteerHelper();
             ApplyDrive(accel, footbrake);
@@ -221,11 +224,10 @@ namespace RedHomestead.Rovers
             switch (m_CarDriveType)
             {
                 case CarDriveType.FourWheelDrive:
-                    thrustTorque = accel * (m_CurrentTorque / 6f);
-                    for (int i = 0; i < 6; i++)
-                    {
-                        m_WheelColliders[i].motorTorque = thrustTorque;
-                    }
+                    thrustTorque = accel * (m_CurrentTorque / 4f);
+
+                    m_WheelColliders[0].motorTorque = m_WheelColliders[1].motorTorque = thrustTorque;
+                    m_WheelColliders[4].motorTorque = m_WheelColliders[5].motorTorque = thrustTorque;
                     break;
 
                 case CarDriveType.FrontWheelDrive:
@@ -240,7 +242,7 @@ namespace RedHomestead.Rovers
 
             }
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < WheelCount; i++)
             {
                 if (CurrentSpeed > 5 && Vector3.Angle(transform.forward, m_Rigidbody.velocity) < 50f)
                 {
@@ -257,7 +259,7 @@ namespace RedHomestead.Rovers
 
         private void SteerHelper()
         {
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < WheelCount; i++)
             {
                 WheelHit wheelhit;
                 m_WheelColliders[i].GetGroundHit(out wheelhit);
@@ -292,7 +294,7 @@ namespace RedHomestead.Rovers
         private void CheckForWheelSpin()
         {
             // loop through all wheels
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < WheelCount; i++)
             {
                 WheelHit wheelHit;
                 m_WheelColliders[i].GetGroundHit(out wheelHit);
@@ -331,7 +333,7 @@ namespace RedHomestead.Rovers
             {
                 case CarDriveType.FourWheelDrive:
                     // loop through all wheels
-                    for (int i = 0; i < 6; i++)
+                    for (int i = 0; i < WheelCount; i++)
                     {
                         m_WheelColliders[i].GetGroundHit(out wheelHit);
 
@@ -377,7 +379,7 @@ namespace RedHomestead.Rovers
 
         private bool AnySkidSoundPlaying()
         {
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < WheelCount; i++)
             {
                 if (m_WheelEffects[i].PlayingAudio)
                 {

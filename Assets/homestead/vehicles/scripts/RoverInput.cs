@@ -92,7 +92,7 @@ namespace RedHomestead.Rovers
                 float v = CrossPlatformInputManager.GetAxis("Vertical");
     #if !MOBILE_INPUT
                 float brake = CrossPlatformInputManager.GetAxis("Jump");
-                m_Car.Move(h, v, -brake, 0f);
+                m_Car.Move(h, v, v, -brake);
     #else
                 m_Car.Move(h, v, v, 0f);
     #endif
