@@ -433,7 +433,7 @@ public class PlayerInput : MonoBehaviour {
         {
             this.PostItText = null;
             this.CurrentMode = InputMode.Normal;
-            FPSController.SuspendInput = false;
+            FPSController.FreezeMovement = false;
 
             RefreshEquipmentState();
         }
@@ -1130,7 +1130,7 @@ public class PlayerInput : MonoBehaviour {
             t.SetParent(hitInfo.collider.transform);
             this.PostItText = t.GetChild(0).GetChild(0).GetComponent<TextMesh>();
             this.CurrentMode = InputMode.PostIt;
-            FPSController.SuspendInput = true;
+            FPSController.FreezeMovement = true;
             this.RefreshEquipmentState();
         }
     }
@@ -1515,7 +1515,7 @@ public class PlayerInput : MonoBehaviour {
             FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
             FPSController.transform.SetParent(null);
             FPSController.CharacterController.enabled = true;
-            FPSController.SuspendInput = false;
+            FPSController.FreezeMovement = false;
         }
         else //entering vehicle
         {
@@ -1530,7 +1530,7 @@ public class PlayerInput : MonoBehaviour {
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;
             FPSController.InitializeMouseLook();
-            FPSController.SuspendInput = true;
+            FPSController.FreezeMovement = true;
             FPSController.CharacterController.enabled = false;
         }
     }
@@ -1718,7 +1718,7 @@ public class PlayerInput : MonoBehaviour {
     {
         this.CurrentMode = inTerminal ? InputMode.Terminal : InputMode.Normal;
 
-        FPSController.SuspendInput = inTerminal;
+        FPSController.FreezeMovement = inTerminal;
         FPSController.FreezeLook = inTerminal;
         Cursor.visible = inTerminal;
         Cursor.lockState = CursorLockMode.None;
@@ -1730,7 +1730,7 @@ public class PlayerInput : MonoBehaviour {
     {
         this.CurrentMode = isAsleep ? InputMode.Sleep : InputMode.Normal;
 
-        FPSController.SuspendInput = isAsleep;
+        FPSController.FreezeMovement = isAsleep;
 
         this.RefreshEquipmentState();
     }
