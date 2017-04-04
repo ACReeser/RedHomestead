@@ -148,7 +148,7 @@ public class CustomFPSController : MonoBehaviour
                     m_IsOnLadder = m_PostTransitionLadderState;
                 }
             }
-            else if (transform.position.y < maximumLadderY)
+            else if (transform.position.y + m_Input.y < maximumLadderY)
             {
                 m_CharacterController.Move(new Vector3(0, m_Input.y, 0) * Time.fixedDeltaTime * speed / 2f);
             }
@@ -294,7 +294,7 @@ public class CustomFPSController : MonoBehaviour
     #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
             // keep track of whether or not the character is walking or running
-            m_IsWalking = !(Input.GetKey(KeyCode.LeftShift) && m_CharacterController.isGrounded);
+            m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
     #endif
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
