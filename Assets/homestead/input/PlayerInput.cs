@@ -1722,6 +1722,7 @@ public class PlayerInput : MonoBehaviour {
         FPSController.FreezeLook = inTerminal;
         Cursor.visible = inTerminal;
         Cursor.lockState = CursorLockMode.None;
+        GuiBridge.Instance.Crosshair.gameObject.SetActive(!inTerminal);
 
         this.RefreshEquipmentState();
     }

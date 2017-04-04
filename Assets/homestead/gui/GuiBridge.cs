@@ -104,7 +104,7 @@ public struct PromptUI
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel;
+    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel, Crosshair;
     public Text ConstructionHeader, EquippedText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
