@@ -271,11 +271,13 @@ namespace RedHomestead.Economy{
         public DeliveryType Via
         {
             get { return via; }
-            //todo: bug - selecting delivery will get around mass/volume limits
             set {
-                via = value;
-                RecalcVolumeMassShipping();
-                RecalcDeliveryTime();
+                if (TotalMass <= value.MaximumMass() && TotalVolume <= value.MaximumVolume())
+                {
+                    via = value;
+                    RecalcVolumeMassShipping();
+                    RecalcDeliveryTime();
+                }
             }
         }
         public string VendorName;

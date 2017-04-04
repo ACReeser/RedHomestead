@@ -332,6 +332,7 @@ public class Terminal : MonoBehaviour {
     public void SelectDeliveryType(int type)
     {
         CurrentOrder.Via = (DeliveryType)type;
+        
         buys.RefreshMassVolumeMoney(CurrentOrder);
         //todo: refresh delivery estimate text using CurrentOrder.DeliveryTime.ToString()
     }
