@@ -150,8 +150,9 @@ namespace RedHomestead.Electricity
     public class PowerGrids
     {
         private Dictionary<string, PowerGrid> grids = new Dictionary<string, PowerGrid>();
+        internal Dictionary<IPowerable, List<Powerline>> Edges = new Dictionary<IPowerable, List<Powerline>>();
 
-        internal void Attach(IPowerable node1, IPowerable node2)
+        internal void Attach(Powerline edge, IPowerable node1, IPowerable node2)
         {
             bool node1Powered = node1.HasPowerGrid();
             bool node2Powered = node2.HasPowerGrid();
@@ -180,13 +181,84 @@ namespace RedHomestead.Electricity
                 newPG.Add(node1);
                 newPG.Add(node2);
             }
+
+            AddEdge(edge, node1);
+            AddEdge(edge, node2);
         }
 
-        internal void RemoveLink(IPowerable node1, IPowerable node2)
+        private void AddEdge(Powerline edge, IPowerable node)
+        {
+            if (Edges.ContainsKey(node))
+                Edges[node].Add(edge);
+            else
+                Edges[node] = new List<Powerline>() { edge };
+        }
+
+        internal void Detach(Powerline edge, IPowerable node1, IPowerable node2)
         {
             PowerGrid splittingPowerGrid = grids[node1.PowerGridInstanceID];
 
+            //let's take care of the easy cases first
+            if (Edges[node1].Count == 1 && Edges[node2].Count == 1) //both are each other's leaf
+            {
+                //so set them both as "unpowered"
+                splittingPowerGrid.Remove(node1);
+                splittingPowerGrid.Remove(node2);
+                Edges.Remove(node1);
+                Edges.Remove(node2);
+                //and remove this power grid completely
+                grids.Clear();
+                grids.Remove(splittingPowerGrid.PowerGridInstanceID);
+            }
+            else if (Edges[node1].Count == 1) //node 1 is a leaf
+            {
+                splittingPowerGrid.Remove(node1);
+                Edges.Remove(node1);
+                Edges[node2].Remove(edge);
+            }
+            else if (Edges[node2].Count == 1) //node 2 is a leaf
+            {
+                splittingPowerGrid.Remove(node2);
+                Edges.Remove(node2);
+                Edges[node1].Remove(edge);
+            }
+            else //node 1 and 2 are connected to a larger graph
+            {
+                Edges[node1].Remove(edge);
+                Edges[node2].Remove(edge);
 
+                BuildNewPowerGrid(node1);
+                BuildNewPowerGrid(node2);
+                
+                splittingPowerGrid.Clear();
+                grids.Remove(splittingPowerGrid.PowerGridInstanceID);
+            }
+        }
+
+        private void BuildNewPowerGrid(IPowerable node1)
+        {
+            PowerGrid newPG = new PowerGrid();
+            Dictionary<IPowerable, bool> visited = new Dictionary<IPowerable, bool>();
+
+            BuildPowerGridVisitPowerNodes(node1, newPG, visited);
+
+            grids.Add(newPG.PowerGridInstanceID, newPG);
+        }
+
+        private void BuildPowerGridVisitPowerNodes(IPowerable parentNode, PowerGrid parentGrid, Dictionary<IPowerable, bool> visited)
+        {
+            parentGrid.Add(parentNode);
+            visited.Add(parentNode, true);
+
+            foreach(Powerline edge in Edges[parentNode])
+            {
+#pragma warning disable CS0253 // Possible unintended reference comparison; right hand side needs cast
+                IPowerable child = (edge.Data.From == parentNode) ? edge.Data.To as IPowerable : edge.Data.From as IPowerable;
+#pragma warning restore CS0253 // Possible unintended reference comparison; right hand side needs cast
+
+                if (!visited.ContainsKey(child))
+                    BuildPowerGridVisitPowerNodes(child, parentGrid, visited);
+            }
         }
 
         internal void Tick()
@@ -212,12 +284,24 @@ namespace RedHomestead.Electricity
         public Mesh[] ActiveMeshes;
     }
 
+    public struct PowerGridTickData
+    {
+        public float CapacityWatts;
+        public float LoadWatts;
+        public float BatteryWatts;
+
+        public float SurplusWatts;
+        public float DeficitWatts;
+    }
+
     public class PowerGrid
     {
         public enum GridMode { Unknown = -99, Blackout = -3, Brownout, BatteryDrain, Nominal = 0, BatteryRecharge }
 
         internal readonly string PowerGridInstanceID;
         internal GridMode Mode = GridMode.Unknown;
+
+        //if you add anymore lists, update .Usurp
         protected List<IPowerConsumer> Consumers = new List<IPowerConsumer>();
         protected List<IPowerSupply> Producers = new List<IPowerSupply>();
         protected List<IPowerSupply> VariableProducers = new List<IPowerSupply>();
@@ -390,9 +474,19 @@ namespace RedHomestead.Electricity
 
             other.Producers.ForEach(SetPowerableParentToMe);
             Producers.AddRange(other.Producers);
+            //since variable producers are just producers, we don't need to set powerable parent on them all
+            VariableProducers.AddRange(other.VariableProducers);
 
             other.Batteries.ForEach(SetPowerableParentToMe);
             Batteries.AddRange(other.Batteries);
+        }
+
+        internal void Clear()
+        {
+            Consumers.Clear();
+            Batteries.Clear();
+            Producers.Clear();
+            VariableProducers.Clear();
         }
     }
 }

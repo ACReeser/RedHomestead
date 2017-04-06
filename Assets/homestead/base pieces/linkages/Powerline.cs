@@ -16,7 +16,7 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
             To = to
         };
 
-        FlowManager.Instance.PowerGrids.Attach(from, to);
+        FlowManager.Instance.PowerGrids.Attach(this, from, to);
     }
 
     internal void Remove()
@@ -27,7 +27,7 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
         }
         else
         {
-            FlowManager.Instance.PowerGrids.RemoveLink(Data.From, Data.To);
+            FlowManager.Instance.PowerGrids.Detach(this, Data.From, Data.To);
 
             GameObject.Destroy(gameObject);
         }
