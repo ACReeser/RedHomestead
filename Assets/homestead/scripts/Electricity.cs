@@ -52,8 +52,8 @@ namespace RedHomestead.Electricity
 
     public static class ElectricityConstants
     {
-        public const float WattHoursPerBatteryBlock = WattsPerBlock / 2f;
-        public const float WattsPerBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f;
+        public const float WattHoursPerBatteryBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f / 2f;
+        public const float WattsPerBlock = RadioisotopeThermoelectricGenerator._WattsGenerated / 10f;
         public static Vector3 _BackingScale = new Vector3(1.2f, 1.2f, 0f);
     }
 
@@ -472,6 +472,8 @@ namespace RedHomestead.Electricity
             else if (mod is IPowerConsumer)
             {
                 Consumers.Remove(mod as IPowerConsumer);
+                
+                (mod as IPowerConsumer).EmergencyShutdown();
             }
 
             if (mod is IBattery)

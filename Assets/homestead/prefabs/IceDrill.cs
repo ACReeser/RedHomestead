@@ -12,10 +12,11 @@ public class IceDrillData: FacingData
 
 }
 
-public class IceDrill : MovableSnappable, ResourcelessGameplay {
+public class IceDrill : MovableSnappable, IPowerConsumer {
     public Transform Drill;
     public Transform OnOffHandle;
-    public bool Drilling, LegsDown;
+    public Transform Socket;
+    public bool LegsDown;
     public Animator[] LegControllers;
 
     private const float DrillDownLocalY = -.709f;
@@ -49,7 +50,7 @@ public class IceDrill : MovableSnappable, ResourcelessGameplay {
 
     // Update is called once per frame
     void Update () {
-		if (Drilling)
+		if (IsOn)
         {
             Drill.Rotate(Vector3.forward, 2f, Space.Self);
         }
@@ -58,33 +59,34 @@ public class IceDrill : MovableSnappable, ResourcelessGameplay {
     public void ToggleLegs()
     {
         LegsDown = !LegsDown;
-        print("legs down now " + LegsDown);
         foreach(Animator LegController in LegControllers)
         {
             LegController.SetBool("LegDown", LegsDown);
         }
+        Socket.tag = LegsDown ? "powerplug" : "Untagged";
     }
 
-    public void ToggleDrilling()
+    public void ToggleDrilling(bool? state = null)
     {
-        Drilling = !Drilling;
+        IsOn = state ?? !IsOn;
         RefreshHandle();
         StartCoroutine(MoveDrill());
+        this.RefreshVisualization();
     }
 
     private void RefreshHandle()
     {
-        OnOffHandle.localRotation = Quaternion.Euler(0, Drilling ? -180 : -90, 0);
+        OnOffHandle.localRotation = Quaternion.Euler(0, IsOn ? -180 : -90, 0);
     }
 
     private IEnumerator MoveDrill()
     {
-        while (Drilling && Drill.localPosition.y > DrillDownLocalY)
+        while (IsOn && Drill.localPosition.y > DrillDownLocalY)
         {
             yield return null;
             Drill.localPosition = Drill.localPosition + Vector3.down * .3f * Time.deltaTime;
         }
-        while (!Drilling && Drill.localPosition.y < 0f)
+        while (!IsOn && Drill.localPosition.y < 0f)
         {
             yield return null;
             Drill.localPosition = Drill.localPosition - Vector3.down * .3f * Time.deltaTime;
@@ -101,8 +103,8 @@ public class IceDrill : MovableSnappable, ResourcelessGameplay {
 
     protected override void OnDetach()
     {
-        if (Drilling)
-            ToggleDrilling();
+        if (IsOn)
+            ToggleDrilling(false);
 
         if (LegsDown)
             ToggleLegs();
@@ -112,7 +114,6 @@ public class IceDrill : MovableSnappable, ResourcelessGameplay {
 
     public void OnPowerChanged()
     {
-        print("ice drill power");
         if (HasPower && LegsDown)
             OnOffHandle.tag = "pumpHandle";
         else
@@ -121,9 +122,6 @@ public class IceDrill : MovableSnappable, ResourcelessGameplay {
 
     public void OnEmergencyShutdown()
     {
-        if (Drilling)
-        {
-            ToggleDrilling();
-        }        
+        ToggleDrilling(false);
     }
 }

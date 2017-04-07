@@ -5,6 +5,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using RedHomestead.EVA;
 using System.Linq;
 using System.Collections.Generic;
+using RedHomestead.Electricity;
 
 namespace RedHomestead.Persistence
 {
@@ -77,6 +78,13 @@ namespace RedHomestead.Persistence
     {
         [HideInInspector]
         public Vector3 LocalScale;
+    }
+
+    [Serializable]
+    public class PipelineData : ConnectionData
+    {
+        [HideInInspector]
+        public Simulation.Matter MatterType;
         [NonSerialized]
         public ModuleGameplay From, To;
         public string FromModuleInstanceID, ToModuleInstanceID;
@@ -95,14 +103,24 @@ namespace RedHomestead.Persistence
     }
 
     [Serializable]
-    public class PipelineData : ConnectionData
+    public class PowerlineData: ConnectionData
     {
-        [HideInInspector]
-        public Simulation.Matter MatterType;
-    }
+        [NonSerialized]
+        public IPowerable From, To;
+        public string FromPowerGridInstanceID, ToPowerGridInstanceID;
 
-    [Serializable]
-    public class PowerlineData: ConnectionData { }
+        protected override void BeforeMarshal(Transform t = null)
+        {
+            base.BeforeMarshal(t);
+
+            if (From != null)
+                FromPowerGridInstanceID = From.PowerGridInstanceID;
+            if (To != null)
+                ToPowerGridInstanceID = To.PowerGridInstanceID;
+
+            LocalScale = t.localScale;
+        }
+    }
 
     [Serializable]
     public class EnvironmentData
@@ -165,6 +183,7 @@ namespace RedHomestead.Persistence
             Habitat[] allHabs = Transform.FindObjectsOfType<Habitat>();
 
             Dictionary<string, ModuleGameplay> moduleMap = new Dictionary<string, ModuleGameplay>();
+            Dictionary<string, IPowerable> powerableMap = new Dictionary<string, IPowerable>();
 
             //we have to look at each data to figure out which prefab to use
             foreach (ResourcelessModuleData data in ResourcelessData)
@@ -173,6 +192,7 @@ namespace RedHomestead.Persistence
                 ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
                 r.Data = data;
                 moduleMap.Add(data.ModuleInstanceID, r);
+                powerableMap.Add(data.PowerGridInstanceID, r);
             }
             foreach (SingleResourceModuleData data in SingleResourceContainerData)
             {
@@ -180,6 +200,7 @@ namespace RedHomestead.Persistence
                 SingleResourceModuleGameplay r = t.GetComponent<SingleResourceModuleGameplay>();
                 r.Data = data;
                 moduleMap.Add(data.ModuleInstanceID, r);
+                powerableMap.Add(data.PowerGridInstanceID, r);
             }
             foreach (MultipleResourceModuleData data in MultiResourceContainerData)
             {
@@ -193,6 +214,7 @@ namespace RedHomestead.Persistence
                     MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
                     r.Data = data;
                     moduleMap.Add(data.ModuleInstanceID, r);
+                    powerableMap.Add(data.PowerGridInstanceID, r);
                 }
             }
             foreach (PipelineData data in PipeData)
@@ -211,7 +233,7 @@ namespace RedHomestead.Persistence
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
-                r.AssignConnections(moduleMap[data.FromModuleInstanceID], moduleMap[data.ToModuleInstanceID]);
+                r.AssignConnections(powerableMap[data.FromPowerGridInstanceID], powerableMap[data.ToPowerGridInstanceID]);
             }
         }
 

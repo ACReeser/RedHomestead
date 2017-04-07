@@ -9,6 +9,7 @@ using RedHomestead.Equipment;
 using RedHomestead.Interiors;
 using RedHomestead.Geography;
 using RedHomestead.Persistence;
+using RedHomestead.Electricity;
 
 namespace RedHomestead.Equipment
 {
@@ -1567,7 +1568,7 @@ public class PlayerInput : MonoBehaviour {
         collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
         selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
 
-        ModuleGameplay g1 = selectedPowerSocket.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
+        IPowerable g1 = selectedPowerSocket.transform.root.GetComponent<IPowerable>(), g2 = collider.transform.root.GetComponent<IPowerable>();
         if (g1 != null && g2 != null)
         {
             power.GetComponent<Powerline>().AssignConnections(g1, g2);
