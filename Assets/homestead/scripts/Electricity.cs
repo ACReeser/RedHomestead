@@ -68,12 +68,18 @@ namespace RedHomestead.Electricity
         {
             foreach (IPowerConsumer c in list)
             {
-                if (!c.HasPower)
-                {
-                    c.HasPower = true;
-                    c.RefreshVisualization();
-                    c.OnPowerChanged();
-                }
+                c.TurnOnPower();
+            }
+        }
+
+        public static void TurnOnPower(this IPowerConsumer consumer)
+        {
+            UnityEngine.Debug.Log("turning on consumer");
+            if (!consumer.HasPower)
+            {
+                consumer.HasPower = true;
+                consumer.RefreshVisualization();
+                consumer.OnPowerChanged();
             }
         }
 
@@ -433,6 +439,16 @@ namespace RedHomestead.Electricity
             else if (mod is IPowerConsumer)
             {
                 Consumers.Add(mod as IPowerConsumer);
+
+                //consumers need to have their HasPower state refreshed
+                switch (Mode)
+                {
+                    case GridMode.BatteryDrain:
+                    case GridMode.BatteryRecharge:
+                    case GridMode.Nominal:
+                        (mod as IPowerConsumer).TurnOnPower();
+                        break;
+                }
             }
 
             if (mod is IBattery)

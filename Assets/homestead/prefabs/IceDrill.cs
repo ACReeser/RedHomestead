@@ -5,20 +5,31 @@ using RedHomestead.Simulation;
 using UnityEngine;
 using RedHomestead.Persistence;
 using UnityEditor.Animations;
+using RedHomestead.Electricity;
 
 public class IceDrillData: FacingData
 {
 
 }
 
-public class IceDrill : MovableSnappable {
+public class IceDrill : MovableSnappable, ResourcelessGameplay {
     public Transform Drill;
     public Transform OnOffHandle;
     public bool Drilling, LegsDown;
     public Animator[] LegControllers;
 
     private const float DrillDownLocalY = -.709f;
-    
+
+    public float WattsConsumed { get { return ElectricityConstants.WattsPerBlock; } }
+
+    public bool HasPower { get; set; }
+    public bool IsOn { get; set; }
+
+    public string PowerGridInstanceID { get; set; }
+
+    public PowerVisualization _powerViz;
+    public PowerVisualization PowerViz { get { return _powerViz; } }
+
     public override string GetText()
     {
         return "Ice Drill";
@@ -27,10 +38,13 @@ public class IceDrill : MovableSnappable {
     // Use this for initialization
     void Start () {
         Drill.localPosition = Vector3.zero;
+
         foreach (Animator LegController in LegControllers)
         {
             LegController.SetBool("LegDown", LegsDown);
         }
+
+        this.InitializePowerVisualization();
     }
 
     // Update is called once per frame
@@ -82,7 +96,6 @@ public class IceDrill : MovableSnappable {
         if (this.SnappedTo is Deposit)
         {
             ToggleLegs();
-            OnOffHandle.tag = "pumpHandle";
         }
     }
 
@@ -95,5 +108,22 @@ public class IceDrill : MovableSnappable {
             ToggleLegs();
 
         OnOffHandle.tag = "Untagged";
+    }
+
+    public void OnPowerChanged()
+    {
+        print("ice drill power");
+        if (HasPower && LegsDown)
+            OnOffHandle.tag = "pumpHandle";
+        else
+            OnOffHandle.tag = "Untagged";
+    }
+
+    public void OnEmergencyShutdown()
+    {
+        if (Drilling)
+        {
+            ToggleDrilling();
+        }        
     }
 }
