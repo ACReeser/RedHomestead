@@ -200,6 +200,14 @@ namespace RedHomestead.Electricity
                 Edges[node] = new List<Powerline>() { edge };
         }
 
+        internal void Detach(IPowerable node)
+        {
+            foreach (Powerline p in Edges[node])
+            {
+                p.Remove();
+            }
+        }
+
         internal void Detach(Powerline edge, IPowerable node1, IPowerable node2)
         {
             PowerGrid splittingPowerGrid = grids[node1.PowerGridInstanceID];

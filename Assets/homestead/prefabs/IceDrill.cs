@@ -110,6 +110,8 @@ public class IceDrill : MovableSnappable, IPowerConsumer {
             ToggleLegs();
 
         OnOffHandle.tag = "Untagged";
+
+        FlowManager.Instance.PowerGrids.Detach(this);
     }
 
     public void OnPowerChanged()
