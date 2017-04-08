@@ -583,6 +583,23 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1781417463317066
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4570819027058604}
+  - component: {fileID: 65836570507675532}
+  - component: {fileID: 114049523904865170}
+  m_Layer: 8
+  m_Name: CrateSnap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1831250595953596
 GameObject:
   m_ObjectHideFlags: 1
@@ -831,6 +848,7 @@ Transform:
   - {fileID: 4427005932519868}
   - {fileID: 4760160863846220}
   - {fileID: 4365603990516040}
+  - {fileID: 4570819027058604}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1043,6 +1061,19 @@ Transform:
   m_Father: {fileID: 4003185407926250}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -90.00001, y: 22.5, z: 0}
+--- !u!4 &4570819027058604
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1781417463317066}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.253, z: -0.868}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4321635143723982}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4590831953766352
 Transform:
   m_ObjectHideFlags: 1
@@ -1670,6 +1701,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.6, y: 0.6, z: 0.6}
   m_Center: {x: 0, y: 0, z: -0.3}
+--- !u!65 &65836570507675532
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1781417463317066}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.8, y: 0.8, z: 0.8}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!95 &95163229188647768
 Animator:
   serializedVersion: 3
@@ -1753,7 +1796,7 @@ MonoBehaviour:
   Drill: {fileID: 4710129375199688}
   OnOffHandle: {fileID: 4063953653745182}
   Socket: {fileID: 4409399832911682}
-  Drilling: 0
+  CrateAnchor: {fileID: 4570819027058604}
   LegsDown: 0
   LegControllers:
   - {fileID: 95882177424511000}
@@ -1764,6 +1807,17 @@ MonoBehaviour:
     PowerBacking: {fileID: 33037912224309194}
     PowerMask: {fileID: 4407563291476128}
     PowerActive: {fileID: 4365603990516040}
+--- !u!114 &114049523904865170
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1781417463317066}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 601d8d47802955743aadf072242adc81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!137 &137050007188878912
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

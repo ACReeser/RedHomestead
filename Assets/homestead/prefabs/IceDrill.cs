@@ -12,16 +12,15 @@ public class IceDrillData: FacingData
 
 }
 
-public class IceDrill : MovableSnappable, IPowerConsumer {
-    public Transform Drill;
-    public Transform OnOffHandle;
-    public Transform Socket;
+public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITriggerSubscriber {
+    public Transform Drill, OnOffHandle, Socket, CrateAnchor;
     public bool LegsDown;
     public Animator[] LegControllers;
 
     private const float DrillDownLocalY = -.709f;
 
     public float WattsConsumed { get { return ElectricityConstants.WattsPerBlock; } }
+    public static float WaterPerSecond = (1f / (SunOrbit.GameMinutesPerGameDay * 60f)) / 2f;
 
     public bool HasPower { get; set; }
     public bool IsOn { get; set; }
@@ -46,6 +45,7 @@ public class IceDrill : MovableSnappable, IPowerConsumer {
         }
 
         this.InitializePowerVisualization();
+        CrateAnchor.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -53,6 +53,10 @@ public class IceDrill : MovableSnappable, IPowerConsumer {
 		if (IsOn)
         {
             Drill.Rotate(Vector3.forward, 2f, Space.Self);
+            if (HasAttachedWaterContainer && capturedResource.Data.Quantity < 1f)
+            {
+                capturedResource.Data.Quantity += Time.deltaTime * WaterPerSecond;
+            }
         }
 	}
 
@@ -64,6 +68,7 @@ public class IceDrill : MovableSnappable, IPowerConsumer {
             LegController.SetBool("LegDown", LegsDown);
         }
         Socket.tag = LegsDown ? "powerplug" : "Untagged";
+        CrateAnchor.gameObject.SetActive(LegsDown);
     }
 
     public void ToggleDrilling(bool? state = null)
@@ -125,5 +130,32 @@ public class IceDrill : MovableSnappable, IPowerConsumer {
     public void OnEmergencyShutdown()
     {
         ToggleDrilling(false);
+    }
+
+    private ResourceComponent capturedResource;
+    private bool HasAttachedWaterContainer { get { return capturedResource != null; } }
+    private Coroutine detachTimer;
+    public void DetachCrate(IMovableSnappable detaching)
+    {
+        capturedResource = null;
+        detachTimer = StartCoroutine(DetachTimer());
+    }
+
+    private IEnumerator DetachTimer()
+    {
+        yield return new WaitForSeconds(1f);
+        detachTimer = null;
+    }
+
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
+    {
+        if (detachTimer == null && res is ResourceComponent)
+        {
+            if ((res as ResourceComponent).Data.ResourceType == Matter.Water)
+            {
+                capturedResource = res as ResourceComponent;
+                capturedResource.SnapCrate(this, CrateAnchor.position);
+            }
+        }
     }
 }
