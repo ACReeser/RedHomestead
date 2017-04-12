@@ -1490,6 +1490,7 @@ public class PlayerInput : MonoBehaviour {
         oldMass = rigid.mass;
         carriedObject.mass = 0f;
         carriedObject.transform.SetParent(this.transform);
+        res.OnPickedUp();
     }
 
     internal void DropObject()

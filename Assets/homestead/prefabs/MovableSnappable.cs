@@ -12,6 +12,7 @@ public interface IMovableSnappable
     FixedJoint snapJoint { get; }
     void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null);
     void UnsnapCrate();
+    void OnPickedUp();
     string GetText();
 }
 
@@ -81,4 +82,6 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
     }
 
     public abstract string GetText();
+
+    public virtual void OnPickedUp() { }
 }
