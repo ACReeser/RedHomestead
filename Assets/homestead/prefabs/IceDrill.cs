@@ -7,12 +7,13 @@ using RedHomestead.Persistence;
 using UnityEditor.Animations;
 using RedHomestead.Electricity;
 
+[Serializable]
 public class IceDrillData: FacingData
 {
-
+    public string PowerGridInstanceID;
 }
 
-public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITriggerSubscriber {
+public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITriggerSubscriber, IDataContainer<IceDrillData> {
     public Transform Drill, OnOffHandle, Socket, CrateAnchor;
     public bool LegsDown;
     public Animator[] LegControllers;
@@ -25,7 +26,10 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
     public bool HasPower { get; set; }
     public bool IsOn { get; set; }
 
-    public string PowerGridInstanceID { get; set; }
+    private IceDrillData data;
+    public IceDrillData Data { get { return data; } set { data = value; } }
+
+    public string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
 
     public PowerVisualization _powerViz;
     public PowerVisualization PowerViz { get { return _powerViz; } }
@@ -36,7 +40,11 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
     }
 
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
+        if (this.data == null)
+            this.data = new IceDrillData();
+
         Drill.localPosition = Vector3.zero;
 
         foreach (Animator LegController in LegControllers)
@@ -46,6 +54,7 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
 
         this.InitializePowerVisualization();
         CrateAnchor.gameObject.SetActive(false);
+
     }
 
     // Update is called once per frame

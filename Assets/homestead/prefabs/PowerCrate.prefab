@@ -38,6 +38,7 @@ GameObject:
   - component: {fileID: 4020971077623906}
   - component: {fileID: 65951067714241298}
   - component: {fileID: 54217337315301888}
+  - component: {fileID: 114290519807456416}
   m_Layer: 8
   m_Name: PowerCrate
   m_TagString: movable
@@ -591,7 +592,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1377127042955332}
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: -0.458, z: 0}
+  m_LocalPosition: {x: 0, y: -0.509, z: 0}
   m_LocalScale: {x: 0.5, y: 0.50000024, z: 0.50000024}
   m_Children:
   - {fileID: 4200793166153494}
@@ -1300,3 +1301,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.05, y: 1.05, z: 1.05}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114290519807456416
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1084278061950760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6c438257e9096645a5e65cede5b288a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BangSoundClip: {fileID: 0}
+  _powerViz:
+    PowerBacking: {fileID: 33193382420079558}
+    PowerMask: {fileID: 4387663373119494}
+    PowerActive: {fileID: 4591062565580142}

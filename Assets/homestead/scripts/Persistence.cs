@@ -107,6 +107,7 @@ namespace RedHomestead.Persistence
     {
         [NonSerialized]
         public IPowerable From, To;
+#warning this is for GRIDS not powerables
         public string FromPowerGridInstanceID, ToPowerGridInstanceID;
 
         protected override void BeforeMarshal(Transform t = null)
@@ -154,12 +155,15 @@ namespace RedHomestead.Persistence
         public RoverData RoverData;
         public PipelineData[] PipeData;
         public PowerlineData[] PowerData;
+        public IceDrillData[] IceDrillData;
+        public PowerCubeData[] PowerCubeData;
         ////pipe data
 
         public void OnAfterDeserialize()
         {
             UnityEngine.Debug.Log("creating crates");
             DeserializeCrates();
+            DeserializeCratelikes();
             UnityEngine.Debug.Log("creating con zones");
             _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
             UnityEngine.Debug.Log("creating modules");
@@ -192,7 +196,8 @@ namespace RedHomestead.Persistence
                 ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
                 r.Data = data;
                 moduleMap.Add(data.ModuleInstanceID, r);
-                powerableMap.Add(data.PowerGridInstanceID, r);
+                if (!String.IsNullOrEmpty(data.PowerGridInstanceID))
+                    powerableMap.Add(data.PowerGridInstanceID, r);
             }
             foreach (SingleResourceModuleData data in SingleResourceContainerData)
             {
@@ -200,7 +205,8 @@ namespace RedHomestead.Persistence
                 SingleResourceModuleGameplay r = t.GetComponent<SingleResourceModuleGameplay>();
                 r.Data = data;
                 moduleMap.Add(data.ModuleInstanceID, r);
-                powerableMap.Add(data.PowerGridInstanceID, r);
+                if (!String.IsNullOrEmpty(data.PowerGridInstanceID))
+                    powerableMap.Add(data.PowerGridInstanceID, r);
             }
             foreach (MultipleResourceModuleData data in MultiResourceContainerData)
             {
@@ -214,7 +220,8 @@ namespace RedHomestead.Persistence
                     MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
                     r.Data = data;
                     moduleMap.Add(data.ModuleInstanceID, r);
-                    powerableMap.Add(data.PowerGridInstanceID, r);
+                    if (!String.IsNullOrEmpty(data.PowerGridInstanceID))
+                        powerableMap.Add(data.PowerGridInstanceID, r);
                 }
             }
             foreach (PipelineData data in PipeData)
@@ -255,6 +262,15 @@ namespace RedHomestead.Persistence
                 matchingHab.OnResourceChange(Simulation.Matter.Biomass, Simulation.Matter.OrganicMeal, Simulation.Matter.MealShake, Simulation.Matter.RationMeal, Simulation.Matter.MealPowder);
 
             moduleMap.Add(data.ModuleInstanceID, matchingHab);
+        }
+
+        private void DeserializeCratelikes()
+        {
+            _DestroyCurrent<IceDrill>();
+            _InstantiateMany<IceDrill, IceDrillData>(IceDrillData, ModuleBridge.Instance.IceDrillPrefab);
+
+            _DestroyCurrent<PowerCube>();
+            _InstantiateMany<PowerCube, PowerCubeData>(PowerCubeData, ModuleBridge.Instance.PowerCubePrefab);
         }
 
         private void DeserializeCrates()
@@ -307,6 +323,8 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<SingleResourceModuleGameplay, SingleResourceModuleData>((modules) => this.SingleResourceContainerData = modules);
             this._MarshalManyFromScene<Pipe, PipelineData>((pipes) => this.PipeData = pipes);
             this._MarshalManyFromScene<Powerline, PowerlineData>((powerline) => this.PowerData = powerline);
+            this._MarshalManyFromScene<IceDrill, IceDrillData>((drill) => this.IceDrillData = drill);
+            this._MarshalManyFromScene<PowerCube, PowerCubeData>((power) => this.PowerCubeData = power);
 
             this._MarshalHabitats();
 

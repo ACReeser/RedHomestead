@@ -7,16 +7,18 @@ using RedHomestead.Persistence;
 using UnityEditor.Animations;
 using RedHomestead.Electricity;
 
+[Serializable]
 public class PowerCubeData : FacingData
 {
     public EnergyContainer EnergyContainer;
+    public string PowerGridInstanceID;
 }
 
-public class PowerCube : MovableSnappable, IBattery {
-    public string PowerGridInstanceID { get; set; }
-
+public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBattery {
     private PowerCubeData data;
     public PowerCubeData Data { get { return data; } set { data = value; } }
+
+    public string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
 
     public PowerVisualization _powerViz;
     public PowerVisualization PowerViz { get { return _powerViz; } }
