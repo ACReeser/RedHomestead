@@ -207,7 +207,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         PackLander(o.LineItemUnits);
     }
     
-    private void PackLander(Dictionary<Matter, int> lineItemUnits)
+    private void PackLander(ResourceCountDictionary lineItemUnits)
     {
         int i = 0;
         foreach(KeyValuePair<Matter, int> kvp in lineItemUnits)

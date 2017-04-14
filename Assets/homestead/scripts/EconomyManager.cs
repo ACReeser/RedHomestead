@@ -37,8 +37,6 @@ public class EconomyManager : MonoBehaviour
 
     public int BasePaydayAmount = 1000000;
 
-    public PersistentPlayer Player = new PersistentPlayer();
-
     void Awake()
     {
         Instance = this;
@@ -78,14 +76,14 @@ public class EconomyManager : MonoBehaviour
     {
         SolHourStamp now = SolHourStamp.Now();
 
-        foreach (Order candidate in Player.EnRouteOrders.ToArray())
+        foreach (Order candidate in RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.ToArray())
         {
             SolsAndHours future = now.SolHoursIntoFuture(candidate.ETA);
 
             if (future.Sol <= 1 && future.Hour <= 1)
             {
                 Deliver(candidate);
-                Player.EnRouteOrders.Remove(candidate);
+                RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.Remove(candidate);
             }
         }
     }

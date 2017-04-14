@@ -6,6 +6,7 @@ using RedHomestead.EVA;
 using System.Linq;
 using System.Collections.Generic;
 using RedHomestead.Electricity;
+using RedHomestead.Economy;
 
 namespace RedHomestead.Persistence
 {
@@ -60,6 +61,7 @@ namespace RedHomestead.Persistence
         public float ConstructionPerSecond = 1f;
         public PackData PackData;
         public int BankAccount;
+        public List<Order> EnRouteOrders;
 
         protected override void BeforeMarshal(Transform t = null)
         {
@@ -483,7 +485,8 @@ namespace RedHomestead.Persistence
                     BankAccount = 350000,
                     ExcavationPerSecond = 1f,
                     ConstructionPerSecond = 1f,
-                    PackData = EVA.EVA.GetDefaultPackData()
+                    PackData = EVA.EVA.GetDefaultPackData(),
+                    EnRouteOrders = new List<Order>()
                 }
             };
         }

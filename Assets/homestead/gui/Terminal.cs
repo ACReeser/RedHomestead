@@ -42,7 +42,7 @@ public struct EnRouteFields
                 t.GetChild(0).GetComponent<Image>().sprite = DeliverySprites[(int)o.Via];
                 Text tex = t.GetChild(1).GetComponent<Text>();
                 tex.text = o.TimeUntilETA();
-                tex.transform.GetChild(0).GetComponent<Image>().fillAmount = o.DeliveryWaitPercentage();
+                tex.transform.GetChild(1).GetComponent<Image>().fillAmount = o.DeliveryWaitPercentage();
                 Transform childItemParent = t.GetChild(2);
 
                 int j = 0;
@@ -198,7 +198,10 @@ public class Terminal : MonoBehaviour {
         EconomyManager.Instance.OnBankAccountChange += OnBankAccountChange;
         OnBankAccountChange();
 
-        CurrentOrder = new Order();
+        CurrentOrder = new Order()
+        {
+            LineItemUnits = new ResourceCountDictionary()
+        };
     }
 
     private void OnBankAccountChange()
@@ -224,7 +227,7 @@ public class Terminal : MonoBehaviour {
 
         if (currentMarketTab == MarketTabs[(int)MarketTab.EnRoute])
         {
-            enroute.FillEnRoute(EconomyManager.Instance.Player.EnRouteOrders);
+            enroute.FillEnRoute(RedHomestead.Persistence.Game.Current.Player.EnRouteOrders);
         }
     }
 
@@ -282,7 +285,7 @@ public class Terminal : MonoBehaviour {
         }
         else if (currentMarketTab == MarketTabs[(int)MarketTab.EnRoute])
         {
-            enroute.FillEnRoute(EconomyManager.Instance.Player.EnRouteOrders);
+            enroute.FillEnRoute(RedHomestead.Persistence.Game.Current.Player.EnRouteOrders);
         }
 
         currentMarketTab.gameObject.SetActive(true);
@@ -360,15 +363,21 @@ public class Terminal : MonoBehaviour {
         else
         {
             CurrentOrder.FinalizeOrder();
-            EconomyManager.Instance.Player.EnRouteOrders.Add(CurrentOrder);
-            CurrentOrder = new Order();
+            RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.Add(CurrentOrder);
+            CurrentOrder = new Order()
+            {
+                LineItemUnits = new ResourceCountDictionary()
+            };
             SwitchMarketTab((int)MarketTab.EnRoute);
         }
     }
 
     public void CancelOrder()
     {
-        CurrentOrder = new Order();
+        CurrentOrder = new Order()
+        {
+            LineItemUnits = new ResourceCountDictionary()
+        };
         buys.RefreshBuyTabsTabs(false);
         SwitchBuyTab((int)BuyTab.BySupplier);
     }

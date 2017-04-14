@@ -8,11 +8,6 @@ using System.Linq;
 using RedHomestead.Persistence;
 
 namespace RedHomestead.Economy{
-    public class PersistentPlayer
-    {
-        public List<Order> EnRouteOrders = new List<Order>();
-    }
-
     [Flags]
     public enum DeliveryType { Rover, Lander, Drop }
 
@@ -155,13 +150,25 @@ namespace RedHomestead.Economy{
     [Serializable]
     public struct SolsAndHours : ISolsAndHours
     {
-        public int Sol { get; set; }
-        public int Hour { get; set; }
+        [SerializeField]
+        private int sol;
+        public int Sol
+        {
+            get { return sol; }
+            set { sol = value; }
+        }
+        [SerializeField]
+        private int hour;
+        public int Hour
+        {
+            get { return hour; }
+            set { hour = value; }
+        }
 
         public SolsAndHours(int sols, int hours)
         {
-            this.Sol = sols;
-            this.Hour = hours;
+            this.sol = sols;
+            this.hour = hours;
         }
 
         public override string ToString()
@@ -186,8 +193,19 @@ namespace RedHomestead.Economy{
     [Serializable]
     public struct SolHourStamp : ISolsAndHours
     {
-        public int Sol { get; set; }
-        public int Hour { get; set; }
+        [SerializeField]
+        private int sol;
+        public int Sol
+        {
+            get { return sol; }
+            set { sol = value; }
+        }
+        [SerializeField]
+        private int hour;
+        public int Hour {
+            get { return hour; }
+            set { hour = value; }
+        }
 
         public override string ToString()
         {
@@ -263,10 +281,12 @@ namespace RedHomestead.Economy{
         }
     }
 
+    [Serializable]
     public class Order
     {
-        public Dictionary<Matter, int> LineItemUnits = new Dictionary<Matter, int>();
+        public ResourceCountDictionary LineItemUnits;
         public SolHourStamp ETA, Ordered;
+        [SerializeField]
         private DeliveryType via;
         public DeliveryType Via
         {
@@ -322,9 +342,9 @@ namespace RedHomestead.Economy{
 
             return false;
         }
-        
-        public float TotalVolume { get; set; }
-        public float TotalMass { get; set; }
+
+        public float TotalVolume;
+        public float TotalMass;
 
         private void RecalcVolumeMassShipping()
         {
