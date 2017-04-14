@@ -32,8 +32,12 @@ namespace RedHomestead.Electricity
 
     public interface IPowerSupply : IPowerable
     {
-        bool VariablePowerSupply { get; }
         float WattsGenerated { get; }
+    }
+
+    public interface IVariablePowerSupply : IPowerSupply
+    {
+        float MaximumWattsGenerated { get; }
     }
 
     public interface IBattery : IPowerable
@@ -122,7 +126,7 @@ namespace RedHomestead.Electricity
 
         public static void RefreshVisualization(this IPowerSupply s)
         {
-            if (s.VariablePowerSupply)
+            if (s is IVariablePowerSupply)
             {
                 s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - s.GenerationInPowerUnits());
             }
@@ -158,6 +162,10 @@ namespace RedHomestead.Electricity
     {
         private Dictionary<string, PowerGrid> grids = new Dictionary<string, PowerGrid>();
         internal Dictionary<IPowerable, List<Powerline>> Edges = new Dictionary<IPowerable, List<Powerline>>();
+        internal PowerGridTickData LastGlobalTickData;
+
+        public delegate void PowerTickEventHandler();
+        public event PowerTickEventHandler OnPowerTick;
 
         internal void Attach(Powerline edge, IPowerable node1, IPowerable node2)
         {
@@ -279,10 +287,15 @@ namespace RedHomestead.Electricity
 
         internal void Tick()
         {
+            LastGlobalTickData = new PowerGridTickData();
             foreach (PowerGrid g in grids.Values)
             {
                 g.Tick();
+                LastGlobalTickData += g.Data;
             }
+
+            if (OnPowerTick != null)
+                OnPowerTick();
         }
     }
 
@@ -302,12 +315,46 @@ namespace RedHomestead.Electricity
 
     public struct PowerGridTickData
     {
-        public float CapacityWatts;
+        public float RatedCapacityWatts;
+        public float CurrentCapacityWatts;
+        public string CapacityString {
+            get {
+                if (RatedCapacityWatts == 0f)
+                    return "0%";
+                else
+                    return String.Format("{0:0.##}%", CurrentCapacityWatts / RatedCapacityWatts * 100f);
+            }
+        }
+
         public float LoadWatts;
-        public float BatteryWatts;
+        public float InstalledBatteryWatts;
+        public float CurrentBatteryWatts;
+        public string BatteryString {
+            get
+            {
+                if (InstalledBatteryWatts == 0f)
+                    return "0%";
+                else
+                    return String.Format("{0:0.##}%", CurrentBatteryWatts / InstalledBatteryWatts * 100f);
+            }
+        }
 
         public float SurplusWatts;
         public float DeficitWatts;
+
+        public static PowerGridTickData operator +(PowerGridTickData alpha, PowerGridTickData beta)
+        {
+            return new PowerGridTickData()
+            {
+                RatedCapacityWatts = alpha.RatedCapacityWatts + beta.RatedCapacityWatts,
+                CurrentCapacityWatts = alpha.CurrentCapacityWatts + beta.CurrentCapacityWatts,
+                LoadWatts = alpha.LoadWatts + beta.LoadWatts,
+                InstalledBatteryWatts = alpha.InstalledBatteryWatts + beta.InstalledBatteryWatts,
+                CurrentBatteryWatts = alpha.CurrentBatteryWatts + beta.CurrentBatteryWatts,
+                SurplusWatts = alpha.SurplusWatts + beta.SurplusWatts,
+                DeficitWatts = alpha.DeficitWatts + beta.DeficitWatts
+            };
+        } 
     }
 
     public class PowerGrid
@@ -316,11 +363,12 @@ namespace RedHomestead.Electricity
 
         internal readonly string PowerGridInstanceID;
         internal GridMode Mode = GridMode.Unknown;
+        internal PowerGridTickData Data;
 
         //if you add anymore lists, update .Usurp
         protected List<IPowerConsumer> Consumers = new List<IPowerConsumer>();
         protected List<IPowerSupply> Producers = new List<IPowerSupply>();
-        protected List<IPowerSupply> VariableProducers = new List<IPowerSupply>();
+        protected List<IVariablePowerSupply> VariableProducers = new List<IVariablePowerSupply>();
         protected List<IBattery> Batteries = new List<IBattery>();
 
         public PowerGrid()
@@ -332,27 +380,27 @@ namespace RedHomestead.Electricity
         {
             GridMode newGridMode = GridMode.Unknown;
 
-            float capacityWatts = Producers.Sum(x => x.WattsGenerated) * Time.fixedDeltaTime;
-            float loadWatts = Consumers.Sum(x => x.IsOn ? x.WattsConsumed : 0f) * Time.fixedDeltaTime;
-            float batteryWatts = Batteries.Sum(x => x.EnergyContainer.CurrentAmount);
+            Data.CurrentCapacityWatts = Producers.Sum(x => x.WattsGenerated);
+            Data.LoadWatts = Consumers.Sum(x => x.IsOn ? x.WattsConsumed : 0f);
+            Data.CurrentBatteryWatts = Batteries.Sum(x => x.EnergyContainer.CurrentAmount);
 
-            float surplusWatts = capacityWatts - loadWatts;
-            float deficitWatts = loadWatts - capacityWatts;
+            Data.SurplusWatts = Data.CurrentCapacityWatts - Data.LoadWatts;
+            Data.DeficitWatts = Data.LoadWatts - Data.CurrentCapacityWatts;
 
-            if (capacityWatts + batteryWatts == 0f)
+            if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts == 0f)
             {
                 newGridMode = GridMode.Blackout;
             }
-            else if (capacityWatts > loadWatts)
+            else if (Data.CurrentCapacityWatts > Data.LoadWatts)
             {
-                if (surplusWatts == 0f)
+                if (Data.SurplusWatts == 0f)
                     newGridMode = GridMode.Nominal;
                 else //surplus > 0f
                     newGridMode = GridMode.BatteryRecharge;
             }
             else //capacity < load
             {
-                if (capacityWatts + batteryWatts > deficitWatts)
+                if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts > Data.DeficitWatts)
                     newGridMode = GridMode.BatteryDrain;
                 else //deficit > capacity + battery
                     newGridMode = GridMode.Brownout;
@@ -369,8 +417,8 @@ namespace RedHomestead.Electricity
                         {
                             c.EmergencyShutdown();
                         }
-                        loadWatts = 0f;
-                        surplusWatts = 0f;
+                        Data.LoadWatts = 0f;
+                        Data.SurplusWatts = 0f;
                         break;
                     case GridMode.Brownout:
                         foreach (IPowerConsumer c in Consumers)
@@ -379,12 +427,12 @@ namespace RedHomestead.Electricity
 
                             c.EmergencyShutdown();
 
-                            deficitWatts -= c.WattsConsumed;
+                            Data.DeficitWatts -= c.WattsConsumed;
 
                             c.RefreshVisualization();
 
                             //stop the brownout when we have a new equilibrium
-                            if (capacityWatts + batteryWatts > deficitWatts)
+                            if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts > Data.DeficitWatts)
                                 break;
                             //but wait until next tick to sort itself out
                         }
@@ -403,7 +451,7 @@ namespace RedHomestead.Electricity
 
             if (Mode == GridMode.BatteryRecharge)
             {
-                float recharged = surplusWatts;
+                float recharged = Data.SurplusWatts;
                 //todo: some sort of priority
                 //so you can recharge your rover faster probably
                 foreach (IBattery batt in Batteries)
@@ -413,12 +461,11 @@ namespace RedHomestead.Electricity
 
                     if (recharged <= 0)
                         break;
-
                 }
             }
             else if (Mode == GridMode.BatteryDrain)
             {
-                float drained = deficitWatts;
+                float drained = Data.DeficitWatts;
                 foreach (IBattery batt in Batteries)
                 {
                     drained -= batt.EnergyContainer.Pull(drained);
@@ -441,9 +488,14 @@ namespace RedHomestead.Electricity
             {
                 Producers.Add(mod as IPowerSupply);
 
-                if ((mod as IPowerSupply).VariablePowerSupply)
+                if (mod is IVariablePowerSupply)
                 {
-                    VariableProducers.Add(mod as IPowerSupply);
+                    VariableProducers.Add(mod as IVariablePowerSupply);
+                    Data.RatedCapacityWatts += (mod as IVariablePowerSupply).MaximumWattsGenerated;
+                }
+                else
+                {
+                    Data.RatedCapacityWatts += (mod as IPowerSupply).WattsGenerated;
                 }
             }
             else if (mod is IPowerConsumer)
@@ -464,6 +516,7 @@ namespace RedHomestead.Electricity
             if (mod is IBattery)
             {
                 Batteries.Add(mod as IBattery);
+                Data.InstalledBatteryWatts += (mod as IBattery).EnergyContainer.TotalCapacity;
             }
             mod.PowerGridInstanceID = this.PowerGridInstanceID;
         }
@@ -474,9 +527,14 @@ namespace RedHomestead.Electricity
             {
                 Producers.Remove(mod as IPowerSupply);
 
-                if ((mod as IPowerSupply).VariablePowerSupply)
+                if (mod is IVariablePowerSupply)
                 {
-                    VariableProducers.Remove(mod as IPowerSupply);
+                    VariableProducers.Remove(mod as IVariablePowerSupply);
+                    Data.RatedCapacityWatts -= (mod as IVariablePowerSupply).MaximumWattsGenerated;
+                }
+                else
+                {
+                    Data.RatedCapacityWatts -= (mod as IPowerSupply).WattsGenerated;
                 }
             }
             else if (mod is IPowerConsumer)
@@ -489,6 +547,7 @@ namespace RedHomestead.Electricity
             if (mod is IBattery)
             {
                 Batteries.Remove(mod as IBattery);
+                Data.InstalledBatteryWatts -= (mod as IBattery).EnergyContainer.TotalCapacity;
             }
 
             mod.PowerGridInstanceID = "";

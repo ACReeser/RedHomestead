@@ -6,7 +6,7 @@ using RedHomestead.Buildings;
 using RedHomestead.Electricity;
 using RedHomestead.Persistence;
 
-public class SolarPanel : ResourcelessGameplay, IPowerSupply
+public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
 {
     public float Efficiency = .22f;
     public float GrossSolarWattagePerTick = 20f;
@@ -22,7 +22,8 @@ public class SolarPanel : ResourcelessGameplay, IPowerSupply
         }
     }
 
-    public bool VariablePowerSupply { get { return true; } }
+    public float MaximumWattsGenerated { get { return GrossSolarWattagePerTick * Efficiency; } }
+
     public float WattsGenerated
     {
         get

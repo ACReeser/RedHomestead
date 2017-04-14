@@ -209,7 +209,7 @@ public class Terminal : MonoBehaviour {
         finance.BankAccountText.text = String.Format("${0:n0}", RedHomestead.Persistence.Game.Current.Player.BankAccount);
     }
 
-    void Destroy()
+    void OnDestroy()
     {
         SunOrbit.Instance.OnHourChange -= OnHourChange;
         SunOrbit.Instance.OnSolChange -= OnSolChange;

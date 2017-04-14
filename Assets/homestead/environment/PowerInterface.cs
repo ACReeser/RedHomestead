@@ -9,35 +9,39 @@ public class PowerInterface : HabitatModule
 
     protected override void OnStart()
     {
-        OnPowerChanged();
+        FlowManager.Instance.PowerGrids.OnPowerTick += PowerGrids_OnPowerTick;
     }
 
-    void FixedUpdate()
+    void OnDestroy()
+    {
+        FlowManager.Instance.PowerGrids.OnPowerTick -= PowerGrids_OnPowerTick;
+    }
+
+    private void PowerGrids_OnPowerTick()
     {
         OnPowerChanged();
     }
 
     private void OnPowerChanged()
     {
-        float capacity = 100;
-        float charge = 100;
-        float generation = 10;
-        float installedGeneration = 10;
-        float pull = 10;
+        DisplayOut.text = string.Format(@"Power: {0}
 
-        DisplayOut.text = string.Format("Power\n\nGeneration: {9}%\nGenerated: {5}{6}\nInstalled: {7}{8}\n\nStorage: {4}%\nCharge: {0}{1}\nCapacity: {2}{3}\n\nDraw: {10}{11}\n",
-            Math.Truncate(capacity),
-            GetReadableMetricPower(capacity),
-            Math.Truncate(charge),
-            GetReadableMetricPower(charge),
-            capacity <= 0 ? 0: Math.Truncate(charge/capacity*100),
-            Math.Truncate(generation),
-            GetReadableMetricPower(generation),
-            Math.Truncate(installedGeneration),
-            GetReadableMetricPower(installedGeneration),
-            installedGeneration <= 0 ? 0 : Math.Truncate(generation / installedGeneration * 100),
-            pull,
-            GetReadableMetricPower(pull)+"/s"
+Rated: {1:0.#} W
+Current: {2:0.#} W
+Load: {3:0.#} W
+
+Batteries: {4}
+
+Installed: {5:0.#} Wh
+Charge: {6:0.#} Wh
+",
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.CapacityString,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.RatedCapacityWatts,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.CurrentCapacityWatts,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.LoadWatts,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.BatteryString,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.InstalledBatteryWatts,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.CurrentBatteryWatts
             );
     }
 

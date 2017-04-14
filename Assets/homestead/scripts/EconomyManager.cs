@@ -49,7 +49,7 @@ public class EconomyManager : MonoBehaviour
         SunOrbit.Instance.OnSolChange += OnSolChange;
     }
 
-    void Destroy()
+    void OnDestroy()
     {
         SunOrbit.Instance.OnHourChange -= OnHourChange;
         SunOrbit.Instance.OnSolChange -= OnSolChange;
