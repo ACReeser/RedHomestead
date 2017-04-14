@@ -9,6 +9,7 @@ namespace RedHomestead.Electricity
 {
     public interface IPowerable
     {
+        string PowerableInstanceID { get; }
         string PowerGridInstanceID { get; set; }
         PowerVisualization PowerViz { get; }
     }
@@ -202,7 +203,8 @@ namespace RedHomestead.Electricity
 
         internal void Detach(IPowerable node)
         {
-            foreach (Powerline p in Edges[node])
+            Powerline[] lines = Edges[node].ToArray();
+            foreach (Powerline p in lines)
             {
                 p.Remove();
             }

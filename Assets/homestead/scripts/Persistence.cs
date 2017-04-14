@@ -107,17 +107,16 @@ namespace RedHomestead.Persistence
     {
         [NonSerialized]
         public IPowerable From, To;
-#warning this is for GRIDS not powerables
-        public string FromPowerGridInstanceID, ToPowerGridInstanceID;
+        public string FromPowerableInstanceID, ToPowerableInstanceID;
 
         protected override void BeforeMarshal(Transform t = null)
         {
             base.BeforeMarshal(t);
 
             if (From != null)
-                FromPowerGridInstanceID = From.PowerGridInstanceID;
+                FromPowerableInstanceID = From.PowerableInstanceID;
             if (To != null)
-                ToPowerGridInstanceID = To.PowerGridInstanceID;
+                ToPowerableInstanceID = To.PowerableInstanceID;
 
             LocalScale = t.localScale;
         }
@@ -161,13 +160,14 @@ namespace RedHomestead.Persistence
 
         public void OnAfterDeserialize()
         {
-            UnityEngine.Debug.Log("creating crates");
+            Dictionary<string, IPowerable> powerableMap = new Dictionary<string, IPowerable>();
+            UnityEngine.Debug.Log("deserializing crates");
             DeserializeCrates();
-            DeserializeCratelikes();
-            UnityEngine.Debug.Log("creating con zones");
+            DeserializeCratelikes(powerableMap);
+            UnityEngine.Debug.Log("deserializing con zones");
             _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
-            UnityEngine.Debug.Log("creating modules");
-            DeserializeModules();
+            UnityEngine.Debug.Log("deserializing modules");
+            DeserializeModules(powerableMap);
             DeserializeRover();
         }
 
@@ -179,7 +179,7 @@ namespace RedHomestead.Persistence
             rovIn.transform.rotation = this.RoverData.Rotation;
         }
 
-        private void DeserializeModules()
+        private void DeserializeModules(Dictionary<string, IPowerable> powerableMap)
         {
             _DestroyCurrent<ResourcelessGameplay>();
             _DestroyCurrent<SingleResourceModuleGameplay>();
@@ -187,7 +187,6 @@ namespace RedHomestead.Persistence
             Habitat[] allHabs = Transform.FindObjectsOfType<Habitat>();
 
             Dictionary<string, ModuleGameplay> moduleMap = new Dictionary<string, ModuleGameplay>();
-            Dictionary<string, IPowerable> powerableMap = new Dictionary<string, IPowerable>();
 
             //we have to look at each data to figure out which prefab to use
             foreach (ResourcelessModuleData data in ResourcelessData)
@@ -196,8 +195,8 @@ namespace RedHomestead.Persistence
                 ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
                 r.Data = data;
                 moduleMap.Add(data.ModuleInstanceID, r);
-                if (!String.IsNullOrEmpty(data.PowerGridInstanceID))
-                    powerableMap.Add(data.PowerGridInstanceID, r);
+                if (!String.IsNullOrEmpty(data.PowerableInstanceID))
+                    powerableMap.Add(data.PowerableInstanceID, r);
             }
             foreach (SingleResourceModuleData data in SingleResourceContainerData)
             {
@@ -205,8 +204,8 @@ namespace RedHomestead.Persistence
                 SingleResourceModuleGameplay r = t.GetComponent<SingleResourceModuleGameplay>();
                 r.Data = data;
                 moduleMap.Add(data.ModuleInstanceID, r);
-                if (!String.IsNullOrEmpty(data.PowerGridInstanceID))
-                    powerableMap.Add(data.PowerGridInstanceID, r);
+                if (!String.IsNullOrEmpty(data.PowerableInstanceID))
+                    powerableMap.Add(data.PowerableInstanceID, r);
             }
             foreach (MultipleResourceModuleData data in MultiResourceContainerData)
             {
@@ -220,8 +219,8 @@ namespace RedHomestead.Persistence
                     MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
                     r.Data = data;
                     moduleMap.Add(data.ModuleInstanceID, r);
-                    if (!String.IsNullOrEmpty(data.PowerGridInstanceID))
-                        powerableMap.Add(data.PowerGridInstanceID, r);
+                    if (!String.IsNullOrEmpty(data.PowerableInstanceID))
+                        powerableMap.Add(data.PowerableInstanceID, r);
                 }
             }
             foreach (PipelineData data in PipeData)
@@ -240,7 +239,7 @@ namespace RedHomestead.Persistence
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
-                r.AssignConnections(powerableMap[data.FromPowerGridInstanceID], powerableMap[data.ToPowerGridInstanceID]);
+                r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID]);
             }
         }
 
@@ -264,13 +263,17 @@ namespace RedHomestead.Persistence
             moduleMap.Add(data.ModuleInstanceID, matchingHab);
         }
 
-        private void DeserializeCratelikes()
+        private void DeserializeCratelikes(Dictionary<string, IPowerable> powerableMap)
         {
             _DestroyCurrent<IceDrill>();
-            _InstantiateMany<IceDrill, IceDrillData>(IceDrillData, ModuleBridge.Instance.IceDrillPrefab);
+            _InstantiateMany<IceDrill, IceDrillData>(IceDrillData, ModuleBridge.Instance.IceDrillPrefab, (IceDrill drill, IceDrillData data) => {
+                powerableMap.Add(data.PowerableInstanceID, drill);
+            });
 
             _DestroyCurrent<PowerCube>();
-            _InstantiateMany<PowerCube, PowerCubeData>(PowerCubeData, ModuleBridge.Instance.PowerCubePrefab);
+            _InstantiateMany<PowerCube, PowerCubeData>(PowerCubeData, ModuleBridge.Instance.PowerCubePrefab, (PowerCube cube, PowerCubeData data) => {
+                powerableMap.Add(data.PowerableInstanceID, cube);
+            });
         }
 
         private void DeserializeCrates()
@@ -304,13 +307,15 @@ namespace RedHomestead.Persistence
             }
         }
 
-        private void _InstantiateMany<T, D>(D[] list, Transform prefab) where T : MonoBehaviour, IDataContainer<D> where D : FacingData
+        private void _InstantiateMany<T, D>(D[] list, Transform prefab, Action<T, D> rider = null) where T : MonoBehaviour, IDataContainer<D> where D : FacingData
         {
             foreach (D data in list)
             {
                 Transform t = GameObject.Instantiate(prefab, data.Position, data.Rotation) as Transform;
                 T c = t.GetComponent<T>();
                 c.Data = data;
+                if (rider != null)
+                    rider(c, data);
             }
         }
 

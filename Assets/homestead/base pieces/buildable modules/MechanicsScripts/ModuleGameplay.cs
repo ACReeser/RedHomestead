@@ -16,7 +16,7 @@ public abstract class ModuleData : FacingData
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public RedHomestead.Buildings.Module ModuleType;
     public string ModuleInstanceID;
-    public string PowerGridInstanceID;
+    public string PowerableInstanceID { get { return ModuleInstanceID; } }
 }
 
 public abstract class ResourcefullModuleData: ModuleData
@@ -52,7 +52,8 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
     public float WattsAvailablePerTick { get; set; }
     public abstract float WattsConsumed { get; }
     public abstract string ModuleInstanceID { get; }
-    public abstract string PowerGridInstanceID { get; set; }
+    public string PowerGridInstanceID { get; set; }
+    public abstract string PowerableInstanceID { get; }
     public PowerVisualization powerViz;
     public PowerVisualization PowerViz { get { return powerViz; } }
 
@@ -114,7 +115,7 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     private ResourcelessModuleData data;
     public ResourcelessModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
-    public override string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
+    public override string PowerableInstanceID { get { return data.PowerableInstanceID; }  }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -150,7 +151,7 @@ public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataConta
     private MultipleResourceModuleData data;
     public MultipleResourceModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
-    public override string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
+    public override string PowerableInstanceID { get { return data.PowerableInstanceID; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -186,7 +187,7 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     private SingleResourceModuleData data;
     public SingleResourceModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
-    public override string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
+    public override string PowerableInstanceID { get { return data.PowerableInstanceID; } }
 
     public SpriteRenderer flowAmountRenderer;
 

@@ -10,7 +10,7 @@ using RedHomestead.Electricity;
 [Serializable]
 public class IceDrillData: FacingData
 {
-    public string PowerGridInstanceID;
+    public string PowerableInstanceID;
 }
 
 public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITriggerSubscriber, IDataContainer<IceDrillData> {
@@ -29,7 +29,8 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
     private IceDrillData data;
     public IceDrillData Data { get { return data; } set { data = value; } }
 
-    public string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
+    public string PowerGridInstanceID { get; set; }
+    public string PowerableInstanceID { get { return data.PowerableInstanceID; } }
 
     public PowerVisualization _powerViz;
     public PowerVisualization PowerViz { get { return _powerViz; } }
@@ -43,7 +44,10 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
     void Start ()
     {
         if (this.data == null)
-            this.data = new IceDrillData();
+            this.data = new IceDrillData()
+            {
+                PowerableInstanceID = Guid.NewGuid().ToString()
+            };
 
         Drill.localPosition = Vector3.zero;
 

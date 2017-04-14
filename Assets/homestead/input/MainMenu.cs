@@ -31,6 +31,8 @@ public class MainMenu : MonoBehaviour {
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
 
+        //if we start here from the escape menu, time is paused
+        Time.timeScale = 1f;
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 

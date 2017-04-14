@@ -11,14 +11,15 @@ using RedHomestead.Electricity;
 public class PowerCubeData : FacingData
 {
     public EnergyContainer EnergyContainer;
-    public string PowerGridInstanceID;
+    public string PowerableInstanceID;
 }
 
 public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBattery {
     private PowerCubeData data;
     public PowerCubeData Data { get { return data; } set { data = value; } }
 
-    public string PowerGridInstanceID { get { return data.PowerGridInstanceID; } set { data.PowerGridInstanceID = value; } }
+    public string PowerGridInstanceID { get; set; }
+    public string PowerableInstanceID { get { return data.PowerableInstanceID; } }
 
     public PowerVisualization _powerViz;
     public PowerVisualization PowerViz { get { return _powerViz; } }
@@ -36,7 +37,8 @@ public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBatte
                 EnergyContainer = new EnergyContainer(0f)
                 {
                     TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock
-                }
+                },
+                PowerableInstanceID = Guid.NewGuid().ToString()
             };
 
         this.InitializePowerVisualization();
