@@ -18,6 +18,7 @@ public class EconomyManager : MonoBehaviour
     public Transform ResourceCratePrefab, ResourceVesselPrefab, ResourceTankPrefab;
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
+    public AudioClip IncomingDelivery, BuyerFoundForGoods;
 
     public int HoursUntilPayday
     {
@@ -90,6 +91,7 @@ public class EconomyManager : MonoBehaviour
 
     private void Deliver(Order order)
     {
+        GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.IncomingDelivery);
         switch (order.Via)
         {
             default:

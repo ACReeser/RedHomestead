@@ -32,16 +32,16 @@ Load: {3:0.#} W
 
 Batteries: {4}
 
-Installed: {5:0.#} Wh
-Charge: {6:0.#} Wh
+Installed: {5}
+Charge: {6}
 ",
             FlowManager.Instance.PowerGrids.LastGlobalTickData.CapacityString,
             FlowManager.Instance.PowerGrids.LastGlobalTickData.RatedCapacityWatts,
             FlowManager.Instance.PowerGrids.LastGlobalTickData.CurrentCapacityWatts,
             FlowManager.Instance.PowerGrids.LastGlobalTickData.LoadWatts,
             FlowManager.Instance.PowerGrids.LastGlobalTickData.BatteryString,
-            FlowManager.Instance.PowerGrids.LastGlobalTickData.InstalledBatteryWatts,
-            FlowManager.Instance.PowerGrids.LastGlobalTickData.CurrentBatteryWatts
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.InstalledBatteryWattHours,
+            FlowManager.Instance.PowerGrids.LastGlobalTickData.CurrentBatteryWattHours
             );
     }
 

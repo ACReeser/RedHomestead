@@ -71,7 +71,7 @@ public class SunOrbit : MonoBehaviour {
 
             if (RunTilMorning && Game.Current.Environment.CurrentHour == 6)
             {
-                ToggleSleepUntilMorning(false);
+                ToggleSleepUntilMorning(false, PlayerInput.WakeSignal.DayStart);
             }
         }
 
@@ -203,7 +203,7 @@ public class SunOrbit : MonoBehaviour {
         UpdateClockSpeedArrows();
     }
 
-    internal void ToggleSleepUntilMorning(bool startSleeping)
+    internal void ToggleSleepUntilMorning(bool startSleeping, PlayerInput.WakeSignal? signal = null)
     {
         if (startSleeping)
         {
@@ -218,7 +218,8 @@ public class SunOrbit : MonoBehaviour {
             SpeedTier = 1;
             UpdateClockSpeedArrows();
             RunTilMorning = false;
-            PlayerInput.Instance.wakeyWakeySignal = true;
+
+            PlayerInput.Instance.wakeyWakeySignal = signal;
         }
     }
 
@@ -233,7 +234,7 @@ public class SunOrbit : MonoBehaviour {
             if (RunTilMorning)
             {
                 RunTilMorning = false;
-                PlayerInput.Instance.wakeyWakeySignal = true;
+                PlayerInput.Instance.wakeyWakeySignal = PlayerInput.WakeSignal.ResourceRequired;
             }
         }
     }

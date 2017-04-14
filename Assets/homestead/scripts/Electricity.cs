@@ -328,7 +328,21 @@ namespace RedHomestead.Electricity
 
         public float LoadWatts;
         public float InstalledBatteryWatts;
+        public string InstalledBatteryWattHours
+        {
+            get
+            {
+                return String.Format("{0:0} Wh", Mathf.Round(InstalledBatteryWatts / SunOrbit.GameMinutesPerGameDay));
+            }
+        }
         public float CurrentBatteryWatts;
+        public string CurrentBatteryWattHours
+        {
+            get
+            {
+                return String.Format("{0:0} Wh", Mathf.Round(CurrentBatteryWatts / SunOrbit.GameMinutesPerGameDay));
+            }
+        }
         public string BatteryString {
             get
             {
@@ -409,7 +423,6 @@ namespace RedHomestead.Electricity
             if (Mode != newGridMode)
             {
                 Mode = newGridMode;
-                UnityEngine.Debug.Log("power is now: " + Mode.ToString());
                 switch (Mode)
                 {
                     case GridMode.Blackout:

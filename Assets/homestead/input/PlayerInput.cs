@@ -157,7 +157,8 @@ public class PlayerInput : MonoBehaviour {
 
     public AudioSource InteractionSource;
     public InteractionClips Sfx;
-    
+    public AudioClip GoodMorningHomesteader;
+
     internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
 
@@ -1738,7 +1739,8 @@ public class PlayerInput : MonoBehaviour {
         this.RefreshEquipmentState();
     }
 
-    internal bool wakeyWakeySignal = false;
+    internal enum WakeSignal { PlayerCancel, ResourceRequired, DayStart }
+    internal WakeSignal? wakeyWakeySignal = null;
     private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)
     {
         if (Input.GetKeyUp(KeyCode.Comma))
@@ -1748,17 +1750,28 @@ public class PlayerInput : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.Period))
         {
             SunOrbit.Instance.SpeedUp();
+        } else if (doInteract)
+        {
+            if (SunOrbit.Instance.RunTilMorning)
+            {
+                SunOrbit.Instance.ToggleSleepUntilMorning(false, WakeSignal.PlayerCancel);
+            }
+            else
+            {
+                wakeyWakeySignal = WakeSignal.PlayerCancel;
+            }
         }
 
-        if (wakeyWakeySignal || doInteract)
+        if (wakeyWakeySignal.HasValue)
         {
-            wakeyWakeySignal = false;
-
-            if (SunOrbit.Instance.RunTilMorning)
-                SunOrbit.Instance.ToggleSleepUntilMorning(false);
-
             lerpCtx.StandUp(); //reset ctx
             StartCoroutine(LerpTick(ExitSleep));
+
+            if (wakeyWakeySignal.Value == WakeSignal.DayStart)
+            {
+                GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.GoodMorningHomesteader);
+            }
+            wakeyWakeySignal = null;
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {

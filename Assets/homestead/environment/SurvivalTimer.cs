@@ -159,6 +159,7 @@ public class SurvivalTimer : MonoBehaviour {
     public DoubleSurvivalResource Power = new DoubleSurvivalResource();
 
     internal PackData Data { get; private set; }
+    public AudioClip IncomingSolarFlare;
 
     public bool UsingPackResources
     {
