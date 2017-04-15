@@ -40,6 +40,29 @@ namespace RedHomestead.Buildings
     {
         private const int DefaultBuildTimeSeconds = 10;
 
+        public static int BuildRadius(Module module)
+        {
+            switch (module)
+            {
+                case Module.JunctionBox:
+                    return 1;
+                case Module.Flywheel:
+                case Module.Splitter:
+                    return 2;
+                case Module.RTG:
+                case Module.SabatierReactor:
+                case Module.AlgaeTank:
+                case Module.SmallWaterTank:
+                    return 3;
+                case Module.GreenhouseHall:
+                    return 4;
+                case Module.Warehouse:
+                    return 6;
+                default:
+                    return 5;
+            }
+        }
+
         /// <summary>
         /// In seconds
         /// </summary>

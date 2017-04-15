@@ -68,8 +68,23 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
                 RequiredResourceMask[i] = required.Type;
                 i++;
             }
-
-            //todo: move the pylons and tape to match the width/length of the module to be built
+            
+            int j = 0;
+            int radius = Construction.BuildRadius(Data.ModuleTypeUnderConstruction);
+            foreach(Transform t in this.transform)
+            {
+                if (j < 4)//poles
+                {
+                    t.localPosition = new Vector3(j % 2 == 0 ? -radius: radius, 0f, j < 2 ? -radius : radius);
+                }
+                else //tape
+                {
+                    int coeff = j % 2 == 0 ? -1 : 1;
+                    t.localPosition = new Vector3(j < 6 ? 0 : radius * coeff, 1f, j > 5 ? 0 : radius * coeff);
+                    t.localScale = new Vector3(radius * 2, .2f, .01f);
+                }
+                j++;
+            }
         }
     }
 
@@ -85,8 +100,8 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             else if (other.CompareTag("movable"))
             {
                 ResourceComponent addedResources = other.GetComponent<ResourceComponent>();
-                //todo: bug: adds resources that aren't required, and surplus resources
-                if (addedResources != null && !addedResources.IsInConstructionZone)
+                //todo: bug: adds surplus resources
+                if (addedResources != null && !addedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(addedResources.data.ResourceType))
                 {
 #warning rounding error
                     Data.ResourceCount[addedResources.Data.ResourceType] += (int)addedResources.Data.Quantity;
@@ -111,8 +126,8 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             else if (other.CompareTag("movable"))
             {
                 ResourceComponent removedResources = other.GetComponent<ResourceComponent>();
-                //todo: bug: removes resources that aren't required, and surplus resources
-                if (removedResources != null && removedResources.IsInConstructionZone)
+                //todo: bug: removes surplus resources
+                if (removedResources != null && removedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(removedResources.data.ResourceType))
                 {
 #warning rounding error
                     Data.ResourceCount[removedResources.Data.ResourceType] -= (int)removedResources.Data.Quantity;

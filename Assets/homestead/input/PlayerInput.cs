@@ -635,7 +635,7 @@ public class PlayerInput : MonoBehaviour {
         }
 
         RaycastHit hitInfo;
-        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        if (CastRay(out hitInfo, carriedObject == null ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore, layerNames: "interaction"))
         {
             if (hitInfo.collider != null)
             {
