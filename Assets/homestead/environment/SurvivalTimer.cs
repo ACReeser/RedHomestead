@@ -214,7 +214,7 @@ public class SurvivalTimer : MonoBehaviour {
             if (Oxygen.Data.Current < 0)
             {
                 //todo: accept reason why you died: e.g. You asphyxiated
-                KillPlayer();
+                KillPlayer("ASPHYXIATION");
                 return;
             }
 
@@ -222,7 +222,7 @@ public class SurvivalTimer : MonoBehaviour {
             if (Power.IsOnLastBar && Power.Data.Current < 0f)
             {
                 //todo: accept reason why you died: e.g. You froze
-                KillPlayer();
+                KillPlayer("EXPOSURE");
                 return;
             }
         }
@@ -232,7 +232,7 @@ public class SurvivalTimer : MonoBehaviour {
         if (Water.Data.Current < 0)
         {
             //todo: accept reason why you died: e.g. You terminally dehydrated
-            KillPlayer();
+            KillPlayer("DEHYDRATION");
             return;
         }
 
@@ -241,7 +241,7 @@ public class SurvivalTimer : MonoBehaviour {
         if (Food.Data.Current < 0)
         {
             //todo: accept reason why you died: e.g. You starved
-            KillPlayer();
+            KillPlayer("STARVATION");
             return;
         }
     }
@@ -255,9 +255,9 @@ public class SurvivalTimer : MonoBehaviour {
         Food.Data = data.Food;
     }
 
-    private void KillPlayer()
+    private void KillPlayer(string reason)
     {
-        PlayerInput.Instance.KillPlayer();
+        PlayerInput.Instance.KillPlayer(reason);
         this.enabled = false;
     }
 

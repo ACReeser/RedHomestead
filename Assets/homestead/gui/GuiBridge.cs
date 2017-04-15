@@ -106,7 +106,7 @@ public class GuiBridge : MonoBehaviour {
 
     public Canvas GUICanvas;
     public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel, Crosshair;
-    public Text ConstructionHeader, EquippedText, PlacingText, TimeText;
+    public Text ConstructionHeader, EquippedText, PlacingText, TimeText, KilledByReasonText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
@@ -389,9 +389,10 @@ public class GuiBridge : MonoBehaviour {
         this.RefreshPlanningUI();
     }
 
-    internal void ShowKillMenu()
+    internal void ShowKillMenu(string reason)
     {
         KilledPanel.transform.gameObject.SetActive(true);
+        KilledByReasonText.text = "DEATH BY " + reason;
     }
 
     public void Restart()

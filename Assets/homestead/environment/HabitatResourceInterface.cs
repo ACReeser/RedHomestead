@@ -14,7 +14,6 @@ public class HabitatResourceInterface : HabitatModule
         if (LinkedHab != null)
         {
             LinkedHab.OnResourceChange += OnResourceChange;
-            //todo- change to event-based
             OnResourceChange();
         }
 	}

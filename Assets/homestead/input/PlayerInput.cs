@@ -1632,11 +1632,12 @@ public class PlayerInput : MonoBehaviour {
         this.FloorPlan.SetVisualization(whatToBuild);
     }
 
-    public void KillPlayer()
+    public void KillPlayer(string reason)
     {
-        GuiBridge.Instance.ShowKillMenu();
+        GuiBridge.Instance.ShowKillMenu(reason);
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.lockState = CursorLockMode.None;
+        Time.timeScale = 0f;
         FPSController.enabled = false;
         this.enabled = false;
     }

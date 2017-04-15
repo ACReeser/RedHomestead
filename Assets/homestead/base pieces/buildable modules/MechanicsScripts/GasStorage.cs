@@ -19,7 +19,7 @@ public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
     internal enum PumpStatus { PumpOff, PumpIn, PumpOut }
     internal PumpStatus CurrentPumpStatus;
 
-    public const float PumpPerSecond = .25f;
+    public const float PumpPerSecond = .04f;
     public const float PumpUpdateIntervalSeconds = .25f;
     public const float PumpPerUpdateInterval = PumpPerSecond / PumpUpdateIntervalSeconds;
     private const float SnapInterferenceTimerSeconds = 1.25f;
