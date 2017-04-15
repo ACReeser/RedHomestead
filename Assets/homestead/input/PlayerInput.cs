@@ -818,6 +818,10 @@ public class PlayerInput : MonoBehaviour {
                         {
                             DrivingRoverInput.ToggleLights();
                         }
+                        else if (hitInfo.collider.name == "HabitatLightsButton")
+                        {
+                            SurvivalTimer.Instance.CurrentHabitat.PlayerToggleLights();
+                        }
                     }
                     else
                     {

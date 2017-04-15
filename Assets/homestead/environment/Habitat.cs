@@ -35,15 +35,19 @@ public class Habitat : Converter, IPowerConsumer, IBattery
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
-    private float _CurrentPowerRequirements = 1f;
+    private float _CurrentPowerRequirements = ElectricityConstants.WattsPerBlock * 4f;
 
     internal ResourceChangeHandler OnResourceChange;
     public delegate void ResourceChangeHandler(params Matter[] type);
     
     public HabitatExtraData HabitatData;
-    public bool IsOn { get; set; }
+    public PowerVisualization BatteryViz;
+    public bool IsOn { get { return this.HasPower; } set { } }
 
     public EnergyContainer EnergyContainer { get { return HabitatData.EnergyContainer; } }
+
+    public GameObject EmergencyLight;
+    public Light[] Lights;
 
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
@@ -55,6 +59,11 @@ public class Habitat : Converter, IPowerConsumer, IBattery
         }
     }
 
+    protected override void OnStart()
+    {
+        base.OnStart();
+        FlowManager.Instance.PowerGrids.Add(this);
+    }
 
     public override void ClearHooks()
     {
@@ -212,5 +221,31 @@ public class Habitat : Converter, IPowerConsumer, IBattery
 
     public void OnEmergencyShutdown()
     {
+        if (EmergencyLight != null)
+            EmergencyLight.SetActive(true);
+    }
+
+    public override void OnPowerChanged()
+    {
+        foreach(Light l in Lights)
+        {
+            l.enabled = this.HasPower;
+        }
+
+        if (!this.HasPower && EmergencyLight != null && !EmergencyLight.activeInHierarchy)
+            EmergencyLight.SetActive(true);
+        else if (this.HasPower && EmergencyLight != null && EmergencyLight.activeInHierarchy)
+            EmergencyLight.SetActive(false);
+    }
+    
+    public void PlayerToggleLights()
+    {
+        if (this.HasPower)
+        {
+            foreach (Light l in Lights)
+            {
+                l.enabled = !l.enabled;
+            }
+        }
     }
 }

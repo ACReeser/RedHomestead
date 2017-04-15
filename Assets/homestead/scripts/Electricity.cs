@@ -114,14 +114,21 @@ namespace RedHomestead.Electricity
 
             if (powerable is IBattery)
             {
-                powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.BatteryMeshes.BackingMeshes[(powerable as IBattery).BatteryUnitCapacity() - 1];
+                PowerVisualization viz;
+                if (powerable is Habitat)
+                    viz = (powerable as Habitat).BatteryViz;
+                else
+                    viz = powerable.PowerViz;
+
+                viz.PowerBacking.mesh = FlowManager.Instance.BatteryMeshes.BackingMeshes[(powerable as IBattery).BatteryUnitCapacity() - 1];
                 (powerable as IBattery).RefreshVisualization();
             }
         }
 
         public static void RefreshVisualization(this IPowerConsumer c)
         {
-            c.PowerViz.PowerActive.gameObject.SetActive(c.IsOn);
+            if (c.PowerViz.PowerActive != null)
+                c.PowerViz.PowerActive.gameObject.SetActive(c.IsOn);
         }
 
         public static void RefreshVisualization(this IPowerSupply s)
@@ -134,7 +141,15 @@ namespace RedHomestead.Electricity
 
         public static void RefreshVisualization(this IBattery b)
         {
-            b.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward *  (10 - b.CurrentBatteryUnits());
+            PowerVisualization viz;
+
+            if (b is Habitat)
+                viz = (b as Habitat).BatteryViz;
+            else
+                viz = b.PowerViz;
+
+            if (viz.PowerMask != null)
+                viz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward *  (10 - b.CurrentBatteryUnits());
         }
 
         public static int BatteryUnitCapacity(this IBattery b)
@@ -166,6 +181,18 @@ namespace RedHomestead.Electricity
 
         public delegate void PowerTickEventHandler();
         public event PowerTickEventHandler OnPowerTick;
+
+        internal void Add(Habitat h)
+        {
+            if (!h.HasPowerGrid())
+            {
+                PowerGrid newPG = new PowerGrid();
+                grids.Add(newPG.PowerGridInstanceID, newPG);
+                newPG.Add(h);
+            }
+
+            h.OnPowerChanged();
+        }
 
         internal void Attach(Powerline edge, IPowerable node1, IPowerable node2)
         {
@@ -569,6 +596,7 @@ namespace RedHomestead.Electricity
         private void SetPowerableParentToMe(IPowerable p) { p.PowerGridInstanceID = this.PowerGridInstanceID; }
         internal void Usurp(PowerGrid other)
         {
+            this.Data += other.Data;
             other.Consumers.ForEach(SetPowerableParentToMe);
             Consumers.AddRange(other.Consumers);
 

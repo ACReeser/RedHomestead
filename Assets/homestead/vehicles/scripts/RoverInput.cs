@@ -65,7 +65,7 @@ namespace RedHomestead.Rovers
                     PowerableInstanceID = Guid.NewGuid().ToString()
                 };
             }
-            this.RefreshVisualization();
+            this.InitializePowerVisualization();
 
             HatchDegrees = GetRotationXFromHatchState();
             Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);

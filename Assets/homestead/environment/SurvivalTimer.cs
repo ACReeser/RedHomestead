@@ -185,8 +185,6 @@ public class SurvivalTimer : MonoBehaviour {
 
     void Start()
     {
-        UnityEngine.Debug.Log("Starting up survival timer");
-
         SetData(Game.Current.Player.PackData);
 
         if (!String.IsNullOrEmpty(this.Data.CurrentHabitatModuleInstanceID))
@@ -209,7 +207,7 @@ public class SurvivalTimer : MonoBehaviour {
     }
 	
 	void Update () {
-        if (UsingPackResources)
+        if (UsingPackResources || !CurrentHabitat.HasPower)
         {
             Oxygen.Consume();
 
@@ -270,7 +268,7 @@ public class SurvivalTimer : MonoBehaviour {
         {
             this.skipEnterHabitatPackRefill = false;
         }
-        else
+        else if (hab.HasPower)
         {
             Oxygen.ResetToMaximum();
             Power.ResetToMaximum();
