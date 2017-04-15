@@ -82,7 +82,7 @@ public struct EnRouteFields
 public struct BuyFields
 {
     public RectTransform[] BuyTabs;
-    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton;
+    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, BySuppliersSelectSupplierButton, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton;
     public Text CheckoutVendorName, CheckoutWeight, CheckoutVolume, CheckoutAccount, CheckoutGoods, CheckoutShippingCost, CheckoutTotal;
     public Text[] DeliveryTimeLabels;
     
@@ -109,7 +109,42 @@ public struct BuyFields
         CheckoutGoods.text = String.Format("-{0:n0}", o.MatterCost);
         CheckoutShippingCost.text = String.Format("-{0:n0}", o.ShippingCost);
         CheckoutTotal.text = String.Format("-{0:n0}", o.GrandTotal);
+
+        if (o.TotalMass == o.Via.MaximumMass() || o.TotalVolume == o.Via.MaximumVolume())
+        {
+            this.SetCheckoutMoreButtons(false);
+        }
+        else
+        {
+            this.SetCheckoutMoreButtons(true);
+        }
     }
+
+    private Button[] checkoutMoreButtons;
+    private Text[] checkoutMoreButtonsText;
+    private void SetCheckoutMoreButtons(bool interactable)
+    {
+        if (checkoutMoreButtons == null)
+        {
+            List<Button> tempButtons = new List<Button>();
+            List<Text> tempText = new List<Text>();
+            foreach (Transform t in CheckoutStockParent)
+            {
+                Transform button = t.GetChild(0).GetChild(3);
+                tempButtons.Add(button.GetComponent<Button>());
+                tempText.Add(button.GetChild(0).GetComponent<Text>());
+            }
+            checkoutMoreButtons = tempButtons.ToArray();
+            checkoutMoreButtonsText = tempText.ToArray();
+        }
+
+        for (int i = 0; i < checkoutMoreButtons.Length; i++)
+        {
+            checkoutMoreButtons[i].interactable = interactable;
+            checkoutMoreButtonsText[i].enabled = interactable;
+        }
+    }
+
     private void FillCheckoutStock(Vendor v)
     {
         SetStock(v, CheckoutStockParent, (Transform t, int i) =>
@@ -121,6 +156,8 @@ public struct BuyFields
                 "{0} @ ${1}  {2}<size=6>kg</size> {3}<size=6>m3</size>", v.Stock[i].StockAvailable, v.Stock[i].ListPrice, v.Stock[i].Matter.Kilograms(), 1);
             group.GetChild(5).GetComponent<Text>().text = "0";
         });
+
+        this.checkoutMoreButtons = null;
     }
     internal void SetBySuppliersStock(Vendor v)
     {
@@ -130,6 +167,8 @@ public struct BuyFields
             t.GetChild(1).GetComponent<Text>().text = v.Stock[i].Name;
             t.GetChild(2).GetComponent<Text>().text = v.Stock[i].StockAvailable + " @ $" + v.Stock[i].ListPrice;
         });
+
+        BySuppliersSelectSupplierButton.gameObject.SetActive(v != null);
     }
     private void SetStock(Vendor v, Transform stockParent, Action<Transform, int> bind)
     {
