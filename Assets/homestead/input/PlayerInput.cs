@@ -238,6 +238,9 @@ public class PlayerInput : MonoBehaviour {
         if (Input.GetKeyUp(KeyCode.F1))
         {
             GuiBridge.Instance.ToggleHelpMenu();
+        } else if (Input.GetKeyUp(KeyCode.F2))
+        {
+            GuiBridge.Instance.ToggleCinematicMode();
         }
         
         PromptInfo newPrompt = null;

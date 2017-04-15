@@ -104,6 +104,7 @@ public struct PromptUI
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
+    public Canvas GUICanvas;
     public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel, Crosshair;
     public Text ConstructionHeader, EquippedText, PlacingText, TimeText;
     public Button[] ConstructionGroupButtons;
@@ -247,6 +248,46 @@ public class GuiBridge : MonoBehaviour {
             {
                 this.ConstructionRequirements[i].gameObject.SetActive(false);
             }
+        }
+    }
+
+    private enum CinematicModes { None, WithGUI, NoGUI }
+    private CinematicModes CinematicMode = CinematicModes.None;
+    private UnityStandardAssets.ImageEffects.CameraMotionBlur cinematicMotionBlur;
+    internal void ToggleCinematicMode()
+    {
+        int newCinematic = (((int)this.CinematicMode) + 1);
+
+        if (newCinematic > (int)CinematicModes.NoGUI)
+            newCinematic = 0;
+
+        CinematicMode = (CinematicModes)newCinematic;
+
+        switch (CinematicMode)
+        {
+            case CinematicModes.None:
+                cinematicMotionBlur.enabled = false;
+                GUICanvas.enabled = true;
+                PlayerInput.Instance.FPSController.MouseLook.smooth = false;
+                break;
+            case CinematicModes.WithGUI:
+                if (cinematicMotionBlur == null)
+                {
+                    cinematicMotionBlur = Camera.main.gameObject.AddComponent<UnityStandardAssets.ImageEffects.CameraMotionBlur>();
+                    cinematicMotionBlur.filterType = UnityStandardAssets.ImageEffects.CameraMotionBlur.MotionBlurFilter.Reconstruction;
+                    cinematicMotionBlur.velocityScale = 1f;
+                    cinematicMotionBlur.shader = this.blurShader;
+                    cinematicMotionBlur.noiseTexture = this.noiseTexture;
+                }
+                cinematicMotionBlur.enabled = true;
+                GUICanvas.enabled = true;
+                PlayerInput.Instance.FPSController.MouseLook.smooth = true;
+                break;
+            case CinematicModes.NoGUI:
+                cinematicMotionBlur.enabled = true;
+                PlayerInput.Instance.FPSController.MouseLook.smooth = true;
+                GUICanvas.enabled = false;
+                break;
         }
     }
 
@@ -471,6 +512,9 @@ public class GuiBridge : MonoBehaviour {
     }
 
     private ReportIORow[] currentIORows;
+    public Texture2D noiseTexture;
+    public Shader blurShader;
+
     internal void WriteReport(string moduleName, string reaction, string energyEfficiency, string reactionEfficiency, 
         ReportIOData? power, ReportIOData[] inputs, ReportIOData[] outputs)
     {
