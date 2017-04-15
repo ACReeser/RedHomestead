@@ -687,13 +687,18 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
-                    if (doInteract)
+                    RoverInput ri = hitInfo.collider.transform.GetComponent<RoverInput>();
+
+                    if (ri.CanDrive)
                     {
-                        ToggleVehicle(hitInfo.collider.transform.GetComponent<RoverInput>());
+                        if (doInteract)
+                            ToggleVehicle(ri);
+                        else
+                            newPrompt = Prompts.DriveRoverPrompt;
                     }
                     else
                     {
-                        newPrompt = Prompts.DriveRoverPrompt;
+                        newPrompt = Prompts.UnhookRoverPrompt;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("constructionzone"))
@@ -805,6 +810,10 @@ public class PlayerInput : MonoBehaviour {
                         else if (hitInfo.collider.name == "pressurize")
                         {
                             hitInfo.collider.transform.parent.parent.GetComponent<Airlock>().Pressurize();
+                        }
+                        else if (hitInfo.collider.name == "RoverLightsButton")
+                        {
+                            DrivingRoverInput.ToggleLights();
                         }
                     }
                     else

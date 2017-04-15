@@ -74,6 +74,8 @@ namespace RedHomestead.Persistence
     public class RoverData : FacingData
     {
         public bool HatchOpen;
+        public EnergyContainer EnergyContainer;
+        public string PowerableInstanceID;
     }
 
     public abstract class ConnectionData : FacingData

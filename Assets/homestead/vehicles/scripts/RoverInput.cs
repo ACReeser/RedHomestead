@@ -5,29 +5,45 @@ using RedHomestead.Persistence;
 using System;
 using RedHomestead.Simulation;
 using System.Collections.Generic;
+using RedHomestead.Electricity;
 
 namespace RedHomestead.Rovers
 { 
     [RequireComponent(typeof(SixWheelCarController))]
-    public class RoverInput : MonoBehaviour, IDataContainer<RoverData>, ICrateSnapper, ITriggerSubscriber
+    public class RoverInput : MonoBehaviour, IDataContainer<RoverData>, ICrateSnapper, ITriggerSubscriber, IBattery
     {
         private SixWheelCarController m_Car; // the car controller we want to use
         private Rigidbody carRigid;
 
-        public RoverData data;
+        private RoverData data = null;
         public RoverData Data { get { return data; } set { data = value; } }
+        internal bool AcceptInput;
+        internal bool CanDrive { get { return !this.HasPowerGrid(); } }
 
-        public Transform Hatch;
+        #region power
+        public EnergyContainer EnergyContainer { get { return data.EnergyContainer; } }
+        public PowerVisualization powerViz;
+        public PowerVisualization PowerViz { get { return powerViz; } }
+        public string PowerGridInstanceID { get; set; }
+        public string PowerableInstanceID { get { return data.PowerableInstanceID; } }
+        #endregion
+
+        #region camera members
         public Transform[] CameraMounts;
         public Camera RoverCam;
         public TextMesh roverCamTextMesh;
         private int cameraMountIndex = 0;
+        #endregion
 
-        internal bool AcceptInput;
+        #region hatch members
+        public Transform Hatch;
         private const float HatchOpenDegrees = 142;
         private const float HatchClosedRotationX = 0f;
         private const float HatchOpenRotationX = -HatchOpenDegrees;
         private float HatchDegrees = 0f;
+        #endregion
+
+        public Light[] Lights;
 
         void Awake()
         {
@@ -38,8 +54,22 @@ namespace RedHomestead.Rovers
 
         void Start()
         {
+            if (this.data == null)
+            {
+                this.data = new RoverData()
+                {
+                    EnergyContainer = new EnergyContainer()
+                    {
+                        TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 3
+                    },
+                    PowerableInstanceID = Guid.NewGuid().ToString()
+                };
+            }
+            this.RefreshVisualization();
+
             HatchDegrees = GetRotationXFromHatchState();
             Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);
+            ToggleLights(false);
         }
 
         private float GetRotationXFromHatchState()
@@ -57,6 +87,20 @@ namespace RedHomestead.Rovers
 
             if (hatchMovement == null)
                 hatchMovement = StartCoroutine(MoveHatch());
+        }
+
+        private bool LightsOn = true;
+        internal void ToggleLights(bool? state = null)
+        {
+            if (!state.HasValue)
+                state = !LightsOn;
+
+            LightsOn = state.Value;
+
+            foreach(Light l in Lights)
+            {
+                l.enabled = state.Value;
+            }
         }
 
         internal void ChangeCameraMount()
