@@ -145,6 +145,7 @@ public class MainMenu : MonoBehaviour {
 
     private void ToggleLogoAndCamera(bool toMainMenuView, Action onFinishTransition)
     {
+        transitionTime = 0f;
         if (toMainMenuView)
         {
             cameraLerp.Reverse();
