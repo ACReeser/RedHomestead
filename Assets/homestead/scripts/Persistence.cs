@@ -180,7 +180,7 @@ namespace RedHomestead.Persistence
         private void DeserializeDeposits()
         {
             _DestroyCurrent<Deposit>();
-            _InstantiateMany<Deposit, DepositData>(Deposits, ModuleBridge.Instance.ConstructionZonePrefab);
+            _InstantiateMany<Deposit, DepositData>(Deposits, ModuleBridge.Instance.WaterDepositPrefab);
         }
 
         private void DeserializeRover()
