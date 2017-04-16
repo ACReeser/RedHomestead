@@ -68,7 +68,7 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
             Drill.Rotate(Vector3.forward, 2f, Space.Self);
             if (HasAttachedWaterContainer && capturedResource.Data.Quantity < 1f)
             {
-                capturedResource.Data.Quantity += Time.deltaTime * WaterPerSecond;
+                capturedResource.Data.Quantity += this.HostDeposit.Data.Extractable.Pull(Time.deltaTime * WaterPerSecond);
             }
         }
 	}
@@ -115,6 +115,7 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
     {
         if (this.SnappedTo is Deposit)
         {
+            this.HostDeposit = this.SnappedTo as Deposit;
             ToggleLegs();
         }
     }
@@ -147,6 +148,9 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
 
     private ResourceComponent capturedResource;
     private bool HasAttachedWaterContainer { get { return capturedResource != null; } }
+
+    internal Deposit HostDeposit { get; private set; }
+
     private Coroutine detachTimer;
     public void DetachCrate(IMovableSnappable detaching)
     {

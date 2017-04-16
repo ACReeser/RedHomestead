@@ -160,10 +160,12 @@ namespace RedHomestead.Persistence
         public PowerlineData[] PowerData;
         public IceDrillData[] IceDrillData;
         public PowerCubeData[] PowerCubeData;
+        public DepositData[] Deposits;
         ////pipe data
 
         public void OnAfterDeserialize()
         {
+            DeserializeDeposits();
             Dictionary<string, IPowerable> powerableMap = new Dictionary<string, IPowerable>();
             UnityEngine.Debug.Log("deserializing crates");
             DeserializeCrates();
@@ -173,6 +175,12 @@ namespace RedHomestead.Persistence
             UnityEngine.Debug.Log("deserializing modules");
             DeserializeModules(powerableMap);
             DeserializeRover();
+        }
+
+        private void DeserializeDeposits()
+        {
+            _DestroyCurrent<Deposit>();
+            _InstantiateMany<Deposit, DepositData>(Deposits, ModuleBridge.Instance.ConstructionZonePrefab);
         }
 
         private void DeserializeRover()
@@ -334,6 +342,7 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<Powerline, PowerlineData>((powerline) => this.PowerData = powerline);
             this._MarshalManyFromScene<IceDrill, IceDrillData>((drill) => this.IceDrillData = drill);
             this._MarshalManyFromScene<PowerCube, PowerCubeData>((power) => this.PowerCubeData = power);
+            this._MarshalManyFromScene<Deposit, DepositData>((dep) => this.Deposits = dep);
 
             this._MarshalHabitats();
 
