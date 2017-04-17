@@ -61,6 +61,7 @@ namespace RedHomestead.Persistence
         public float ConstructionPerSecond = 1f;
         public PackData PackData;
         public int BankAccount;
+        public int GremlinMissStreak;
         public List<Order> EnRouteOrders;
 
         protected override void BeforeMarshal(Transform t = null)
