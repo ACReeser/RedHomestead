@@ -8,8 +8,15 @@ using RedHomestead.Persistence;
 
 public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
 {
-    public float Efficiency = .22f;
-    public float GrossSolarWattagePerTick = 20f;
+    public float Efficiency = .14f;
+    public const float MinimumEfficiency = .14f;
+    public const float MaximumEfficiency = .38f;
+    public const float EquatorAnnualAverageInsolationPerMeter2 = 190f;
+    public const float EquatorAnnualMaximumInsolationPerMeter2 = 210f;
+    public const float SouthPoleAnnualMaximumInsolationPerMeter2 = 300f;
+    public const float SouthPoleAnnualAverageInsolationPerMeter2 = 90f;
+    public const int Meter2PerModule = 16;
+    public const float MaximumWattsPerModule = SouthPoleAnnualMaximumInsolationPerMeter2 * Meter2PerModule * MaximumEfficiency;
     public MeshFilter powerBacking { get; set; }
     public Transform powerMask { get; set; }
     public Transform[] PivotPoles = new Transform[2];
@@ -22,13 +29,13 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
         }
     }
 
-    public float MaximumWattsGenerated { get { return GrossSolarWattagePerTick * Efficiency; } }
+    public float MaximumWattsGenerated { get { return EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * Efficiency; } }
 
     public float WattsGenerated
     {
         get
         {
-            return GrossSolarWattagePerTick * Efficiency;
+            return EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * Efficiency;
         }
     }
 

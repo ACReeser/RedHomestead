@@ -58,7 +58,7 @@ namespace RedHomestead.Electricity
     public static class ElectricityConstants
     {
         public const float WattHoursPerBatteryBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f / 2f;
-        public const float WattsPerBlock = RadioisotopeThermoelectricGenerator._WattsGenerated / 10f;
+        public const float WattsPerBlock = SolarPanel.MaximumWattsPerModule / 10f;
         public static Vector3 _BackingScale = new Vector3(1.2f, 1.2f, 0f);
     }
 
@@ -123,6 +123,12 @@ namespace RedHomestead.Electricity
                 viz.PowerBacking.mesh = FlowManager.Instance.BatteryMeshes.BackingMeshes[(powerable as IBattery).BatteryUnitCapacity() - 1];
                 (powerable as IBattery).RefreshVisualization();
             }
+
+            if (powerable is IPowerSupply)
+            {
+                powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.GeneratorMeshes.BackingMeshes[(powerable as IPowerSupply).GenerationInPowerUnits() - 1];
+                (powerable as IPowerSupply).RefreshVisualization();
+            }
         }
 
         public static void RefreshVisualization(this IPowerConsumer c)
@@ -133,10 +139,10 @@ namespace RedHomestead.Electricity
 
         public static void RefreshVisualization(this IPowerSupply s)
         {
-            if (s is IVariablePowerSupply)
-            {
-                s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - s.GenerationInPowerUnits());
-            }
+            //if (s is IVariablePowerSupply)
+            //{
+            //}
+            s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - s.GenerationInPowerUnits());
         }
 
         public static void RefreshVisualization(this IBattery b)

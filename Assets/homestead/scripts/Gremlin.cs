@@ -12,11 +12,11 @@ public interface IRepairable
 public class Gremlin : MonoBehaviour {
     private const int BaseDC = 10;
     private const int RepairableGraceCount = 5;
-    private const float LowBatteryBonus = 5;
     /// <summary>
     /// The bonus (to avoid havok) during the late night
     /// </summary>
     private const float LateNightBonus = 5f;
+    private const float LowBatteryBonus = 5f;
     private const int WealthyPlayerThreshold = 200000;
     private const float PenaltyPerRepairable = .333f;
     private const int GremlinMissesThreshold = 4;
