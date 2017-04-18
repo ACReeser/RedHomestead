@@ -126,7 +126,14 @@ namespace RedHomestead.Electricity
 
             if (powerable is IPowerSupply)
             {
-                powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.GeneratorMeshes.BackingMeshes[(powerable as IPowerSupply).GenerationInPowerUnits() - 1];
+                if (powerable is IVariablePowerSupply)
+                {
+                    powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.GeneratorMeshes.BackingMeshes[(powerable as IVariablePowerSupply).MaximumGenerationInPowerUnits() - 1];
+                }
+                else
+                {
+                    powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.GeneratorMeshes.BackingMeshes[(powerable as IPowerSupply).GenerationInPowerUnits() - 1];
+                }
                 (powerable as IPowerSupply).RefreshVisualization();
             }
         }
@@ -175,7 +182,12 @@ namespace RedHomestead.Electricity
 
         public static int GenerationInPowerUnits(this IPowerSupply c)
         {
-            return Math.Max(1, Mathf.RoundToInt(c.WattsGenerated / ElectricityConstants.WattsPerBlock));
+            return Math.Max(0, Mathf.RoundToInt(c.WattsGenerated / ElectricityConstants.WattsPerBlock));
+        }
+
+        public static int MaximumGenerationInPowerUnits(this IVariablePowerSupply c)
+        {
+            return Math.Max(1, Mathf.RoundToInt(c.MaximumWattsGenerated / ElectricityConstants.WattsPerBlock));
         }
     }
 

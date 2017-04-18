@@ -8,7 +8,7 @@ using RedHomestead.Persistence;
 
 public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
 {
-    public float Efficiency = .14f;
+    internal float Efficiency = MinimumEfficiency;
     public const float MinimumEfficiency = .14f;
     public const float MaximumEfficiency = .38f;
     public const float EquatorAnnualAverageInsolationPerMeter2 = 190f;
@@ -16,7 +16,7 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
     public const float SouthPoleAnnualMaximumInsolationPerMeter2 = 300f;
     public const float SouthPoleAnnualAverageInsolationPerMeter2 = 90f;
     public const int Meter2PerModule = 16;
-    public const float MaximumWattsPerModule = SouthPoleAnnualMaximumInsolationPerMeter2 * Meter2PerModule * MaximumEfficiency;
+    public const float MaximumWattsPerModule = EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * MinimumEfficiency;
     public MeshFilter powerBacking { get; set; }
     public Transform powerMask { get; set; }
     public Transform[] PivotPoles = new Transform[2];
@@ -35,8 +35,36 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
     {
         get
         {
-            return EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * Efficiency;
+            return GetWattsAtHour();
         }
+    }
+
+    private float GetWattsAtHour()
+    {
+        float x;
+        if (Game.Current.Environment.CurrentHour < 6)
+        {
+            return 0;
+        }
+        else if (Game.Current.Environment.CurrentHour < 12)
+        {
+            x = Game.Current.Environment.CurrentHour - 6;
+        }
+        else if (Game.Current.Environment.CurrentHour < 18)
+        {
+            x = Game.Current.Environment.CurrentHour - 6;
+        }
+        else
+        {
+            return 0;
+        }
+        //hand tuned function that sums to .211 kilo-watt-hours over x = 0 to 11
+        //return Meter2PerModule * (((1 / 120)*x*(x*(x*(x*(11 * x - 130) + 525) - 950) + 1384)) + 24);
+        //instead, we'll just use sine
+#warning inaccuracy: solar panel power generation over the course of a day
+        //this sin() is way off from the U shaped graph in reality
+        //that means we're shortchanging players kWh
+        return MaximumWattsGenerated * Mathf.Sin(Mathf.Lerp(0, Mathf.PI, x / 12));
     }
 
     public override void OnAdjacentChanged()
