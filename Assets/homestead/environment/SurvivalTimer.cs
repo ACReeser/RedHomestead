@@ -328,4 +328,10 @@ public class SurvivalTimer : MonoBehaviour {
         PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
         PlayerInput.Instance.SetPressure(false);
     }
+
+    internal void ToggleRun(bool isRunning)
+    {
+        Oxygen.EnvironmentalConsumptionCoefficient = isRunning ? 1.5f : 1f;
+        GuiBridge.Instance.RefreshSprintIcon(isRunning);
+    }
 }

@@ -31,7 +31,7 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private bool m_UseFovKick;
     [SerializeField]
-    private FOVKick m_FovKick = new FOVKick();
+    private CustomFOVKick m_FovKick = new CustomFOVKick();
     [SerializeField]
     private bool m_UseHeadBob;
     [SerializeField]

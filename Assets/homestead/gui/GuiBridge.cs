@@ -110,7 +110,7 @@ public class GuiBridge : MonoBehaviour {
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage, AutosaveIcon;
+    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage, AutosaveIcon, SprintIcon;
     public AudioSource ComputerAudioSource;
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
     public ReportIORow ReportRowTemplate;
@@ -166,6 +166,8 @@ public class GuiBridge : MonoBehaviour {
             ShowNews(NewsSource.ToolOpenHint);
             ShowNews(NewsSource.FOneHint);
         }
+
+        RefreshSprintIcon(false);
     }
 
     private Coroutine newsTimer;
@@ -251,6 +253,7 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    #region cinematic mode
     private enum CinematicModes { None, WithGUI, NoGUI }
     private CinematicModes CinematicMode = CinematicModes.None;
     private UnityStandardAssets.ImageEffects.CameraMotionBlur cinematicMotionBlur;
@@ -289,6 +292,12 @@ public class GuiBridge : MonoBehaviour {
                 GUICanvas.enabled = false;
                 break;
         }
+    }
+    #endregion
+
+    internal void RefreshSprintIcon(bool sprinting)
+    {
+        this.SprintIcon.gameObject.SetActive(sprinting);
     }
 
     private void _doToggleEscapeMenu()

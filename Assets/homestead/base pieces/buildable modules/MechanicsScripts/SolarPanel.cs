@@ -74,7 +74,8 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
     private const float TiltAmount = 50f;
     private void _OnHourChange(int sol, float hour)
     {
-        if (hour < 19 && hour > 5)
+        //"preview" solar panels were throwing errors
+        if (this.gameObject.activeInHierarchy && hour < 19 && hour > 5)
         {
             float tiltAmount = Mathf.Lerp(90f + TiltAmount, 90f - TiltAmount, (float)(hour - 6f) / 12f);
             StartCoroutine(RotateTo(tiltAmount));
