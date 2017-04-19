@@ -25,12 +25,13 @@ public abstract class SurvivalResource
 
     internal bool IsCritical = false;
     internal bool IsWarning = false;
+    internal float EnvironmentalConsumptionCoefficient = 1f;
 
     public int HoursLeftHint
     {
         get
         {
-            return (int)Math.Ceiling(Data.Current / (Data.ConsumptionPerSecond * 60));
+            return (int)Math.Ceiling(Data.Current / (Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient * 60));
         }
     }
 
@@ -71,7 +72,7 @@ public class SingleSurvivalResource : SurvivalResource
 
     protected override void DoConsume()
     {
-        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond;
+        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient;
         this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
     }
 
@@ -114,7 +115,7 @@ public class DoubleSurvivalResource : SurvivalResource
 
     protected override void DoConsume()
     {
-        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond;
+        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient;
         
         if (IsOnLastBar)
             this.UpdateUI(0f, Data.Current / Data.Maximum, HoursLeftHint);
@@ -147,6 +148,8 @@ public class DoubleSurvivalResource : SurvivalResource
     }
 }
 
+public enum Temperature { Cold, Temperate, Hot }
+
 public class SurvivalTimer : MonoBehaviour {
     public static SurvivalTimer Instance;
 
@@ -156,9 +159,10 @@ public class SurvivalTimer : MonoBehaviour {
 
     public SingleSurvivalResource Food = new SingleSurvivalResource();
 
-    public DoubleSurvivalResource Power = new DoubleSurvivalResource();
+    public SingleSurvivalResource Power = new SingleSurvivalResource();
 
     internal PackData Data { get; private set; }
+    internal Temperature ExternalTemperature;
     public AudioClip IncomingSolarFlare;
 
     public bool UsingPackResources
@@ -204,9 +208,31 @@ public class SurvivalTimer : MonoBehaviour {
         Water.UpdateUI = GuiBridge.Instance.RefreshWaterBar;
         Food.UpdateUI = GuiBridge.Instance.RefreshFoodBar;
         Power.UpdateUI = GuiBridge.Instance.RefreshPowerBar;
+        SunOrbit.Instance.OnHourChange += OnHourChange;
+        OnHourChange(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour);
     }
-	
-	void Update () {
+
+    private void OnHourChange(int sol, float hour)
+    {
+        if (Game.Current.Environment.CurrentHour > 8 && Game.Current.Environment.CurrentHour < 16)
+        {
+            ExternalTemperature = Temperature.Hot;
+            Power.EnvironmentalConsumptionCoefficient = .5f;
+        }
+        else if (Game.Current.Environment.CurrentHour < 4 | Game.Current.Environment.CurrentHour > 20)
+        {
+            ExternalTemperature = Temperature.Cold;
+            Power.EnvironmentalConsumptionCoefficient = 2f;
+        }
+        else
+        {
+            ExternalTemperature = Temperature.Temperate;
+            Power.EnvironmentalConsumptionCoefficient = 1f;
+        }
+        GuiBridge.Instance.RefreshTemperatureGauges();
+    }
+
+    void Update () {
         if (UsingPackResources || !CurrentHabitat.HasPower)
         {
             Oxygen.Consume();
@@ -219,7 +245,7 @@ public class SurvivalTimer : MonoBehaviour {
             }
 
             Power.Consume();
-            if (Power.IsOnLastBar && Power.Data.Current < 0f)
+            if (Power.Data.Current < 0f)
             {
                 //todo: accept reason why you died: e.g. You froze
                 KillPlayer("EXPOSURE");

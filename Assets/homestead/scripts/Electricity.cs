@@ -214,8 +214,8 @@ namespace RedHomestead.Electricity
 
         internal void Attach(Powerline edge, IPowerable node1, IPowerable node2)
         {
-            bool node1Powered = node1.HasPowerGrid();
-            bool node2Powered = node2.HasPowerGrid();
+            bool node1Powered = node1.HasPowerGrid() && grids.ContainsKey(node1.PowerGridInstanceID);
+            bool node2Powered = node2.HasPowerGrid() && grids.ContainsKey(node2.PowerGridInstanceID);
 
             if (node1Powered && node2Powered)
             {

@@ -429,21 +429,16 @@ public class GuiBridge : MonoBehaviour {
         this.RadBar.fillAmount = percentage;
     }
 
-    internal void RefreshPowerBar(float powerPercentage, float heatPercentage, int hoursLeftHint)
+    internal void RefreshPowerBar(float percentage, int hoursLeftHint)
     {
-        this.PowerImage.enabled = (powerPercentage > 0f);
-        this.HotImage.enabled = (powerPercentage <= 0f) && (heatPercentage > .5f);
-        this.ColdImage.enabled = (powerPercentage <= 0f) && (heatPercentage <= .5f);
+        this.PowerBar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.PowerImageHours, hoursLeftHint);
+    }
 
-        if (this.PowerImage.enabled)
-        {
-            this.PowerBar.fillAmount = powerPercentage;
-        }
-        else
-        {
-            this.PowerBar.fillAmount = heatPercentage;
-        }
+    internal void RefreshTemperatureGauges()
+    {
+        this.HotImage.enabled = SurvivalTimer.Instance.ExternalTemperature == Temperature.Hot;
+        this.ColdImage.enabled = SurvivalTimer.Instance.ExternalTemperature == Temperature.Cold;
     }
 
     public FloorplanGroup selectedFloorplanGroup = FloorplanGroup.Undecided;

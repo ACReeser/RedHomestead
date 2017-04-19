@@ -1587,7 +1587,7 @@ public class PlayerInput : MonoBehaviour {
         selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
 
         IPowerable g1 = selectedPowerSocket.transform.root.GetComponent<IPowerable>(), g2 = collider.transform.root.GetComponent<IPowerable>();
-        if (g1 != null && g2 != null)
+        if (g1 != null && g2 != null && g1 != g2)
         {
             power.GetComponent<Powerline>().AssignConnections(g1, g2);
         }
