@@ -9,8 +9,10 @@ using RedHomestead.Persistence;
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
     public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
-    public Transform OrbitCameraAnchor;
+    public Transform OrbitCameraAnchor, ScoutCameraAnchor, PlanetRegions;
     public Button LoadButton;
+    public Light Sun;
+    public Behaviour Halo;
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
@@ -30,6 +32,7 @@ public class MainMenu : MonoBehaviour {
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
+        PlanetRegions.gameObject.SetActive(false);
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -86,9 +89,15 @@ public class MainMenu : MonoBehaviour {
         }
     }
 
+    private bool onScout = false;
     // Update is called once per frame
-    void Update () {
-	
+    void Update() {
+	    if (Input.GetKeyDown(KeyCode.Space))
+        {
+            onScout = !onScout;
+            print("now onscout: " + onScout);
+            ScoutToggle(onScout);
+        }
 	}
 
     public void NewGameToggle(bool state)
@@ -107,6 +116,25 @@ public class MainMenu : MonoBehaviour {
             }
 
             ToggleLogoAndCamera(!state, AfterNewGame);
+        }
+    }
+
+    public void ScoutToggle(bool toScout)
+    {
+        if (!transitioning)
+        {
+            transitioning = true;
+
+            if (toScout)
+                cameraLerp.Seed(Camera.main.transform, ScoutCameraAnchor);
+
+            ToggleLogoAndCamera(!toScout, () =>
+            {
+                RenderSettings.ambientLight = new Color(1, 1, 1, .5f);
+                Halo.enabled = false;
+                Sun.enabled = false;
+                PlanetRegions.gameObject.SetActive(true);
+            });
         }
     }
 
