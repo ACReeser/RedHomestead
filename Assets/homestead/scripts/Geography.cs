@@ -111,20 +111,28 @@ namespace RedHomestead.Geography
 
         public static LatLong FromPointOnUnitSphere(Vector3 point)
         {
-            UnityEngine.Debug.Log(point);
 
-            //float r = Mathf.Sqrt(Mathf.Pow(point.x, 2) + Mathf.Pow(point.y, 2) + Mathf.Pow(point.z, 2));
+            float r = Mathf.Sqrt(Mathf.Pow(point.x, 2) + Mathf.Pow(point.y, 2) + Mathf.Pow(point.z, 2));
 
-            //return new LatLong()
-            //{
-            //    LatitudeDegrees = 1f / Mathf.Cos(point.z / r),
-            //    LongitudeDegrees = 1f / Mathf.Tan(point.x / point.y)
-            //};
+            float phi;
+
+            if (point.x == 0)
+                phi = 0;
+            else
+                phi = Mathf.Atan(point.z / point.x);
+
+            //phi += Mathf.PI / 4f;
+            //phi %= 1f * Mathf.PI;
+
+            //UnityEngine.Debug.Log(String.Format("{2} = {0}/{1}", point.z, point.x, point.z / point.x));
+            UnityEngine.Debug.Log(phi);
 
             return new LatLong()
             {
-                LatitudeDegrees = (float)Mathf.Acos(point.y / 1f),
-                LongitudeDegrees = (float)Mathf.Atan(point.x / point.z)
+                //theta
+                LatitudeDegrees = 90f - Mathf.Acos(point.y / r) * Mathf.Rad2Deg,
+                //phi
+                LongitudeDegrees = phi * Mathf.Rad2Deg
             };
         }
 

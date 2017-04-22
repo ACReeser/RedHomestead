@@ -139,8 +139,8 @@ public class MainMenu : MonoBehaviour {
             ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
 
             //print(Orrey.transform.localRotation.eulerAngles.z);
-            if (ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.z > 25 || ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.x < -25)
-                ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, yDelta, Space.Self);
+            //if (ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.z > 25 || ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.x < -25)
+            //    ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, yDelta, Space.Self);
         }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
