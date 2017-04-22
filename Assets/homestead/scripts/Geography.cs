@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 namespace RedHomestead.Geography
 {
     public enum Direction { North, East, South, West }
+    public enum MarsRegion { alba_patera, amazonis_planitia, aonia_terra, daedalia_planum, noachis_terra, north_pole, olympus_mons, planum_australe, south_pole, syria_thaumasia, terra_sirenum, tharsis_montes, valles_marineris, vastitas_borealis}
 
     public static class GeoExtensions
     {
@@ -45,6 +47,16 @@ namespace RedHomestead.Geography
             }
 
             return dir;
+        }
+
+        public static MarsRegion ParseRegion(string input)
+        {
+            return (MarsRegion)Enum.Parse(typeof(MarsRegion), input);
+        }
+
+        public static string Name(this MarsRegion region)
+        {
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(region.ToString().Replace('_', ' '));
         }
     }
 

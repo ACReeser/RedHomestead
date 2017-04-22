@@ -6,15 +6,30 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using RedHomestead.Persistence;
 using UnityStandardAssets.CrossPlatformInput;
+using RedHomestead.Geography;
 
-public class MainMenu : MonoBehaviour {
-    public Image BigLogo;
-    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow, ScoutPanels;
-    public Transform OrbitCameraAnchor, ScoutCameraAnchor, PlanetRegions, Orrey;
-    public Button LoadButton;
+[Serializable]
+public struct ScoutFields
+{
+    public RectTransform ScoutPanels;
+    public Transform ScoutCameraAnchor, ScoutRegions, ScoutOrrey, ScoutCursor;
     public Light Sun;
     public Behaviour Halo;
     public Spin PlanetSpin;
+    public Text RegionName, RegionSolar, RegionMinerals, RegionWater, RegionRemote, RegionMultiplier;
+
+    public void FillScoutInfo(MarsRegion region)
+    {
+        RegionName.text = region.Name();
+    }
+}
+
+public class MainMenu : MonoBehaviour {
+    public Image BigLogo;
+    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
+    public Transform OrbitCameraAnchor;
+    public Button LoadButton;
+    public ScoutFields ScoutFields;
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
@@ -34,8 +49,8 @@ public class MainMenu : MonoBehaviour {
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
-        PlanetRegions.gameObject.SetActive(false);
-        ScoutPanels.gameObject.SetActive(false);
+        ScoutFields.ScoutRegions.gameObject.SetActive(false);
+        ScoutFields.ScoutPanels.gameObject.SetActive(false);
         RenderSettings.ambientLight = new Color(0, 0, 0, 0);
 
 
@@ -116,15 +131,25 @@ public class MainMenu : MonoBehaviour {
         float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
 
         if (xDelta != 0f)
-            PlanetSpin.transform.Rotate(Vector3.forward, xDelta, Space.Self);
+            ScoutFields.PlanetSpin.transform.Rotate(Vector3.forward, xDelta, Space.Self);
 
         if (yDelta != 0f)
         {
-            Orrey.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
+            ScoutFields.ScoutOrrey.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
 
             //print(Orrey.transform.localRotation.eulerAngles.z);
-            if (Orrey.transform.localRotation.eulerAngles.z > 25 || Orrey.transform.localRotation.eulerAngles.x < -25)
-                Orrey.transform.Rotate(Vector3.forward, yDelta, Space.Self);
+            if (ScoutFields.ScoutOrrey.transform.localRotation.eulerAngles.z > 25 || ScoutFields.ScoutOrrey.transform.localRotation.eulerAngles.x < -25)
+                ScoutFields.ScoutOrrey.transform.Rotate(Vector3.forward, yDelta, Space.Self);
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+        {
+            ScoutFields.FillScoutInfo(GeoExtensions.ParseRegion(hit.collider.name));
+            ScoutFields.ScoutCursor.position = hit.point;
+            ScoutFields.ScoutCursor.rotation = Quaternion.Euler(hit.normal);
+            ScoutFields.ScoutCursor.Rotate(Vector3.up * 90f);
         }
     }
 
@@ -154,16 +179,16 @@ public class MainMenu : MonoBehaviour {
             transitioning = true;
 
             if (toScout)
-                cameraLerp.Seed(Camera.main.transform, ScoutCameraAnchor);
+                cameraLerp.Seed(Camera.main.transform, ScoutFields.ScoutCameraAnchor);
 
             ToggleLogoAndCamera(!toScout, () =>
             {
                 RenderSettings.ambientLight = new Color(1, 1, 1, .5f);
-                Halo.enabled = false;
-                Sun.enabled = false;
-                PlanetRegions.gameObject.SetActive(true);
-                ScoutPanels.gameObject.SetActive(true);
-                PlanetSpin.enabled = false;
+                ScoutFields.Halo.enabled = false;
+                ScoutFields.Sun.enabled = false;
+                ScoutFields.ScoutRegions.gameObject.SetActive(true);
+                ScoutFields.ScoutPanels.gameObject.SetActive(true);
+                ScoutFields.PlanetSpin.enabled = false;
             });
         }
     }
