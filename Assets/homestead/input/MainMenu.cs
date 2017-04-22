@@ -122,7 +122,7 @@ public class MainMenu : MonoBehaviour {
         {
             Orrey.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
 
-            print(Orrey.transform.localRotation.eulerAngles.z);
+            //print(Orrey.transform.localRotation.eulerAngles.z);
             if (Orrey.transform.localRotation.eulerAngles.z > 25 || Orrey.transform.localRotation.eulerAngles.x < -25)
                 Orrey.transform.Rotate(Vector3.forward, yDelta, Space.Self);
         }
