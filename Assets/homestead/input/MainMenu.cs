@@ -5,14 +5,16 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using RedHomestead.Persistence;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
     public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow, ScoutPanels;
-    public Transform OrbitCameraAnchor, ScoutCameraAnchor, PlanetRegions;
+    public Transform OrbitCameraAnchor, ScoutCameraAnchor, PlanetRegions, Orrey;
     public Button LoadButton;
     public Light Sun;
     public Behaviour Halo;
+    public Spin PlanetSpin;
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
@@ -34,6 +36,8 @@ public class MainMenu : MonoBehaviour {
         NewGamePanels.gameObject.SetActive(false);
         PlanetRegions.gameObject.SetActive(false);
         ScoutPanels.gameObject.SetActive(false);
+        RenderSettings.ambientLight = new Color(0, 0, 0, 0);
+
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -99,7 +103,30 @@ public class MainMenu : MonoBehaviour {
             print("now onscout: " + onScout);
             ScoutToggle(onScout);
         }
+
+        if (onScout)
+        {
+            HandleScoutInput();
+        }
 	}
+
+    private void HandleScoutInput()
+    {
+        float xDelta = CrossPlatformInputManager.GetAxis("Horizontal");
+        float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
+
+        if (xDelta != 0f)
+            PlanetSpin.transform.Rotate(Vector3.forward, xDelta, Space.Self);
+
+        if (yDelta != 0f)
+        {
+            Orrey.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
+
+            print(Orrey.transform.localRotation.eulerAngles.z);
+            if (Orrey.transform.localRotation.eulerAngles.z > 25 || Orrey.transform.localRotation.eulerAngles.x < -25)
+                Orrey.transform.Rotate(Vector3.forward, yDelta, Space.Self);
+        }
+    }
 
     public void NewGameToggle(bool state)
     {
@@ -136,6 +163,7 @@ public class MainMenu : MonoBehaviour {
                 Sun.enabled = false;
                 PlanetRegions.gameObject.SetActive(true);
                 ScoutPanels.gameObject.SetActive(true);
+                PlanetSpin.enabled = false;
             });
         }
     }
