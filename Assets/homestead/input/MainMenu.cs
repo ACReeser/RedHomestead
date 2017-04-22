@@ -12,15 +12,16 @@ using RedHomestead.Geography;
 public struct ScoutFields
 {
     public RectTransform ScoutPanels;
-    public Transform ScoutCameraAnchor, ScoutRegions, ScoutOrrey, ScoutCursor;
+    public Transform ScoutCameraAnchor, ScoutRegions, ScoutOrreyVertical, ScoutOrreyHorizontal, ScoutCursor;
     public Light Sun;
     public Behaviour Halo;
     public Spin PlanetSpin;
-    public Text RegionName, RegionSolar, RegionMinerals, RegionWater, RegionRemote, RegionMultiplier;
+    public Text RegionName, RegionSolar, RegionMinerals, RegionWater, RegionRemote, RegionMultiplier, LatLongText;
 
-    public void FillScoutInfo(MarsRegion region)
+    public void FillScoutInfo(MarsRegion region, LatLong latlong)
     {
         RegionName.text = region.Name();
+        LatLongText.text = latlong.ToString();
     }
 }
 
@@ -131,25 +132,24 @@ public class MainMenu : MonoBehaviour {
         float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
 
         if (xDelta != 0f)
-            ScoutFields.PlanetSpin.transform.Rotate(Vector3.forward, xDelta, Space.Self);
+            ScoutFields.ScoutOrreyHorizontal.transform.Rotate(Vector3.up, xDelta, Space.Self);
 
         if (yDelta != 0f)
         {
-            ScoutFields.ScoutOrrey.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
+            ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
 
             //print(Orrey.transform.localRotation.eulerAngles.z);
-            if (ScoutFields.ScoutOrrey.transform.localRotation.eulerAngles.z > 25 || ScoutFields.ScoutOrrey.transform.localRotation.eulerAngles.x < -25)
-                ScoutFields.ScoutOrrey.transform.Rotate(Vector3.forward, yDelta, Space.Self);
+            if (ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.z > 25 || ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.x < -25)
+                ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, yDelta, Space.Self);
         }
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            ScoutFields.FillScoutInfo(GeoExtensions.ParseRegion(hit.collider.name));
+            ScoutFields.FillScoutInfo(GeoExtensions.ParseRegion(hit.collider.name), LatLong.FromPointOnUnitSphere(ScoutFields.ScoutOrreyHorizontal.transform.InverseTransformPoint(hit.point)));
             ScoutFields.ScoutCursor.position = hit.point;
-            ScoutFields.ScoutCursor.rotation = Quaternion.Euler(hit.normal);
-            ScoutFields.ScoutCursor.Rotate(Vector3.up * 90f);
+            ScoutFields.ScoutCursor.rotation = Quaternion.LookRotation(hit.normal);
         }
     }
 
@@ -189,6 +189,7 @@ public class MainMenu : MonoBehaviour {
                 ScoutFields.ScoutRegions.gameObject.SetActive(true);
                 ScoutFields.ScoutPanels.gameObject.SetActive(true);
                 ScoutFields.PlanetSpin.enabled = false;
+                ScoutFields.PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
             });
         }
     }

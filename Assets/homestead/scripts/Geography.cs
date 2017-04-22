@@ -5,7 +5,41 @@ using System;
 namespace RedHomestead.Geography
 {
     public enum Direction { North, East, South, West }
-    public enum MarsRegion { alba_patera, amazonis_planitia, aonia_terra, daedalia_planum, noachis_terra, north_pole, olympus_mons, planum_australe, south_pole, syria_thaumasia, terra_sirenum, tharsis_montes, valles_marineris, vastitas_borealis}
+    public enum MarsRegion {
+        acidalia_planitia,
+        alba_mons,
+        amazonis_planitia,
+        aonia_terra,
+        arabia_terra,
+        arcadia_planitia,
+        argyre_planitia,
+        chryse_planitia,
+        daedalia_planum,
+        elysium_mons,
+        elysium_planitia,
+        hellas_planitia,
+        herperia_planum,
+        lunae_planum,
+        meridiani_planum,
+        noachis_terra,
+        north_pole,
+        olympus_mons,
+        planum_australe,
+        promethei_terra,
+        south_pole,
+        syria_thaumasia,
+        syrtis_major_planum,
+        tempe_terra,
+        terra_cimmeria,
+        terra_sabaea,
+        terra_sirenum,
+        tharsis_montes,
+        tyrrhena_terra,
+        utopia_planitia,
+        valles_marineris,
+        vastitas_borealis,
+        xanthe_terra
+    }
 
     public static class GeoExtensions
     {
@@ -73,6 +107,30 @@ namespace RedHomestead.Geography
         public float DistanceKilometers(LatLong other)
         {
             return 100f;
+        }
+
+        public static LatLong FromPointOnUnitSphere(Vector3 point)
+        {
+            UnityEngine.Debug.Log(point);
+
+            //float r = Mathf.Sqrt(Mathf.Pow(point.x, 2) + Mathf.Pow(point.y, 2) + Mathf.Pow(point.z, 2));
+
+            //return new LatLong()
+            //{
+            //    LatitudeDegrees = 1f / Mathf.Cos(point.z / r),
+            //    LongitudeDegrees = 1f / Mathf.Tan(point.x / point.y)
+            //};
+
+            return new LatLong()
+            {
+                LatitudeDegrees = (float)Mathf.Acos(point.y / 1f),
+                LongitudeDegrees = (float)Mathf.Atan(point.x / point.z)
+            };
+        }
+
+        public override string ToString()
+        {
+            return String.Format("Lat {0:0.##}, Lon {1:0.##}", LatitudeDegrees, LongitudeDegrees);
         }
     }
 }
