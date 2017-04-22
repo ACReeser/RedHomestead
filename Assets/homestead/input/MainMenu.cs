@@ -8,7 +8,7 @@ using RedHomestead.Persistence;
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
-    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
+    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow, ScoutPanels;
     public Transform OrbitCameraAnchor, ScoutCameraAnchor, PlanetRegions;
     public Button LoadButton;
     public Light Sun;
@@ -33,6 +33,7 @@ public class MainMenu : MonoBehaviour {
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
         PlanetRegions.gameObject.SetActive(false);
+        ScoutPanels.gameObject.SetActive(false);
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -134,6 +135,7 @@ public class MainMenu : MonoBehaviour {
                 Halo.enabled = false;
                 Sun.enabled = false;
                 PlanetRegions.gameObject.SetActive(true);
+                ScoutPanels.gameObject.SetActive(true);
             });
         }
     }
