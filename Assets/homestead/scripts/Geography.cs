@@ -41,6 +41,12 @@ namespace RedHomestead.Geography
         xanthe_terra
     }
 
+    public class BaseLocation
+    {
+        public MarsRegion Region;
+        public LatLong LatLong;
+    }
+
     public static class GeoExtensions
     {
         private static Quaternion eastQ = Quaternion.Euler(0, 90, 0);

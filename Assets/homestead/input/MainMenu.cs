@@ -11,7 +11,7 @@ using RedHomestead.Geography;
 [Serializable]
 public struct ScoutFields
 {
-    public RectTransform ScoutPanels;
+    public RectTransform ScoutPanels, ClaimHomesteadButton, SelectLocationButton;
     public Transform ScoutCameraAnchor, ScoutRegions, ScoutOrreyVertical, ScoutOrreyHorizontal, ScoutCursor;
     public Light Sun;
     public Behaviour Halo;
@@ -37,7 +37,7 @@ public class MainMenu : MonoBehaviour {
     private const string DefaultRadioButtonName = "default";
     private const string RadioTagPostfix = "radio";
     private float transitionTime = 0f;
-    private int smallLogoW, smallLogoH;
+    private int smallLogoW, smallLogoH, scoutLogoW, scoutLogoH;
     private LerpContext cameraLerp;
     private string lastPlayerName;
     private string[] savedPlayerNames;
@@ -47,13 +47,13 @@ public class MainMenu : MonoBehaviour {
     {
         smallLogoW = UnityEngine.Screen.width / 2;
         smallLogoH = UnityEngine.Screen.height / 2;
+        scoutLogoW = (int)(UnityEngine.Screen.width * .6666f);
+        scoutLogoH = (int)(UnityEngine.Screen.height * .6666f);
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
         NewGamePanels.gameObject.SetActive(false);
-        ScoutFields.ScoutRegions.gameObject.SetActive(false);
-        ScoutFields.ScoutPanels.gameObject.SetActive(false);
-        RenderSettings.ambientLight = new Color(0, 0, 0, 0);
-
+        ToggleScoutMode(false);
+        SetSelectedLocation(null);
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -116,7 +116,6 @@ public class MainMenu : MonoBehaviour {
 	    if (Input.GetKeyDown(KeyCode.Space))
         {
             onScout = !onScout;
-            print("now onscout: " + onScout);
             ScoutToggle(onScout);
         }
 
@@ -126,31 +125,51 @@ public class MainMenu : MonoBehaviour {
         }
 	}
 
+    private BaseLocation hoverLocation, selectedLocation;
+
     private void HandleScoutInput()
     {
-        float xDelta = CrossPlatformInputManager.GetAxis("Horizontal");
-        float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
-
-        if (xDelta != 0f)
-            ScoutFields.ScoutOrreyHorizontal.transform.Rotate(Vector3.up, xDelta, Space.Self);
-
-        if (yDelta != 0f)
-        {
-            ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
-
-            //print(Orrey.transform.localRotation.eulerAngles.z);
-            //if (ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.z > 25 || ScoutFields.ScoutOrreyVertical.transform.localRotation.eulerAngles.x < -25)
-            //    ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, yDelta, Space.Self);
-        }
-
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
+        if (selectedLocation == null && Physics.Raycast(ray, out hit))
         {
-            ScoutFields.FillScoutInfo(GeoExtensions.ParseRegion(hit.collider.name), LatLong.FromPointOnUnitSphere(ScoutFields.ScoutOrreyHorizontal.transform.InverseTransformPoint(hit.point)));
+            hoverLocation = new BaseLocation()
+            {
+                Region = GeoExtensions.ParseRegion(hit.collider.name),
+                LatLong = LatLong.FromPointOnUnitSphere(ScoutFields.ScoutOrreyHorizontal.transform.InverseTransformPoint(hit.point))
+            };
+            ScoutFields.FillScoutInfo(hoverLocation.Region, hoverLocation.LatLong);
             ScoutFields.ScoutCursor.position = hit.point;
             ScoutFields.ScoutCursor.rotation = Quaternion.LookRotation(hit.normal);
         }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            SetSelectedLocation(hoverLocation);
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            SetSelectedLocation(null);
+        }
+        else
+        {
+            float xDelta = CrossPlatformInputManager.GetAxis("Horizontal");
+            float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
+
+            if (xDelta != 0f)
+                ScoutFields.ScoutOrreyHorizontal.transform.Rotate(Vector3.up, xDelta, Space.Self);
+
+            if (yDelta != 0f)
+                ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
+        }
+    }
+
+    private void SetSelectedLocation(BaseLocation loc)
+    {
+        selectedLocation = loc;
+        ScoutFields.ClaimHomesteadButton.gameObject.SetActive(loc != null);
+        ScoutFields.SelectLocationButton.gameObject.SetActive(loc == null);
+        ScoutFields.ScoutCursor.transform.SetParent(loc == null ? null : ScoutFields.ScoutOrreyHorizontal);
     }
 
     public void NewGameToggle(bool state)
@@ -168,7 +187,7 @@ public class MainMenu : MonoBehaviour {
                 NewGamePanels.gameObject.SetActive(false);
             }
 
-            ToggleLogoAndCamera(!state, AfterNewGame);
+            ToggleLogoAndCamera(!state, AfterNewGame, smallLogoH, smallLogoW);
         }
     }
 
@@ -183,15 +202,23 @@ public class MainMenu : MonoBehaviour {
 
             ToggleLogoAndCamera(!toScout, () =>
             {
-                RenderSettings.ambientLight = new Color(1, 1, 1, .5f);
-                ScoutFields.Halo.enabled = false;
-                ScoutFields.Sun.enabled = false;
-                ScoutFields.ScoutRegions.gameObject.SetActive(true);
-                ScoutFields.ScoutPanels.gameObject.SetActive(true);
-                ScoutFields.PlanetSpin.enabled = false;
-                ScoutFields.PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
-            });
+                this.ToggleScoutMode(toScout);
+            }, scoutLogoH, scoutLogoW);
         }
+    }
+
+    private void ToggleScoutMode(bool isScout)
+    {
+        RenderSettings.ambientLight = isScout ? new Color(1, 1, 1, .5f) : new Color(0, 0, 0, 0);
+
+        ScoutFields.Halo.enabled = !isScout;
+        ScoutFields.Sun.enabled = !isScout;
+        ScoutFields.ScoutRegions.gameObject.SetActive(isScout);
+        ScoutFields.ScoutPanels.gameObject.SetActive(isScout);
+        ScoutFields.PlanetSpin.enabled = !isScout;
+
+        if (isScout)
+            ScoutFields.PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
     }
 
     private void AfterNewGame()
@@ -218,7 +245,7 @@ public class MainMenu : MonoBehaviour {
             {
                 cameraLerp.Seed(Camera.main.transform, OrbitCameraAnchor);
             }
-            ToggleLogoAndCamera(!state, AfterSettings);
+            ToggleLogoAndCamera(!state, AfterSettings, smallLogoH, smallLogoW);
         }
     }
 
@@ -227,19 +254,19 @@ public class MainMenu : MonoBehaviour {
         MainMenuButtons.gameObject.SetActive(onMainMenu);
     }
 
-    private void ToggleLogoAndCamera(bool toMainMenuView, Action onFinishTransition)
+    private void ToggleLogoAndCamera(bool toMainMenuView, Action onFinishTransition, int logoH, int logoW)
     {
         transitionTime = 0f;
         if (toMainMenuView)
         {
             cameraLerp.Reverse();
             //toggle to fullscreen and non-orbit camera
-            StartCoroutine(LogoCameraChange(smallLogoH, smallLogoW, 0, 0, onFinishTransition));
+            StartCoroutine(LogoCameraChange(logoH, logoW, 0, 0, onFinishTransition));
         }
         else
         {
             //toggle to off
-            StartCoroutine(LogoCameraChange(0, 0, smallLogoH, smallLogoW, onFinishTransition));
+            StartCoroutine(LogoCameraChange(0, 0, logoH, logoW, onFinishTransition));
         }
     }
 
