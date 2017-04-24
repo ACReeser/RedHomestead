@@ -19,7 +19,7 @@ public class MarsRegionMapLabeller : MonoBehaviour {
 
         foreach(Transform t in this.transform)
         {
-            if (t.gameObject.activeInHierarchy)
+            if (t.gameObject.activeInHierarchy && t.name != "equator" && t.name != "prime_meridian")
             {
                 children.Add(t);
                 GameObject g = new GameObject();

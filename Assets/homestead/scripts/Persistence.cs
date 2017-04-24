@@ -63,6 +63,7 @@ namespace RedHomestead.Persistence
         public int BankAccount;
         public int GremlinMissStreak;
         public List<Order> EnRouteOrders;
+        public float[] PerkProgress;
 
         protected override void BeforeMarshal(Transform t = null)
         {

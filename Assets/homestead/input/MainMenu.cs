@@ -51,6 +51,7 @@ public class MainMenu : MonoBehaviour {
         scoutLogoH = (int)(UnityEngine.Screen.height * .6666f);
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
+        MainMenuButtons.gameObject.SetActive(true);
         NewGamePanels.gameObject.SetActive(false);
         ToggleScoutMode(false);
         SetSelectedLocation(null);

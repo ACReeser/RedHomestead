@@ -11,6 +11,22 @@ namespace RedHomestead.Economy{
     [Flags]
     public enum DeliveryType { Rover, Lander, Drop }
 
+    public struct StartingSupplyData
+    {
+        public string Name;
+        public float PerUnitCost;
+        public float Quantity;
+        public Matter Matter;
+
+        public StartingSupplyData(string name, float cost, Matter matter, float quantity = 1f)
+        {
+            this.Name = name;
+            this.PerUnitCost = cost;
+            this.Matter = matter;
+            this.Quantity = quantity;
+        }
+    }
+
     public static class EconomyExtensions
     {
         private const float MinimumDeliveryTimeHours = 2f;
@@ -92,6 +108,14 @@ namespace RedHomestead.Economy{
                     return 12;
             }
         }
+
+        public static StartingSupplyData[] StartingSupplies = new StartingSupplyData[]
+        {
+            new StartingSupplyData("1 Week Food", 50000, Matter.RationMeal),
+            new StartingSupplyData("1 Week Water", 100000, Matter.Water),
+            new StartingSupplyData("Oxygen", 100000, Matter.Oxygen),
+            new StartingSupplyData("Battery Pack", 100000, Matter.Unspecified),
+        };
     }
 
     public class Stock

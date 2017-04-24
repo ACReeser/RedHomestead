@@ -41,6 +41,13 @@ namespace RedHomestead.Geography
         xanthe_terra
     }
 
+    public struct MarsRegionData
+    {
+        public float SolarMultiplier;
+        public float MineralMultiplier;
+        public float WaterMultiplier;
+    }
+
     public class BaseLocation
     {
         public MarsRegion Region;
@@ -98,6 +105,11 @@ namespace RedHomestead.Geography
         {
             return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(region.ToString().Replace('_', ' '));
         }
+
+        //public static MarsRegionData Data(this MarsRegion region)
+        //{
+
+        //}
     }
 
     public static class PlayerGeography
@@ -125,7 +137,7 @@ namespace RedHomestead.Geography
             if (point.x == 0)
                 phi = 0;
             else
-                phi = Mathf.Atan(point.z / point.x);
+                phi = Mathf.Atan2(point.z, point.x);
 
             //phi += Mathf.PI / 4f;
             //phi %= 1f * Mathf.PI;
