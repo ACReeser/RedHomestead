@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Simulation;
 
 namespace RedHomestead.Geography
 {
@@ -18,7 +19,7 @@ namespace RedHomestead.Geography
         elysium_mons,
         elysium_planitia,
         hellas_planitia,
-        herperia_planum,
+        hesperia_planum,
         lunae_planum,
         meridiani_planum,
         noachis_terra,
@@ -46,6 +47,19 @@ namespace RedHomestead.Geography
         public float SolarMultiplier;
         public float MineralMultiplier;
         public float WaterMultiplier;
+        public Matter AbundantMatter;
+
+        public MarsRegionData(float solar, float mineral, float water, Matter abundant)
+        {
+            this.SolarMultiplier = solar;
+            this.MineralMultiplier = mineral;
+            this.WaterMultiplier = water;
+            this.AbundantMatter = abundant;
+        }
+
+        public string SolarMultiplierString { get { return String.Format("{0:0}% Solar", SolarMultiplier * 100); } }
+        public string MineralMultiplierString { get { return String.Format("{0:0}% Mineral", MineralMultiplier * 100); } }
+        public string WaterMultiplierString { get { return String.Format("{0:0}% Water", WaterMultiplier * 100); } }
     }
 
     public class BaseLocation
@@ -106,10 +120,80 @@ namespace RedHomestead.Geography
             return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(region.ToString().Replace('_', ' '));
         }
 
-        //public static MarsRegionData Data(this MarsRegion region)
-        //{
+        private static MarsRegionData[] _regionData = new MarsRegionData[]
+        {
+            //acidalia_planitia,
+            new MarsRegionData(1f, 1f, 1.25f, Matter.Silica), //mid latitude, glacier ice
+            //alba_mons,
+            new MarsRegionData(.8f, 1.25f, .8f, Matter.Iron), //high dust, water in soil
+            //amazonis_planitia,
+            new MarsRegionData(1.25f, 1f, 1.1f, Matter.Silica), //equatorial, dark streaks
+            //aonia_terra,
+            new MarsRegionData(.8f, 1.15f, 1.1f, Matter.Iron), //near polar, rough terrain
+            //arabia_terra,
+            new MarsRegionData(1.25f, 1.15f, 1.1f, Matter.Iron), //equatorial, rough terrain
+            //arcadia_planitia,
+            new MarsRegionData(.8f, 1f, 1.1f, Matter.Iron), //near polar, water in craters
+            //argyre_planitia,
+            new MarsRegionData(.8f, 1.25f, 1.1f, Matter.Iron), //near polar, impact crater, ancient lake
+            //chryse_planitia,
+            new MarsRegionData(1.25f, 1f, 1f, Matter.Iron), //equatorial
+            //daedalia_planum,
+            new MarsRegionData(1f, 1f, .8f, Matter.Iron), //mid latitude, planum, featureless
+            //elysium_mons,
+            new MarsRegionData(1f, 1.25f, .6f, Matter.Iron), //mid latitude, mountain
+            //elysium_planitia,
+            new MarsRegionData(1.25f, 1f, 1.25f, Matter.Iron), //equatorial, water ice in photos
+            //hellas_planitia,
+            new MarsRegionData(.8f, 1.25f, 1.25f, Matter.Iron), //near polar, impact crater, water can be liquid
+            //hesperia_planum,
+            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            //lunae_planum,
+            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, impact craters
+            //meridiani_planum,
+            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, high iron content
+            //noachis_terra,
+            new MarsRegionData(.8f, 1.1f, 1f, Matter.Iron), //near polar, rough terrain
+            //north_pole,
+            new MarsRegionData(.25f, .5f, 2f, Matter.Water), //pole
+            //olympus_mons,
+            new MarsRegionData(1f, 1.5f, .8f, Matter.Iron), //equatorial, mountain
+            //planum_australe,
+            new MarsRegionData(.5f, 1.1f, 1.5f, Matter.Iron), //polar, rough
+            //promethei_terra,
+            new MarsRegionData(.8f, 1.1f, 1.1f, Matter.Water), //near polar, rough
+            //south_pole,
+            new MarsRegionData(.25f, .75f, 1.75f, Matter.Water), //pole
+            //syria_thaumasia,
+            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            //syrtis_major_planum,
+            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, impact craters
+            //tempe_terra,
+            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            //terra_cimmeria,
+            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            //terra_sabaea,
+            new MarsRegionData(1.25f, 1.25f, 1f, Matter.Iron), //equatorial, many impact craters
+            //terra_sirenum,
+            new MarsRegionData(1.15f, 1.1f, 1f, Matter.Iron), //mid to polar latitude, impact craters
+            //tharsis_montes,
+            new MarsRegionData(1.25f, 1.5f, .8f, Matter.Iron), //equatorial, mountain
+            //tyrrhena_terra,
+            new MarsRegionData(1.2f, 1.1f, 1f, Matter.Iron), //mid to equatorial latitude, impact craters
+            //utopia_planitia,
+            new MarsRegionData(1.2f, 1f, 1.33f, Matter.Iron), //mid to equatorial latitude, large amounts of ice
+            //valles_marineris,
+            new MarsRegionData(1.25f, 1f, 1.1f, Matter.Iron), //equatorial latitude, deep + shadows
+            //vastitas_borealis,
+            new MarsRegionData(.5f, 1f, 1.5f, Matter.Water), //polar, smooth
+            //xanthe_terra
+            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, impact craters
+        };
 
-        //}
+        public static MarsRegionData Data(this MarsRegion region)
+        {
+            return _regionData[(int)region];
+        }
     }
 
     public static class PlayerGeography

@@ -22,6 +22,9 @@ public struct ScoutFields
     {
         RegionName.text = region.Name();
         LatLongText.text = latlong.ToString();
+        RegionWater.text = region.Data().WaterMultiplierString;
+        RegionMinerals.text = region.Data().MineralMultiplierString;
+        RegionSolar.text = region.Data().SolarMultiplierString;
     }
 }
 
@@ -210,6 +213,8 @@ public class MainMenu : MonoBehaviour {
 
     private void ToggleScoutMode(bool isScout)
     {
+        MainMenuButtons.gameObject.SetActive(!isScout);
+
         RenderSettings.ambientLight = isScout ? new Color(1, 1, 1, .5f) : new Color(0, 0, 0, 0);
 
         ScoutFields.Halo.enabled = !isScout;
