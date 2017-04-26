@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using RedHomestead.Persistence;
 using UnityStandardAssets.CrossPlatformInput;
 using RedHomestead.Geography;
+using RedHomestead.Perks;
+using RedHomestead.Economy;
 
 [Serializable]
 public struct ScoutFields
@@ -28,12 +30,38 @@ public struct ScoutFields
     }
 }
 
+[Serializable]
+public struct FinanceAndSupplyFields
+{
+    public Text StartingFunds, AllocatedSupplyFunds, RemainingFunds;
+
+    public void RefreshFunds(NewGameChoices choices)
+    {
+        StartingFunds.text = String.Format("Starting Funds: ${0}k", choices.StartingFunds / 1000);
+        RemainingFunds.text = String.Format("Remaining Funds: ${0}k", choices.RemainingFunds / 1000);
+    }
+}
+
+public struct NewGameChoices
+{
+    public Perk ChosenPlayerTraining;
+    public BackerFinancing ChosenFinancing;
+    public BaseLocation ChosenLocation;
+    public int StartingFunds, AllocatedFunds, RemainingFunds;
+
+    public void RecalculateFunds()
+    {
+        StartingFunds = Mathf.RoundToInt(ChosenFinancing.StartingFunds() * PerkMultipliers.StartingFunds(ChosenPlayerTraining));
+    }
+}
+
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
     public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
     public Transform OrbitCameraAnchor;
     public Button LoadButton;
     public ScoutFields ScoutFields;
+    public FinanceAndSupplyFields FinanceAndSupplyFields;
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
@@ -44,6 +72,8 @@ public class MainMenu : MonoBehaviour {
     private LerpContext cameraLerp;
     private string lastPlayerName;
     private string[] savedPlayerNames;
+
+    internal NewGameChoices NewGameChoices;
 
 	// Use this for initialization
 	void Start ()
@@ -129,13 +159,13 @@ public class MainMenu : MonoBehaviour {
         }
 	}
 
-    private BaseLocation hoverLocation, selectedLocation;
+    private BaseLocation hoverLocation;
 
     private void HandleScoutInput()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        if (selectedLocation == null && Physics.Raycast(ray, out hit))
+        if (NewGameChoices.ChosenLocation == null && Physics.Raycast(ray, out hit))
         {
             hoverLocation = new BaseLocation()
             {
@@ -170,7 +200,7 @@ public class MainMenu : MonoBehaviour {
 
     private void SetSelectedLocation(BaseLocation loc)
     {
-        selectedLocation = loc;
+        NewGameChoices.ChosenLocation = loc;
         ScoutFields.ClaimHomesteadButton.gameObject.SetActive(loc != null);
         ScoutFields.SelectLocationButton.gameObject.SetActive(loc == null);
         ScoutFields.ScoutCursor.transform.SetParent(loc == null ? null : ScoutFields.ScoutOrreyHorizontal);
@@ -338,11 +368,17 @@ public class MainMenu : MonoBehaviour {
     public void SelectTraining(int trainingIndex)
     {
         OnRadioSelect(NewGameRadioButtons.training);
+        NewGameChoices.ChosenPlayerTraining = (Perk)trainingIndex;
+        NewGameChoices.RecalculateFunds();
+        FinanceAndSupplyFields.RefreshFunds(NewGameChoices);
     }
 
     public void SelectFinancing(int financeIndex)
     {
         OnRadioSelect(NewGameRadioButtons.financing);
+        NewGameChoices.ChosenFinancing = (BackerFinancing)financeIndex;
+        NewGameChoices.RecalculateFunds();
+        FinanceAndSupplyFields.RefreshFunds(NewGameChoices);
     }
 
     private void OnRadioSelect(NewGameRadioButtons radioGroup)

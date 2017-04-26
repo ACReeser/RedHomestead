@@ -62,6 +62,7 @@ namespace RedHomestead.Geography
         public string WaterMultiplierString { get { return String.Format("{0:0}% Water", WaterMultiplier * 100); } }
     }
 
+    [Serializable]
     public class BaseLocation
     {
         public MarsRegion Region;
@@ -201,6 +202,7 @@ namespace RedHomestead.Geography
         public static LatLong BaseLocation;
     }
 
+    [Serializable]
     public struct LatLong
     {
         public float LatitudeDegrees;

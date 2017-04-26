@@ -11,6 +11,8 @@ namespace RedHomestead.Economy{
     [Flags]
     public enum DeliveryType { Rover, Lander, Drop }
 
+    public enum BackerFinancing { Government, TechCorp, IndustryCorp, Benefactor }
+
     public struct StartingSupplyData
     {
         public string Name;
@@ -34,6 +36,12 @@ namespace RedHomestead.Economy{
         public static bool IsSet(this DeliveryType value, DeliveryType flag)
         {
             return (value & flag) == flag;
+        }
+
+        private static int[] startingFunds = new int[] { 3000000, 4000000, 4000000, 5000000 };
+        public static int StartingFunds(this BackerFinancing financing)
+        {
+            return startingFunds[(int)financing];
         }
         
         //rover shipping type should be based on miles, not weight
