@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RedHomestead.Perks;
+using System;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.CrossPlatformInput;
@@ -16,7 +17,7 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private float m_WalkSpeed;
     [SerializeField]
-    private float m_RunSpeed;
+    internal float m_RunSpeed;
     [SerializeField]
     [Range(0f, 1f)]
     private float m_RunstepLenghten;
@@ -83,6 +84,7 @@ public class CustomFPSController : MonoBehaviour
         m_NextStep = m_StepCycle / 2f;
         m_Jumping = false;
         m_AudioSource = GetComponent<AudioSource>();
+        m_RunSpeed *= PerkMultipliers.RunSpeed;
         //alex
         this.InitializeMouseLook();        
     }

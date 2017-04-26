@@ -27,7 +27,7 @@ namespace RedHomestead.Perks
         public static float WeeklyIncome { get; private set; }
         public static float PurchasePrice { get; private set; }
         public static float ShippingCost { get; private set; }
-        public static float ExcavationTime { get; private set; }
+        public static float ExcavationSpeed { get; private set; }
         public static float CropWaterUse { get; private set; }
         public static float CropGrowSpeed { get; private set; }
         public static float IndustrialEfficiency { get; private set; }
@@ -44,7 +44,7 @@ namespace RedHomestead.Perks
             AirUsage = Perk.Athlete.HasPerkLevel(1) ? .9f : 1f;
             RunSpeed = Perk.Athlete.HasPerkLevel(2) ? 1.15f : 1f;
 
-            ConstructSpeed = Perk.Engineer.HasPerkLevel(1) ? .9f : 1f;
+            ConstructSpeed = Perk.Engineer.HasPerkLevel(1) ? 1.1f : 1f;
             SolarEfficiency= Perk.Engineer.HasPerkLevel(2) ? 1.1f : 1f;
 
             ChemistryData = Perk.Chemist.HasPerkLevel(1) ? 1.25f : 1f;
@@ -53,11 +53,11 @@ namespace RedHomestead.Perks
             //StartingFunds = 1f + (Perk.Administrator.HasPerkLevel(1) ? .15f : 0) + (Perk.Astronaut.HasPerkLevel(1) ? .10f : 0);
             ShippingCost = Perk.Administrator.HasPerkLevel(2) ? .925f : 1f;
 
-            PurchasePrice = Perk.Salesperson.HasPerkLevel(1) ? 1.05f : 1f;
-            WeeklyIncome  = Perk.Salesperson.HasPerkLevel(2) ? .95f : 1f;
+            PurchasePrice = Perk.Salesperson.HasPerkLevel(1) ? .95f : 1f;
+            WeeklyIncome  = Perk.Salesperson.HasPerkLevel(2) ? 1.05f : 1f;
 
             GeologyData  = Perk.Geologist.HasPerkLevel(1) ? 1.25f : 1f;
-            ExcavationTime  = Perk.Geologist.HasPerkLevel(2) ? .9f : 1f;
+            ExcavationSpeed  = Perk.Geologist.HasPerkLevel(2) ? 1.1f : 1f;
 
             CropWaterUse = Perk.Botanist.HasPerkLevel(1) ? .9f : 1f;
             CropGrowSpeed  = Perk.Botanist.HasPerkLevel(2) ? 1.1f : 1f;

@@ -10,6 +10,7 @@ using RedHomestead.Interiors;
 using RedHomestead.Geography;
 using RedHomestead.Persistence;
 using RedHomestead.Electricity;
+using RedHomestead.Perks;
 
 namespace RedHomestead.Equipment
 {
@@ -715,7 +716,7 @@ public class PlayerInput : MonoBehaviour {
 
                         if (Input.GetKey(KeyCode.E))
                         {
-                            zone.WorkOnConstruction(Time.deltaTime * Game.Current.Player.ConstructionPerSecond);
+                            zone.WorkOnConstruction(Time.deltaTime * PerkMultipliers.ConstructSpeed);
                         }
                         Prompts.ConstructHint.Progress = zone.ProgressPercentage;
                         newPrompt = Prompts.ConstructHint;
@@ -772,7 +773,7 @@ public class PlayerInput : MonoBehaviour {
 
                             if (Input.GetKey(KeyCode.E))
                             {
-                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * Game.Current.Player.ExcavationPerSecond);
+                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * PerkMultipliers.ExcavationSpeed);
                                 if (Prompts.ExcavateHint.Progress >= 1f)
                                 {
                                     DrillSparks.Stop();

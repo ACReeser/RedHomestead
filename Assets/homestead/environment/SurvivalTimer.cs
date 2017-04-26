@@ -26,12 +26,17 @@ public abstract class SurvivalResource
     internal bool IsCritical = false;
     internal bool IsWarning = false;
     internal float EnvironmentalConsumptionCoefficient = 1f;
+    internal float PerkConsumptionCoefficient = 1f;
+    internal float EffectiveConsumptionPerSecond
+    {
+        get { return Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient * PerkConsumptionCoefficient; }
+    }
 
     public int HoursLeftHint
     {
         get
         {
-            return (int)Math.Ceiling(Data.Current / (Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient * 60));
+            return (int)Math.Ceiling(Data.Current / (EffectiveConsumptionPerSecond * 60));
         }
     }
 
@@ -72,7 +77,7 @@ public class SingleSurvivalResource : SurvivalResource
 
     protected override void DoConsume()
     {
-        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient;
+        Data.Current -= Time.deltaTime * EffectiveConsumptionPerSecond;
         this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
     }
 
@@ -190,6 +195,7 @@ public class SurvivalTimer : MonoBehaviour {
     void Start()
     {
         SetData(Game.Current.Player.PackData);
+        Oxygen.PerkConsumptionCoefficient = RedHomestead.Perks.PerkMultipliers.AirUsage;
 
         if (!String.IsNullOrEmpty(this.Data.CurrentHabitatModuleInstanceID))
         {
@@ -239,7 +245,6 @@ public class SurvivalTimer : MonoBehaviour {
 
             if (Oxygen.Data.Current < 0)
             {
-                //todo: accept reason why you died: e.g. You asphyxiated
                 KillPlayer("ASPHYXIATION");
                 return;
             }
@@ -247,7 +252,6 @@ public class SurvivalTimer : MonoBehaviour {
             Power.Consume();
             if (Power.Data.Current < 0f)
             {
-                //todo: accept reason why you died: e.g. You froze
                 KillPlayer("EXPOSURE");
                 return;
             }
@@ -257,7 +261,6 @@ public class SurvivalTimer : MonoBehaviour {
 
         if (Water.Data.Current < 0)
         {
-            //todo: accept reason why you died: e.g. You terminally dehydrated
             KillPlayer("DEHYDRATION");
             return;
         }
@@ -266,7 +269,6 @@ public class SurvivalTimer : MonoBehaviour {
 
         if (Food.Data.Current < 0)
         {
-            //todo: accept reason why you died: e.g. You starved
             KillPlayer("STARVATION");
             return;
         }

@@ -59,7 +59,6 @@ namespace RedHomestead.Persistence
     {
         public string Name;
         public float ExcavationPerSecond;
-        public float ConstructionPerSecond = 1f;
         public PackData PackData;
         public int BankAccount;
         public int GremlinMissStreak;
@@ -447,6 +446,7 @@ namespace RedHomestead.Persistence
         public static void LoadGame(string playerName)
         {
             Game.Current = _LoadGame(playerName);
+            Perks.PerkMultipliers.LoadFromPlayerPerkProgress();
         }
 
         public static string[] GetPlayerNames()
@@ -497,12 +497,12 @@ namespace RedHomestead.Persistence
                 {
                     Name = "Ares",
                     BankAccount = choices.RemainingFunds,
-                    ExcavationPerSecond = 1f,
-                    ConstructionPerSecond = 1f,
                     PackData = EVA.EVA.GetDefaultPackData(),
-                    EnRouteOrders = new List<Order>()
+                    EnRouteOrders = new List<Order>(),
+                    PerkProgress = choices.GetPerkProgress()
                 }
             };
+            Perks.PerkMultipliers.LoadFromPlayerPerkProgress();
         }
     }
 
