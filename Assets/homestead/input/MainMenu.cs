@@ -9,6 +9,7 @@ using UnityStandardAssets.CrossPlatformInput;
 using RedHomestead.Geography;
 using RedHomestead.Perks;
 using RedHomestead.Economy;
+using RedHomestead.GameplayOptions;
 
 [Serializable]
 public struct ScoutFields
@@ -37,23 +38,11 @@ public struct FinanceAndSupplyFields
 
     public void RefreshFunds(NewGameChoices choices)
     {
-        StartingFunds.text = String.Format("Starting Funds: ${0}k", choices.StartingFunds / 1000);
-        RemainingFunds.text = String.Format("Remaining Funds: ${0}k", choices.RemainingFunds / 1000);
+        StartingFunds.text = String.Format("Starting Funds: ${0:#,##0}k", choices.StartingFunds / 1000);
+        RemainingFunds.text = String.Format("Remaining Funds: ${0:#,##0}k", choices.RemainingFunds / 1000);
     }
 }
 
-public struct NewGameChoices
-{
-    public Perk ChosenPlayerTraining;
-    public BackerFinancing ChosenFinancing;
-    public BaseLocation ChosenLocation;
-    public int StartingFunds, AllocatedFunds, RemainingFunds;
-
-    public void RecalculateFunds()
-    {
-        StartingFunds = Mathf.RoundToInt(ChosenFinancing.StartingFunds() * PerkMultipliers.StartingFunds(ChosenPlayerTraining));
-    }
-}
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
@@ -88,6 +77,10 @@ public class MainMenu : MonoBehaviour {
         NewGamePanels.gameObject.SetActive(false);
         ToggleScoutMode(false);
         SetSelectedLocation(null);
+        NewGameChoices.ChosenFinancing = BackerFinancing.Government;
+        NewGameChoices.ChosenPlayerTraining = Perk.Athlete;
+        NewGameChoices.RecalculateFunds();
+        FinanceAndSupplyFields.RefreshFunds(NewGameChoices);
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -345,7 +338,7 @@ public class MainMenu : MonoBehaviour {
 
     public void LaunchGame()
     {
-        PersistentDataManager.StartNewGame();
+        PersistentDataManager.StartNewGame(NewGameChoices);
         UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 

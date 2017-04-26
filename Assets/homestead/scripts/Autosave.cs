@@ -15,7 +15,12 @@ public class Autosave : MonoBehaviour
         if (Game.Current == null)
         {
             print("Starting new game for editor session");
-            PersistentDataManager.StartNewGame();
+            PersistentDataManager.StartNewGame(new RedHomestead.GameplayOptions.NewGameChoices() {
+                ChosenFinancing = RedHomestead.Economy.BackerFinancing.Government,
+                BuyRover = true,
+                ChosenPlayerTraining = RedHomestead.Perks.Perk.Athlete,
+                RemainingFunds = 1000000
+            });
         }
 #endif
     }

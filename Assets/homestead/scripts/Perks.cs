@@ -71,4 +71,11 @@ namespace RedHomestead.Perks
             return Game.Current.Player.PerkProgress[(int)perk] >= level;
         }
     }
+
+    public enum PackUpgrades
+    {
+        OxygenPack,
+        PowerPack,
+        Exoskeleton
+    }
 }

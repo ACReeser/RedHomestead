@@ -32,6 +32,8 @@ namespace RedHomestead.Economy{
     public static class EconomyExtensions
     {
         private const float MinimumDeliveryTimeHours = 2f;
+        public const int HabitatCost = 1000000;
+        public const int RoverCost = 1000000;
 
         public static bool IsSet(this DeliveryType value, DeliveryType flag)
         {

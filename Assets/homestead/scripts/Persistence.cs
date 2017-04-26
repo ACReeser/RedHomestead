@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using RedHomestead.Electricity;
 using RedHomestead.Economy;
+using RedHomestead.GameplayOptions;
 
 namespace RedHomestead.Persistence
 {
@@ -468,7 +469,7 @@ namespace RedHomestead.Persistence
         }
 
         //todo: pass in perk/equipment selections from screen
-        public static void StartNewGame()
+        public static void StartNewGame(NewGameChoices choices)
         {
             UnityEngine.Debug.Log("Starting new game");
             Game.Current = new Game()
@@ -495,7 +496,7 @@ namespace RedHomestead.Persistence
                 Player = new PlayerData()
                 {
                     Name = "Ares",
-                    BankAccount = 350000,
+                    BankAccount = choices.RemainingFunds,
                     ExcavationPerSecond = 1f,
                     ConstructionPerSecond = 1f,
                     PackData = EVA.EVA.GetDefaultPackData(),
