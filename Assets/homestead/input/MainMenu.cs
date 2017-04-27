@@ -12,10 +12,32 @@ using RedHomestead.Economy;
 using RedHomestead.GameplayOptions;
 
 [Serializable]
-public struct ScoutFields
+public abstract class MainMenuView
 {
-    public RectTransform ScoutPanels, ClaimHomesteadButton, SelectLocationButton;
-    public Transform ScoutCameraAnchor, ScoutRegions, ScoutOrreyVertical, ScoutOrreyHorizontal, ScoutCursor;
+    public Transform CameraAnchor;
+    public RectTransform CanvasParent;
+    internal int LogoBottom, LogoRight;
+
+    public void AfterTransitionTo()
+    {
+        CanvasParent.gameObject.SetActive(true);
+        this._AfterTransitionTo();
+    }
+    public void BeforeTransitionAway()
+    {
+        CanvasParent.gameObject.SetActive(false);
+        this._BeforeTransitionAway();
+    }
+
+    protected abstract void _AfterTransitionTo();
+    protected abstract void _BeforeTransitionAway();
+}
+
+[Serializable]
+public class ScoutView: MainMenuView
+{
+    public RectTransform ClaimHomesteadButton, SelectLocationButton;
+    public Transform ScoutRegions, ScoutOrreyVertical, ScoutOrreyHorizontal, ScoutCursor;
     public Light Sun;
     public Behaviour Halo;
     public Spin PlanetSpin;
@@ -29,10 +51,34 @@ public struct ScoutFields
         RegionMinerals.text = region.Data().MineralMultiplierString;
         RegionSolar.text = region.Data().SolarMultiplierString;
     }
+
+    internal void ToggleScoutMode(bool isScout)
+    {
+        RenderSettings.ambientLight = isScout ? new Color(1, 1, 1, .5f) : new Color(0, 0, 0, 0);
+
+        Halo.enabled = !isScout;
+        Sun.enabled = !isScout;
+        ScoutRegions.gameObject.SetActive(isScout);
+        CanvasParent.gameObject.SetActive(isScout);
+        PlanetSpin.enabled = !isScout;
+
+        if (isScout)
+            PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
+    }
+
+    protected override void _AfterTransitionTo()
+    {
+        ToggleScoutMode(true);
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+        ToggleScoutMode(false);
+    }
 }
 
 [Serializable]
-public struct FinanceAndSupplyFields
+public class FinanceAndSupplyView: MainMenuView
 {
     public Text StartingFunds, AllocatedSupplyFunds, RemainingFunds;
 
@@ -41,23 +87,58 @@ public struct FinanceAndSupplyFields
         StartingFunds.text = String.Format("Starting Funds: ${0:#,##0}k", choices.StartingFunds / 1000);
         RemainingFunds.text = String.Format("Remaining Funds: ${0:#,##0}k", choices.RemainingFunds / 1000);
     }
+
+    protected override void _AfterTransitionTo()
+    {
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+    }
 }
 
+[Serializable]
+public class TitleView: MainMenuView
+{
+    protected override void _AfterTransitionTo()
+    {
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+    }
+}
+
+public enum MainMenuCameraView { Title, Scout, Supply }
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
-    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
-    public Transform OrbitCameraAnchor;
+    public RectTransform QuickstartBackdrop, QuickstartTrainingEquipmentRow;
     public Button LoadButton;
-    public ScoutFields ScoutFields;
-    public FinanceAndSupplyFields FinanceAndSupplyFields;
+    public ScoutView ScoutView;
+    public FinanceAndSupplyView FinanceAndSupplyView;
+    public TitleView TitleView;
+
+    private MainMenuCameraView ViewState = MainMenuCameraView.Title;
+    private MainMenuView CurrentView;
+    private MainMenuView GetView(MainMenuCameraView viewState)
+    {
+        switch (viewState)
+        {
+            case MainMenuCameraView.Scout:
+                return ScoutView;
+            case MainMenuCameraView.Supply:
+                return FinanceAndSupplyView;
+            default:
+                return TitleView;
+        }
+    }
 
     private bool transitioning, onMainMenu = true;
     private const float transitionDuration = 1f;
     private const string DefaultRadioButtonName = "default";
     private const string RadioTagPostfix = "radio";
     private float transitionTime = 0f;
-    private int smallLogoW, smallLogoH, scoutLogoW, scoutLogoH;
     private LerpContext cameraLerp;
     private string lastPlayerName;
     private string[] savedPlayerNames;
@@ -67,20 +148,25 @@ public class MainMenu : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-        smallLogoW = UnityEngine.Screen.width / 2;
-        smallLogoH = UnityEngine.Screen.height / 2;
-        scoutLogoW = (int)(UnityEngine.Screen.width * .6666f);
-        scoutLogoH = (int)(UnityEngine.Screen.height * .6666f);
+        CurrentView = TitleView;
+        FinanceAndSupplyView.LogoRight = UnityEngine.Screen.width / 2;
+        FinanceAndSupplyView.LogoBottom = UnityEngine.Screen.height / 2;
+        ScoutView.LogoRight = (int)(UnityEngine.Screen.width * .6666f);
+        ScoutView.LogoBottom = (int)(UnityEngine.Screen.height * .6666f);
+
         cameraLerp.Seed(Camera.main.transform, null);
         cameraLerp.Duration = transitionDuration;
-        MainMenuButtons.gameObject.SetActive(true);
-        NewGamePanels.gameObject.SetActive(false);
-        ToggleScoutMode(false);
+
+        TitleView.CanvasParent.gameObject.SetActive(true);
+        FinanceAndSupplyView.CanvasParent.gameObject.SetActive(false);
+
+        ScoutView.ToggleScoutMode(false);
         SetSelectedLocation(null);
+
         NewGameChoices.ChosenFinancing = BackerFinancing.Government;
         NewGameChoices.ChosenPlayerTraining = Perk.Athlete;
         NewGameChoices.RecalculateFunds();
-        FinanceAndSupplyFields.RefreshFunds(NewGameChoices);
+        FinanceAndSupplyView.RefreshFunds(NewGameChoices);
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -136,17 +222,9 @@ public class MainMenu : MonoBehaviour {
             }
         }
     }
-
-    private bool onScout = false;
-    // Update is called once per frame
+    
     void Update() {
-	    if (Input.GetKeyDown(KeyCode.Space))
-        {
-            onScout = !onScout;
-            ScoutToggle(onScout);
-        }
-
-        if (onScout)
+        if (ViewState == MainMenuCameraView.Scout)
         {
             HandleScoutInput();
         }
@@ -163,11 +241,11 @@ public class MainMenu : MonoBehaviour {
             hoverLocation = new BaseLocation()
             {
                 Region = GeoExtensions.ParseRegion(hit.collider.name),
-                LatLong = LatLong.FromPointOnUnitSphere(ScoutFields.ScoutOrreyHorizontal.transform.InverseTransformPoint(hit.point))
+                LatLong = LatLong.FromPointOnUnitSphere(ScoutView.ScoutOrreyHorizontal.transform.InverseTransformPoint(hit.point))
             };
-            ScoutFields.FillScoutInfo(hoverLocation.Region, hoverLocation.LatLong);
-            ScoutFields.ScoutCursor.position = hit.point;
-            ScoutFields.ScoutCursor.rotation = Quaternion.LookRotation(hit.normal);
+            ScoutView.FillScoutInfo(hoverLocation.Region, hoverLocation.LatLong);
+            ScoutView.ScoutCursor.position = hit.point;
+            ScoutView.ScoutCursor.rotation = Quaternion.LookRotation(hit.normal);
         }
 
         if (Input.GetMouseButtonDown(0))
@@ -184,119 +262,59 @@ public class MainMenu : MonoBehaviour {
             float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
 
             if (xDelta != 0f)
-                ScoutFields.ScoutOrreyHorizontal.transform.Rotate(Vector3.up, xDelta, Space.Self);
+                ScoutView.ScoutOrreyHorizontal.transform.Rotate(Vector3.up, xDelta, Space.Self);
 
             if (yDelta != 0f)
-                ScoutFields.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
+                ScoutView.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
         }
     }
 
     private void SetSelectedLocation(BaseLocation loc)
     {
         NewGameChoices.ChosenLocation = loc;
-        ScoutFields.ClaimHomesteadButton.gameObject.SetActive(loc != null);
-        ScoutFields.SelectLocationButton.gameObject.SetActive(loc == null);
-        ScoutFields.ScoutCursor.transform.SetParent(loc == null ? null : ScoutFields.ScoutOrreyHorizontal);
+        ScoutView.ClaimHomesteadButton.gameObject.SetActive(loc != null);
+        ScoutView.SelectLocationButton.gameObject.SetActive(loc == null);
+        ScoutView.ScoutCursor.transform.SetParent(loc == null ? null : ScoutView.ScoutOrreyHorizontal);
     }
 
-    public void NewGameToggle(bool state)
+    public void ChangeViewInt(int newView)
+    {
+        ChangeView((MainMenuCameraView)newView);
+    }
+
+    public void ChangeView(MainMenuCameraView newView)
     {
         if (!transitioning)
         {
             transitioning = !transitioning;
 
-            if (onMainMenu)
-            {
-                cameraLerp.Seed(Camera.main.transform, OrbitCameraAnchor);
-            }
-            else
-            {
-                NewGamePanels.gameObject.SetActive(false);
-            }
+            MainMenuView fromView = CurrentView;
+            MainMenuView toView = GetView(newView);
 
-            ToggleLogoAndCamera(!state, AfterNewGame, smallLogoH, smallLogoW);
+            cameraLerp.Seed(fromView.CameraAnchor, toView.CameraAnchor);
+
+            fromView.BeforeTransitionAway();
+            ToggleLogoAndCamera(fromView, toView, () => {
+                CurrentView = toView;
+                CurrentView.AfterTransitionTo();
+
+                ViewState = newView;
+
+                if (newView == MainMenuCameraView.Supply)
+                {
+                    //unselect all radio buttons
+                    InitializeRadioButtons();
+
+                    QuickstartBackdrop.gameObject.SetActive(true);
+                }
+            });
         }
     }
 
-    public void ScoutToggle(bool toScout)
-    {
-        if (!transitioning)
-        {
-            transitioning = true;
-
-            if (toScout)
-                cameraLerp.Seed(Camera.main.transform, ScoutFields.ScoutCameraAnchor);
-
-            ToggleLogoAndCamera(!toScout, () =>
-            {
-                this.ToggleScoutMode(toScout);
-            }, scoutLogoH, scoutLogoW);
-        }
-    }
-
-    private void ToggleScoutMode(bool isScout)
-    {
-        MainMenuButtons.gameObject.SetActive(!isScout);
-
-        RenderSettings.ambientLight = isScout ? new Color(1, 1, 1, .5f) : new Color(0, 0, 0, 0);
-
-        ScoutFields.Halo.enabled = !isScout;
-        ScoutFields.Sun.enabled = !isScout;
-        ScoutFields.ScoutRegions.gameObject.SetActive(isScout);
-        ScoutFields.ScoutPanels.gameObject.SetActive(isScout);
-        ScoutFields.PlanetSpin.enabled = !isScout;
-
-        if (isScout)
-            ScoutFields.PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
-    }
-
-    private void AfterNewGame()
-    {
-        MainMenuButtons.gameObject.SetActive(onMainMenu);
-
-        if (!onMainMenu)
-        {
-            NewGamePanels.gameObject.SetActive(true);
-
-            //unselect all radio buttons
-            InitializeRadioButtons();
-
-            QuickstartBackdrop.gameObject.SetActive(true);
-        }
-    }
-
-    public void SettingsClick(bool state)
-    {
-        if (!transitioning)
-        {
-            transitioning = !transitioning;
-            if (onMainMenu)
-            {
-                cameraLerp.Seed(Camera.main.transform, OrbitCameraAnchor);
-            }
-            ToggleLogoAndCamera(!state, AfterSettings, smallLogoH, smallLogoW);
-        }
-    }
-
-    private void AfterSettings()
-    {
-        MainMenuButtons.gameObject.SetActive(onMainMenu);
-    }
-
-    private void ToggleLogoAndCamera(bool toMainMenuView, Action onFinishTransition, int logoH, int logoW)
+    private void ToggleLogoAndCamera(MainMenuView fromView, MainMenuView toView, Action onFinishTransition)
     {
         transitionTime = 0f;
-        if (toMainMenuView)
-        {
-            cameraLerp.Reverse();
-            //toggle to fullscreen and non-orbit camera
-            StartCoroutine(LogoCameraChange(logoH, logoW, 0, 0, onFinishTransition));
-        }
-        else
-        {
-            //toggle to off
-            StartCoroutine(LogoCameraChange(0, 0, logoH, logoW, onFinishTransition));
-        }
+        StartCoroutine(LogoCameraChange(fromView.LogoBottom, fromView.LogoRight, toView.LogoBottom, toView.LogoRight, onFinishTransition));
     }
 
     private IEnumerator LogoCameraChange(float startBottom, float startRight, int endBottom, int endRight, Action onFinishTransition)
@@ -363,7 +381,7 @@ public class MainMenu : MonoBehaviour {
         OnRadioSelect(NewGameRadioButtons.training);
         NewGameChoices.ChosenPlayerTraining = (Perk)trainingIndex;
         NewGameChoices.RecalculateFunds();
-        FinanceAndSupplyFields.RefreshFunds(NewGameChoices);
+        FinanceAndSupplyView.RefreshFunds(NewGameChoices);
     }
 
     public void SelectFinancing(int financeIndex)
@@ -371,7 +389,7 @@ public class MainMenu : MonoBehaviour {
         OnRadioSelect(NewGameRadioButtons.financing);
         NewGameChoices.ChosenFinancing = (BackerFinancing)financeIndex;
         NewGameChoices.RecalculateFunds();
-        FinanceAndSupplyFields.RefreshFunds(NewGameChoices);
+        FinanceAndSupplyView.RefreshFunds(NewGameChoices);
     }
 
     private void OnRadioSelect(NewGameRadioButtons radioGroup)
