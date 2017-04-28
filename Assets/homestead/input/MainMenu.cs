@@ -16,6 +16,8 @@ public abstract class MainMenuView
 {
     public Transform CameraAnchor;
     public RectTransform CanvasParent;
+    public virtual float TransitionToTime { get { return 1f; } }
+
     internal int LogoBottom, LogoRight;
 
     public void AfterTransitionTo()
@@ -64,6 +66,11 @@ public class ScoutView: MainMenuView
 
         if (isScout)
             PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
+        else
+        {
+            ScoutOrreyHorizontal.localRotation = Quaternion.identity;
+            ScoutOrreyVertical.localRotation = Quaternion.identity;
+        }
     }
 
     protected override void _AfterTransitionTo()
@@ -109,15 +116,32 @@ public class TitleView: MainMenuView
     }
 }
 
-public enum MainMenuCameraView { Title, Scout, Supply }
+[Serializable]
+public class QuickstartView : MainMenuView
+{
+    public override float TransitionToTime { get { return 0f; } }
+    public RectTransform QuickstartBackdrop, QuickstartTrainingEquipmentRow;
+
+    protected override void _AfterTransitionTo()
+    {
+        //QuickstartBackdrop.gameObject.SetActive(true);
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+        //QuickstartBackdrop.gameObject.SetActive(false);
+    }
+}
+
+public enum MainMenuCameraView { Title, Quickstart, Scout, Supply }
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
-    public RectTransform QuickstartBackdrop, QuickstartTrainingEquipmentRow;
     public Button LoadButton;
     public ScoutView ScoutView;
     public FinanceAndSupplyView FinanceAndSupplyView;
     public TitleView TitleView;
+    public QuickstartView QuickstartView;
 
     private MainMenuCameraView ViewState = MainMenuCameraView.Title;
     private MainMenuView CurrentView;
@@ -129,16 +153,16 @@ public class MainMenu : MonoBehaviour {
                 return ScoutView;
             case MainMenuCameraView.Supply:
                 return FinanceAndSupplyView;
+            case MainMenuCameraView.Quickstart:
+                return QuickstartView;
             default:
                 return TitleView;
         }
     }
 
-    private bool transitioning, onMainMenu = true;
-    private const float transitionDuration = 1f;
+    private bool transitioning;
     private const string DefaultRadioButtonName = "default";
     private const string RadioTagPostfix = "radio";
-    private float transitionTime = 0f;
     private LerpContext cameraLerp;
     private string lastPlayerName;
     private string[] savedPlayerNames;
@@ -155,13 +179,17 @@ public class MainMenu : MonoBehaviour {
         ScoutView.LogoBottom = (int)(UnityEngine.Screen.height * .6666f);
 
         cameraLerp.Seed(Camera.main.transform, null);
-        cameraLerp.Duration = transitionDuration;
 
         TitleView.CanvasParent.gameObject.SetActive(true);
+
+        //init radio buttons needs active gameobjects
+        FinanceAndSupplyView.CanvasParent.gameObject.SetActive(true);
+        InitializeRadioButtons();
         FinanceAndSupplyView.CanvasParent.gameObject.SetActive(false);
 
+        QuickstartView.CanvasParent.gameObject.SetActive(false);
+
         ScoutView.ToggleScoutMode(false);
-        SetSelectedLocation(null);
 
         NewGameChoices.ChosenFinancing = BackerFinancing.Government;
         NewGameChoices.ChosenPlayerTraining = Perk.Athlete;
@@ -209,7 +237,7 @@ public class MainMenu : MonoBehaviour {
                     if (defaultQuickstartClones[(int)r] == null)
                     {
                         defaultQuickstartClones[(int)r] = GameObject.Instantiate(g);
-                        defaultQuickstartClones[(int)r].transform.SetParent(QuickstartTrainingEquipmentRow);
+                        defaultQuickstartClones[(int)r].transform.SetParent(QuickstartView.QuickstartTrainingEquipmentRow);
                         //remove the checkbox
                         defaultQuickstartClones[(int)r].transform.GetChild(0).gameObject.SetActive(false);
                         defaultQuickstartClones[(int)r].tag = "Untagged";
@@ -291,7 +319,10 @@ public class MainMenu : MonoBehaviour {
             MainMenuView fromView = CurrentView;
             MainMenuView toView = GetView(newView);
 
-            cameraLerp.Seed(fromView.CameraAnchor, toView.CameraAnchor);
+            cameraLerp.Seed(fromView.CameraAnchor, toView.CameraAnchor, toView.TransitionToTime);
+
+            if (newView == MainMenuCameraView.Scout)
+                SetSelectedLocation(null);
 
             fromView.BeforeTransitionAway();
             ToggleLogoAndCamera(fromView, toView, () => {
@@ -300,20 +331,19 @@ public class MainMenu : MonoBehaviour {
 
                 ViewState = newView;
 
-                if (newView == MainMenuCameraView.Supply)
-                {
-                    //unselect all radio buttons
-                    InitializeRadioButtons();
+                //if (newView == MainMenuCameraView.Supply)
+                //{
+                //    //unselect all radio buttons
+                //    InitializeRadioButtons();
 
-                    QuickstartBackdrop.gameObject.SetActive(true);
-                }
+                //    QuickstartBackdrop.gameObject.SetActive(true);
+                //}
             });
         }
     }
 
     private void ToggleLogoAndCamera(MainMenuView fromView, MainMenuView toView, Action onFinishTransition)
     {
-        transitionTime = 0f;
         StartCoroutine(LogoCameraChange(fromView.LogoBottom, fromView.LogoRight, toView.LogoBottom, toView.LogoRight, onFinishTransition));
     }
 
@@ -321,21 +351,17 @@ public class MainMenu : MonoBehaviour {
     {
         while(transitioning)
         {
-            transitionTime += Time.deltaTime;
-
             cameraLerp.Tick(Camera.main.transform);
 
-            if (transitionTime > transitionDuration)
+            if (cameraLerp.Done)
             {
                 SetBottomRight(BigLogo, endBottom, endRight);
                 transitioning = false;
-                transitionTime = 0f;
-                onMainMenu = !onMainMenu;
                 onFinishTransition();
             }
             else
             {
-                float lerpAmt = transitionTime / transitionDuration;
+                float lerpAmt = cameraLerp.Time / cameraLerp.Duration;
                 SetBottomRight(BigLogo, (int)Mathf.Lerp(startBottom, endBottom, lerpAmt), (int)Mathf.Lerp(startRight, endRight, lerpAmt) );
 
                 yield return null;
@@ -364,11 +390,6 @@ public class MainMenu : MonoBehaviour {
     {
 #warning todo: make sure quickstart at quickstart equipment/training
         LaunchGame();
-    }
-
-    public void StartCustomize()
-    {
-        QuickstartBackdrop.gameObject.SetActive(false);
     }
 
     private enum NewGameRadioButtons { financing, training }
@@ -424,10 +445,10 @@ public class MainMenu : MonoBehaviour {
         public Vector3 FromPosition, ToPosition;
         public Quaternion FromRotation, ToRotation;
         public float Duration;
-        private float Time;
-        public bool Done;
+        public float Time { get; private set; }
+        public bool Done { get; private set; }
 
-        public void Seed(Transform from, Transform to)
+        public void Seed(Transform from, Transform to, float duration = 1f)
         {
             FromPosition = from.position;
             FromRotation = Quaternion.LookRotation(from.forward, from.up);
@@ -436,6 +457,9 @@ public class MainMenu : MonoBehaviour {
                 ToPosition = to.position;
                 ToRotation = Quaternion.LookRotation(to.forward, to.up);
             }
+            this.Time = 0f;
+            this.Duration = Mathf.Max(duration, 0.00001f); //prevent divide by zero errors
+            this.Done = false;
         }
 
         public void Reverse()

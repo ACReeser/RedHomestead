@@ -224,12 +224,8 @@ namespace RedHomestead.Geography
                 phi = 0;
             else
                 phi = Mathf.Atan2(point.z, point.x);
-
-            //phi += Mathf.PI / 4f;
-            //phi %= 1f * Mathf.PI;
-
-            //UnityEngine.Debug.Log(String.Format("{2} = {0}/{1}", point.z, point.x, point.z / point.x));
-            UnityEngine.Debug.Log(phi);
+            
+            //UnityEngine.Debug.Log(phi);
 
             return new LatLong()
             {
