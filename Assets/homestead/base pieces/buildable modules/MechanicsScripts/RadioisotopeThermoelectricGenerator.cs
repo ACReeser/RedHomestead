@@ -5,10 +5,13 @@ using RedHomestead.Buildings;
 using UnityEngine;
 using System.Linq;
 
-public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHomestead.Electricity.IPowerSupply
+public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHomestead.Electricity.IPowerSupply, IElectricalRepairable
 {
     public const float WattHoursGeneratedPerDay = _WattsGenerated * SunOrbit.GameSecondsPerGameDay;
     public const float _WattsGenerated = 130;
+
+    public Transform electricalFailureAnchor;
+    public Transform ElectricalFailureAnchor { get { return electricalFailureAnchor; } }
 
     public MeshFilter powerBacking { get; set; }
     public Transform powerMask { get; set; }

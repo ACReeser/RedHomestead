@@ -30,7 +30,7 @@ public class Gremlin : MonoBehaviour {
     private const float PenaltyPerRepairable = .333f;
     private const int GremlinMissesThreshold = 4;
     public Transform ElectricalFailureSparksPrefab, OutgassingFailurePrefab;
-    internal Gremlin Instance { get; private set; }
+    internal static Gremlin Instance { get; private set; }
 
     void Awake()
     {
@@ -109,24 +109,17 @@ public class Gremlin : MonoBehaviour {
         return Mathf.RoundToInt(dc);
     }
 
-    //todo: use map to struct with both part system transform and failType
-    //and use that as currentlygremlind, with keys.count > 0 as "has victim"
-    private Dictionary<IRepairable, Transform> repairableToParticleSystemMap = new Dictionary<IRepairable, Transform>();
-    private List<IRepairable> currentlyGremlind = new List<IRepairable>();
+    public struct Gremlind
+    {
+        public Transform Effect;
+        public FailureType FailType;
+    }
+    
+    private Dictionary<IRepairable, Gremlind> gremlindMap = new Dictionary<IRepairable, Gremlind>();
+
     private IEnumerator CauseHavok()
     {
-        IRepairable victim = registeredRepairables[UnityEngine.Random.Range(0, registeredRepairables.Count)];
-
-        if (victim is IElectricalRepairable)
-        {
-            Transform particleSystem = GetParticleSystemPrefab(FailureType.Electrical);
-            particleSystem.SetParent((victim as IElectricalRepairable).ElectricalFailureAnchor);
-            particleSystem.transform.localPosition = Vector3.zero;
-            particleSystem.transform.localRotation = Quaternion.identity;
-            repairableToParticleSystemMap.Add(victim, particleSystem);
-        }
-
-        currentlyGremlind.Add(victim);
+        CauseFailure();
 
         bool hasGremlinedRepairable = true;
 
@@ -135,10 +128,47 @@ public class Gremlin : MonoBehaviour {
 
             yield return new WaitForSeconds(1f);
 
-            hasGremlinedRepairable = currentlyGremlind.Count > 0;
+            hasGremlinedRepairable = gremlindMap.Keys.Count > 0;
         }
 
         StartCoroutine(Lurk());
+    }
+
+    private void CauseFailure()
+    {
+        IRepairable victim = registeredRepairables[UnityEngine.Random.Range(0, registeredRepairables.Count)];
+
+        FailureType fail = GetFailType(victim);
+        Transform effect = GetParticleSystemPrefab(fail);
+        if (fail == FailureType.Electrical)
+        {
+            effect.SetParent((victim as IElectricalRepairable).ElectricalFailureAnchor);
+        }
+        else if (fail == FailureType.Pressure)
+        {
+            effect.SetParent((victim as IPressureRepairable).PressureFailureAnchor);
+        }
+
+        effect.transform.localPosition = Vector3.zero;
+        effect.transform.localRotation = Quaternion.identity;
+        gremlindMap.Add(victim, new Gremlind()
+        {
+            FailType = fail,
+            Effect = effect
+        });
+    }
+
+    private FailureType GetFailType(IRepairable victim)
+    {
+        bool canElectricFailure = victim is IElectricalRepairable;
+        bool canPressureFailure = victim is IPressureRepairable;
+
+        if (canElectricFailure && canPressureFailure)
+            return UnityEngine.Random.Range(0, 2) == 0 ? FailureType.Electrical : FailureType.Pressure;
+        else if (canElectricFailure)
+            return FailureType.Electrical;
+        else //if (canPressureFailure)
+            return FailureType.Pressure;
     }
 
     private List<IRepairable> registeredRepairables = new List<IRepairable>();
@@ -154,9 +184,9 @@ public class Gremlin : MonoBehaviour {
 
     internal void FinishRepair(IRepairable repairable)
     {
-        currentlyGremlind.Remove(repairable);
-        //todo: add particle system back to pool
-        //repairableToParticleSystemMap[repairable]
+        Gremlind fixing = gremlindMap[repairable];
+        gremlindMap.Remove(repairable);
+        particleSystemPool[fixing.FailType].Add(fixing.Effect);
     }
 
     public enum FailureType { Electrical, Pressure }

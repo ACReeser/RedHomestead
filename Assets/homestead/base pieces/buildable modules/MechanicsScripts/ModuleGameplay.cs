@@ -16,6 +16,7 @@ public abstract class ModuleData : FacingData
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public RedHomestead.Buildings.Module ModuleType;
     public string ModuleInstanceID;
+    public float RepairProgress;
     public string PowerableInstanceID { get { return ModuleInstanceID; } }
 }
 
@@ -86,6 +87,9 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
         if (this.powerViz.IsAssigned)
             this.InitializePowerVisualization();
 
+        if (this is IRepairable)
+            Gremlin.Instance.Register(this as IRepairable);
+
         this.OnStart();
     }
 
@@ -116,6 +120,7 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     public ResourcelessModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
     public override string PowerableInstanceID { get { return data.PowerableInstanceID; }  }
+    public float RepairProgress { get { return data.RepairProgress; } set { data.RepairProgress = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
