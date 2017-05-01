@@ -51,8 +51,13 @@ public class Gremlin : MonoBehaviour {
     
 	void Start()
     {
-        StartCoroutine(Lurk());
-	}
+        BeginLurk();
+    }
+
+    private void BeginLurk()
+    {
+        LurkCoroutine = StartCoroutine(Lurk());
+    }
 
     private float lurkTime;
     private IEnumerator Lurk()
@@ -78,14 +83,17 @@ public class Gremlin : MonoBehaviour {
             if (roll > dc)
             {
                 Game.Current.Player.GremlinMissStreak++;
-                StartCoroutine(Lurk());
+                BeginLurk();
             }
             else
-                StartCoroutine(CauseHavok());
+            {
+                CauseRandomFailure();
+                StartCoroutine(WaitForRepair());
+            }
         }
         else
         {
-            StartCoroutine(Lurk());
+            BeginLurk();
         }
     }
     
@@ -133,10 +141,8 @@ public class Gremlin : MonoBehaviour {
     
     private Dictionary<IRepairable, Gremlind> gremlindMap = new Dictionary<IRepairable, Gremlind>();
 
-    private IEnumerator CauseHavok()
+    private IEnumerator WaitForRepair()
     {
-        CauseFailure();
-
         bool hasGremlinedRepairable = true;
 
         while (hasGremlinedRepairable)
@@ -150,11 +156,17 @@ public class Gremlin : MonoBehaviour {
         StartCoroutine(Lurk());
     }
 
-    private void CauseFailure()
+    private void CauseRandomFailure()
     {
         IRepairable victim = registeredRepairables[UnityEngine.Random.Range(0, registeredRepairables.Count)];
 
         FailureType fail = GetFailType(victim);
+
+        CauseFailure(victim, fail);
+    }
+
+    private void CauseFailure(IRepairable victim, FailureType fail)
+    {
         Transform effect = GetFailureParticleSystemFromPool(fail);
 
         gremlindMap.Add(victim, new Gremlind()
@@ -162,7 +174,10 @@ public class Gremlin : MonoBehaviour {
             FailType = fail,
             Effect = effect
         });
-        victim.FaultedPercentage = 1f;
+
+        //if we've loaded a pre-existing fault percentage, don't undo the repair
+        if (victim.FaultedPercentage == 0f)
+            victim.FaultedPercentage = 1f;
 
         if (fail == FailureType.Electrical)
         {
@@ -198,7 +213,17 @@ public class Gremlin : MonoBehaviour {
     internal void Register(IRepairable repairable)
     {
         if (repairable.CanHaveElectricalFailure() || repairable.CanHavePressureFailure())
+        {
             registeredRepairables.Add(repairable);
+
+            //should only happen after loading a game
+            if (repairable.FaultedPercentage > 0f)
+            {
+                StopCoroutine(LurkCoroutine);
+#warning bug: may lose the right kind of failure here if supports both electrical and pressure
+                CauseFailure(repairable, GetFailType(repairable));
+            }
+        }
     }
 
     internal void Deregister(IRepairable repairable)
@@ -220,6 +245,7 @@ public class Gremlin : MonoBehaviour {
         { FailureType.Electrical, new List<Transform>() },
         { FailureType.Pressure, new List<Transform>() }
     };
+    private Coroutine LurkCoroutine;
 
     private Transform GetParticleSystemPrefab(FailureType failType)
     {
