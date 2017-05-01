@@ -15,6 +15,7 @@ public interface IRepairable
 {
     float FaultedPercentage { get; set; }
     FailureAnchors FailureEffectAnchors { get; }
+    Transform transform { get; }
 }
 
 public static class RepairableExtensions
@@ -41,6 +42,8 @@ public class Gremlin : MonoBehaviour {
     private const int WealthyPlayerThreshold = 200000;
     private const float PenaltyPerRepairable = .333f;
     private const int GremlinMissesThreshold = 4;
+    public const string GremlindTag = "gremlind";
+    private const float RepairPercentagePerSecond = .1f;
     public Transform ElectricalFailureSparksPrefab, OutgassingFailurePrefab;
     internal static Gremlin Instance { get; private set; }
 
@@ -137,6 +140,7 @@ public class Gremlin : MonoBehaviour {
     {
         public Transform Effect;
         public FailureType FailType;
+        public string PreviousTag;
     }
     
     private Dictionary<IRepairable, Gremlind> gremlindMap = new Dictionary<IRepairable, Gremlind>();
@@ -172,8 +176,11 @@ public class Gremlin : MonoBehaviour {
         gremlindMap.Add(victim, new Gremlind()
         {
             FailType = fail,
-            Effect = effect
+            Effect = effect,
+            PreviousTag = victim.transform.root.tag
         });
+
+        victim.transform.root.tag = GremlindTag;
 
         //if we've loaded a pre-existing fault percentage, don't undo the repair
         if (victim.FaultedPercentage == 0f)
@@ -182,6 +189,7 @@ public class Gremlin : MonoBehaviour {
         if (fail == FailureType.Electrical)
         {
             effect.SetParent(victim.FailureEffectAnchors.Electrical);
+            //alert the powergrid script
             FlowManager.Instance.PowerGrids.HandleElectricalFailure(victim);
         }
         else if (fail == FailureType.Pressure)
@@ -192,8 +200,10 @@ public class Gremlin : MonoBehaviour {
         effect.transform.localPosition = Vector3.zero;
         effect.transform.localRotation = Quaternion.identity;
 
+        //alert the other scripts
         SunOrbit.Instance.CheckEmergencyReset();
         GuiBridge.Instance.ShowNews(NewsSource.GetFailureNews(victim, fail));
+        PlayerInput.Instance.ToggleRepairMode(true);
     }
 
     private FailureType GetFailType(IRepairable victim)
@@ -232,11 +242,29 @@ public class Gremlin : MonoBehaviour {
             registeredRepairables.Remove(repairable);
     }
 
-    internal void FinishRepair(IRepairable repairable)
+    internal void EffectRepair(IRepairable repairable)
     {
-        Gremlind fixing = gremlindMap[repairable];
-        gremlindMap.Remove(repairable);
+        repairable.FaultedPercentage -= RepairPercentagePerSecond * Time.deltaTime;
+
+        if (repairable.FaultedPercentage <= 0f)
+            FinishRepair(repairable);
+    }
+
+    internal void FinishRepair(IRepairable repaired)
+    {
+        repaired.FaultedPercentage = 0f;
+        Gremlind fixing = gremlindMap[repaired];
+        gremlindMap.Remove(repaired);
+        fixing.Effect.SetParent(null);
+        fixing.Effect.gameObject.SetActive(false);
+        repaired.transform.root.tag = fixing.PreviousTag;
         particleSystemPool[fixing.FailType].Add(fixing.Effect);
+        if (fixing.FailType == FailureType.Electrical)
+        {
+            FlowManager.Instance.PowerGrids.OnElectricalFailureChange(repaired);
+        }
+        GuiBridge.Instance.ShowNews(NewsSource.MalfunctionRepaired);
+        PlayerInput.Instance.ToggleRepairMode(false);
     }
 
     public enum FailureType { Electrical, Pressure }
@@ -266,6 +294,7 @@ public class Gremlin : MonoBehaviour {
         {
             Transform result = pool[0];
             pool.RemoveAt(0);
+            result.gameObject.SetActive(true);
             return result;
         }
         else

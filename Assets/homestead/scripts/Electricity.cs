@@ -355,7 +355,16 @@ namespace RedHomestead.Electricity
             if (victim is IPowerConsumer)
             {
                 (victim as IPowerConsumer).EmergencyShutdown();
-                (victim as IPowerConsumer).RefreshVisualization();
+            }
+
+            this.OnElectricalFailureChange(victim);
+        }
+
+        internal void OnElectricalFailureChange(IRepairable repairable)
+        {
+            if (repairable is IPowerConsumer)
+            {
+                (repairable as IPowerConsumer).RefreshVisualization();
             }
 
             //batteries don't lose charge, just can't charge/discharge
@@ -364,9 +373,9 @@ namespace RedHomestead.Electricity
             //    (victim as IBattery).RefreshVisualization();
             //}
 
-            if (victim is IPowerSupply)
+            if (repairable is IPowerSupply)
             {
-                (victim as IPowerSupply).RefreshVisualization();
+                (repairable as IPowerSupply).RefreshVisualization();
             }            
         }
     }

@@ -84,6 +84,12 @@ public static class NewsSource
         DurationMilliseconds = 10000,
         Icon = MiscIcon.Information
     };
+    internal static News MalfunctionRepaired = new News()
+    {
+        Text = "Malfunction Repaired",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {
@@ -417,5 +423,11 @@ public static class Prompts {
         Description = "Deposit",
         Key = "",
         UsesProgress  = true
+    };
+    internal static PromptInfo RepairHint = new PromptInfo()
+    {
+        Description = "Repair",
+        Key = "E",
+        UsesProgress = true
     };
 }

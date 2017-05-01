@@ -92,6 +92,20 @@ namespace RedHomestead.Equipment
         {
             this._loadout[aSlot] = e;
         }
+
+        private Equipment preWrenchPrimarySlot;
+        internal void ToggleRepairWrench(bool doRepairs)
+        {
+            if (doRepairs)
+            {
+                preWrenchPrimarySlot = this[Slot.PrimaryTool];
+                PutEquipmentInSlot(Slot.PrimaryTool, Equipment.Wrench);
+            }
+            else
+            {
+                PutEquipmentInSlot(Slot.PrimaryTool, preWrenchPrimarySlot);
+            }
+        }
     }
 
     [Serializable]
@@ -162,6 +176,7 @@ public class PlayerInput : MonoBehaviour {
 
     internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
+    internal bool LookForRepairs = false;
 
     internal void SetPressure(bool pressurized)
     {
@@ -264,6 +279,9 @@ public class PlayerInput : MonoBehaviour {
                     case Equipment.Wheelbarrow:
                         HandleInteriorPlanningInput(ref newPrompt, doInteract);
                         break;
+                    case Equipment.Wrench:
+                        HandleWrenchInput(ref newPrompt);
+                        break;
                 }
                 break;
             case InputMode.PostIt:
@@ -299,6 +317,32 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleWrenchInput(ref PromptInfo newPrompt)
+    {
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, layerNames: "Default"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.transform.root.CompareTag(Gremlin.GremlindTag))
+                {
+                    IRepairable repairable = hitInfo.collider.transform.root.GetComponent<IRepairable>();
+
+                    if (repairable != null)
+                    {
+                        if (Input.GetKey(KeyCode.E))
+                        {
+                            Gremlin.Instance.EffectRepair(repairable);
+                        }
+
+                        newPrompt = Prompts.RepairHint;
+                        newPrompt.Progress = 1f - repairable.FaultedPercentage;
+                    }
+                }
+            }
+        }
+    }
 
     private void HandlePowerlineInput(ref PromptInfo newPrompt, bool doInteract)
     {
@@ -1103,6 +1147,12 @@ public class PlayerInput : MonoBehaviour {
         {
             PlacePostIt();
         }
+    }
+    
+    internal void ToggleRepairMode(bool isRepairMode)
+    {
+        Loadout.ToggleRepairWrench(isRepairMode);
+        Equip(Slot.PrimaryTool);
     }
 
     internal void ToggleMenu()
