@@ -12,6 +12,7 @@ public class PowerCubeData : FacingData
 {
     public EnergyContainer EnergyContainer;
     public string PowerableInstanceID;
+    public float FaultedPercentage;
 }
 
 public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBattery {
@@ -23,6 +24,10 @@ public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBatte
 
     public PowerVisualization _powerViz;
     public PowerVisualization PowerViz { get { return _powerViz; } }
+
+    public FailureAnchors failureEffectAnchors;
+    public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
+    public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
     public override string GetText()
     {

@@ -266,6 +266,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1450424051956758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4781143192633418}
+  m_Layer: 0
+  m_Name: ElectricalFailureSparks
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1479686504043928
 GameObject:
   m_ObjectHideFlags: 1
@@ -849,6 +864,7 @@ Transform:
   - {fileID: 4760160863846220}
   - {fileID: 4365603990516040}
   - {fileID: 4570819027058604}
+  - {fileID: 4781143192633418}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1189,6 +1205,19 @@ Transform:
   m_Father: {fileID: 4321635143723982}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
+--- !u!4 &4781143192633418
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1450424051956758}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.375}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4321635143723982}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4781978352888450
 Transform:
   m_ObjectHideFlags: 1
@@ -1803,6 +1832,9 @@ MonoBehaviour:
   - {fileID: 95508046939110082}
   - {fileID: 95191590128876680}
   - {fileID: 95163229188647768}
+  failureEffectAnchors:
+    Electrical: {fileID: 4781143192633418}
+    Pressure: {fileID: 0}
   _powerViz:
     PowerBacking: {fileID: 33037912224309194}
     PowerMask: {fileID: 4407563291476128}

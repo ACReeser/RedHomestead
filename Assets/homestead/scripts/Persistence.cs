@@ -78,6 +78,7 @@ namespace RedHomestead.Persistence
         public bool HatchOpen;
         public EnergyContainer EnergyContainer;
         public string PowerableInstanceID;
+        public float FaultedPercentage;
     }
 
     public abstract class ConnectionData : FacingData

@@ -4,18 +4,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IRepairable
+[Serializable]
+public struct FailureAnchors
 {
-    float RepairProgress { get; set; }
+    public Transform Electrical;
+    public Transform Pressure;
 }
 
-public interface IElectricalRepairable: IRepairable
+public interface IRepairable
 {
-    Transform ElectricalFailureAnchor { get; }
+    float FaultedPercentage { get; set; }
+    FailureAnchors FailureEffectAnchors { get; }
 }
-public interface IPressureRepairable : IRepairable
+
+public static class RepairableExtensions
 {
-    Transform PressureFailureAnchor { get; }
+    public static bool CanHaveElectricalFailure(this IRepairable rep)
+    {
+        return rep.FailureEffectAnchors.Electrical != null;
+    }
+
+    public static bool CanHavePressureFailure(this IRepairable rep)
+    {
+        return rep.FailureEffectAnchors.Pressure != null;
+    }
 }
 
 public class Gremlin : MonoBehaviour {
@@ -47,6 +59,8 @@ public class Gremlin : MonoBehaviour {
     {
         lurkTime = UnityEngine.Random.Range(1f * 60f, 6f * 60f);
 
+        print("Gremlin lurking for " + lurkTime + " seconds");
+
         yield return new WaitForSeconds(lurkTime);
 
         Plot();
@@ -58,6 +72,8 @@ public class Gremlin : MonoBehaviour {
         {
             int roll = UnityEngine.Random.Range(1, 21);
             int dc = GetDifficultyCheck(registeredRepairables);
+
+            print("Player rolled a " + roll + " vs a Gremlin DC of " + dc);
 
             if (roll > dc)
             {
@@ -139,29 +155,36 @@ public class Gremlin : MonoBehaviour {
         IRepairable victim = registeredRepairables[UnityEngine.Random.Range(0, registeredRepairables.Count)];
 
         FailureType fail = GetFailType(victim);
-        Transform effect = GetParticleSystemPrefab(fail);
-        if (fail == FailureType.Electrical)
-        {
-            effect.SetParent((victim as IElectricalRepairable).ElectricalFailureAnchor);
-        }
-        else if (fail == FailureType.Pressure)
-        {
-            effect.SetParent((victim as IPressureRepairable).PressureFailureAnchor);
-        }
+        Transform effect = GetFailureParticleSystemFromPool(fail);
 
-        effect.transform.localPosition = Vector3.zero;
-        effect.transform.localRotation = Quaternion.identity;
         gremlindMap.Add(victim, new Gremlind()
         {
             FailType = fail,
             Effect = effect
         });
+        victim.FaultedPercentage = 1f;
+
+        if (fail == FailureType.Electrical)
+        {
+            effect.SetParent(victim.FailureEffectAnchors.Electrical);
+            FlowManager.Instance.PowerGrids.HandleElectricalFailure(victim);
+        }
+        else if (fail == FailureType.Pressure)
+        {
+            effect.SetParent(victim.FailureEffectAnchors.Pressure);
+        }
+
+        effect.transform.localPosition = Vector3.zero;
+        effect.transform.localRotation = Quaternion.identity;
+
+        SunOrbit.Instance.CheckEmergencyReset();
+        GuiBridge.Instance.ShowNews(NewsSource.GetFailureNews(victim, fail));
     }
 
     private FailureType GetFailType(IRepairable victim)
     {
-        bool canElectricFailure = victim is IElectricalRepairable;
-        bool canPressureFailure = victim is IPressureRepairable;
+        bool canElectricFailure = victim.CanHaveElectricalFailure();
+        bool canPressureFailure = victim.CanHavePressureFailure();
 
         if (canElectricFailure && canPressureFailure)
             return UnityEngine.Random.Range(0, 2) == 0 ? FailureType.Electrical : FailureType.Pressure;
@@ -174,12 +197,14 @@ public class Gremlin : MonoBehaviour {
     private List<IRepairable> registeredRepairables = new List<IRepairable>();
     internal void Register(IRepairable repairable)
     {
-        registeredRepairables.Add(repairable);
+        if (repairable.CanHaveElectricalFailure() || repairable.CanHavePressureFailure())
+            registeredRepairables.Add(repairable);
     }
 
     internal void Deregister(IRepairable repairable)
     {
-        registeredRepairables.Remove(repairable);
+        if (registeredRepairables.Contains(repairable))
+            registeredRepairables.Remove(repairable);
     }
 
     internal void FinishRepair(IRepairable repairable)

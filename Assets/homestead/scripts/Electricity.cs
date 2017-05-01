@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace RedHomestead.Electricity
 {
-    public interface IPowerable
+    public interface IPowerable: IRepairable
     {
         string PowerableInstanceID { get; }
         string PowerGridInstanceID { get; set; }
@@ -141,7 +141,7 @@ namespace RedHomestead.Electricity
         public static void RefreshVisualization(this IPowerConsumer c)
         {
             if (c.PowerViz.PowerActive != null)
-                c.PowerViz.PowerActive.gameObject.SetActive(c.IsOn);
+                c.PowerViz.PowerActive.gameObject.SetActive((!(c.FaultedPercentage > 0f)) && c.IsOn);
         }
 
         public static void RefreshVisualization(this IPowerSupply s)
@@ -149,7 +149,14 @@ namespace RedHomestead.Electricity
             //if (s is IVariablePowerSupply)
             //{
             //}
-            s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - s.GenerationInPowerUnits());
+            if (s.FaultedPercentage > 0f)
+            {
+                s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * 10f;
+            }
+            else
+            {
+                s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - s.GenerationInPowerUnits());
+            }
         }
 
         public static void RefreshVisualization(this IBattery b)
@@ -342,6 +349,26 @@ namespace RedHomestead.Electricity
             if (OnPowerTick != null)
                 OnPowerTick();
         }
+
+        internal void HandleElectricalFailure(IRepairable victim)
+        {
+            if (victim is IPowerConsumer)
+            {
+                (victim as IPowerConsumer).EmergencyShutdown();
+                (victim as IPowerConsumer).RefreshVisualization();
+            }
+
+            //batteries don't lose charge, just can't charge/discharge
+            //if (victim is IBattery)
+            //{
+            //    (victim as IBattery).RefreshVisualization();
+            //}
+
+            if (victim is IPowerSupply)
+            {
+                (victim as IPowerSupply).RefreshVisualization();
+            }            
+        }
     }
 
     [Serializable]
@@ -439,9 +466,9 @@ namespace RedHomestead.Electricity
         {
             GridMode newGridMode = GridMode.Unknown;
 
-            Data.CurrentCapacityWatts = Producers.Sum(x => x.WattsGenerated);
-            Data.LoadWatts = Consumers.Sum(x => x.IsOn ? x.WattsConsumed : 0f);
-            Data.CurrentBatteryWatts = Batteries.Sum(x => x.EnergyContainer.CurrentAmount);
+            Data.CurrentCapacityWatts = Producers.Sum(x => x.FaultedPercentage > 0f ? 0f : x.WattsGenerated);
+            Data.LoadWatts = Consumers.Sum(x => !x.IsOn && x.FaultedPercentage > 0f ? 0f : x.WattsConsumed);
+            Data.CurrentBatteryWatts =  Batteries.Sum(x => x.FaultedPercentage > 0f ? 0f : x.EnergyContainer.CurrentAmount);
 
             Data.SurplusWatts = Data.CurrentCapacityWatts - Data.LoadWatts;
             Data.DeficitWatts = Data.LoadWatts - Data.CurrentCapacityWatts;
@@ -482,17 +509,23 @@ namespace RedHomestead.Electricity
                         foreach (IPowerConsumer c in Consumers)
                         {
 #warning todo: reference priority field during shutdown, sort by it probably
+                            if (c.FaultedPercentage > 0f)
+                            {
+                                //noop
+                            }
+                            else
+                            {
+                                c.EmergencyShutdown();
 
-                            c.EmergencyShutdown();
+                                Data.DeficitWatts -= c.WattsConsumed;
 
-                            Data.DeficitWatts -= c.WattsConsumed;
+                                c.RefreshVisualization();
 
-                            c.RefreshVisualization();
-
-                            //stop the brownout when we have a new equilibrium
-                            if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts > Data.DeficitWatts)
-                                break;
-                            //but wait until next tick to sort itself out
+                                //stop the brownout when we have a new equilibrium
+                                if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts > Data.DeficitWatts)
+                                    break;
+                                //but wait until next tick to sort itself out
+                            }
                         }
                         break;
                     case GridMode.BatteryDrain:
@@ -514,11 +547,18 @@ namespace RedHomestead.Electricity
                 //so you can recharge your rover faster probably
                 foreach (IBattery batt in Batteries)
                 {
-                    recharged = batt.EnergyContainer.Push(recharged);
-                    batt.RefreshVisualization();
+                    if (batt.FaultedPercentage > 0f)
+                    {
+                        //noop
+                    }
+                    else
+                    {
+                        recharged = batt.EnergyContainer.Push(recharged);
+                        batt.RefreshVisualization();
 
-                    if (recharged <= 0)
-                        break;
+                        if (recharged <= 0)
+                            break;
+                    }
                 }
             }
             else if (Mode == GridMode.BatteryDrain)
@@ -526,11 +566,18 @@ namespace RedHomestead.Electricity
                 float drained = Data.DeficitWatts;
                 foreach (IBattery batt in Batteries)
                 {
-                    drained -= batt.EnergyContainer.Pull(drained);
-                    batt.RefreshVisualization();
+                    if (batt.FaultedPercentage > 0f)
+                    {
+                        //noop
+                    }
+                    else
+                    {
+                        drained -= batt.EnergyContainer.Pull(drained);
+                        batt.RefreshVisualization();
 
-                    if (drained <= 0)
-                        break;
+                        if (drained <= 0)
+                            break;
+                    }
                 }
             }
 

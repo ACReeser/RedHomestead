@@ -16,7 +16,7 @@ public abstract class ModuleData : FacingData
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
     public RedHomestead.Buildings.Module ModuleType;
     public string ModuleInstanceID;
-    public float RepairProgress;
+    public float FaultedPercentage;
     public string PowerableInstanceID { get { return ModuleInstanceID; } }
 }
 
@@ -50,13 +50,22 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
     
     public bool HasPower { get; set; }
     
+    public abstract string ModuleInstanceID { get; }
+
+    #region power members
     public float WattsAvailablePerTick { get; set; }
     public abstract float WattsConsumed { get; }
-    public abstract string ModuleInstanceID { get; }
     public string PowerGridInstanceID { get; set; }
     public abstract string PowerableInstanceID { get; }
     public PowerVisualization powerViz;
     public PowerVisualization PowerViz { get { return powerViz; } }
+    #endregion
+
+    #region repairable members
+    public FailureAnchors failureEffectAnchors;
+    public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
+    public abstract float FaultedPercentage { get; set; }
+    #endregion
 
     protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
     
@@ -87,8 +96,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
         if (this.powerViz.IsAssigned)
             this.InitializePowerVisualization();
 
-        if (this is IRepairable)
-            Gremlin.Instance.Register(this as IRepairable);
+        Gremlin.Instance.Register(this as IRepairable);
 
         this.OnStart();
     }
@@ -120,7 +128,7 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     public ResourcelessModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
     public override string PowerableInstanceID { get { return data.PowerableInstanceID; }  }
-    public float RepairProgress { get { return data.RepairProgress; } set { data.RepairProgress = value; } }
+    public override float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -157,6 +165,7 @@ public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataConta
     public MultipleResourceModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
     public override string PowerableInstanceID { get { return data.PowerableInstanceID; } }
+    public override float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
     public override ResourceContainer Get(Matter c)
     {
@@ -193,6 +202,7 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     public SingleResourceModuleData Data { get { return data; } set { data = value; } }
     public override string ModuleInstanceID { get { return data.ModuleInstanceID; } }
     public override string PowerableInstanceID { get { return data.PowerableInstanceID; } }
+    public override float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
     public SpriteRenderer flowAmountRenderer;
 

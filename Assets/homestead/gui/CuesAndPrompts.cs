@@ -74,6 +74,44 @@ public static class NewsSource
         DurationMilliseconds = 10000,
         Icon = MiscIcon.Information
     };
+    private static News ElectricalFailure = new News()
+    {
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+    private static News PressureFailure = new News()
+    {
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+
+    public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
+    {
+        string thingName = GetThingName(victim);
+
+        if (failType == Gremlin.FailureType.Electrical)
+        {
+            ElectricalFailure.Text = thingName + " Electrical Failure!";
+            return ElectricalFailure;
+        }
+        else
+        {
+            PressureFailure.Text = thingName + " Pressure Failure!";
+            return PressureFailure;
+        }
+    }
+
+    private static string GetThingName(IRepairable victim)
+    {
+        if (victim is ModuleGameplay)
+            return (victim as ModuleGameplay).GetModuleType().ToString();
+        else if (victim is IceDrill)
+            return "Ice Drill";
+        else if (victim is PowerCube)
+            return "Power Cube";
+
+        return "";
+    }
 }
 
 public static class Prompts {

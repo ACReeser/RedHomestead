@@ -20,6 +20,10 @@ namespace RedHomestead.Rovers
         internal bool AcceptInput;
         internal bool CanDrive { get { return !this.HasPowerGrid(); } }
 
+        public FailureAnchors failureEffectAnchors;
+        public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
+        public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
+
         #region power
         public EnergyContainer EnergyContainer { get { return data.EnergyContainer; } }
         public PowerVisualization powerViz;

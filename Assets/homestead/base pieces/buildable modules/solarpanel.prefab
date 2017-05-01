@@ -122,6 +122,7 @@ Transform:
   - {fileID: 4175115546683746}
   - {fileID: 4899339226440062}
   - {fileID: 4260484788645650}
+  - {fileID: 4273414989787278}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -228,6 +229,9 @@ MonoBehaviour:
     PowerBacking: {fileID: 33798540787989886}
     PowerMask: {fileID: 4237535329304692}
     PowerActive: {fileID: 4899339226440062}
+  failureEffectAnchors:
+    Electrical: {fileID: 4273414989787278}
+    Pressure: {fileID: 0}
   data:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -250,7 +254,7 @@ MonoBehaviour:
           C: 0
     ModuleType: 0
     ModuleInstanceID: 
-  Efficiency: 0.14
+    FaultedPercentage: 0
   PivotPoles:
   - {fileID: 4669959570379150}
   - {fileID: 4084671769568156}
@@ -327,6 +331,21 @@ GameObject:
   - component: {fileID: 65971402631073498}
   m_Layer: 0
   m_Name: harness
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1379321692979986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4273414989787278}
+  m_Layer: 0
+  m_Name: ElectricalFailureSparks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -602,6 +621,19 @@ Transform:
   m_Father: {fileID: 491350}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4273414989787278
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1379321692979986}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.584, z: -0.559}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 491350}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!4 &4438024792272036
 Transform:
   m_ObjectHideFlags: 1

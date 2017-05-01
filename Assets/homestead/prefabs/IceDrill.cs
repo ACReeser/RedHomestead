@@ -11,12 +11,17 @@ using RedHomestead.Electricity;
 public class IceDrillData: FacingData
 {
     public string PowerableInstanceID;
+    public float FaultedPercentage;
 }
 
 public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITriggerSubscriber, IDataContainer<IceDrillData> {
     public Transform Drill, OnOffHandle, Socket, CrateAnchor;
     public bool LegsDown;
     public Animator[] LegControllers;
+
+    public FailureAnchors failureEffectAnchors;
+    public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
+    public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
     private const float DrillDownLocalY = -.709f;
 
