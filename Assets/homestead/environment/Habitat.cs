@@ -7,7 +7,7 @@ using RedHomestead.Persistence;
 using RedHomestead.Buildings;
 using RedHomestead.Electricity;
 
-public enum HabitatType { LuxuryLander, Burrow } //Lander, Tent
+public enum HabitatType { LuxuryLander, Burrow, Tent } //Lander, Tent
 
 [Serializable]
 public class HabitatExtraData : RedHomesteadData
