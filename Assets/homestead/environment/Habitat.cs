@@ -230,6 +230,9 @@ public class Habitat : Converter, IPowerConsumer, IBattery
         foreach(Light l in Lights)
         {
             l.enabled = this.HasPower;
+            Behaviour halo = (Behaviour)l.GetComponent("Halo");
+            if (halo != null)
+                halo.enabled = this.HasPower;
         }
 
         if (!this.HasPower && EmergencyLight != null && !EmergencyLight.activeInHierarchy)
