@@ -1627,6 +1627,7 @@ public class PlayerInput : MonoBehaviour {
         Construction.SetCorridorVertices(newCorridor, newCorridorMesh, anchorT1, anchorM1, anchorT2, anchorM2);
 
         newCorridorFilter.mesh = newCorridorMesh;
+        newCorridor.GetComponent<MeshCollider>().sharedMesh = newCorridorMesh;
     }
 
     private void PlaceGasPipe(Collider collider)

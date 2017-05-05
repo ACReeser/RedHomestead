@@ -240,10 +240,14 @@ namespace RedHomestead.Buildings
         {
             { CorridorVertexGroup.OriginInner, new int[] {  0,  1,  2,  3,  5,  4,  7,  6 } },
             { CorridorVertexGroup.OriginOuter, new int[] { 12, 13, 15, 14, 10, 11,  8,  9 } },
-            { CorridorVertexGroup.NorthInner,  new int[] {  9, 13,  8, 12, 15, 14, 17, 16 } },
-            { CorridorVertexGroup.NorthOuter,  new int[] { 35, 34, 32, 33, 37, 36, 39, 38 } },
-            { CorridorVertexGroup.SouthInner,  new int[] { 20, 10, 18, 19, 11, 21, 23, 22 } },
-            { CorridorVertexGroup.SouthOuter,  new int[] { 43, 42, 40, 41, 45, 44, 47, 46 } }
+            //{ CorridorVertexGroup.NorthInner,  new int[] {  9, 13,  8, 12, 15, 14, 17, 16 } },
+            //{ CorridorVertexGroup.NorthOuter,  new int[] { 35, 34, 32, 33, 37, 36, 39, 38 } },
+            //{ CorridorVertexGroup.SouthInner,  new int[] { 20, 10, 18, 19, 11, 21, 23, 22 } },
+            //{ CorridorVertexGroup.SouthOuter,  new int[] { 43, 42, 40, 41, 45, 44, 47, 46 } }
+            { CorridorVertexGroup.NorthInner,  new int[] {  1,  5,  0,  4,  7,  6,  9,  8 } },
+            { CorridorVertexGroup.NorthOuter,  new int[] { 19, 18, 16, 17, 21, 20, 23, 22 } },
+            { CorridorVertexGroup.SouthInner,  new int[] { 12,  2, 10, 11,  3, 13, 15, 14 } },
+            { CorridorVertexGroup.SouthOuter,  new int[] { 27, 26, 24, 25, 29, 28, 31, 30 } }
         };
 
         private static void SetCorridorVertices(Transform corridorT, Vector3[] corridorVerts, CorridorVertexGroup corridorG, Transform anchorT, Vector3[] anchorVerts, CorridorVertexGroup anchorG)
@@ -251,14 +255,14 @@ namespace RedHomestead.Buildings
             int[] corridorI = CorridorVertexProgressions[corridorG];
             int[] anchorI = CorridorVertexProgressions[anchorG];
 
-            corridorVerts[corridorI[0]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[0]]));
-            corridorVerts[corridorI[1]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[1]]));
-            corridorVerts[corridorI[2]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[2]]));
-            corridorVerts[corridorI[3]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[3]]));
-            corridorVerts[corridorI[4]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[4]]));
-            corridorVerts[corridorI[5]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[5]]));
-            corridorVerts[corridorI[6]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[6]]));
-            corridorVerts[corridorI[7]] = corridorT.InverseTransformVector(anchorT.TransformVector(anchorVerts[anchorI[7]]));
+            corridorVerts[corridorI[0]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[0]]));
+            corridorVerts[corridorI[1]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[1]]));
+            corridorVerts[corridorI[2]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[2]]));
+            corridorVerts[corridorI[3]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[3]]));
+            corridorVerts[corridorI[4]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[4]]));
+            corridorVerts[corridorI[5]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[5]]));
+            corridorVerts[corridorI[6]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[6]]));
+            corridorVerts[corridorI[7]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[7]]));
         }
 
         public static void SetCorridorVertices(Transform corridorT, Mesh corridorM, Transform anchorT1, Mesh anchorM1, Transform anchorT2, Mesh anchorM2)
@@ -272,6 +276,7 @@ namespace RedHomestead.Buildings
             SetCorridorVertices(corridorT, corridorVerts, CorridorVertexGroup.SouthOuter, anchorT2, anchorVerts, CorridorVertexGroup.OriginOuter);
 
             corridorM.vertices = corridorVerts;
+            corridorM.RecalculateNormals();
         }
     }
 
