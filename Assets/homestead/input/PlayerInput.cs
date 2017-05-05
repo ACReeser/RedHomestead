@@ -184,7 +184,7 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private RoverInput DrivingRoverInput;
-    private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket;
+    private Collider selectedBulkhead, selectedGasValve, selectedPowerSocket;
     private Rigidbody carriedObject;
     private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
@@ -1115,9 +1115,9 @@ public class PlayerInput : MonoBehaviour {
             }
             else if (doInteract)
             {
-                if (selectedAirlock1 != null)
+                if (selectedBulkhead != null)
                 {
-                    selectedAirlock1 = null;
+                    selectedBulkhead = null;
                 }
                 if (selectedGasValve != null)
                 {
@@ -1343,7 +1343,7 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedAirlock1, value => selectedAirlock1 = value, PlaceTube, Prompts.BulkheadBridgePrompts);
+        return OnLinkable(doInteract, hitInfo, selectedBulkhead, value => selectedBulkhead = value, PlaceTube, Prompts.BulkheadBridgePrompts);
     }
 
     private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
@@ -1605,9 +1605,28 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private void PlaceTube(Collider collider)
+    private void PlaceTube(Collider toBulkhead)
     {
-        PlaceRuntimeLinkingObject(selectedAirlock1, collider, tubePrefab, createdTubes, true, .2f);
+        Transform newCorridorParent = PlaceRuntimeLinkingObject(selectedBulkhead, toBulkhead, tubePrefab, createdTubes, hideObjectEnds: true, setScale: false);
+        Transform newCorridor = newCorridorParent.GetChild(0);
+        MeshFilter newCorridorFilter = newCorridor.GetComponent<MeshFilter>();
+
+        //create the interior mesh
+        Mesh baseCorridorMesh = newCorridorFilter.sharedMesh;
+        Mesh newCorridorMesh = (Mesh)Instantiate(baseCorridorMesh);
+
+        Transform anchorT1 = selectedBulkhead.transform.parent;
+        Mesh anchorM1 = anchorT1.GetComponent<MeshFilter>().mesh;
+        selectedBulkhead.gameObject.SetActive(false);
+
+        Transform anchorT2 = toBulkhead.transform.parent;
+        Mesh anchorM2 = anchorT2.GetComponent<MeshFilter>().mesh;
+        toBulkhead.gameObject.SetActive(false);
+
+        //modify the ends of the mesh
+        Construction.SetCorridorVertices(newCorridor, newCorridorMesh, anchorT1, anchorM1, anchorT2, anchorM2);
+
+        newCorridorFilter.mesh = newCorridorMesh;
     }
 
     private void PlaceGasPipe(Collider collider)
@@ -1647,17 +1666,26 @@ public class PlayerInput : MonoBehaviour {
         GuiBridge.Instance.RefreshMode();
     }
 
-    private static Transform PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
+    private static Transform PlaceRuntimeLinkingObject(
+        Collider firstObject, 
+        Collider otherObject, 
+        Transform linkingObjectPrefab, List<Transform> addToList, 
+        bool hideObjectEnds = false, 
+        float extraScale = 0f,
+        bool setScale = true)
     {
         float distanceBetween = Vector3.Distance(firstObject.transform.position, otherObject.transform.position);
 
         Vector3 midpoint = Vector3.Lerp(firstObject.transform.position, otherObject.transform.position, 0.5f);
-        Transform newTube = GameObject.Instantiate<Transform>(linkingObjectPrefab);
+        Transform newObj = GameObject.Instantiate<Transform>(linkingObjectPrefab);
 
-        newTube.position = midpoint;
-        newTube.LookAt(otherObject.transform);
-        newTube.localScale = new Vector3(newTube.localScale.x, newTube.localScale.y, (distanceBetween / 2f) + extraScale);
-        addToList.Add(newTube);
+        newObj.position = midpoint;
+        newObj.LookAt(otherObject.transform);
+
+        if (setScale)
+            newObj.localScale = new Vector3(newObj.localScale.x, newObj.localScale.y, (distanceBetween / 2f) + extraScale);
+
+        addToList.Add(newObj);
 
         if (hideObjectEnds)
         {
@@ -1665,7 +1693,7 @@ public class PlayerInput : MonoBehaviour {
             otherObject.gameObject.SetActive(false);
         }
 
-        return newTube;
+        return newObj;
     }
 
     internal void PlanModule(Module planModule)
