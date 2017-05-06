@@ -1626,7 +1626,9 @@ public class PlayerInput : MonoBehaviour {
         //modify the ends of the mesh
         Construction.SetCorridorVertices(newCorridor, newCorridorMesh, anchorT1, anchorM1, anchorT2, anchorM2);
 
+        //assign the programmatically created mesh to the mesh filter
         newCorridorFilter.mesh = newCorridorMesh;
+        //and tell the mesh collider to use this new mesh as well
         newCorridor.GetComponent<MeshCollider>().sharedMesh = newCorridorMesh;
     }
 

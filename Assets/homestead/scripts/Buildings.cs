@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
+using System.Linq;
 
 namespace RedHomestead.Buildings
 {
@@ -238,42 +239,102 @@ namespace RedHomestead.Buildings
         public enum CorridorVertexGroup { OriginInner, OriginOuter, NorthInner, NorthOuter, SouthInner, SouthOuter }
         public static readonly Dictionary<CorridorVertexGroup, int[]> CorridorVertexProgressions = new Dictionary<CorridorVertexGroup, int[]>
         {
-            { CorridorVertexGroup.OriginInner, new int[] {  0,  1,  2,  3,  5,  4,  7,  6 } },
-            { CorridorVertexGroup.OriginOuter, new int[] { 12, 13, 15, 14, 10, 11,  8,  9 } },
+            //original guide rings
+            //{ CorridorVertexGroup.OriginInner, new int[] {  0,  1,  2,  3,  5,  4,  7,  6 } },
+            //{ CorridorVertexGroup.OriginOuter, new int[] { 12, 13, 15, 14, 10, 11,  8,  9 } },
+            //reversed guide rings
+            { CorridorVertexGroup.OriginInner, new int[] {  0,  1,  2,  3,  5,  4,  7,  6 }.Reverse().ToArray() },
+            { CorridorVertexGroup.OriginOuter, new int[] { 12, 13, 15, 14, 10, 11,  8,  9 }.Reverse().ToArray() },
+            //we used to go by index through both the guide rings and the corridor mesh
+            //but Unity messes up the corridor mesh vertices
+            //double mesh (3 sets of rings, north, origin, south)
             //{ CorridorVertexGroup.NorthInner,  new int[] {  9, 13,  8, 12, 15, 14, 17, 16 } },
             //{ CorridorVertexGroup.NorthOuter,  new int[] { 35, 34, 32, 33, 37, 36, 39, 38 } },
             //{ CorridorVertexGroup.SouthInner,  new int[] { 20, 10, 18, 19, 11, 21, 23, 22 } },
             //{ CorridorVertexGroup.SouthOuter,  new int[] { 43, 42, 40, 41, 45, 44, 47, 46 } }
-            { CorridorVertexGroup.NorthInner,  new int[] {  1,  5,  0,  4,  7,  6,  9,  8 } },
-            { CorridorVertexGroup.NorthOuter,  new int[] { 19, 18, 16, 17, 21, 20, 23, 22 } },
-            { CorridorVertexGroup.SouthInner,  new int[] { 12,  2, 10, 11,  3, 13, 15, 14 } },
-            { CorridorVertexGroup.SouthOuter,  new int[] { 27, 26, 24, 25, 29, 28, 31, 30 } }
+            //simple mesh (2 sets of rings, north and south)
+            //{ CorridorVertexGroup.NorthInner,  new int[] {  1,  5,  0,  4,  7,  6,  9,  8 } },
+            //{ CorridorVertexGroup.NorthOuter,  new int[] { 19, 18, 16, 17, 21, 20, 23, 22 } },
+            //{ CorridorVertexGroup.SouthInner,  new int[] { 12,  2, 10, 11,  3, 13, 15, 14 } },
+            //{ CorridorVertexGroup.SouthOuter,  new int[] { 27, 26, 24, 25, 29, 28, 31, 30 } }
         };
 
-        private static void SetCorridorVertices(Transform corridorT, Vector3[] corridorVerts, CorridorVertexGroup corridorG, Transform anchorT, Vector3[] anchorVerts, CorridorVertexGroup anchorG)
-        {
-            int[] corridorI = CorridorVertexProgressions[corridorG];
-            int[] anchorI = CorridorVertexProgressions[anchorG];
+        //we used to go by index through both the guide rings and the corridor mesh
+        //but Unity messes up the corridor mesh vertices
+        //private static void SetCorridorVertices(Transform corridorT, Vector3[] corridorVerts, CorridorVertexGroup corridorG, Transform anchorT, Vector3[] anchorVerts, CorridorVertexGroup anchorG)
+        //{
+        //    int[] corridorI = CorridorVertexProgressions[corridorG];
+        //    int[] anchorI = CorridorVertexProgressions[anchorG];
 
-            corridorVerts[corridorI[0]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[0]]));
-            corridorVerts[corridorI[1]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[1]]));
-            corridorVerts[corridorI[2]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[2]]));
-            corridorVerts[corridorI[3]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[3]]));
-            corridorVerts[corridorI[4]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[4]]));
-            corridorVerts[corridorI[5]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[5]]));
-            corridorVerts[corridorI[6]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[6]]));
-            corridorVerts[corridorI[7]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[7]]));
-        }
+        //    corridorVerts[corridorI[0]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[0]]));
+        //    corridorVerts[corridorI[1]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[1]]));
+        //    corridorVerts[corridorI[2]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[2]]));
+        //    corridorVerts[corridorI[3]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[3]]));
+        //    corridorVerts[corridorI[4]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[4]]));
+        //    corridorVerts[corridorI[5]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[5]]));
+        //    corridorVerts[corridorI[6]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[6]]));
+        //    corridorVerts[corridorI[7]] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[anchorI[7]]));
+        //}
 
         public static void SetCorridorVertices(Transform corridorT, Mesh corridorM, Transform anchorT1, Mesh anchorM1, Transform anchorT2, Mesh anchorM2)
         {
             Vector3[] corridorVerts = corridorM.vertices;
             Vector3[] anchorVerts = anchorM1.vertices;
 
-            SetCorridorVertices(corridorT, corridorVerts, CorridorVertexGroup.NorthInner, anchorT1, anchorVerts, CorridorVertexGroup.OriginInner);
-            SetCorridorVertices(corridorT, corridorVerts, CorridorVertexGroup.NorthOuter, anchorT1, anchorVerts, CorridorVertexGroup.OriginOuter);
-            SetCorridorVertices(corridorT, corridorVerts, CorridorVertexGroup.SouthInner, anchorT2, anchorVerts, CorridorVertexGroup.OriginInner);
-            SetCorridorVertices(corridorT, corridorVerts, CorridorVertexGroup.SouthOuter, anchorT2, anchorVerts, CorridorVertexGroup.OriginOuter);
+            int anchorI;
+            CorridorVertexGroup anchorRing = CorridorVertexGroup.OriginOuter;
+            Transform anchorT = null;
+
+            //int[] counts = new int[5];
+            for (int corridorI = 0; corridorI < corridorVerts.Length; corridorI++)
+            {
+                //the "ring" is _encoded_ in the X value of the verts that need to programmatically change
+                int ringFromVertexX = (int)corridorVerts[corridorI].x;
+                switch (ringFromVertexX)
+                {
+                    //a vertex with an X of 0 _will not have its position changed_ as it is the center of the corridor, not an end
+                    //otherwise, each int corresponds to a ring (outer/inner) and an end (north/south or 1/2)
+                    case -2: //rear outer
+                        anchorRing = CorridorVertexGroup.OriginOuter;
+                        anchorT = anchorT2;
+                        goto case 99;
+                    case -1: //rear inner
+                        anchorRing = CorridorVertexGroup.OriginInner;
+                        anchorT = anchorT2;
+                        goto case 99;
+                    case 1: //front inner
+                        anchorRing = CorridorVertexGroup.OriginInner;
+                        anchorT = anchorT1;
+                        goto case 99;
+                    case 2: //front outer
+                        anchorRing = CorridorVertexGroup.OriginOuter;
+                        anchorT = anchorT1;
+                        goto case 99;
+                    //no verts should have an X of 99, we use this label for control flow to avoid a function call
+                    case 99:
+                        //yech we have to round
+                        anchorI = Mathf.RoundToInt(corridorVerts[corridorI].y * 10f);
+                        // here's a giant debug call for when we had bugs
+                        //    UnityEngine.Debug.Log(string.Format(
+                        //        "raw Y {5}, anchor I {6}, Anchor group {0}, progression index {1}, anchor vert {2}, global pos {3}, local Corr pos {4}", 
+                        //        anchorGroup.ToString(), 
+                        //        CorridorVertexProgressions[anchorGroup][anchorI],
+                        //        anchorVerts[CorridorVertexProgressions[anchorGroup][anchorI]],
+                        //        anchorT.TransformPoint(anchorVerts[CorridorVertexProgressions[anchorGroup][anchorI]]),
+                        //        corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[CorridorVertexProgressions[anchorGroup][anchorI]])),
+                        //        corridorVerts[corridorI].y,
+                        //        anchorI
+                        //     ));
+                        //set the vertex at corridorI
+                        //to the local position
+                        //of the anchor's vertex in global position
+                        //given the anchor index encoded in the corridor vertex's Y value
+                        //and a given anchor group (outer or inner ring)
+                        corridorVerts[corridorI] = corridorT.InverseTransformPoint(anchorT.TransformPoint(anchorVerts[CorridorVertexProgressions[anchorRing][anchorI]]));
+                        break;
+                }
+            }
+            //UnityEngine.Debug.Log(string.Format("{0}, {1}, {2}, {3}, {4}", counts[0], counts[1], counts[2], counts[3], counts[4]));
 
             corridorM.vertices = corridorVerts;
             corridorM.RecalculateNormals();
