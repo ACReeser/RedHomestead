@@ -501,7 +501,8 @@ namespace RedHomestead.Persistence
                     PackData = EVA.EVA.GetDefaultPackData(),
                     EnRouteOrders = new List<Order>(),
                     PerkProgress = choices.GetPerkProgress()
-                }
+                },
+                History = new Simulation.GlobalHistory()
             };
             Perks.PerkMultipliers.LoadFromPlayerPerkProgress();
         }
