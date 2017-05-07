@@ -23,6 +23,10 @@ public class MealResourceInterface : HabitatResourceInterface {
         {
             visualizationRoot.GetChild(i).gameObject.SetActive(meals >= i + 1);
         }
+
+        Collider c = visualizationRoot.GetComponent<Collider>();
+        if (c != null)
+            c.enabled = meals > 0f;
     }
 
     private void Display()

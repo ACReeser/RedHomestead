@@ -14,5 +14,7 @@ public class WaterResourceInterface : HabitatResourceInterface {
         {
             Barrels[i].gameObject.SetActive(numBarrels >= i + 1);
         }
+
+        base.OnResourceChange(changedMatter);
     }
 }
