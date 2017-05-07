@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
 
-public class Airlock : MonoBehaviour {
+public class Airlock : HabitatModuleBase {
     public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
     public static Dictionary<Transform, Airlock> DoorToAirlock = new Dictionary<Transform, Airlock>();
     
@@ -16,7 +16,6 @@ public class Airlock : MonoBehaviour {
     public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
     private Animator OuterAnimator, InnerAnimator;
-    private Habitat attachedHab;
 
 	// Use this for initialization
 	void Start () {
@@ -27,7 +26,6 @@ public class Airlock : MonoBehaviour {
         InnerAnimator = InnerDoor.parent.GetComponent<Animator>();
 
         RefreshDoorAndLightState();
-        attachedHab = transform.root.GetComponent<Habitat>();
 	}
 
     private void RefreshDoorAndLightState()
@@ -42,11 +40,11 @@ public class Airlock : MonoBehaviour {
     public void Pressurize()
     {
         //only allow it if door is sealed properly
-        if (OuterDoorSealed && !IsPressurized)
+        if (LinkedHabitat != null && OuterDoorSealed && !IsPressurized)
         {
             IsPressurized = true;
             RefreshDoorAndLightState();
-            SurvivalTimer.Instance.EnterHabitat(attachedHab);
+            SurvivalTimer.Instance.EnterHabitat(LinkedHabitat);
             OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
             RefreshSealedButtons();
@@ -126,9 +124,9 @@ public class Airlock : MonoBehaviour {
     void OnTriggerEnter(Collider other)
     {
         ResourceComponent comp = other.GetComponent<ResourceComponent>();
-        if (comp != null && this.attachedHab != null)
+        if (comp != null && this.LinkedHabitat != null)
         {
-            this.attachedHab.ImportResource(comp);
+            this.LinkedHabitat.ImportResource(comp);
         }
     }
 }

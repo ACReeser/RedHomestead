@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class HabitatModule : MonoBehaviour {
+public abstract class HabitatReadout : MonoBehaviour {
     internal Habitat LinkedHab;
 
     // Use this for initialization

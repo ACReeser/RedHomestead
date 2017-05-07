@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class PowerInterface : HabitatModule
+public class PowerInterface : HabitatReadout
 {
 
     public TextMesh DisplayOut;

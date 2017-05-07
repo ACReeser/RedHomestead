@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TableInterface : HabitatModule {
+public class TableInterface : HabitatReadout {
 
     public Transform RationMeal, OrganicMeal, ShakeMeal;
 

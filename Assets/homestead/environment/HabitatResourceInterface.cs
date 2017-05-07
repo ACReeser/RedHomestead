@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 
-public class HabitatResourceInterface : HabitatModule
+public class HabitatResourceInterface : HabitatReadout
 {
     public TextMesh DisplayOut;
     public Matter DisplayResource;

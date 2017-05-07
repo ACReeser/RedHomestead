@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 
-public class FoodPrepInterface : HabitatModule
+public class FoodPrepInterface : HabitatReadout
 {
     public Transform PowderVisualization, BiomassVisualization, BiomassStorageRoot;
 

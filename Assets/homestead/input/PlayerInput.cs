@@ -1630,6 +1630,26 @@ public class PlayerInput : MonoBehaviour {
         newCorridorFilter.mesh = newCorridorMesh;
         //and tell the mesh collider to use this new mesh as well
         newCorridor.GetComponent<MeshCollider>().sharedMesh = newCorridorMesh;
+
+        Habitat hab1 = anchorT1.root.GetComponent<Habitat>();
+        Habitat hab2 = anchorT2.root.GetComponent<Habitat>();
+
+        IHabitatModule habMod1 = anchorT1.root.GetComponent<IHabitatModule>();
+        IHabitatModule habMod2 = anchorT2.root.GetComponent<IHabitatModule>();
+
+        if (hab1 != null && habMod2 != null)
+        {
+            habMod2.SetHabitat(hab1);
+        }
+        else if (hab2 != null && habMod1 != null)
+        {
+            habMod1.SetHabitat(hab2);
+        }
+        else if (habMod1 != null && habMod2 != null)
+        {
+            habMod1.AddAdjacent(habMod2);
+            habMod2.AddAdjacent(habMod1);
+        }
     }
 
     private void PlaceGasPipe(Collider collider)
