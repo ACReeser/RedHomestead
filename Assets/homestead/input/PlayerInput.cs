@@ -962,6 +962,39 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.BedEnterHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("workshop"))
+                {
+                    if (doInteract)
+                    {
+                        
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.WorkshopHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("locker"))
+                {
+                    if (doInteract)
+                    {
+
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.WorkshopHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("suit"))
+                {
+                    if (doInteract)
+                    {
+
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.WorkshopSuitHint;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("postit"))
                 {
                     if (doInteract)

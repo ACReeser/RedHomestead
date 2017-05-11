@@ -430,4 +430,14 @@ public static class Prompts {
         Key = "E",
         UsesProgress = true
     };
+    internal static PromptInfo WorkshopHint = new PromptInfo()
+    {
+        Description = "Craft",
+        Key = "E"
+    };
+    internal static PromptInfo WorkshopSuitHint = new PromptInfo()
+    {
+        Description = "Upgrade",
+        Key = "E"
+    };
 }
