@@ -26,7 +26,8 @@ namespace RedHomestead.Buildings
         JunctionBox,
         Workshop,
         HallwayNode,
-        Flywheel
+        Flywheel,
+        Airlock
     }
 
     /// <summary>
@@ -159,20 +160,47 @@ namespace RedHomestead.Buildings
                 {
                     new ResourceEntry(2, Matter.Steel),
                     new ResourceEntry(2, Matter.Glass),
-                    new ResourceEntry(2, Matter.Biomass),
+                    new ResourceEntry(1, Matter.Biomass),
                 }
             },
             {
                 Module.Warehouse, new List<ResourceEntry>()
                 {
                     new ResourceEntry(2, Matter.Steel),
-                    new ResourceEntry(4, Matter.Canvas)
+                    new ResourceEntry(2, Matter.Canvas)
                 }
             },
             {
                 Module.JunctionBox, new List<ResourceEntry>()
                 {
                     new ResourceEntry(1, Matter.Copper)
+                }
+            },
+            {
+                Module.Airlock, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Matter.Steel)
+                }
+            },
+            {
+                Module.Workshop, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Matter.Steel),
+                    new ResourceEntry(1, Matter.Canvas)
+                }
+            },
+            {
+                Module.HallwayNode, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Matter.Steel),
+                    new ResourceEntry(1, Matter.Glass)
+                }
+            },
+            {
+                Module.GreenhouseHall, new List<ResourceEntry>()
+                {
+                    new ResourceEntry(1, Matter.Steel),
+                    new ResourceEntry(1, Matter.Glass)
                 }
             }
         };
@@ -188,7 +216,10 @@ namespace RedHomestead.Buildings
                 new Module[]
                 {
                     //Module.Habitat,
-                    //Module.Workspace
+                    Module.Airlock,
+                    Module.HallwayNode,
+                    Module.Workshop,
+                    Module.GreenhouseHall,
                 }
             },
             {
@@ -227,9 +258,9 @@ namespace RedHomestead.Buildings
                 ConstructionGroup.Storage,
                 new Module[]
                 {
-                    //Module.Splitter,
+                    Module.Splitter,
                     Module.SmallGasTank,
-                    //Module.LargeGasTank,
+                    Module.LargeGasTank,
                     Module.SmallWaterTank,
                     Module.Warehouse
                 }
@@ -339,6 +370,11 @@ namespace RedHomestead.Buildings
             corridorM.vertices = corridorVerts;
             corridorM.RecalculateNormals();
         }
+    }
+
+    public interface IBuildable
+    {
+        void InitializeStartingData();
     }
 
     public interface IHarvestable

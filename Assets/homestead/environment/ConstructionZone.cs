@@ -175,7 +175,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         //is outside the zone looking in, so maybe not
         
         Transform newT = (Transform)GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
-        newT.GetComponent<ModuleGameplay>().InitializeStartingData();
+        newT.GetComponent<IBuildable>().InitializeStartingData();
 
         if (ZoneThatPlayerIsStandingIn == this)
         {

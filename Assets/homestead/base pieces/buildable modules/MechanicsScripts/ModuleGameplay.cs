@@ -5,6 +5,7 @@ using System;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 using RedHomestead.Electricity;
+using RedHomestead.Buildings;
 
 /// <summary>
 /// Base abstract class for all modules
@@ -44,7 +45,7 @@ public class SingleResourceModuleData : ResourcefullModuleData
     public ResourceContainer Container;
 }
 
-public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable
+public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuildable
 {
     protected AudioSource SoundSource;
     
