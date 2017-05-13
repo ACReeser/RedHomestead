@@ -199,6 +199,11 @@ public class FloorplanBridge : MonoBehaviour {
         PlayerInput.Instance.FPSController.FreezeLook = false;
     }
 
+    public void HoverModuleButton()
+    {
+        Module whatToBuild = (Module)Enum.Parse(typeof(Module), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+    }
+
     internal Transform GetPrefab(Floorplan s)
     {
         switch (s)
