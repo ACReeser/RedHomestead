@@ -28,12 +28,17 @@ namespace RedHomestead.Simulation
     public class ResourceEntry
     {
         public Matter Type { get; set; }
-        public int Count { get; set; }
+        public float Count { get; set; }
 
         public ResourceEntry(int count, Matter type)
         {
             this.Type = type;
             this.Count = count;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0} x{1:0.##}", this.Type, this.Count);
         }
     }
 

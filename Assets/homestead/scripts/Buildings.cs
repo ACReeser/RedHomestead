@@ -44,9 +44,9 @@ namespace RedHomestead.Buildings
         public List<ResourceEntry> Requirements;
         public int? PowerSteady, PowerMin, PowerMax;
         public int? EnergyStorage;
-        public Matter StorageType;
+        public Matter StorageType = Matter.Unspecified;
         public int? Storage;
-        public Dictionary<Matter, int> IO;
+        public Dictionary<Matter, float> IO;
         public string Description;
     }
 
@@ -104,6 +104,48 @@ namespace RedHomestead.Buildings
                     },
                     Description = "A canvas storage area to stash materials.",
                     Storage = 10
+                }
+            },
+            {
+                Module.SmallGasTank, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                    },
+                    Description = "A small pressure vessel to store gasses.",
+                    Storage = 10,
+                    StorageType = Matter.Methane
+                }
+            },
+            {
+                Module.LargeGasTank, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(3, Matter.Steel),
+                    },
+                    Description = "A large pressure vessel to store gasses.",
+                    Storage = 50,
+                    StorageType = Matter.Methane
+                }
+            },
+            {
+                Module.SmallWaterTank, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                    },
+                    Description = "A small vessel to store water.",
+                    Storage = 10,
+                    StorageType = Matter.Water
+                }
+            },
+            {
+                Module.Splitter, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                    },
+                    Description = "A fluid splitter to split pipelines."
                 }
             }
         };

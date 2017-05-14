@@ -5,6 +5,7 @@ using System;
 using RedHomestead.Interiors;
 using UnityEngine.UI;
 using RedHomestead.Buildings;
+using RedHomestead.Simulation;
 
 [Serializable]
 public abstract class InteriorFields<G, C> where C : IConvertible
@@ -14,6 +15,7 @@ public abstract class InteriorFields<G, C> where C : IConvertible
     public Sprite[] Sprites;
     public Text DetailHeader, DetailDescription, DetailPower, DetailPowerStorage, DetailStorage, DetailTypedStorage;
     public Text[] DetailIO;
+    public Image DetailTypedStorageSprite;
     public G CurrentGroup { get; private set; }
 
     public void Toggle(bool state)
@@ -207,6 +209,7 @@ public class FloorplanBridge : MonoBehaviour {
     {
         Module whatToBuild = this.ModuleFields.Map[this.ModuleFields.CurrentGroup][index];
 
+        //avoid filling every frame that we're hovered
         if (whatToBuild != this.currentDetail)
         {
             if (Construction.BuildData.ContainsKey(whatToBuild))
@@ -215,6 +218,74 @@ public class FloorplanBridge : MonoBehaviour {
                 BuildingData data = Construction.BuildData[whatToBuild];
                 ModuleFields.DetailHeader.text = whatToBuild.ToString();
                 ModuleFields.DetailDescription.text = data.Description;
+                int i = 0;
+                foreach(RectTransform text in ModuleFields.DetailMaterialsParent)
+                {
+                    if (i == 0)
+                    {
+                        //noop;
+                    }
+                    else
+                    {
+                        int actualIndex = i - 1;
+                        bool active = actualIndex < data.Requirements.Count;
+                        text.gameObject.SetActive(active);
+                        if (active)
+                        {
+                            text.GetComponent<Text>().text = data.Requirements[actualIndex].ToString();
+                            text.GetChild(0).GetComponent<Image>().sprite = data.Requirements[actualIndex].Type.Sprite();
+                        }
+                    }
+
+                    i++;
+                }
+
+                ModuleFields.DetailPower.transform.parent.gameObject.SetActive(data.PowerSteady.HasValue || data.PowerMin.HasValue);
+
+                if (data.PowerSteady.HasValue)
+                    ModuleFields.DetailPower.text = data.PowerSteady.Value > 0 ? "+" + data.PowerSteady.Value : data.PowerSteady.Value.ToString();
+                else if (data.PowerMin.HasValue && data.PowerMin.Value >= 0)
+                    ModuleFields.DetailPower.text = String.Format("+[{0}-{1}]", data.PowerMin.Value, data.PowerMax.Value);
+
+                ModuleFields.DetailPowerStorage.transform.parent.gameObject.SetActive(data.EnergyStorage.HasValue);
+                if (data.EnergyStorage.HasValue)
+                    ModuleFields.DetailPower.text = data.EnergyStorage.ToString();
+
+                ModuleFields.DetailTypedStorage.transform.parent.gameObject.SetActive(data.StorageType != Matter.Unspecified);
+                if (data.StorageType != Matter.Unspecified)
+                {
+                    ModuleFields.DetailStorage.transform.parent.gameObject.SetActive(false);
+                    ModuleFields.DetailTypedStorage.text = data.Storage.Value.ToString();
+                    ModuleFields.DetailTypedStorageSprite.sprite = data.StorageType.Sprite();
+                }
+                else
+                {
+                    ModuleFields.DetailStorage.transform.parent.gameObject.SetActive(data.Storage.HasValue);
+                    if (data.Storage.HasValue)
+                        ModuleFields.DetailStorage.text = data.Storage.Value.ToString();
+                }
+
+                if (data.IO == null)
+                {
+                    foreach(Text io in ModuleFields.DetailIO)
+                    {
+                        io.transform.parent.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    i = 0;
+                    foreach(KeyValuePair<Matter, float> entry in data.IO)
+                    {
+                        ModuleFields.DetailIO[i].text = entry.Value > 0 ? "+" + entry.Value : entry.Value.ToString();
+                        ModuleFields.DetailIO[i].transform.parent.GetChild(0).GetComponent<Image>().sprite = entry.Key.Sprite();
+                        i++;
+                    }
+                    for(int j = i;  j < ModuleFields.DetailIO.Length; j++)
+                    {
+                        ModuleFields.DetailIO[i].transform.parent.gameObject.SetActive(false);
+                    }
+                }
             }
         }
     }
