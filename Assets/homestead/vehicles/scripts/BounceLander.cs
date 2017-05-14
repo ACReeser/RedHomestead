@@ -210,7 +210,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     private void PackLander(ResourceCountDictionary lineItemUnits)
     {
         int i = 0;
-        foreach(KeyValuePair<Matter, int> kvp in lineItemUnits)
+        foreach(KeyValuePair<Matter, float> kvp in lineItemUnits)
         {
             for (int vol = 0; vol < kvp.Value; vol++)
             {

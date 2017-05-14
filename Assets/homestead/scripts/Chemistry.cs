@@ -30,7 +30,7 @@ namespace RedHomestead.Simulation
         public Matter Type { get; set; }
         public float Count { get; set; }
 
-        public ResourceEntry(int count, Matter type)
+        public ResourceEntry(float count, Matter type)
         {
             this.Type = type;
             this.Count = count;

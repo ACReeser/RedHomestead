@@ -8,13 +8,13 @@ using RedHomestead.Buildings;
 using RedHomestead.Persistence;
 
 [Serializable]
-public class ResourceCountDictionary: SerializableDictionary<Matter, int> { }
+public class ResourceCountDictionary: SerializableDictionary<Matter, float> { }
 
 [Serializable]
 public class ConstructionData: FacingData
 {
     public Module ModuleTypeUnderConstruction;
-    public Dictionary<Matter, int> ResourceCount;
+    public Dictionary<Matter, float> ResourceCount;
     public float CurrentProgressSeconds = 0;
 }
 
@@ -56,13 +56,13 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
     {
         if (Data.ModuleTypeUnderConstruction != Module.Unspecified)
         {
-            Data.ResourceCount = new Dictionary<Matter, int>();
+            Data.ResourceCount = new Dictionary<Matter, float>();
             ResourceList = new List<ResourceComponent>();
             //todo: change to Construction.Requirements[underconstruction].keys when that's a dict of <resource, entry> and not a list
-            RequiredResourceMask = new Matter[Construction.Requirements[Data.ModuleTypeUnderConstruction].Count];
+            RequiredResourceMask = new Matter[Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.Count];
 
             int i = 0;
-            foreach(ResourceEntry required in Construction.Requirements[Data.ModuleTypeUnderConstruction])
+            foreach(ResourceEntry required in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
             {
                 Data.ResourceCount[required.Type] = 0;
                 RequiredResourceMask[i] = required.Type;
@@ -94,7 +94,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         {
             if (other.CompareTag("Player"))
             {
-                GuiBridge.Instance.ShowConstruction(Construction.Requirements[Data.ModuleTypeUnderConstruction], Data.ResourceCount, Data.ModuleTypeUnderConstruction);
+                GuiBridge.Instance.ShowConstruction(Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements, Data.ResourceCount, Data.ModuleTypeUnderConstruction);
                 ZoneThatPlayerIsStandingIn = this;
             }
             else if (other.CompareTag("movable"))
@@ -108,7 +108,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
-                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[Data.ModuleTypeUnderConstruction], Data.ResourceCount, Data.ModuleTypeUnderConstruction);
+                    GuiBridge.Instance.ShowConstruction(Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements, Data.ResourceCount, Data.ModuleTypeUnderConstruction);
                 }
             }
         }
@@ -205,7 +205,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
                     deletedCount[component.Data.ResourceType] = 0;
                 }
 
-                if (numDeleted < Construction.Requirements[Data.ModuleTypeUnderConstruction].Where(r => r.Type == component.Data.ResourceType).Count())
+                if (numDeleted < Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.Where(r => r.Type == component.Data.ResourceType).Count())
                 {
                     this.ResourceList.Remove(component);
                     Destroy(component.gameObject);

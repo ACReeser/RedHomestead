@@ -230,7 +230,7 @@ public class GuiBridge : MonoBehaviour {
     }
 
     //todo: just pass constructionZone, it's less params
-    internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Matter, int> hasCount, Module toBeBuilt)
+    internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Matter, float> hasCount, Module toBeBuilt)
     {
         //show the name of the thing being built
         this.ConstructionPanel.gameObject.SetActive(true);

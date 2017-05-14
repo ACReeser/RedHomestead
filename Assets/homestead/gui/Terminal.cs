@@ -390,7 +390,7 @@ public class Terminal : MonoBehaviour {
         buys.RefreshMassVolumeMoney(CurrentOrder);
     }
 
-    private void RefreshAmountText(Transform checkoutFieldsParent, int units)
+    private void RefreshAmountText(Transform checkoutFieldsParent, float units)
     {
         checkoutFieldsParent.GetChild(5).GetComponent<Text>().text = units.ToString();
     }

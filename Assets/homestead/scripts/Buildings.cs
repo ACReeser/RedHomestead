@@ -82,12 +82,23 @@ namespace RedHomestead.Buildings
         /// </summary>
         public static Dictionary<Module, BuildingData> BuildData = new Dictionary<Module, BuildingData>
         {
+            //power
+            {
+                Module.JunctionBox, new BuildingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Copper)
+                    },
+                    Description = "A small box to split powerlines."
+                }
+            },
             {
                 Module.SolarPanelSmall, new BuildingData()
                 {
                     Requirements = new List<ResourceEntry>()
                     {
-                        new ResourceEntry(2, Matter.Steel),
+                        new ResourceEntry(1, Matter.Steel),
                         new ResourceEntry(4, Matter.SiliconWafers)
                     },
                     Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear.",
@@ -95,6 +106,19 @@ namespace RedHomestead.Buildings
                     PowerMax = 9
                 }
             },
+            {
+                Module.Flywheel, new BuildingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(2, Matter.Steel),
+                        new ResourceEntry(2, Matter.Copper)
+                    },
+                    Description = "A spinning cylinder that stores rotational energy.",
+                    EnergyStorage = 10
+                }
+            },
+            //storage
             { 
                 Module.Warehouse, new BuildingData() {
                     Requirements = new List<ResourceEntry>()
@@ -147,112 +171,128 @@ namespace RedHomestead.Buildings
                     },
                     Description = "A fluid splitter to split pipelines."
                 }
+            },
+            //extraction
+            {
+                Module.SabatierReactor, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                    },
+                    Description = "An atmosphere miner that uses hydrogen to create water and methane.",
+                    PowerSteady = -3,
+                    IO = new Dictionary<Matter, float>()
+                    {
+                        { Matter.Hydrogen, -3f },
+                        { Matter.Water, 1f },
+                        { Matter.Methane, 1f }
+                    }
+                }
+            },
+            {
+                Module.OreExtractor, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(4, Matter.Steel),
+                    },
+                    Description = "An ore miner that scoops up regolith.",
+                    PowerSteady = -3,
+                    //IO = new Dictionary<Matter, float>()
+                    //{
+                    //    { Matter.Hydrogen, -3f },
+                    //    { Matter.Water, 1f },
+                    //    { Matter.Methane, 1f }
+                    //}
+                }
+            },
+            //refining
+            {
+                Module.WaterElectrolyzer, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                        new ResourceEntry(2, Matter.Polyethylene),
+                        new ResourceEntry(.5f, Matter.Copper),
+                    },
+                    Description = "An tank that converts water to oxygen and hydrogen.",
+                    PowerSteady = -3,
+                    IO = new Dictionary<Matter, float>()
+                    {
+                        { Matter.Water, -3f },
+                        { Matter.Oxygen, 2f },
+                        { Matter.Hydrogen, 1f }
+                    }
+                }
+            },
+            {
+                Module.AlgaeTank, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                        new ResourceEntry(1, Matter.Glass),
+                        new ResourceEntry(.5f, Matter.Biomass),
+                    },
+                    Description = "A transparent tower for growing edible algae.",
+                    PowerSteady = -1,
+                    IO = new Dictionary<Matter, float>()
+                    {
+                        { Matter.Water, -1f },
+                        { Matter.Biomass, 1f },
+                        { Matter.Oxygen, .5f }
+                    }
+                }
+            },
+            //hab/life support
+            {
+                Module.Airlock, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                        new ResourceEntry(2, Matter.Polyethylene)
+                    },
+                    Description = "A door for entering and exiting a pressurized habitat."
+                }
+            },
+            {
+                Module.GreenhouseHall, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(1, Matter.Steel),
+                        new ResourceEntry(2, Matter.Polyethylene),
+                        new ResourceEntry(.5f, Matter.Biomass),
+                    },
+                    Description = "A transparent hallway for growing crops.",
+                    PowerSteady = -2,
+                    IO = new Dictionary<Matter, float>()
+                    {
+                        { Matter.Water, -1f },
+                        { Matter.Biomass, 1f },
+                        { Matter.Oxygen, .5f }
+                    }
+                }
+            },
+            {
+                Module.Workshop, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(3, Matter.Steel),
+                        new ResourceEntry(1, Matter.Copper),
+                    },
+                    Description = "A large workspace for crafting and EVA suit upgrades."
+                }
+            },
+            {
+                Module.HallwayNode, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(2, Matter.Steel),
+                        new ResourceEntry(.5f, Matter.Glass),
+                    },
+                    Description = "A 4-way node for expanding the habitat."
+                }
             }
         };
-
-        //todo: load from file probably
-        //todo: disallow duplicate resource types by using another dict instead of a list
-        public static Dictionary<Module, List<ResourceEntry>> Requirements = new Dictionary<Module, List<ResourceEntry>>()
-        {
-            {
-                Module.SolarPanelSmall, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(2, Matter.Steel),
-                    new ResourceEntry(4, Matter.SiliconWafers)
-                }
-            },
-            {
-                Module.LargeGasTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(8, Matter.Steel)
-                }
-            },
-            {
-                Module.SmallGasTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.SmallWaterTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.Splitter, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.SabatierReactor, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.OreExtractor, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.WaterElectrolyzer, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.AlgaeTank, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(2, Matter.Steel),
-                    new ResourceEntry(2, Matter.Glass),
-                    new ResourceEntry(1, Matter.Biomass),
-                }
-            },
-            {
-                Module.Warehouse, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(2, Matter.Steel),
-                    new ResourceEntry(2, Matter.Canvas)
-                }
-            },
-            {
-                Module.JunctionBox, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Copper)
-                }
-            },
-            {
-                Module.Airlock, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel)
-                }
-            },
-            {
-                Module.Workshop, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel),
-                    new ResourceEntry(1, Matter.Canvas)
-                }
-            },
-            {
-                Module.HallwayNode, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel),
-                    new ResourceEntry(1, Matter.Glass)
-                }
-            },
-            {
-                Module.GreenhouseHall, new List<ResourceEntry>()
-                {
-                    new ResourceEntry(1, Matter.Steel),
-                    new ResourceEntry(1, Matter.Glass)
-                }
-            }
-        };
-
+        
 
         /// <summary>
         /// from group to list of modules

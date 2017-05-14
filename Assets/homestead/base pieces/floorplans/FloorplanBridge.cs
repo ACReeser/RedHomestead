@@ -277,6 +277,7 @@ public class FloorplanBridge : MonoBehaviour {
                     i = 0;
                     foreach(KeyValuePair<Matter, float> entry in data.IO)
                     {
+                        ModuleFields.DetailIO[i].transform.parent.gameObject.SetActive(true);
                         ModuleFields.DetailIO[i].text = entry.Value > 0 ? "+" + entry.Value : entry.Value.ToString();
                         ModuleFields.DetailIO[i].transform.parent.GetChild(0).GetComponent<Image>().sprite = entry.Key.Sprite();
                         i++;
