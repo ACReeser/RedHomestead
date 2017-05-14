@@ -42,7 +42,7 @@ namespace RedHomestead.Buildings
     {
         public int BuildTime = Construction.DefaultBuildTimeSeconds;
         public List<ResourceEntry> Requirements;
-        public int? Power;
+        public int? PowerSteady, PowerMin, PowerMax;
         public int? EnergyStorage;
         public Matter StorageType;
         public int? Storage;
@@ -85,7 +85,25 @@ namespace RedHomestead.Buildings
             {
                 Module.SolarPanelSmall, new BuildingData()
                 {
-
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(2, Matter.Steel),
+                        new ResourceEntry(4, Matter.SiliconWafers)
+                    },
+                    Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear.",
+                    PowerMin = 0,
+                    PowerMax = 9
+                }
+            },
+            { 
+                Module.Warehouse, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(2, Matter.Steel),
+                        new ResourceEntry(2, Matter.Canvas)
+                    },
+                    Description = "A canvas storage area to stash materials.",
+                    Storage = 10
                 }
             }
         };

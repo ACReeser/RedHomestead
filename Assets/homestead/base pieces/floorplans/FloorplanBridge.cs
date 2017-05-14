@@ -9,9 +9,12 @@ using RedHomestead.Buildings;
 [Serializable]
 public abstract class InteriorFields<G, C> where C : IConvertible
 {
-    public RectTransform FullPanel, GroupsPanel, GroupDetailPanel, DetailButtonsParent;
+    public RectTransform FullPanel, GroupsPanel, GroupDetailPanel, DetailButtonsParent, DetailMaterialsParent;
     public Transform[] Prefabs;
     public Sprite[] Sprites;
+    public Text DetailHeader, DetailDescription, DetailPower, DetailPowerStorage, DetailStorage, DetailTypedStorage;
+    public Text[] DetailIO;
+    public G CurrentGroup { get; private set; }
 
     public void Toggle(bool state)
     {
@@ -25,9 +28,9 @@ public abstract class InteriorFields<G, C> where C : IConvertible
 
     public void SelectGroup(int index)
     {
-
+        this.CurrentGroup = (G)(object)index;
         this.GroupsPanel.gameObject.SetActive(false);
-        FillDetail((G)(object)index);
+        FillDetail(this.CurrentGroup);
         this.GroupDetailPanel.gameObject.SetActive(true);
     }
 
@@ -69,7 +72,7 @@ public abstract class InteriorFields<G, C> where C : IConvertible
         }
     }
 
-    protected abstract Dictionary<G, C[]> Map { get; }
+    public abstract Dictionary<G, C[]> Map { get; }
 }
 
 [Serializable]
@@ -78,7 +81,7 @@ public class FloorplanPrefabs: InteriorFields<FloorplanGroup, Floorplan>
     public Material[] Materials;
     internal Material SelectedMaterial;
 
-    protected override Dictionary<FloorplanGroup, Floorplan[]> Map
+    public override Dictionary<FloorplanGroup, Floorplan[]> Map
     {
         get
         {
@@ -90,7 +93,7 @@ public class FloorplanPrefabs: InteriorFields<FloorplanGroup, Floorplan>
 [Serializable]
 public class StuffFields: InteriorFields<StuffGroup, Stuff>
 {
-    protected override Dictionary<StuffGroup, Stuff[]> Map
+    public override Dictionary<StuffGroup, Stuff[]> Map
     {
         get
         {
@@ -102,7 +105,7 @@ public class StuffFields: InteriorFields<StuffGroup, Stuff>
 [Serializable]
 public class ModuleFields : InteriorFields<ConstructionGroup, Module>
 {
-    protected override Dictionary<ConstructionGroup, Module[]> Map
+    public override Dictionary<ConstructionGroup, Module[]> Map
     {
         get
         {
@@ -199,9 +202,21 @@ public class FloorplanBridge : MonoBehaviour {
         PlayerInput.Instance.FPSController.FreezeLook = false;
     }
 
-    public void HoverModuleButton()
+    private Module currentDetail = Module.Unspecified;
+    public void HoverModuleButton(int index)
     {
-        Module whatToBuild = (Module)Enum.Parse(typeof(Module), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+        Module whatToBuild = this.ModuleFields.Map[this.ModuleFields.CurrentGroup][index];
+
+        if (whatToBuild != this.currentDetail)
+        {
+            if (Construction.BuildData.ContainsKey(whatToBuild))
+            {
+                this.currentDetail = whatToBuild;
+                BuildingData data = Construction.BuildData[whatToBuild];
+                ModuleFields.DetailHeader.text = whatToBuild.ToString();
+                ModuleFields.DetailDescription.text = data.Description;
+            }
+        }
     }
 
     internal Transform GetPrefab(Floorplan s)
