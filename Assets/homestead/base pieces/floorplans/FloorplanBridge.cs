@@ -256,7 +256,10 @@ public class FloorplanBridge : MonoBehaviour {
                 {
                     ModuleFields.DetailStorage.transform.parent.gameObject.SetActive(false);
                     ModuleFields.DetailTypedStorage.text = data.Storage.Value.ToString();
-                    ModuleFields.DetailTypedStorageSprite.sprite = data.StorageType.Sprite();
+                    if (data.StorageType == Matter.Methane)
+                        ModuleFields.DetailTypedStorageSprite.sprite = GuiBridge.Instance.Icons.MiscIcons[(int)MiscIcon.Molecule];
+                    else
+                        ModuleFields.DetailTypedStorageSprite.sprite = data.StorageType.Sprite();
                 }
                 else
                 {

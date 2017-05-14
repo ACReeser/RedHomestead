@@ -60,7 +60,7 @@ public struct ReportFields
     public Sprite Connected, Disconnected;
 }
 
-public enum MiscIcon { Information, Rocket, Pipe, Plug, Harvest }
+public enum MiscIcon { Information, Rocket, Pipe, Plug, Harvest, Molecule }
 
 [Serializable]
 public struct Icons

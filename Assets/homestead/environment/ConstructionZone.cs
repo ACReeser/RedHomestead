@@ -134,7 +134,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();
-                    GuiBridge.Instance.ShowConstruction(Construction.Requirements[Data.ModuleTypeUnderConstruction], Data.ResourceCount, Data.ModuleTypeUnderConstruction);
+                    GuiBridge.Instance.ShowConstruction(Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements, Data.ResourceCount, Data.ModuleTypeUnderConstruction);
                 }
             }
         }
@@ -144,7 +144,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
     {
         CanConstruct = true;
 
-        foreach(ResourceEntry resourceEntry in Construction.Requirements[Data.ModuleTypeUnderConstruction])
+        foreach(ResourceEntry resourceEntry in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
         {
             if (Data.ResourceCount[resourceEntry.Type] < resourceEntry.Count)
             {
