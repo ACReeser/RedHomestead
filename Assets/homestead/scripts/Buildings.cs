@@ -38,16 +38,15 @@ namespace RedHomestead.Buildings
     /// </summary>
     public enum ConstructionGroup { Undecided = -1, LifeSupport, Power, Extraction, Refinement, Storage, Other }
 
-    public class BuildingData
+    public class BuildingData : Crafting.BlueprintData
     {
-        public int BuildTime = Construction.DefaultBuildTimeSeconds;
-        public List<ResourceEntry> Requirements;
-        public int? PowerSteady, PowerMin, PowerMax;
-        public int? EnergyStorage;
         public Matter StorageType = Matter.Unspecified;
         public int? Storage;
-        public Dictionary<Matter, float> IO;
-        public string Description;
+
+        public BuildingData()
+        {
+            this.BuildTime = Construction.DefaultBuildTimeSeconds;
+        }
     }
 
     public static class Construction
