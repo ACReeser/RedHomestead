@@ -9,6 +9,8 @@ namespace RedHomestead.Crafting
     {
         Unspecified = -1,
         PowerCube = 0,
+        GasCrate,
+        WaterCrate,
         SolarPanel,
         IceDrill,
     }
