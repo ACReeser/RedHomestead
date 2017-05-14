@@ -38,9 +38,21 @@ namespace RedHomestead.Buildings
     /// </summary>
     public enum ConstructionGroup { Undecided = -1, LifeSupport, Power, Extraction, Refinement, Storage, Other }
 
+    public class BuildingData
+    {
+        public int BuildTime = Construction.DefaultBuildTimeSeconds;
+        public List<ResourceEntry> Requirements;
+        public int? Power;
+        public int? EnergyStorage;
+        public Matter StorageType;
+        public int? Storage;
+        public Dictionary<Matter, int> IO;
+        public string Description;
+    }
+
     public static class Construction
     {
-        private const int DefaultBuildTimeSeconds = 10;
+        public const int DefaultBuildTimeSeconds = 10;
 
         public static int BuildRadius(Module module)
         {
@@ -68,37 +80,13 @@ namespace RedHomestead.Buildings
         /// <summary>
         /// In seconds
         /// </summary>
-        public static Dictionary<Module, int> BuildTimes = new Dictionary<Module, int>
+        public static Dictionary<Module, BuildingData> BuildData = new Dictionary<Module, BuildingData>
         {
             {
-                Module.SolarPanelSmall, DefaultBuildTimeSeconds
-            },
-            {
-                Module.LargeGasTank, DefaultBuildTimeSeconds
-            },
-            {
-                Module.SmallGasTank, DefaultBuildTimeSeconds
-            },
-            {
-                Module.SmallWaterTank, DefaultBuildTimeSeconds
-            },
-            {
-                Module.Splitter, DefaultBuildTimeSeconds
-            },
-            {
-                Module.SabatierReactor, DefaultBuildTimeSeconds
-            },
-            {
-                Module.OreExtractor, DefaultBuildTimeSeconds
-            },
-            {
-                Module.WaterElectrolyzer, DefaultBuildTimeSeconds
-            },
-            {
-                Module.AlgaeTank, DefaultBuildTimeSeconds
-            },
-            {
-                Module.Warehouse, DefaultBuildTimeSeconds
+                Module.SolarPanelSmall, new BuildingData()
+                {
+
+                }
             }
         };
 
