@@ -41,30 +41,7 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
 
     private float GetWattsAtHour()
     {
-        float x;
-        if (Game.Current.Environment.CurrentHour < 6)
-        {
-            return 0;
-        }
-        else if (Game.Current.Environment.CurrentHour < 12)
-        {
-            x = Game.Current.Environment.CurrentHour - 6;
-        }
-        else if (Game.Current.Environment.CurrentHour < 18)
-        {
-            x = Game.Current.Environment.CurrentHour - 6;
-        }
-        else
-        {
-            return 0;
-        }
-        //hand tuned function that sums to .211 kilo-watt-hours over x = 0 to 11
-        //return Meter2PerModule * (((1 / 120)*x*(x*(x*(x*(11 * x - 130) + 525) - 950) + 1384)) + 24);
-        //instead, we'll just use sine
-#warning inaccuracy: solar panel power generation over the course of a day
-        //this sin() is way off from the U shaped graph in reality
-        //that means we're shortchanging players kWh
-        return MaximumWattsGenerated * Mathf.Sin(Mathf.Lerp(0, Mathf.PI, x / 12));
+        return MaximumWattsGenerated * Game.Current.Environment.SolarIntensity();
     }
 
     public override void OnAdjacentChanged()

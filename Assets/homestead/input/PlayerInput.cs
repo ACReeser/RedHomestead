@@ -686,13 +686,24 @@ public class PlayerInput : MonoBehaviour {
             {
                 if (hitInfo.collider.gameObject.CompareTag("movable"))
                 {
-                    IMovableSnappable res = hitInfo.collider.GetComponent<IMovableSnappable>();
+                    IMovableSnappable res = hitInfo.collider.transform.root.GetComponent<IMovableSnappable>();
+                    bool isDeployable = res is IDeployable;
 
                     if (carriedObject == null)
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
                             PickUpObject(hitInfo.rigidbody, res);
+                        }
+                        else if (isDeployable)
+                        {
+                            if (doInteract)
+                                (res as IDeployable).ToggleDeploy();
+                            else
+                            {
+                                newPrompt = Prompts.DeployableHint;
+                                newPrompt.SecondaryDescription = (res as IDeployable).Deployed ? "Retract" : "Deploy";
+                            }
                         }
                         else
                         {

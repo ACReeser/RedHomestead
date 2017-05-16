@@ -143,6 +143,39 @@ namespace RedHomestead.Persistence
                 return CurrentSol * SunOrbit.MartianHoursPerDay + CurrentHour;
             }
         }
+
+        /// <summary>
+        /// The normalized solar output at the current hour, based on a sine wave
+        /// </summary>
+        /// <returns>From 0 to 1f</returns>
+        public float SolarIntensity()
+        {
+            //hand tuned function that sums to .211 kilo-watt-hours over x = 0 to 11
+            //return Meter2PerModule * (((1 / 120)*x*(x*(x*(x*(11 * x - 130) + 525) - 950) + 1384)) + 24);
+            //instead, we'll just use sine
+            //this sin() is way off from the U shaped graph in reality
+            //that means we're shortchanging players kWh
+#warning inaccuracy: solar panel power generation over the course of a day
+            float x;
+            if (CurrentHour < 6)
+            {
+                return 0;
+            }
+            else if (CurrentHour < 12)
+            {
+                x = CurrentHour - 6;
+            }
+            else if (CurrentHour < 18)
+            {
+                x = CurrentHour - 6;
+            }
+            else
+            {
+                return 0;
+            }
+
+            return Mathf.Sin(Mathf.Lerp(0, Mathf.PI, x / 12));
+        }
     }
 
     [Serializable]
