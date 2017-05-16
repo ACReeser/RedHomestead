@@ -440,11 +440,16 @@ public static class Prompts {
         Description = "Upgrade",
         Key = "E"
     };
-    internal static PromptInfo DeployableHint = new PromptInfo()
+    internal static PromptInfo DeployableDeployHint = new PromptInfo()
     {
         Description = "Pick up",
         Key = "LMB",
         SecondaryKey = "E",
         SecondaryDescription = "Deploy"
+    };
+    internal static PromptInfo DeployableRetractHint = new PromptInfo()
+    {
+        Description = "Retract",
+        Key = "E"
     };
 }

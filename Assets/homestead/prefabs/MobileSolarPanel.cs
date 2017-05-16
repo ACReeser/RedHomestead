@@ -19,16 +19,17 @@ public interface IDeployable: IMovableSnappable
     bool Deployed { get; }
 }
 
-public class MobileSolarPanel : MovableSnappable, IPowerSupply, IDataContainer<MobileSolarPanelData>, IDeployable
+public class MobileSolarPanel : MovableSnappable, IVariablePowerSupply, IDataContainer<MobileSolarPanelData>, IDeployable
 {
     public Transform[] Panels;
 
     public FailureAnchors failureEffectAnchors;
     public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
     public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
+    public const int Meter2PerModule = 5;
 
-    public float MaximumWattsGenerated { get { return SolarPanel.EquatorAnnualAverageInsolationPerMeter2 * SolarPanel.MaximumEfficiency; } }
-    public float WattsGenerated { get { return MaximumWattsGenerated * Game.Current.Environment.SolarIntensity(); } }
+    public float MaximumWattsGenerated { get { return SolarPanel.EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * SolarPanel.MinimumEfficiency; } }
+    public float WattsGenerated { get { return Convert.ToInt32(Deployed) * MaximumWattsGenerated * Game.Current.Environment.SolarIntensity(); } }
 
     private MobileSolarPanelData data;
     public MobileSolarPanelData Data { get { return data; } set { data = value; } }
@@ -57,6 +58,8 @@ public class MobileSolarPanel : MovableSnappable, IPowerSupply, IDataContainer<M
             };
 
         this.ToggleDeploy(false);
+
+        this.InitializePowerVisualization();
     }
 	
 	// Update is called once per frame
@@ -78,6 +81,8 @@ public class MobileSolarPanel : MovableSnappable, IPowerSupply, IDataContainer<M
 
         if (panelMove == null)
             panelMove = StartCoroutine(MovePanels());
+
+        this.RefreshVisualization();
     }
 
     private float GetRotationXFromDeployedState()
@@ -131,7 +136,15 @@ public class MobileSolarPanel : MovableSnappable, IPowerSupply, IDataContainer<M
     {
         if (PanelsDeployed)
             ToggleDeploy(false);
+    }
 
-        FlowManager.Instance.PowerGrids.Detach(this);
+    public override void OnPickedUp()
+    {
+        base.OnPickedUp();
+
+        if (FlowManager.Instance.PowerGrids.Edges.ContainsKey(this) && FlowManager.Instance.PowerGrids.Edges[this].Count > 0)
+        {
+            FlowManager.Instance.PowerGrids.Detach(this);
+        }
     }
 }

@@ -686,12 +686,16 @@ public class PlayerInput : MonoBehaviour {
             {
                 if (hitInfo.collider.gameObject.CompareTag("movable"))
                 {
-                    IMovableSnappable res = hitInfo.collider.transform.root.GetComponent<IMovableSnappable>();
+                    IMovableSnappable res = hitInfo.collider.GetComponent<IMovableSnappable>();
+
+                    if (res == null)
+                        res = hitInfo.collider.transform.root.GetComponent<IMovableSnappable>();
+
                     bool isDeployable = res is IDeployable;
 
                     if (carriedObject == null)
                     {
-                        if (Input.GetMouseButtonDown(0))
+                        if (Input.GetMouseButtonDown(0) && (!isDeployable || !(res as IDeployable).Deployed))
                         {
                             PickUpObject(hitInfo.rigidbody, res);
                         }
@@ -701,8 +705,7 @@ public class PlayerInput : MonoBehaviour {
                                 (res as IDeployable).ToggleDeploy();
                             else
                             {
-                                newPrompt = Prompts.DeployableHint;
-                                newPrompt.SecondaryDescription = (res as IDeployable).Deployed ? "Retract" : "Deploy";
+                                newPrompt = (res as IDeployable).Deployed ? Prompts.DeployableRetractHint : Prompts.DeployableDeployHint;
                             }
                         }
                         else
@@ -720,7 +723,8 @@ public class PlayerInput : MonoBehaviour {
                         else
                         {
                             newPrompt = Prompts.DropHint;
-                            newPrompt.ItalicizedText = res.GetText();
+                            if (res != null)
+                                newPrompt.ItalicizedText = res.GetText();
                         }
                     }
                 }

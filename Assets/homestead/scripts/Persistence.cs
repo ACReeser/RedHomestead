@@ -62,6 +62,7 @@ namespace RedHomestead.Persistence
         public PackData PackData;
         public int BankAccount;
         public int GremlinMissStreak;
+        public bool GremlinChastised;
         public List<Order> EnRouteOrders;
         public float[] PerkProgress;
 

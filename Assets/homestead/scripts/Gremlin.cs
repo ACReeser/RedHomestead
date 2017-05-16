@@ -65,7 +65,8 @@ public class Gremlin : MonoBehaviour {
     private float lurkTime;
     private IEnumerator Lurk()
     {
-        lurkTime = UnityEngine.Random.Range(1f * 60f, 6f * 60f);
+        float extraBreathingRoom = Game.Current.Player.GremlinChastised ? 5f : 0f;
+        lurkTime = UnityEngine.Random.Range(1f * 60f, 6f * 60f) + extraBreathingRoom;
 
         print("Gremlin lurking for " + lurkTime + " seconds");
 
@@ -124,7 +125,7 @@ public class Gremlin : MonoBehaviour {
         //if the player is wealthy, and thus more able to take the challenge, give a penalty linearly with wealth
         if (Game.Current.Player.BankAccount > WealthyPlayerThreshold)
         {
-            dc += ((Game.Current.Player.BankAccount - WealthyPlayerThreshold) / 50000) + 1;
+            dc += ((Game.Current.Player.BankAccount - WealthyPlayerThreshold) / 50000) * .1f;
         }
 
         //if the player has missed a lot of gremlin attacks, give a random penalty
@@ -263,6 +264,7 @@ public class Gremlin : MonoBehaviour {
         {
             FlowManager.Instance.PowerGrids.OnElectricalFailureChange(repaired);
         }
+        Game.Current.Player.GremlinChastised = true;
         GuiBridge.Instance.ShowNews(NewsSource.MalfunctionRepaired);
         PlayerInput.Instance.ToggleRepairMode(false);
     }
