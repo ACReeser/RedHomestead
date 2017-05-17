@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using RedHomestead.Electricity;
 using RedHomestead.Economy;
 using RedHomestead.GameplayOptions;
+using RedHomestead.Scoring;
 
 namespace RedHomestead.Persistence
 {
@@ -183,6 +184,7 @@ namespace RedHomestead.Persistence
     public class Base: ISerializationCallbackReceiver {
         public static Base Current;
 
+        public string Name;
         public CrateData[] Crates;
         public HabitatExtraData[] Habitats;
         public ConstructionData[] ConstructionZones;
@@ -420,6 +422,11 @@ namespace RedHomestead.Persistence
         public EnvironmentData Environment;
         public PlayerData Player;
         public Base[] Bases;
+        public GameScore Score;
+        public int GetScore()
+        {
+            return this.Score.GetScore(Environment.CurrentSol, Environment.CurrentHour);
+        }
 
         internal bool IsNewGame { get; set; }
 
@@ -536,8 +543,10 @@ namespace RedHomestead.Persistence
                     EnRouteOrders = new List<Order>(),
                     PerkProgress = choices.GetPerkProgress()
                 },
+                Score = new GameScore(),
                 History = new Simulation.GlobalHistory()
             };
+            Base.Current = Game.Current.Bases[0];
             Perks.PerkMultipliers.LoadFromPlayerPerkProgress();
         }
     }

@@ -183,6 +183,8 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             GuiBridge.Instance.HideConstruction();
         }
 
+        Game.Current.Score.ModulesBuilt++;
+
         //todo: make this more efficient
         //what this code is doing:
         //only destroying those entries in the ResourceList that are required to build the Module

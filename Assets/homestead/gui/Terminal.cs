@@ -5,6 +5,7 @@ using System;
 using RedHomestead.Economy;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
+using RedHomestead.Persistence;
 
 public enum TerminalProgram { Finances, Colony, News, Market }
 public enum MarketTab { Buy, EnRoute, Sell }
@@ -14,7 +15,18 @@ public enum BuyTab { ByResource, BySupplier, Checkout }
 /// bindings and display logic for all the stuff under the colony app
 public struct ColonyFields
 {
-    public Text ColonyDayText;
+    public Text ColonyNameText, MDIText, SolsText, StructuresText, CraftedText, MatterText, RepairsText;
+
+    internal void FillColonyScreen()
+    {
+        ColonyNameText.text = Base.Current.Name;
+        MDIText.text =        Game.Current.GetScore().ToString();
+        SolsText.text =       Game.Current.Environment.CurrentSol.ToString();
+        StructuresText.text = Game.Current.Score.ModulesBuilt.ToString();
+        CraftedText.text =    Game.Current.Score.ItemsCrafted.ToString();
+        MatterText.text = String.Format("\r\n{0}\r\n{1}\r\n{2}", Game.Current.Score.MatterMined, Game.Current.Score.MatterRefined, Game.Current.Score.MatterSold);
+        RepairsText.text =    Game.Current.Score.RepairsEffected.ToString();
+    }
 }
 
 [Serializable]
@@ -256,7 +268,7 @@ public class Terminal : MonoBehaviour {
 
     private void OnSolChange(int newSol)
     {
-        colony.ColonyDayText.text = newSol.ToString() + " Sols";
+        colony.ColonyNameText.text = newSol.ToString() + " Sols";
     }
 
     private void OnHourChange(int newSol, float newHour)
@@ -304,6 +316,8 @@ public class Terminal : MonoBehaviour {
 
         if (currentProgramPanel == ProgramPanels[(int)TerminalProgram.Market])
             SwitchMarketTab((int)MarketTab.Buy);
+        else if (currentProgramPanel == ProgramPanels[(int)TerminalProgram.Colony])
+            colony.FillColonyScreen();
 
         if (currentProgramPanel != null)
             currentProgramPanel.gameObject.SetActive(true);

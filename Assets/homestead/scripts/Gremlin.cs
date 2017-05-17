@@ -249,6 +249,8 @@ public class Gremlin : MonoBehaviour {
 
         if (repairable.FaultedPercentage <= 0f)
             FinishRepair(repairable);
+
+        Game.Current.Score.RepairsEffected++;
     }
 
     internal void FinishRepair(IRepairable repaired)

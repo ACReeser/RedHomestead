@@ -23,14 +23,13 @@ namespace RedHomestead.Scoring{
         public float MatterMined;
         public float MatterRefined;
         public int MatterSold;
-        //public int Matter sold
-        //public int Suit upgrades made/bought
+        public int ItemsCrafted;
         //public float Extra Training completed
         //public int Solar Flares / Dust Storms survived
         //public int Science data collected
         //public float Additional Colonist time
 
-        public int GetScore(int sol, int hour)
+        public int GetScore(int sol, float hour)
         {
             float rawScore = (sol + hour / SunOrbit.MartianHoursPerDay) * ScoringConstants.PerSol;
 
