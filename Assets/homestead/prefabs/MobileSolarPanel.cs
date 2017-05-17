@@ -99,6 +99,7 @@ public class MobileSolarPanel : MovableSnappable, IVariablePowerSupply, IDataCon
     private IEnumerator MovePanels()
     {
         PanelTime = 0f;
+        bool toggledColliders = false, doToggleCollider = false;
         //we aren't using hatch.rotate here because reading from localRotation.eulerAngles is super unreliable
         while (PanelTime < PanelDuration)
         {
@@ -106,10 +107,18 @@ public class MobileSolarPanel : MovableSnappable, IVariablePowerSupply, IDataCon
             float lerpOffset = (PanelsDeployed) ? 1 : 0f;
 
             PanelTime += Time.deltaTime;
+            float lerp = lerpOffset - (PanelTime * lerpCoeff / PanelDuration);
+
+            //todo: only turn off when appropriate
+            if (!toggledColliders && PanelTime / PanelDuration > .5f)
+            {
+                toggledColliders = true;
+                doToggleCollider = true;
+            }
+
             int i = 0;
             foreach(Transform p in Panels)
             {
-                float lerp = lerpOffset - (PanelTime * lerpCoeff / PanelDuration);
                 switch (i)
                 {
                     case 0:
@@ -126,7 +135,14 @@ public class MobileSolarPanel : MovableSnappable, IVariablePowerSupply, IDataCon
                         break;
                 }
                 i++;
+
+                if (doToggleCollider)
+                {
+                    var collider = p.GetComponent<Collider>();
+                    collider.enabled = !collider.enabled;
+                }
             }
+            doToggleCollider = false;
             yield return null;
         }
         panelMove = null;
