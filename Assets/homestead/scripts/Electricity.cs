@@ -9,7 +9,13 @@ namespace RedHomestead.Electricity
 {
     public interface IPowerable: IRepairable
     {
+        /// <summary>
+        /// The persisted ID of this powerable
+        /// </summary>
         string PowerableInstanceID { get; }
+        /// <summary>
+        /// The transient, only used in game memory ID of the current power grid
+        /// </summary>
         string PowerGridInstanceID { get; set; }
         PowerVisualization PowerViz { get; }
     }
@@ -146,9 +152,7 @@ namespace RedHomestead.Electricity
 
         public static void RefreshVisualization(this IPowerSupply s)
         {
-            //if (s is IVariablePowerSupply)
-            //{
-            //}
+            //when faulted, have the mask show 0 units
             if (s.FaultedPercentage > 0f)
             {
                 s.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * 10f;
@@ -320,7 +324,7 @@ namespace RedHomestead.Electricity
 
             grids.Add(newPG.PowerGridInstanceID, newPG);
         }
-
+        
         private void BuildPowerGridVisitPowerNodes(IPowerable parentNode, PowerGrid parentGrid, Dictionary<IPowerable, bool> visited)
         {
             parentGrid.Add(parentNode);
@@ -394,6 +398,10 @@ namespace RedHomestead.Electricity
         public Mesh[] ActiveMeshes;
     }
 
+    /// <summary>
+    /// A snapshot of a power grid's data, as calculated by the sums of the producers/consumers/batteries
+    /// Includes formatted strings for display
+    /// </summary>
     public struct PowerGridTickData
     {
         public float RatedCapacityWatts;
@@ -437,6 +445,13 @@ namespace RedHomestead.Electricity
         public float SurplusWatts;
         public float DeficitWatts;
 
+        /// <summary>
+        /// Allows snapshots of individual power grids to be composed into one global structure
+        /// This allows us to display the global power statistics
+        /// </summary>
+        /// <param name="alpha"></param>
+        /// <param name="beta"></param>
+        /// <returns></returns>
         public static PowerGridTickData operator +(PowerGridTickData alpha, PowerGridTickData beta)
         {
             return new PowerGridTickData()
@@ -668,6 +683,11 @@ namespace RedHomestead.Electricity
         }
 
         private void SetPowerableParentToMe(IPowerable p) { p.PowerGridInstanceID = this.PowerGridInstanceID; }
+
+        /// <summary>
+        /// Take all the children of the other powergrid
+        /// </summary>
+        /// <param name="other"></param>
         internal void Usurp(PowerGrid other)
         {
             this.Data += other.Data;

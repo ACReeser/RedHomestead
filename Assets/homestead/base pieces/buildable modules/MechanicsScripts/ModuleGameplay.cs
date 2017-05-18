@@ -54,7 +54,6 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuilda
     public abstract string ModuleInstanceID { get; }
 
     #region power members
-    public float WattsAvailablePerTick { get; set; }
     public abstract float WattsConsumed { get; }
     public string PowerGridInstanceID { get; set; }
     public abstract string PowerableInstanceID { get; }

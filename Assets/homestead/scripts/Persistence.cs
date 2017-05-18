@@ -199,6 +199,7 @@ namespace RedHomestead.Persistence
         public PowerlineData[] PowerData;
         public IceDrillData[] IceDrillData;
         public PowerCubeData[] PowerCubeData;
+        public MobileSolarPanelData[] MobileSolarPanelData;
         public DepositData[] Deposits;
         ////pipe data
 
@@ -324,6 +325,11 @@ namespace RedHomestead.Persistence
             _DestroyCurrent<PowerCube>();
             _InstantiateMany<PowerCube, PowerCubeData>(PowerCubeData, ModuleBridge.Instance.PowerCubePrefab, (PowerCube cube, PowerCubeData data) => {
                 powerableMap.Add(data.PowerableInstanceID, cube);
+            });
+
+            _DestroyCurrent<MobileSolarPanel>();
+            _InstantiateMany<MobileSolarPanel, MobileSolarPanelData>(MobileSolarPanelData, ModuleBridge.Instance.MobileSolarPanelPrefab, (MobileSolarPanel panel, MobileSolarPanelData data) => {
+                powerableMap.Add(data.PowerableInstanceID, panel);
             });
         }
 

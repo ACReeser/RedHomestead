@@ -452,4 +452,9 @@ public static class Prompts {
         Description = "Retract",
         Key = "E"
     };
+    internal static PromptInfo CorridorDeconstructHint = new PromptInfo()
+    {
+        Description = "Destroy Hallway",
+        Key = "E"
+    };
 }

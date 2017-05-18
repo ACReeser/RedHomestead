@@ -1160,6 +1160,22 @@ public class PlayerInput : MonoBehaviour {
                     newPrompt.Progress = deposit.Data.Extractable.UtilizationPercentage;
                     newPrompt.Description = deposit.Data.ExtractableHint;
                 }
+                else if (hitInfo.collider.CompareTag("corridor") && SurvivalTimer.Instance.UsingPackResources)
+                {
+                    Powerline powerline = hitInfo.collider.transform.parent.GetComponent<Powerline>();
+
+                    if (powerline != null)
+                    {
+                        if (doInteract)
+                        {
+                            powerline.Remove();
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.CorridorDeconstructHint;
+                        }
+                    }
+                }
             }
             else if (doInteract)
             {
