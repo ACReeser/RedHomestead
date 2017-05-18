@@ -1354,14 +1354,20 @@ public class PlayerInput : MonoBehaviour {
         {
             if (Input.GetKeyUp(KeyCode.G))
             {
-                FloorplanBridge.Instance.ToggleModulePanel(true);
+                ToggleModuleBlueprintMode(true);
             }
             else if (Input.GetKeyDown(KeyCode.Tab))
             {
-                FloorplanBridge.Instance.ToggleModulePanel(false);
+                ToggleModuleBlueprintMode(false);
                 ModulePlan.Reset();
             }
         }        
+    }
+
+    private void ToggleModuleBlueprintMode(bool showBlueprint)
+    {
+        FPSController.FreezeLook = showBlueprint;
+        FloorplanBridge.Instance.ToggleModulePanel(showBlueprint);
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)
@@ -1573,7 +1579,7 @@ public class PlayerInput : MonoBehaviour {
             case Equipment.Blueprints:
                 AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
                 AlternativeCamera.enabled = true;
-                FloorplanBridge.Instance.ToggleModulePanel(true);
+                ToggleModuleBlueprintMode(true);
                 break;
             case Equipment.Screwdriver:
                 this.CommonInteriorEquipmentState();
