@@ -22,6 +22,7 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
     public FailureAnchors failureEffectAnchors;
     public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
     public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
+    public bool CanMalfunction { get { return IsOn; } }
 
     private const float DrillDownLocalY = -.709f;
 

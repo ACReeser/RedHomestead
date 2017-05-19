@@ -59,6 +59,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuilda
     public abstract string PowerableInstanceID { get; }
     public PowerVisualization powerViz;
     public PowerVisualization PowerViz { get { return powerViz; } }
+    public virtual bool CanMalfunction { get { return true; } }
     #endregion
 
     #region repairable members

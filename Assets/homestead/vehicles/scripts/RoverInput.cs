@@ -19,6 +19,7 @@ namespace RedHomestead.Rovers
         public RoverData Data { get { return data; } set { data = value; } }
         internal bool AcceptInput;
         internal bool CanDrive { get { return !this.HasPowerGrid(); } }
+        public bool CanMalfunction { get { return true; } }
 
         public FailureAnchors failureEffectAnchors;
         public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }

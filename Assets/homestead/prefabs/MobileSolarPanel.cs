@@ -44,6 +44,14 @@ public class MobileSolarPanel : MovableSnappable, IVariablePowerSupply, IDataCon
 
     public PowerVisualization PowerViz { get { return _powerViz; } }
 
+    public bool CanMalfunction
+    {
+        get
+        {
+            return PanelsDeployed;
+        }
+    }
+
     public override string GetText()
     {
         return "Solar Panel";

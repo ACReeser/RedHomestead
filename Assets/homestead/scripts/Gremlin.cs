@@ -13,6 +13,7 @@ public struct FailureAnchors
 
 public interface IRepairable
 {
+    bool CanMalfunction { get; }
     float FaultedPercentage { get; set; }
     FailureAnchors FailureEffectAnchors { get; }
     Transform transform { get; }
@@ -158,16 +159,36 @@ public class Gremlin : MonoBehaviour {
             hasGremlinedRepairable = gremlindMap.Keys.Count > 0;
         }
 
-        StartCoroutine(Lurk());
+        BeginLurk();
     }
 
     private void CauseRandomFailure()
     {
-        IRepairable victim = registeredRepairables[UnityEngine.Random.Range(0, registeredRepairables.Count)];
+        int tries = 0;
+        IRepairable victim = null;
+        while (victim == null)
+        {
+            victim = registeredRepairables[UnityEngine.Random.Range(0, registeredRepairables.Count)];
 
-        FailureType fail = GetFailType(victim);
+            if (!victim.CanMalfunction)
+                victim = null;
+            else if (tries > 10) //include a failsafe for 10 non-victims in a row
+                break;
 
-        CauseFailure(victim, fail);
+            tries++;
+        }
+
+        if (victim == null)
+        {
+            //give up
+            BeginLurk();
+        }
+        else
+        {
+            FailureType fail = GetFailType(victim);
+
+            CauseFailure(victim, fail);
+        }
     }
 
     private void CauseFailure(IRepairable victim, FailureType fail)

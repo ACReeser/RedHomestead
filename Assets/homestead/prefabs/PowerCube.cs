@@ -24,6 +24,7 @@ public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBatte
 
     public PowerVisualization _powerViz;
     public PowerVisualization PowerViz { get { return _powerViz; } }
+    public bool CanMalfunction { get { return !String.IsNullOrEmpty(PowerGridInstanceID); } }
 
     public FailureAnchors failureEffectAnchors;
     public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
