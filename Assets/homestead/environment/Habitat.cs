@@ -31,7 +31,7 @@ public class HabitatExtraData : RedHomesteadData
     }
 }
 
-public class Habitat : Converter, IPowerConsumer, IBattery
+public class Habitat : Converter, IPowerConsumer, IBattery, IHabitatModule
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
@@ -58,6 +58,21 @@ public class Habitat : Converter, IPowerConsumer, IBattery
             return _CurrentPowerRequirements;
         }
     }
+
+    public Habitat LinkedHabitat
+    {
+        get
+        {
+            return this;
+        }
+
+        set
+        {
+            //noop;
+        }
+    }
+
+    public List<IHabitatModule> AdjacentModules { get; set; }
 
     protected override void OnStart()
     {

@@ -291,7 +291,8 @@ namespace RedHomestead.Persistence
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
-                r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID]);
+#warning need to find sockets
+                r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID], null, null);
             }
         }
 

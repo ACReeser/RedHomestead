@@ -152,6 +152,13 @@ public abstract class ResourcelessGameplay : ModuleGameplay, IDataContainer<Reso
     }
 }
 
+public abstract class ResourcelessHabitatGameplay: ResourcelessGameplay, IHabitatModule
+{
+    [HideInInspector]
+    public List<IHabitatModule> AdjacentModules { get; set; }
+    [HideInInspector]
+    public Habitat LinkedHabitat { get; set; }
+}
 
 public interface ISink
 {

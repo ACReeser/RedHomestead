@@ -1413,7 +1413,10 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedBulkhead, value => selectedBulkhead = value, PlaceTube, Prompts.BulkheadBridgePrompts);
+        return OnLinkable(doInteract, hitInfo, selectedBulkhead, value => {
+            selectedBulkhead = value;
+
+        }, PlaceTube, Prompts.BulkheadBridgePrompts);
     }
 
     private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
@@ -1687,11 +1690,9 @@ public class PlayerInput : MonoBehaviour {
 
         Transform anchorT1 = selectedBulkhead.transform.parent;
         Mesh anchorM1 = anchorT1.GetComponent<MeshFilter>().mesh;
-        selectedBulkhead.gameObject.SetActive(false);
 
         Transform anchorT2 = toBulkhead.transform.parent;
         Mesh anchorM2 = anchorT2.GetComponent<MeshFilter>().mesh;
-        toBulkhead.gameObject.SetActive(false);
 
         //modify the ends of the mesh
         Construction.SetCorridorVertices(newCorridor, newCorridorMesh, anchorT1, anchorM1, anchorT2, anchorM2);
@@ -1701,25 +1702,11 @@ public class PlayerInput : MonoBehaviour {
         //and tell the mesh collider to use this new mesh as well
         newCorridor.GetComponent<MeshCollider>().sharedMesh = newCorridorMesh;
 
-        Habitat hab1 = anchorT1.root.GetComponent<Habitat>();
-        Habitat hab2 = anchorT2.root.GetComponent<Habitat>();
-
         IHabitatModule habMod1 = anchorT1.root.GetComponent<IHabitatModule>();
         IHabitatModule habMod2 = anchorT2.root.GetComponent<IHabitatModule>();
 
-        if (hab1 != null && habMod2 != null)
-        {
-            habMod2.SetHabitat(hab1);
-        }
-        else if (hab2 != null && habMod1 != null)
-        {
-            habMod1.SetHabitat(hab2);
-        }
-        else if (habMod1 != null && habMod2 != null)
-        {
-            habMod1.AddAdjacent(habMod2);
-            habMod2.AddAdjacent(habMod1);
-        }
+        Powerline powerline = newCorridorParent.GetComponent<Powerline>();
+        powerline.AssignConnections(habMod1, habMod2, selectedBulkhead.transform.parent, toBulkhead.transform.parent);
     }
 
     private void PlaceGasPipe(Collider collider)
@@ -1744,15 +1731,11 @@ public class PlayerInput : MonoBehaviour {
     private void PlacePowerPlug(Collider collider)
     {
         Transform power = PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
-
-        //turn on "plug" cylinders
-        collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-        selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-
+        
         IPowerable g1 = selectedPowerSocket.transform.root.GetComponent<IPowerable>(), g2 = collider.transform.root.GetComponent<IPowerable>();
         if (g1 != null && g2 != null && g1 != g2)
         {
-            power.GetComponent<Powerline>().AssignConnections(g1, g2);
+            power.GetComponent<Powerline>().AssignConnections(g1, g2, selectedPowerSocket.transform, collider.transform);
         }
 
         CurrentMode = InputMode.Normal;
