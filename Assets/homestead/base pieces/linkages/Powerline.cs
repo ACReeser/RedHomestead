@@ -21,7 +21,6 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
 
         FlowManager.Instance.PowerGrids.Attach(this, from, to);
 
-
         IHabitatModule fromH = from as IHabitatModule;
         IHabitatModule toH = to as IHabitatModule;
 
@@ -35,20 +34,25 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
         {
             Ends[0] = fromT.GetChild(0);
             Ends[1] = toT.GetChild(0);
-            SetEnds(this.IsCorridor ? false : true);
+            SetEnds(true);
         }
     }
 
-    private void SetEnds(bool on)
+    private void SetEnds(bool connected)
     {
         if (Ends[0] == null)
         {
-            print("Can't set active state of powerline end that is null!");
+            UnityEngine.Debug.LogWarning("Can't set active state of powerline end that is null!");
         }
-        else
+        else if (this.IsCorridor)
         {
-            Ends[0].gameObject.SetActive(on);
-            Ends[1].gameObject.SetActive(on);
+            Ends[0].gameObject.SetActive(!connected);
+            Ends[1].gameObject.SetActive(!connected);
+        }
+        else //regular powerline
+        {
+            Ends[0].GetComponent<MeshRenderer>().enabled = connected;
+            Ends[1].GetComponent<MeshRenderer>().enabled = connected;
         }
     }
 
@@ -61,12 +65,8 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
         }
         else
         {
-            SetEnds(this.IsCorridor ? true : false);
-
-            if (IsCorridor)
-            {
-
-            }
+            SetEnds(false);
+            
             FlowManager.Instance.PowerGrids.Detach(this, Data.From, Data.To);
 
             GameObject.Destroy(gameObject);
