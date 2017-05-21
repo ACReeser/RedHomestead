@@ -6,6 +6,7 @@ using RedHomestead.Simulation;
 using System.Collections.Generic;
 using System.Linq;
 using RedHomestead.Persistence;
+using RedHomestead.Crafting;
 
 namespace RedHomestead.Economy{
     [Flags]
@@ -16,15 +17,31 @@ namespace RedHomestead.Economy{
     public struct StartingSupplyData
     {
         public string Name;
-        public float PerUnitCost;
+        public int PerUnitCost;
         public float Quantity;
         public Matter Matter;
 
-        public StartingSupplyData(string name, float cost, Matter matter, float quantity = 1f)
+        public StartingSupplyData(string name, int cost, Matter matter, float quantity = 1f)
         {
             this.Name = name;
             this.PerUnitCost = cost;
             this.Matter = matter;
+            this.Quantity = quantity;
+        }
+    }
+
+    public struct StartingCraftableData
+    {
+        public string Name;
+        public float PerUnitCost;
+        public float Quantity;
+        public Craftable Craftable;
+
+        public StartingCraftableData(string name, float cost, Craftable matter, float quantity = 1f)
+        {
+            this.Name = name;
+            this.PerUnitCost = cost;
+            this.Craftable = matter;
             this.Quantity = quantity;
         }
     }
@@ -124,7 +141,17 @@ namespace RedHomestead.Economy{
             new StartingSupplyData("1 Week Food", 50000, Matter.RationMeal),
             new StartingSupplyData("1 Week Water", 100000, Matter.Water),
             new StartingSupplyData("Oxygen", 100000, Matter.Oxygen),
-            new StartingSupplyData("Battery Pack", 100000, Matter.Unspecified),
+            new StartingSupplyData("Solar Panels", 100000, Matter.SiliconWafers),
+            new StartingSupplyData("Canvas", 100000, Matter.Canvas),
+            new StartingSupplyData("Steel", 200000, Matter.Steel),
+            new StartingSupplyData("Polyethylene", 100000, Matter.Polyethylene),
+            new StartingSupplyData("Glass", 200000, Matter.Glass),
+        };
+
+        public static StartingCraftableData[] StartingCraftables = new StartingCraftableData[]
+        {
+            new StartingCraftableData("Battery Pack", 100000, Craftable.PowerCube),
+            new StartingCraftableData("Ice Drill", 100000, Craftable.IceDrill),
         };
     }
 

@@ -10,6 +10,7 @@ using RedHomestead.Geography;
 using RedHomestead.Perks;
 using RedHomestead.Economy;
 using RedHomestead.GameplayOptions;
+using RedHomestead.Simulation;
 
 [Serializable]
 public abstract class MainMenuView
@@ -88,7 +89,8 @@ public class ScoutView: MainMenuView
 public class FinanceAndSupplyView: MainMenuView
 {
     public Text StartingFunds, AllocatedSupplyFunds, RemainingFunds;
-
+    public RectTransform SuppliesParent;
+    
     public void RefreshFunds(NewGameChoices choices)
     {
         StartingFunds.text = String.Format("Starting Funds: ${0:#,##0}k", choices.StartingFunds / 1000);
@@ -101,6 +103,40 @@ public class FinanceAndSupplyView: MainMenuView
 
     protected override void _BeforeTransitionAway()
     {
+    }
+
+    internal void FillSupplies()
+    {
+        int i = 0;
+        foreach (RectTransform entry in SuppliesParent)
+        {
+            if (i < EconomyExtensions.StartingSupplies.Length)
+            {
+                StartingSupplyData data = EconomyExtensions.StartingSupplies[i];
+                entry.GetChild(0).GetComponent<Text>().text = data.Name;
+                entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.PerUnitCost / 1000);
+                entry.GetChild(2).GetComponent<Image>().sprite = data.Matter.AtlasSprite();
+            }
+            else
+            {
+                entry.gameObject.SetActive(false);
+            }
+
+            i++;
+        }
+    }
+
+    internal void UpdateSupplyChoices(NewGameChoices choices)
+    {
+        int i = 0;
+        foreach (RectTransform entry in SuppliesParent)
+        {
+            if (entry.gameObject.activeInHierarchy)
+            {
+                choices.BoughtMatter[i] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
+                i++;
+            }
+        }
     }
 }
 
@@ -191,10 +227,12 @@ public class MainMenu : MonoBehaviour {
 
         ScoutView.ToggleScoutMode(false);
 
+        NewGameChoices.Init();
         NewGameChoices.ChosenFinancing = BackerFinancing.Government;
         NewGameChoices.ChosenPlayerTraining = Perk.Athlete;
         NewGameChoices.RecalculateFunds();
         FinanceAndSupplyView.RefreshFunds(NewGameChoices);
+        FinanceAndSupplyView.FillSupplies();
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -427,6 +465,13 @@ public class MainMenu : MonoBehaviour {
         this.activeRadioTransform[radioGroup] = thisT;
 
         thisT.GetChild(0).gameObject.SetActive(true);
+    }
+
+    public void OnSupplyChange()
+    {
+        this.FinanceAndSupplyView.UpdateSupplyChoices(NewGameChoices);
+        NewGameChoices.RecalculateFunds();
+        this.FinanceAndSupplyView.RefreshFunds(NewGameChoices);
     }
 
     public void LoadLastGame()

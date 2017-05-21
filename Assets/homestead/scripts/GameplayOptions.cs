@@ -15,11 +15,27 @@ namespace RedHomestead.GameplayOptions
         public BaseLocation ChosenLocation;
         public int StartingFunds, AllocatedFunds, RemainingFunds;
         public bool BuyRover;
+        public int[] BoughtMatter;
+        public int[] BoughtCraftables;
+
+        public void Init()
+        {
+            BoughtMatter = new int[EconomyExtensions.StartingSupplies.Length];
+            BoughtCraftables = new int[EconomyExtensions.StartingCraftables.Length];
+        }
 
         public void RecalculateFunds()
         {
             StartingFunds = Mathf.RoundToInt(ChosenFinancing.StartingFunds() * PerkMultipliers.StartingFunds(ChosenPlayerTraining));
             AllocatedFunds = EconomyExtensions.HabitatCost + EconomyExtensions.RoverCost;
+
+            int i = 0;
+            foreach(int number in BoughtMatter)
+            {
+                AllocatedFunds += EconomyExtensions.StartingSupplies[i].PerUnitCost * number;
+                i++;
+            }
+
             RemainingFunds = StartingFunds - AllocatedFunds;
         }
 

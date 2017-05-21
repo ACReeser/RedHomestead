@@ -166,6 +166,19 @@ namespace RedHomestead.Simulation
             }
         }
 
+        public static Sprite AtlasSprite(this Matter r)
+        {
+            int i = (int)r;
+            if (i < 0)
+            {
+                return IconAtlas.Instance.CompoundIcons[i + 6]; //6 "compounds" are negative
+            }
+            else
+            {
+                return IconAtlas.Instance.ResourceIcons[i - 1]; // 1 unspecified
+            }
+        }
+
         public static bool IsStoredInHabitat(this Matter r) {
             switch (r)
             {
