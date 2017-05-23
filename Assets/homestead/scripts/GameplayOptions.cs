@@ -64,7 +64,10 @@ namespace RedHomestead.GameplayOptions
 
         internal void AddMinimumSupplies()
         {
-            AddSuppliesFromModule(Module.Airlock);
+            if (BoughtMatter != null)
+            {
+                AddSuppliesFromModule(Module.Airlock);
+            }
         }
 
         private void AddSuppliesFromModule(Module module)

@@ -215,27 +215,41 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
             for (int vol = 0; vol < kvp.Value; vol++)
             {
                 Vector3 localPos = new Vector3(
-                    (i % 4) > 1? .8f : -.8f,
+                    (i % 4) > 1 ? .8f : -.8f,
                     i > 3 ? 1f : -1f,
                     (i % 2) == 0 ? .8f : -.8f
                     );
 
-                Transform newT = GameObject.Instantiate<Transform>(EconomyManager.Instance.GetResourceCratePrefab(kvp.Key));
-                newT.SetParent(payloadRoot);
-                newT.localPosition = localPos;
-                newT.localRotation = Quaternion.identity;
-
-                var rc = newT.GetComponent<ResourceComponent>();
-                rc.Data.ResourceType = kvp.Key;
-                rc.Data.Quantity = kvp.Value;
-
-                newT.GetComponent<Collider>().enabled = false;
-                var rigibody = newT.GetComponent<Rigidbody>();
-                rigibody.isKinematic = true;
-                rigibody.useGravity = false;
+                CreateCratelike(kvp.Key, kvp.Value, localPos, payloadRoot);
 
                 i++;
             }
+        }
+    }
+
+    public static void CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null)
+    {
+        Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
+
+        var rc = newT.GetComponent<ResourceComponent>();
+        rc.Data.ResourceType = matter;
+        rc.Data.Quantity = amount;
+
+        if (parent == null)
+        {
+            newT.position = position;
+            newT.rotation = Quaternion.identity;
+        }
+        else
+        {
+            newT.SetParent(parent);
+            newT.localPosition = position;
+            newT.localRotation = Quaternion.identity;
+        
+            newT.GetComponent<Collider>().enabled = false;
+            var rigibody = newT.GetComponent<Rigidbody>();
+            rigibody.isKinematic = true;
+            rigibody.useGravity = false;
         }
     }
 }

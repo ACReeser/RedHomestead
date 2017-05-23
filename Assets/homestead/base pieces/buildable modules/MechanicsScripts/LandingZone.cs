@@ -30,6 +30,44 @@ public class LandingZone : MonoBehaviour, IDeliveryScript {
 
     public void Deliver(Dictionary<Matter, int> supplies, Dictionary<Craftable, int> craftables)
     {
+        int totalN = 0;
+        foreach(KeyValuePair<Matter, int> supply in supplies)
+        {
+            int amountToSpawn = supply.Value;
+            while (amountToSpawn > 0)
+            {
+                int height = totalN % 2 == 0 ? 0 : 1;
+                int n = height == 0 ? totalN / 2 : (totalN - 1) / 2;
+                Vector2 spiralPos = spiral(n);
+                Vector3 position = this.transform.position + (new Vector3(spiralPos.x, height * 1.15f, spiralPos.y) * 1.7f);
+                BounceLander.CreateCratelike(supply.Key, (float)1, position);
 
+                totalN++;
+                amountToSpawn--;
+            }
+        }
+    }
+
+    private Vector2 spiral(int n)
+    {
+        var k = Mathf.CeilToInt((Mathf.Sqrt(n) - 1) / 2);
+        var t = 2 * k + 1;
+        var m = Mathf.Pow(t, 2);
+        t = t - 1;
+
+        if (n >= m - t)
+            return new Vector2(k-(m-n),-k);
+        else 
+            m = m - t;
+
+        if (n >= m - t)
+            return new Vector2(-k, -k + (m - n));
+        else
+            m = m - t;
+
+        if (n >= m - t)
+            return new Vector2(-k + (m - n), k);
+        else
+            return new Vector2(k,k - (m - n - t));
     }
 }
