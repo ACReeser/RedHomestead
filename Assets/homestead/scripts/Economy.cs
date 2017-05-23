@@ -136,22 +136,22 @@ namespace RedHomestead.Economy{
             }
         }
 
-        public static StartingSupplyData[] StartingSupplies = new StartingSupplyData[]
+        public static Dictionary<Matter, StartingSupplyData> StartingSupplies = new Dictionary<Matter, StartingSupplyData>()
         {
-            new StartingSupplyData("1 Week Food", 50000, Matter.RationMeal),
-            new StartingSupplyData("1 Week Water", 100000, Matter.Water),
-            new StartingSupplyData("Oxygen", 100000, Matter.Oxygen),
-            new StartingSupplyData("Solar Panels", 100000, Matter.SiliconWafers),
-            new StartingSupplyData("Canvas", 100000, Matter.Canvas),
-            new StartingSupplyData("Steel", 200000, Matter.Steel),
-            new StartingSupplyData("Polyethylene", 100000, Matter.Polyethylene),
-            new StartingSupplyData("Glass", 200000, Matter.Glass),
+            { Matter.RationMeal, new StartingSupplyData("1 Week Food", 50000, Matter.RationMeal) },
+            { Matter.Water, new StartingSupplyData("1 Week Water", 100000, Matter.Water) },
+            { Matter.Oxygen, new StartingSupplyData("Oxygen", 100000, Matter.Oxygen) },
+            { Matter.SiliconWafers, new StartingSupplyData("Solar Panels", 100000, Matter.SiliconWafers) },
+            { Matter.Canvas, new StartingSupplyData("Canvas", 100000, Matter.Canvas) },
+            { Matter.Steel, new StartingSupplyData("Steel", 200000, Matter.Steel) },
+            { Matter.Polyethylene, new StartingSupplyData("Polyethylene", 100000, Matter.Polyethylene) },
+            { Matter.Glass, new StartingSupplyData("Glass", 200000, Matter.Glass) },
         };
 
-        public static StartingCraftableData[] StartingCraftables = new StartingCraftableData[]
+        public static Dictionary<Craftable, StartingCraftableData> StartingCraftables = new Dictionary<Craftable, StartingCraftableData>()
         {
-            new StartingCraftableData("Battery Pack", 100000, Craftable.PowerCube),
-            new StartingCraftableData("Ice Drill", 100000, Craftable.IceDrill),
+            { Craftable.PowerCube, new StartingCraftableData("Battery Pack", 100000, Craftable.PowerCube) },
+            { Craftable.IceDrill, new StartingCraftableData("Ice Drill", 100000, Craftable.IceDrill) },
         };
     }
 

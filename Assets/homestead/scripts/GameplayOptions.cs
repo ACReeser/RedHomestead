@@ -1,9 +1,13 @@
-﻿using RedHomestead.Economy;
+﻿using RedHomestead.Crafting;
+using RedHomestead.Economy;
 using RedHomestead.Geography;
 using RedHomestead.Perks;
+using RedHomestead.Simulation;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using RedHomestead.Buildings;
 
 namespace RedHomestead.GameplayOptions
 {
@@ -15,13 +19,13 @@ namespace RedHomestead.GameplayOptions
         public BaseLocation ChosenLocation;
         public int StartingFunds, AllocatedFunds, RemainingFunds;
         public bool BuyRover;
-        public int[] BoughtMatter;
-        public int[] BoughtCraftables;
+        public Dictionary<Matter, int> BoughtMatter;
+        public Dictionary<Craftable, int> BoughtCraftables;
 
         public void Init()
         {
-            BoughtMatter = new int[EconomyExtensions.StartingSupplies.Length];
-            BoughtCraftables = new int[EconomyExtensions.StartingCraftables.Length];
+            BoughtMatter = new Dictionary<Matter, int>();
+            BoughtCraftables = new Dictionary<Craftable, int>();
         }
 
         public void RecalculateFunds()
@@ -30,9 +34,9 @@ namespace RedHomestead.GameplayOptions
             AllocatedFunds = EconomyExtensions.HabitatCost + EconomyExtensions.RoverCost;
 
             int i = 0;
-            foreach(int number in BoughtMatter)
+            foreach(KeyValuePair<Matter, int> kvp in BoughtMatter)
             {
-                AllocatedFunds += EconomyExtensions.StartingSupplies[i].PerUnitCost * number;
+                AllocatedFunds += EconomyExtensions.StartingSupplies[kvp.Key].PerUnitCost * kvp.Value;
                 i++;
             }
 
@@ -56,6 +60,36 @@ namespace RedHomestead.GameplayOptions
             }
 
             return result;
+        }
+
+        internal void AddMinimumSupplies()
+        {
+            AddSuppliesFromModule(Module.Airlock);
+        }
+
+        private void AddSuppliesFromModule(Module module)
+        {
+            foreach(ResourceEntry entry in Construction.BuildData[module].Requirements)
+            {
+                AddOrIncrement(BoughtMatter, entry.Type, Mathf.CeilToInt(entry.Count));
+            }
+        }
+
+        private void AddOrIncrement<K>(Dictionary<K, int> dictionary, K key, int addition)
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                dictionary[key] += addition;
+            }
+            else
+            {
+                dictionary[key] = addition;
+            }
+        }
+
+        internal void AddBackerSupplies()
+        {
+            
         }
     }
 }

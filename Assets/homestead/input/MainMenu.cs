@@ -90,6 +90,7 @@ public class FinanceAndSupplyView: MainMenuView
 {
     public Text StartingFunds, AllocatedSupplyFunds, RemainingFunds;
     public RectTransform SuppliesParent;
+    public Button LaunchButton;
     
     public void RefreshFunds(NewGameChoices choices)
     {
@@ -108,35 +109,36 @@ public class FinanceAndSupplyView: MainMenuView
     internal void FillSupplies()
     {
         int i = 0;
-        foreach (RectTransform entry in SuppliesParent)
+        foreach (KeyValuePair<Matter, StartingSupplyData> data in EconomyExtensions.StartingSupplies)
         {
-            if (i < EconomyExtensions.StartingSupplies.Length)
+            if (i < SuppliesParent.childCount)
             {
-                StartingSupplyData data = EconomyExtensions.StartingSupplies[i];
-                entry.GetChild(0).GetComponent<Text>().text = data.Name;
-                entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.PerUnitCost / 1000);
-                entry.GetChild(2).GetComponent<Image>().sprite = data.Matter.AtlasSprite();
-            }
-            else
-            {
-                entry.gameObject.SetActive(false);
+                Transform entry = SuppliesParent.GetChild(i);
+                entry.GetChild(0).GetComponent<Text>().text = data.Value.Name;
+                entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.Value.PerUnitCost / 1000);
+                entry.GetChild(2).GetComponent<Image>().sprite = data.Key.AtlasSprite();
+                entry.name = ((int)data.Key).ToString();
             }
 
             i++;
+        }
+        for (int j = i; j < SuppliesParent.childCount; j++)
+        {
+            SuppliesParent.GetChild(j).gameObject.SetActive(false);
         }
     }
 
     internal void UpdateSupplyChoices(NewGameChoices choices)
     {
-        int i = 0;
         foreach (RectTransform entry in SuppliesParent)
         {
             if (entry.gameObject.activeInHierarchy)
             {
-                choices.BoughtMatter[i] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
-                i++;
+                choices.BoughtMatter[(Matter)int.Parse(entry.name)] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
             }
         }
+
+        LaunchButton.interactable = choices.RemainingFunds >= 0f;
     }
 }
 

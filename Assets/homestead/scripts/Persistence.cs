@@ -202,6 +202,8 @@ namespace RedHomestead.Persistence
         public MobileSolarPanelData[] MobileSolarPanelData;
         public DepositData[] Deposits;
         ////pipe data
+        internal Dictionary<Simulation.Matter, int> InitialMatterPurchase;
+        internal Dictionary<Crafting.Craftable, int> InitialCraftablePurchase;
 
         public void OnAfterDeserialize()
         {
@@ -516,10 +518,11 @@ namespace RedHomestead.Persistence
                 return null;
             }
         }
-
-        //todo: pass in perk/equipment selections from screen
+        
         public static void StartNewGame(NewGameChoices choices)
         {
+            choices.AddMinimumSupplies();
+            choices.AddBackerSupplies();
             UnityEngine.Debug.Log("Starting new game");
             Game.Current = new Game()
             {
@@ -528,6 +531,8 @@ namespace RedHomestead.Persistence
                 {
                     new Base()
                     {
+                        InitialMatterPurchase = choices.BoughtMatter,
+                        InitialCraftablePurchase = choices.BoughtCraftables,
                         Crates = new CrateData[] { },
                         Habitats = new HabitatExtraData[] { },
                         ConstructionZones = new ConstructionData[] { },

@@ -3,6 +3,7 @@ using System.Collections;
 using RedHomestead.Economy;
 using System;
 using RedHomestead.Simulation;
+using RedHomestead.Persistence;
 
 public class EconomyManager : MonoBehaviour
 {
@@ -48,6 +49,13 @@ public class EconomyManager : MonoBehaviour
     {
         SunOrbit.Instance.OnHourChange += OnHourChange;
         SunOrbit.Instance.OnSolChange += OnSolChange;
+
+        if (Base.Current.InitialMatterPurchase != null)
+        {
+            LandingZone.Deliver(Base.Current.InitialMatterPurchase, Base.Current.InitialCraftablePurchase);
+            Base.Current.InitialCraftablePurchase = null;
+            Base.Current.InitialMatterPurchase = null;
+        }
     }
 
     void OnDestroy()
