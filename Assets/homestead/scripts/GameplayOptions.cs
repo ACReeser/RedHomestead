@@ -92,7 +92,26 @@ namespace RedHomestead.GameplayOptions
 
         internal void AddBackerSupplies()
         {
-            
+            if (BoughtMatter != null)
+            {
+                switch (ChosenFinancing)
+                {
+                    default:
+                    case BackerFinancing.Government:
+                        AddOrIncrement(BoughtMatter, Matter.RationMeal, 1);
+                        break;
+                    case BackerFinancing.TechCorp:
+                        AddOrIncrement(BoughtMatter, Matter.SiliconWafers, 8);
+                        break;
+                    case BackerFinancing.IndustryCorp:
+                        AddOrIncrement(BoughtMatter, Matter.Steel, 10);
+                        break;
+                    case BackerFinancing.Benefactor:
+                        AddSuppliesFromModule(Module.SmallGasTank);
+                        AddOrIncrement(BoughtMatter, Matter.Hydrogen, 10);
+                        break;
+                }
+            }
         }
     }
 }
