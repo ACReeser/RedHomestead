@@ -61,5 +61,10 @@ namespace RedHomestead.Crafting
         {
             return IconAtlas.Instance.CraftableIcons[Convert.ToInt32(craft)];
         }
+
+        public static Transform Prefab(this Craftable craft)
+        {
+            return EconomyManager.Instance.CraftablePrefabs[Convert.ToInt32(craft)];
+        }
     }
 }

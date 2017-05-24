@@ -4,6 +4,7 @@ using System;
 using RedHomestead.Economy;
 using RedHomestead.Simulation;
 using System.Collections.Generic;
+using RedHomestead.Crafting;
 
 public class BounceLander : MonoBehaviour, IDeliveryScript
 {
@@ -235,6 +236,18 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         rc.Data.ResourceType = matter;
         rc.Data.Quantity = amount;
 
+        AfterSpawnCratelike(position, parent, newT);
+    }
+
+    public static void CreateCratelike(Craftable craftable, Vector3 position, Transform parent = null)
+    {
+        Transform newT = Instantiate(craftable.Prefab());
+
+        AfterSpawnCratelike(position, parent, newT);
+    }
+
+    private static void AfterSpawnCratelike(Vector3 position, Transform parent, Transform newT)
+    {
         if (parent == null)
         {
             newT.position = position;
@@ -245,7 +258,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
             newT.SetParent(parent);
             newT.localPosition = position;
             newT.localRotation = Quaternion.identity;
-        
+
             newT.GetComponent<Collider>().enabled = false;
             var rigibody = newT.GetComponent<Rigidbody>();
             rigibody.isKinematic = true;

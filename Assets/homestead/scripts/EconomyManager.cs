@@ -17,6 +17,7 @@ public class EconomyManager : MonoBehaviour
 
 #warning todo: make crate/vessel the same prefab, just swap out meshes
     public Transform ResourceCratePrefab, ResourceVesselPrefab, ResourceTankPrefab;
+    public Transform[] CraftablePrefabs;
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
     public AudioClip IncomingDelivery, BuyerFoundForGoods;
