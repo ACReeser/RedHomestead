@@ -11,6 +11,7 @@ using RedHomestead.Perks;
 using RedHomestead.Economy;
 using RedHomestead.GameplayOptions;
 using RedHomestead.Simulation;
+using RedHomestead.Crafting;
 
 [Serializable]
 public abstract class MainMenuView
@@ -89,7 +90,7 @@ public class ScoutView: MainMenuView
 public class FinanceAndSupplyView: MainMenuView
 {
     public Text StartingFunds, AllocatedSupplyFunds, RemainingFunds;
-    public RectTransform SuppliesParent;
+    public RectTransform SuppliesParent, CraftablesParent;
     public Button LaunchButton;
     
     public void RefreshFunds(NewGameChoices choices)
@@ -106,29 +107,44 @@ public class FinanceAndSupplyView: MainMenuView
     {
     }
 
-    internal void FillSupplies()
+    internal static void Fill<K, V>(RectTransform parent, Dictionary<K, V> dictionary, Action<KeyValuePair<K, V>, Transform> bindFunction)
     {
         int i = 0;
-        foreach (KeyValuePair<Matter, StartingSupplyData> data in EconomyExtensions.StartingSupplies)
+        foreach (KeyValuePair<K, V> data in dictionary)
         {
-            if (i < SuppliesParent.childCount)
+            if (i < parent.childCount)
             {
-                Transform entry = SuppliesParent.GetChild(i);
-                entry.GetChild(0).GetComponent<Text>().text = data.Value.Name;
-                entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.Value.PerUnitCost / 1000);
-                entry.GetChild(2).GetComponent<Image>().sprite = data.Key.AtlasSprite();
-                entry.name = ((int)data.Key).ToString();
+                Transform entry = parent.GetChild(i);
+                bindFunction(data, entry);
             }
 
             i++;
         }
-        for (int j = i; j < SuppliesParent.childCount; j++)
+        for (int j = i; j < parent.childCount; j++)
         {
-            SuppliesParent.GetChild(j).gameObject.SetActive(false);
+            parent.GetChild(j).gameObject.SetActive(false);
         }
     }
 
-    internal void UpdateSupplyChoices(NewGameChoices choices)
+    internal void FillAll()
+    {
+        Fill(SuppliesParent, EconomyExtensions.StartingSupplies, (KeyValuePair<Matter, StartingSupplyData> data, Transform entry) =>
+        {
+            entry.GetChild(0).GetComponent<Text>().text = data.Value.Name;
+            entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.Value.PerUnitCost / 1000);
+            entry.GetChild(2).GetComponent<Image>().sprite = data.Key.AtlasSprite();
+            entry.name = ((int)data.Key).ToString();
+        });
+        Fill(CraftablesParent, EconomyExtensions.StartingCraftables, (KeyValuePair<Craftable, StartingCraftableData> data, Transform entry) =>
+        {
+            entry.GetChild(0).GetComponent<Text>().text = data.Value.Name;
+            entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.Value.PerUnitCost / 1000);
+            entry.GetChild(2).GetComponent<Image>().sprite = data.Key.AtlasSprite();
+            entry.name = ((int)data.Key).ToString();
+        });
+    }
+
+    internal void UpdateChoices(NewGameChoices choices)
     {
         foreach (RectTransform entry in SuppliesParent)
         {
@@ -137,6 +153,16 @@ public class FinanceAndSupplyView: MainMenuView
                 choices.BoughtMatter[(Matter)int.Parse(entry.name)] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
             }
         }
+        foreach (RectTransform entry in CraftablesParent)
+        {
+            if (entry.gameObject.activeInHierarchy)
+            {
+                choices.BoughtCraftables[(Craftable)int.Parse(entry.name)] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
+            }
+        }
+
+        choices.RecalculateFunds();
+        RefreshFunds(choices);
 
         LaunchButton.interactable = choices.RemainingFunds >= 0f;
     }
@@ -234,7 +260,7 @@ public class MainMenu : MonoBehaviour {
         NewGameChoices.ChosenPlayerTraining = Perk.Athlete;
         NewGameChoices.RecalculateFunds();
         FinanceAndSupplyView.RefreshFunds(NewGameChoices);
-        FinanceAndSupplyView.FillSupplies();
+        FinanceAndSupplyView.FillAll();
 
         //if we start here from the escape menu, time is paused
         Time.timeScale = 1f;
@@ -471,9 +497,7 @@ public class MainMenu : MonoBehaviour {
 
     public void OnSupplyChange()
     {
-        this.FinanceAndSupplyView.UpdateSupplyChoices(NewGameChoices);
-        NewGameChoices.RecalculateFunds();
-        this.FinanceAndSupplyView.RefreshFunds(NewGameChoices);
+        this.FinanceAndSupplyView.UpdateChoices(NewGameChoices);
     }
 
     public void LoadLastGame()

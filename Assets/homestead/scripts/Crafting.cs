@@ -1,4 +1,5 @@
 ﻿using RedHomestead.Simulation;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -55,5 +56,10 @@ namespace RedHomestead.Crafting
         {
 
         };
+
+        public static Sprite AtlasSprite(this Craftable craft)
+        {
+            return IconAtlas.Instance.CraftableIcons[Convert.ToInt32(craft)];
+        }
     }
 }

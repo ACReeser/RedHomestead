@@ -33,11 +33,11 @@ namespace RedHomestead.Economy{
     public struct StartingCraftableData
     {
         public string Name;
-        public float PerUnitCost;
+        public int PerUnitCost;
         public float Quantity;
         public Craftable Craftable;
 
-        public StartingCraftableData(string name, float cost, Craftable matter, float quantity = 1f)
+        public StartingCraftableData(string name, int cost, Craftable matter, float quantity = 1f)
         {
             this.Name = name;
             this.PerUnitCost = cost;
@@ -152,6 +152,7 @@ namespace RedHomestead.Economy{
         {
             { Craftable.PowerCube, new StartingCraftableData("Battery Pack", 100000, Craftable.PowerCube) },
             { Craftable.IceDrill, new StartingCraftableData("Ice Drill", 100000, Craftable.IceDrill) },
+            { Craftable.SolarPanel, new StartingCraftableData("Mobile Solar Panel", 100000, Craftable.SolarPanel) },
         };
     }
 

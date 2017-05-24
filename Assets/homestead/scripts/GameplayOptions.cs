@@ -39,6 +39,12 @@ namespace RedHomestead.GameplayOptions
                 AllocatedFunds += EconomyExtensions.StartingSupplies[kvp.Key].PerUnitCost * kvp.Value;
                 i++;
             }
+            i = 0;
+            foreach (KeyValuePair<Craftable, int> kvp in BoughtCraftables)
+            {
+                AllocatedFunds += EconomyExtensions.StartingCraftables[kvp.Key].PerUnitCost * kvp.Value;
+                i++;
+            }
 
             RemainingFunds = StartingFunds - AllocatedFunds;
         }
