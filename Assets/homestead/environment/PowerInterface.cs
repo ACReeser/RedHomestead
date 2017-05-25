@@ -10,6 +10,7 @@ public class PowerInterface : HabitatReadout
     protected override void OnStart()
     {
         FlowManager.Instance.PowerGrids.OnPowerTick += PowerGrids_OnPowerTick;
+        OnPowerChanged();
     }
 
     void OnDestroy()
