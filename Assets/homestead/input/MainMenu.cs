@@ -256,8 +256,6 @@ public class MainMenu : MonoBehaviour {
         ScoutView.ToggleScoutMode(false);
 
         NewGameChoices.Init();
-        NewGameChoices.ChosenFinancing = BackerFinancing.Government;
-        NewGameChoices.ChosenPlayerTraining = Perk.Athlete;
         NewGameChoices.RecalculateFunds();
         FinanceAndSupplyView.RefreshFunds(NewGameChoices);
         FinanceAndSupplyView.FillAll();
@@ -455,6 +453,7 @@ public class MainMenu : MonoBehaviour {
     public void StartQuickstart()
     {
 #warning todo: make sure quickstart at quickstart equipment/training
+        this.NewGameChoices.LoadQuickstart();
         LaunchGame();
     }
 

@@ -26,6 +26,8 @@ namespace RedHomestead.GameplayOptions
         {
             BoughtMatter = new Dictionary<Matter, int>();
             BoughtCraftables = new Dictionary<Craftable, int>();
+            ChosenFinancing = BackerFinancing.Government;
+            ChosenPlayerTraining = Perk.Athlete;
         }
 
         public void RecalculateFunds()
@@ -118,6 +120,19 @@ namespace RedHomestead.GameplayOptions
                         break;
                 }
             }
+        }
+
+        internal void LoadQuickstart()
+        {
+            this.Init();
+            AddOrIncrement(BoughtMatter, Matter.RationMeal, 1);
+            AddOrIncrement(BoughtMatter, Matter.Water, 2);
+            AddOrIncrement(BoughtMatter, Matter.Oxygen, 2);
+            //this.AddSuppliesFromModule(Module.SolarPanelSmall);
+            this.AddSuppliesFromModule(Module.SmallGasTank);
+            this.AddSuppliesFromModule(Module.SabatierReactor);
+
+            this.RecalculateFunds();
         }
     }
 }
