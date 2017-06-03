@@ -57,4 +57,26 @@ public static class HabitatModuleExtensions
     }
 }
 
+public abstract class GenericBaseModule : ResourcelessHabitatGameplay
+{
+    public override float WattsConsumed
+    {
+        get
+        {
+            return 0;
+        }
+    }
+
+    public override void OnAdjacentChanged()
+    {
+    }
+
+    public override void Report()
+    {
+    }
+
+    public override void Tick()
+    {
+    }
+}
 

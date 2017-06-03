@@ -27,7 +27,8 @@ namespace RedHomestead.Buildings
         Workshop,
         HallwayNode,
         Flywheel,
-        Airlock
+        Airlock,
+        EVAStation
     }
 
     /// <summary>
@@ -289,6 +290,16 @@ namespace RedHomestead.Buildings
                     },
                     Description = "A 4-way node for expanding the habitat."
                 }
+            },
+            {
+                Module.EVAStation, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.Steel),
+                    },
+                    Description = "A way to recharge oxygen and power during an EVA."
+                }
             }
         };
         
@@ -307,6 +318,7 @@ namespace RedHomestead.Buildings
                     Module.HallwayNode,
                     Module.Workshop,
                     Module.GreenhouseHall,
+                    Module.EVAStation
                 }
             },
             {

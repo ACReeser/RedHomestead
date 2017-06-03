@@ -421,7 +421,6 @@ public static class Prompts {
     internal static PromptInfo DepositHint = new PromptInfo()
     {
         Description = "Deposit",
-        Key = "",
         UsesProgress  = true
     };
     internal static PromptInfo RepairHint = new PromptInfo()

@@ -46,30 +46,39 @@ namespace RedHomestead.EVA
         public static class Constants
         {
             public const float KilogramsOxygenPerHour = 0.0972f;
+            public const float BasePackOxygenKilograms = KilogramsOxygenPerHour * 4f;
+            public const float UpgradedPackOxygenKilograms = KilogramsOxygenPerHour * 8f;
+
             public const float CaloriesPerDay = 2400;
             public const float LitersOfWaterPerDay = 3f;
             public const float SuitHeatingWattsPerHour = 1000f;
+
+            public const float BasePackPowerWatts = SuitHeatingWattsPerHour * 6f;
+            public const float UpgradedPackPowerWatts = SuitHeatingWattsPerHour * 10f;
         }
 
         public static PackData GetDefaultPackData()
         {
             return new PackData()
             {
-                Oxygen = new PackResourceData(Constants.KilogramsOxygenPerHour * 4f, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.KilogramsOxygenPerHour)),
+                Oxygen = new PackResourceData(Constants.BasePackOxygenKilograms, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.KilogramsOxygenPerHour)),
                 Water = new PackResourceData(Constants.LitersOfWaterPerDay / 2, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.LitersOfWaterPerDay)),
                 Food = new PackResourceData(Constants.CaloriesPerDay, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.CaloriesPerDay)),
-                Power = new PackResourceData(Constants.SuitHeatingWattsPerHour * 6f, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour))
+                Power = new PackResourceData(Constants.BasePackPowerWatts, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour))
             };
         }
 
-        public static void UpgradePower()
-        {
+        public const float OxygenResupplyRatePerSecondKilograms = Constants.BasePackOxygenKilograms / 100f;
+        public const float PowerResupplyRatePerSecondWatts = Constants.BasePackPowerWatts / 100f;
 
+        public static void UpgradePower(PackData data)
+        {
+            data.Power.Maximum = Constants.UpgradedPackPowerWatts;
         }
 
-        public static void UpgradeOxygen()
+        public static void UpgradeOxygen(PackData data)
         {
-
+            data.Oxygen.Maximum = Constants.UpgradedPackOxygenKilograms;
         }
 
         private static float GetConsumptionPerSecond(ConsumptionPeriod period, float amountPerPeriod)

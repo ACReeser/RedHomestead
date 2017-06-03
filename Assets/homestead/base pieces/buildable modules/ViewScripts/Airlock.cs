@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
-public class Airlock : ResourcelessHabitatGameplay {
+public class Airlock : GenericBaseModule {
     public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
     public static Dictionary<Transform, Airlock> DoorToAirlock = new Dictionary<Transform, Airlock>();
     
@@ -17,14 +17,6 @@ public class Airlock : ResourcelessHabitatGameplay {
     public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
     private Animator OuterAnimator, InnerAnimator;
-
-    public override float WattsConsumed
-    {
-        get
-        {
-            return 0f;
-        }
-    }
 
     // Use this for initialization
     void Start () {
@@ -138,12 +130,6 @@ public class Airlock : ResourcelessHabitatGameplay {
             this.LinkedHabitat.ImportResource(comp);
         }
     }
-
-    public override void OnAdjacentChanged() { }
-
-    public override void Tick() { }
-
-    public override void Report() { }
 
     public override Module GetModuleType()
     {

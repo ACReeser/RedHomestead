@@ -20,20 +20,21 @@ public class FlowManager : MonoBehaviour
 
     void Awake() {
         Instance = this;
-        StartCoroutine(PowerGridUpdate());
-	}
+        StartCoroutine(PowerAndIndustryUpdate());
+    }
 
-    private IEnumerator PowerGridUpdate()
+    private IEnumerator PowerAndIndustryUpdate()
     {
         while (isActiveAndEnabled)
         {
             PowerGrids.Tick();
+            IndustryUpdate();
 
             yield return new WaitForSeconds(1f);
         }
     }
 
-    void FixedUpdate() {
+    private void IndustryUpdate() {
 	    foreach(Converter c in Converters)
         {
             if (c.isActiveAndEnabled)

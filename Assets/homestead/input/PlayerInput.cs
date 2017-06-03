@@ -146,7 +146,6 @@ public class PlayerInput : MonoBehaviour {
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
-    private const float EVAChargerPerSecond = 7.5f;
 
     public Camera AlternativeCamera;
     public Light Headlamp1, Headlamp2;
@@ -1023,9 +1022,20 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("evacharger"))
                 {
-                    if (Input.GetKey(KeyCode.E))
+                    if (Input.GetKeyDown(KeyCode.E))
                     {
-                        SurvivalTimer.Instance.Power.Resupply(EVAChargerPerSecond * Time.deltaTime);
+                        CurrentEVAStation = hitInfo.collider.transform.root.GetComponent<EVAStation>();
+
+                        if (CurrentEVAStation != null)
+                            CurrentEVAStation.ToggleUse(true);
+                    }
+                    else if (Input.GetKeyUp(KeyCode.E))
+                    {
+                        if (CurrentEVAStation != null)
+                        {
+                            CurrentEVAStation.ToggleUse(true);
+                            CurrentEVAStation = null;
+                        }
                     }
                     else
                     {
@@ -1205,6 +1215,11 @@ public class PlayerInput : MonoBehaviour {
             {
                 newPrompt = Prompts.LadderOffHint;
             }
+        }
+        else if (CurrentEVAStation != null)
+        {
+            CurrentEVAStation.ToggleUse(false);
+            CurrentEVAStation = null;
         }
 
         if (!doInteract && Input.GetKeyUp(KeyCode.P))
@@ -1913,6 +1928,8 @@ public class PlayerInput : MonoBehaviour {
 
     internal enum WakeSignal { PlayerCancel, ResourceRequired, DayStart }
     internal WakeSignal? wakeyWakeySignal = null;
+    private EVAStation CurrentEVAStation;
+
     private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)
     {
         if (Input.GetKeyUp(KeyCode.Comma))
