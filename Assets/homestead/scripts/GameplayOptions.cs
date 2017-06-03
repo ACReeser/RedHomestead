@@ -75,6 +75,7 @@ namespace RedHomestead.GameplayOptions
             if (BoughtMatter != null)
             {
                 AddSuppliesFromModule(Module.Airlock);
+                AddSuppliesFromModule(Module.EVAStation);
             }
         }
 
