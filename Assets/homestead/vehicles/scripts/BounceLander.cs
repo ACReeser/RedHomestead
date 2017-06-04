@@ -233,8 +233,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
 
         var rc = newT.GetComponent<ResourceComponent>();
-        rc.Data.ResourceType = matter;
-        rc.Data.Quantity = amount;
+        rc.data.Container = new ResourceContainer(matter, amount);
 
         AfterSpawnCratelike(position, parent, newT);
     }

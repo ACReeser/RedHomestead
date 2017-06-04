@@ -4,6 +4,7 @@ using System;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using System.Linq;
+using RedHomestead.Industry;
 
 //acts like a sink
 //but actually converts internal amount to half amounts

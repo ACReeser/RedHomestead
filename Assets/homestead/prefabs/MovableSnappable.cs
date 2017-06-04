@@ -6,6 +6,7 @@ using System;
 
 public interface IMovableSnappable
 {
+    bool IsSnapped { get; }
     ICrateSnapper SnappedTo { get; }
     Transform transform { get; }
     Rigidbody movableRigidbody { get; }
@@ -19,8 +20,21 @@ public interface IMovableSnappable
 public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
     public AudioClip BangSoundClip;
 
+    /// <summary>
+    /// Is this snapped to something?
+    /// </summary>
+    public bool IsSnapped { get; protected set; }
+    /// <summary>
+    /// Thing that cratelike is snapped to. Optional. May be null.
+    /// </summary>
     public ICrateSnapper SnappedTo { get; protected set; }
+    /// <summary>
+    /// Rigidbody of this snappable. Is not null.
+    /// </summary>
     public Rigidbody movableRigidbody { get; protected set; }
+    /// <summary>
+    /// Joint that was created for this snap. Optional. May be null.
+    /// </summary>
     public FixedJoint snapJoint { get; protected set; }
     
     void Awake()
@@ -30,11 +44,17 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
 
     public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null)
     {
-        PlayerInput.Instance.DropObject();
         this.SnappedTo = snapParent;
+        this.SnapCrate(snapParent.transform, snapPosition, jointRigid);
+    }
+
+    public void SnapCrate(Transform parent, Vector3 snapPosition, Rigidbody jointRigid = null)
+    {
+        this.IsSnapped = true;
+        PlayerInput.Instance.DropObject();
         transform.position = snapPosition;
 #warning snap crate rotation does not inherit from trigger forwarder
-        transform.rotation = snapParent.transform.rotation;
+        transform.rotation = parent.rotation;
 
         if (jointRigid != null)
         {
@@ -67,8 +87,11 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
     //called in pick up object
     public void UnsnapCrate()
     {
-        this.SnappedTo.DetachCrate(this);
-        this.SnappedTo = null;
+        if (this.SnappedTo != null)
+        {
+            this.SnappedTo.DetachCrate(this);
+            this.SnappedTo = null;
+        }
 
         if (this.snapJoint != null)
         {

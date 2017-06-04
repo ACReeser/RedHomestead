@@ -11,6 +11,7 @@ using RedHomestead.Geography;
 using RedHomestead.Persistence;
 using RedHomestead.Electricity;
 using RedHomestead.Perks;
+using RedHomestead.Industry;
 
 namespace RedHomestead.Equipment
 {
@@ -1062,31 +1063,31 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("pumpHandle"))
                 {
-                    GasStorage storage = hitInfo.collider.transform.root.GetComponent<GasStorage>();
+                    Pump pump = hitInfo.collider.transform.parent.parent.GetComponent<Pump>();
 
-                    if (storage != null)
+                    if (pump != null)
                     {
                         if (Input.GetMouseButtonUp(0))
                         {
-                            storage.StartPumpingIn();
-                            PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
+                            pump.StartPumpingIn();
+                            PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
                         }
                         else if (Input.GetMouseButtonUp(1))
                         {
-                            storage.StartPumpingOut();
-                            PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
+                            pump.StartPumpingOut();
+                            PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
                         }
                         else
                         {
-                            switch (storage.CurrentPumpStatus)
+                            switch (pump.CurrentPumpStatus)
                             {
-                                case GasStorage.PumpStatus.PumpOff:
+                                case Pump.PumpStatus.PumpOff:
                                     newPrompt = Prompts.TurnPumpOnHint;
                                     break;
-                                case GasStorage.PumpStatus.PumpIn:
+                                case Pump.PumpStatus.PumpIn:
                                     newPrompt = Prompts.StopPumpingInHint;
                                     break;
-                                case GasStorage.PumpStatus.PumpOut:
+                                case Pump.PumpStatus.PumpOut:
                                     newPrompt = Prompts.StopPumpingOutHint;
                                     break;
                             }
@@ -1298,8 +1299,7 @@ public class PlayerInput : MonoBehaviour {
             }
             else
             {
-                from.UnlinkFromModule(to);
-                to.UnlinkFromModule(from);
+                IndustryExtensions.RemoveAdjacentPumpable(from, to);
             }
             //pipe root is on parent object
             GameObject.Destroy(hitInfo.collider.transform.parent.gameObject);
@@ -1633,11 +1633,11 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private float oldMass;
-    internal void PickUpObject(Rigidbody rigid, IMovableSnappable res)
+    internal void PickUpObject(Rigidbody rigid, IMovableSnappable snappable)
     {
-        if (res != null && res.SnappedTo != null)
+        if (snappable != null && snappable.IsSnapped)
         {
-            res.UnsnapCrate();
+            snappable.UnsnapCrate();
         }
 
         carriedObject = rigid;
@@ -1646,7 +1646,7 @@ public class PlayerInput : MonoBehaviour {
         oldMass = rigid.mass;
         carriedObject.mass = 0f;
         carriedObject.transform.SetParent(this.transform);
-        res.OnPickedUp();
+        snappable.OnPickedUp();
     }
 
     internal void DropObject()

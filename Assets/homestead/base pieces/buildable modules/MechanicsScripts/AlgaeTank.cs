@@ -4,6 +4,7 @@ using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using System;
 using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
 public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnapper, ITriggerSubscriber, IPowerConsumer
 {
@@ -50,7 +51,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         get
         {
             return BiomassCollected > LeastBiomassHarvestKilograms &&
-                ((capturedResource == null) || (capturedResource.Data.Quantity < MaximumBiomass));
+                ((capturedResource == null) || (capturedResource.Data.Container.CurrentAmount < MaximumBiomass));
         }
     }
 
@@ -176,15 +177,14 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         if (capturedResource == null)
         {
             capturedResource = GameObject.Instantiate<Transform>(CratePrefab).GetComponent<ResourceComponent>();
-            capturedResource.Data.ResourceType = Matter.Biomass;
-            capturedResource.Data.Quantity = 0;
+            capturedResource.Data.Container = new ResourceContainer(Matter.Biomass, 0f);
             capturedResource.RefreshLabel();
             capturedResource.SnapCrate(this, CrateAnchor.position);
         }
 
-        if (capturedResource.Data.Quantity < MaximumBiomass)
+        if (capturedResource.Data.Container.CurrentAmount < MaximumBiomass)
         {
-            capturedResource.Data.Quantity += BiomassCollected;
+            capturedResource.Data.Container.Push(BiomassCollected);
             BiomassCollected = 0;
         }
     }
@@ -194,7 +194,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     {
         if (detachTimer == null && res is ResourceComponent)
         {
-            if ((res as ResourceComponent).Data.ResourceType == Matter.Biomass)
+            if ((res as ResourceComponent).Data.Container.MatterType == Matter.Biomass)
             {
                 capturedResource = res as ResourceComponent;
                 capturedResource.SnapCrate(this, CrateAnchor.position);

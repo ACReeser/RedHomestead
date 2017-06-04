@@ -101,10 +101,10 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             {
                 ResourceComponent addedResources = other.GetComponent<ResourceComponent>();
                 //todo: bug: adds surplus resources
-                if (addedResources != null && !addedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(addedResources.data.ResourceType))
+                if (addedResources != null && !addedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(addedResources.data.Container.MatterType))
                 {
 #warning rounding error
-                    Data.ResourceCount[addedResources.Data.ResourceType] += (int)addedResources.Data.Quantity;
+                    Data.ResourceCount[addedResources.Data.Container.MatterType] += (int)addedResources.Data.Container.CurrentAmount;
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
@@ -127,10 +127,10 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             {
                 ResourceComponent removedResources = other.GetComponent<ResourceComponent>();
                 //todo: bug: removes surplus resources
-                if (removedResources != null && removedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(removedResources.data.ResourceType))
+                if (removedResources != null && removedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(removedResources.data.Container.MatterType))
                 {
 #warning rounding error
-                    Data.ResourceCount[removedResources.Data.ResourceType] -= (int)removedResources.Data.Quantity;
+                    Data.ResourceCount[removedResources.Data.Container.MatterType] -= (int)removedResources.Data.Container.CurrentAmount;
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();
@@ -198,16 +198,16 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             //(this frees it for use in another zone)
             component.IsInConstructionZone = false;
 
-            if (RequiredResourceMask.Contains(component.Data.ResourceType))
+            if (RequiredResourceMask.Contains(component.Data.Container.MatterType))
             {
                 int numDeleted = 0;
-                if (deletedCount.ContainsKey(component.Data.ResourceType))
+                if (deletedCount.ContainsKey(component.Data.Container.MatterType))
                 {
-                    numDeleted = deletedCount[component.Data.ResourceType];
-                    deletedCount[component.Data.ResourceType] = 0;
+                    numDeleted = deletedCount[component.Data.Container.MatterType];
+                    deletedCount[component.Data.Container.MatterType] = 0;
                 }
 
-                if (numDeleted < Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.Where(r => r.Type == component.Data.ResourceType).Count())
+                if (numDeleted < Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.Where(r => r.Type == component.Data.Container.MatterType).Count())
                 {
                     this.ResourceList.Remove(component);
                     Destroy(component.gameObject);

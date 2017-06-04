@@ -4,6 +4,7 @@ using System;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
 public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
 {

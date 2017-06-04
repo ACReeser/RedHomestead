@@ -6,6 +6,7 @@ using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 using RedHomestead.Buildings;
 using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
 public enum HabitatType { LuxuryLander, Burrow, Tent } //Lander, Tent
 
@@ -120,17 +121,13 @@ public class Habitat : Converter, IPowerConsumer, IBattery, IHabitatModule
 
     public void ImportResource(ResourceComponent r)
     {
-        if (r.Data.ResourceType.IsStoredInHabitat())
+        if (r.Data.Container.MatterType.IsStoredInHabitat())
         {
-            float amountLeft = Data.Containers[r.Data.ResourceType].Push(r.Data.Quantity);
+            float amountLeft = Data.Containers[r.Data.Container.MatterType].Push(r.Data.Container.CurrentAmount);
             
             if (amountLeft <= 0)
             {
                 GameObject.Destroy(r.gameObject);
-            }
-            else
-            {
-                r.Data.Quantity = amountLeft;
             }
         }
     }

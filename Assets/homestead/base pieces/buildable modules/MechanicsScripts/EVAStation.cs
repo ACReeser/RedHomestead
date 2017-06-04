@@ -5,6 +5,7 @@ using RedHomestead.Buildings;
 using UnityEngine;
 using RedHomestead.EVA;
 using RedHomestead.Simulation;
+using RedHomestead.Industry;
 
 public class EVAStation : Converter
 {

@@ -6,6 +6,7 @@ using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 using RedHomestead.Electricity;
 using RedHomestead.Buildings;
+using RedHomestead.Industry;
 
 /// <summary>
 /// Base abstract class for all modules
@@ -45,7 +46,7 @@ public class SingleResourceModuleData : ResourcefullModuleData
     public ResourceContainer Container;
 }
 
-public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuildable
+public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuildable, IPumpable
 {
     protected AudioSource SoundSource;
     
@@ -68,19 +69,8 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuilda
     public abstract float FaultedPercentage { get; set; }
     #endregion
 
-    protected List<ModuleGameplay> Adjacent = new List<ModuleGameplay>();
-    
-    public void LinkToModule(ModuleGameplay adjacent)
-    {
-        Adjacent.Add(adjacent);
-        OnAdjacentChanged();
-    }
-
-    public void UnlinkFromModule(ModuleGameplay adjacent)
-    {
-        Adjacent.Remove(adjacent);
-        OnAdjacentChanged();
-    }
+    protected List<IPumpable> Adjacent = new List<IPumpable>();
+    public List<IPumpable> AdjacentPumpables { get { return this.Adjacent; } }
 
     void Start()
     {
@@ -158,12 +148,6 @@ public abstract class ResourcelessHabitatGameplay: ResourcelessGameplay, IHabita
     public List<IHabitatModule> AdjacentModules { get; set; }
     [HideInInspector]
     public Habitat LinkedHabitat { get; set; }
-}
-
-public interface ISink
-{
-    ResourceContainer Get(Matter c);
-    bool HasContainerFor(Matter c);
 }
 
 public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataContainer<MultipleResourceModuleData>
@@ -262,7 +246,7 @@ public abstract class Converter : MultipleResourceModuleGameplay
     {
         ClearHooks();
 
-        foreach(ModuleGameplay m in Adjacent)
+        foreach(IPumpable m in Adjacent)
         {
             if (m is ISink)
             {
@@ -273,128 +257,6 @@ public abstract class Converter : MultipleResourceModuleGameplay
 
     public abstract void ClearHooks();
     public virtual void OnSinkConnected(ISink s) { }
-}
-
-[Serializable]
-public class Container
-{
-    public Container() { }
-    public Container(float initialAmount)
-    {
-        this.Amount = initialAmount;
-    }
-
-    //Serializable
-    public float TotalCapacity = 1f;
-    [SerializeField]
-    protected float Amount;
-
-    public float CurrentAmount { get { return Amount; } }
-
-    public float UtilizationPercentage
-    {
-        get
-        {
-            if (TotalCapacity <= 0)
-                return 0;
-
-            return Amount / TotalCapacity;
-        }
-    }
-
-    public string UtilizationPercentageString()
-    {
-        return (int)(UtilizationPercentage * 100) + "%";
-    }
-
-    public float AvailableCapacity
-    {
-        get
-        {
-            return TotalCapacity - Amount;
-        }
-    }
-
-    /// <summary>
-    /// tries to push an amount into the container
-    /// </summary>
-    /// <param name="pushAmount"></param>
-    /// <returns>the amount unable to be stored in the container</returns>
-    public float Push(float pushAmount)
-    {
-        if (AvailableCapacity > 0)
-        {
-            Amount += pushAmount;
-
-            if (Amount > TotalCapacity)
-            {
-                float overage = Amount - TotalCapacity;
-
-                Amount = TotalCapacity;
-
-                return overage;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return pushAmount;
-        }
-    }
-
-    /// <summary>
-    /// tries to pull an amount from the container
-    /// </summary>
-    /// <param name="pullAmount"></param>
-    /// <returns>the amount actually pulled</returns>
-    public float Pull(float pullAmount)
-    {
-        if (Amount <= 0)
-        {
-            return 0;
-        }
-        else
-        {
-            if (Amount > pullAmount)
-            {
-                Amount -= pullAmount;
-
-                return pullAmount;
-            }
-            else
-            {
-                float allToGive = Amount;
-
-                Amount = 0;
-
-                return allToGive;
-            }
-        }
-    }
-
-}
-
-[Serializable]
-public class ResourceContainer: Container
-{
-    public ResourceContainer() { }
-    public ResourceContainer(float initialAmount) : base(initialAmount) { }
-
-    //Serializable
-    public Matter MatterType;
-}
-
-[Serializable]
-public class EnergyContainer : Container
-{
-    public EnergyContainer() { }
-    public EnergyContainer(float initialAmount) : base(initialAmount) { }
-
-    //Serializable
-    public Energy EnergyType;
 }
 
 public interface IPowerToggleable

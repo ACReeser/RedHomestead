@@ -9,6 +9,7 @@ public interface ITriggerSubscriber
 //only used for warehouse so far
 public class TriggerForwarder : MonoBehaviour {
     private ITriggerSubscriber dad;
+    public bool OnlyMovableSnappables = true;
 
     void Start()
     {
@@ -19,7 +20,7 @@ public class TriggerForwarder : MonoBehaviour {
     {
         IMovableSnappable res = other.GetComponent<IMovableSnappable>();
 
-        if (res != null)
+        if (res != null || !OnlyMovableSnappables)
         {
             this.dad.OnChildTriggerEnter(this, other, res);
         }

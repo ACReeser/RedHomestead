@@ -9,6 +9,7 @@ using RedHomestead.Electricity;
 using RedHomestead.Economy;
 using RedHomestead.GameplayOptions;
 using RedHomestead.Scoring;
+using RedHomestead.Simulation;
 
 namespace RedHomestead.Persistence
 {
@@ -345,7 +346,7 @@ namespace RedHomestead.Persistence
             //but we have to look at each data to figure out which prefab to use
             foreach (CrateData data in Crates)
             {
-                Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.ResourceType), data.Position, data.Rotation) as Transform;
+                Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.Container.MatterType), data.Position, data.Rotation) as Transform;
                 ResourceComponent r = t.GetComponent<ResourceComponent>();
                 r.Data = data;
             }

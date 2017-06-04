@@ -5,24 +5,11 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
-public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
+public class GasStorage : SingleResourceModuleGameplay {
     public MeshFilter MeshFilter;
     public Mesh[] CompoundUVSet = new Mesh[6];
     public Mesh UnspecifiedUV;
     public Color[] CompoundColors = new Color[6];
-    public Transform SnapAnchor, PumpHandle;
-    public SpriteRenderer IconRenderer;
-    public Sprite[] PumpSprites;
-    public Color OnColor, OffColor;
-    public AudioClip HandleChangeClip;
-
-    internal enum PumpStatus { PumpOff, PumpIn, PumpOut }
-    internal PumpStatus CurrentPumpStatus;
-
-    public const float PumpPerSecond = .04f;
-    public const float PumpUpdateIntervalSeconds = .25f;
-    public const float PumpPerUpdateInterval = PumpPerSecond / PumpUpdateIntervalSeconds;
-    private const float SnapInterferenceTimerSeconds = 1.25f;
 
     public override float WattsConsumed
     {
@@ -38,7 +25,6 @@ public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
         base.OnStart();
         
         SyncObjectsToCompound();
-        RefreshPumpState();
     }
 
     private void SyncObjectsToCompound()
@@ -118,155 +104,7 @@ public class GasStorage : SingleResourceModuleGameplay, ICrateSnapper {
             SyncObjectsToCompound();
         }
     }
-
-    private ResourceComponent capturedResource, lastCapturedResource;
-    private Coroutine Pumping, CrateInterferenceTimer;
-
-    void OnTriggerEnter(Collider other)
-    {
-        ResourceComponent res = other.GetComponent<ResourceComponent>();
-
-        if (res != null &&
-            this.ResourceType != Matter.Unspecified &&
-            this.ResourceType == res.Data.ResourceType &&
-            capturedResource == null &&
-            (res != lastCapturedResource || CrateInterferenceTimer == null))
-        {
-            CaptureResource(other, res);
-        }
-    }
-
-    private void CaptureResource(Collider other, ResourceComponent res)
-    {
-        capturedResource = res;
-        res.SnapCrate(this, SnapAnchor.position);
-        RefreshPumpState();
-    }
-
-    public void StartPumpingOut()
-    {
-        if (CurrentPumpStatus == PumpStatus.PumpIn)
-        {
-            CurrentPumpStatus = PumpStatus.PumpOff;
-        }
-        else if (CurrentPumpStatus == PumpStatus.PumpOff)
-        {
-            CurrentPumpStatus = PumpStatus.PumpOut;
-            if (Pumping != null)
-                StopCoroutine(Pumping);
-
-            Pumping = StartCoroutine(Pump(false));
-        }
-
-        RefreshPumpState();
-    }
-
-    public void StartPumpingIn()
-    {
-        if (CurrentPumpStatus == PumpStatus.PumpOut)
-        {
-            CurrentPumpStatus = PumpStatus.PumpOff;
-        }
-        else if (CurrentPumpStatus == PumpStatus.PumpOff)
-        {
-            CurrentPumpStatus = PumpStatus.PumpIn;
-
-            if (Pumping != null)
-                StopCoroutine(Pumping);
-
-            Pumping = StartCoroutine(Pump(true));
-        }
-
-        RefreshPumpState();
-    }
-
-    private IEnumerator Pump(bool pumpIn)
-    {
-        SoundSource.Play();
-
-        while(isActiveAndEnabled && CurrentPumpStatus != PumpStatus.PumpOff && capturedResource != null)
-        {
-            if (pumpIn)
-            {
-                if (capturedResource.Data.Quantity < PumpPerUpdateInterval)
-                    break;
-                else
-                {
-                    capturedResource.Data.Quantity -= PumpPerUpdateInterval;
-
-                    float excess = this.Data.Container.Push(PumpPerUpdateInterval);
-
-                    if (excess > 0)
-                    {
-                        capturedResource.Data.Quantity = excess;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                float amount = this.Data.Container.Pull(PumpPerUpdateInterval);
-
-                capturedResource.Data.Quantity += amount;
-
-                if (amount <= 0f)
-                    break;
-            }
-
-            yield return new WaitForSeconds(PumpUpdateIntervalSeconds);
-        }
-
-        SoundSource.Stop();
-        CurrentPumpStatus = PumpStatus.PumpOff;
-        RefreshPumpState();
-    }
-
-    private void RefreshPumpState()
-    {
-        switch (this.CurrentPumpStatus)
-        {
-            case PumpStatus.PumpOff:
-                this.IconRenderer.flipY = false;
-                this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
-                break;
-            case PumpStatus.PumpIn:
-                this.IconRenderer.flipY = true;
-                this.PumpHandle.localRotation = Quaternion.Euler(0, 180, 0);
-                break;
-            case PumpStatus.PumpOut:
-                this.IconRenderer.flipY = false;
-                this.PumpHandle.localRotation = Quaternion.identity;
-                break;
-        }
-
-        this.IconRenderer.sprite = this.CurrentPumpStatus == PumpStatus.PumpOff ? this.PumpSprites[0] : this.PumpSprites[1];
-        this.IconRenderer.color = this.CurrentPumpStatus == PumpStatus.PumpOff ? this.OffColor : this.OnColor;
-
-        if (capturedResource != null)
-        {
-            capturedResource.transform.tag = this.CurrentPumpStatus == PumpStatus.PumpOff ? "movable" : "Untagged";
-            PumpHandle.tag = "pumpHandle";
-        }
-        else
-        {
-            PumpHandle.tag = "Untagged";
-        }
-    }
-
-    public void DetachCrate(IMovableSnappable detaching)
-    {
-        this.lastCapturedResource = this.capturedResource;
-        this.capturedResource = null;
-        PumpHandle.tag = "Untagged";
-        this.CrateInterferenceTimer = StartCoroutine(CrateInterferenceCountdown());
-    }
-
-    private IEnumerator CrateInterferenceCountdown()
-    {
-        yield return new WaitForSeconds(SnapInterferenceTimerSeconds);
-        this.CrateInterferenceTimer = null;
-    }
-
+    
     public override void Tick()
     {
     }

@@ -90,6 +90,24 @@ namespace RedHomestead.Simulation
             }
         }
 
+        internal static Matter FromValveTag(string valveTag)
+        {
+            switch (valveTag)
+            {
+                case "watervalve":
+                    return Matter.Water;
+                case "oxygenvalve":
+                    return Matter.Oxygen;
+                case "hydrogenvalve":
+                    return Matter.Hydrogen;
+                case "carbondioxidevalve":
+                    return Matter.CarbonDioxide;
+                case "methanevalve":
+                    return Matter.Methane;
+            }
+            return Matter.Unspecified;
+        }
+
         public static float KgPerMeal(this Matter meal)
         {
             float denominator = meal.MealsPerCubicMeter();
@@ -317,5 +335,131 @@ namespace RedHomestead.Simulation
     {
         void DetachCrate(IMovableSnappable detaching);
         Transform transform { get; }
+    }
+    
+    [Serializable]
+    public class Container
+    {
+        public Container() { }
+        public Container(float initialAmount)
+        {
+            this.Amount = initialAmount;
+        }
+
+        //Serializable
+        public float TotalCapacity = 1f;
+        [SerializeField]
+        protected float Amount;
+
+        public float CurrentAmount { get { return Amount; } }
+
+        public float UtilizationPercentage
+        {
+            get
+            {
+                if (TotalCapacity <= 0)
+                    return 0;
+
+                return Amount / TotalCapacity;
+            }
+        }
+
+        public string UtilizationPercentageString()
+        {
+            return (int)(UtilizationPercentage * 100) + "%";
+        }
+
+        public float AvailableCapacity
+        {
+            get
+            {
+                return TotalCapacity - Amount;
+            }
+        }
+
+        /// <summary>
+        /// tries to push an amount into the container
+        /// </summary>
+        /// <param name="pushAmount"></param>
+        /// <returns>the amount unable to be stored in the container</returns>
+        public float Push(float pushAmount)
+        {
+            if (AvailableCapacity > 0)
+            {
+                Amount += pushAmount;
+
+                if (Amount > TotalCapacity)
+                {
+                    float overage = Amount - TotalCapacity;
+
+                    Amount = TotalCapacity;
+
+                    return overage;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return pushAmount;
+            }
+        }
+
+        /// <summary>
+        /// tries to pull an amount from the container
+        /// </summary>
+        /// <param name="pullAmount"></param>
+        /// <returns>the amount actually pulled</returns>
+        public float Pull(float pullAmount)
+        {
+            if (Amount <= 0)
+            {
+                return 0;
+            }
+            else
+            {
+                if (Amount > pullAmount)
+                {
+                    Amount -= pullAmount;
+
+                    return pullAmount;
+                }
+                else
+                {
+                    float allToGive = Amount;
+
+                    Amount = 0;
+
+                    return allToGive;
+                }
+            }
+        }
+
+    }
+
+    [Serializable]
+    public class ResourceContainer : Container
+    {
+        public ResourceContainer() { }
+        public ResourceContainer(float initialAmount) : base(initialAmount) { }
+        public ResourceContainer(Matter type, float initialAmount) : base(initialAmount)
+        {
+            this.MatterType = type;
+        }
+
+        //Serializable
+        public Matter MatterType;
+    }
+
+    [Serializable]
+    public class EnergyContainer : Container
+    {
+        public EnergyContainer() { }
+        public EnergyContainer(float initialAmount) : base(initialAmount) { }
+
+        //Serializable
+        public Energy EnergyType;
     }
 }

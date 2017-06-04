@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
+using RedHomestead.Industry;
 
 public class Pipe : MonoBehaviour, IDataContainer<PipelineData> {
     public MeshFilter MeshFilter, NorthVis, SouthVis;
@@ -31,8 +32,7 @@ public class Pipe : MonoBehaviour, IDataContainer<PipelineData> {
             (to as GasStorage).SpecifyCompound(matterType);
         }
 
-        from.LinkToModule(to);
-        to.LinkToModule(from);
+        IndustryExtensions.AddAdjacentPumpable(from, to);
 
         if (data.MatterType != Matter.Unspecified)
         {

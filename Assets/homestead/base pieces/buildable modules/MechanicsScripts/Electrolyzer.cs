@@ -4,6 +4,7 @@ using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using System;
 using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
 public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
 {

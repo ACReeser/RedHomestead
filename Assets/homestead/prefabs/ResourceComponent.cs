@@ -7,8 +7,7 @@ using RedHomestead.Persistence;
 [Serializable]
 public class CrateData : FacingData
 {
-    public Matter ResourceType;
-    public float Quantity = 1;
+    public ResourceContainer Container;
 }
 
 [RequireComponent(typeof(Rigidbody))]
@@ -42,9 +41,9 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
 
     public void RefreshLabel()
     {
-        if (Data.ResourceType != Matter.Unspecified)
+        if (Data.Container.MatterType != Matter.Unspecified)
         {
-            int index = (int)Data.ResourceType;
+            int index = (int)Data.Container.MatterType;
 
             if (index > 0)
                 LabelMeshFilter.mesh = ResourceLabelMeshes[index - 1];
@@ -55,6 +54,6 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
 
     public override string GetText()
     {
-        return this.Data.ResourceType.ToString() + String.Format(" {0:0.##}kg", this.Data.Quantity * this.Data.ResourceType.Kilograms());
+        return this.Data.Container.MatterType.ToString() + String.Format(" {0:0.##}kg", this.Data.Container.CurrentAmount * this.Data.Container.MatterType.Kilograms());
     }
 }

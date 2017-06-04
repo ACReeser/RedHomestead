@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using RedHomestead.Buildings;
+using RedHomestead.Simulation;
 
 public class Flywheel : ResourcelessGameplay, IBattery {
     private EnergyContainer e = new EnergyContainer(0)
