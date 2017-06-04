@@ -63,8 +63,12 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
             connectedPumpable = null;
             connectedSink = null;
         }
+        PumpHandle.tag = "Untagged";
         CurrentPumpStatus = PumpStatus.PumpOff;
         RefreshPumpState();
+
+        if (capturedResource != null)
+            capturedResource.UnsnapCrate();
     }
 
     public void DetachCrate(IMovableSnappable detaching)
@@ -73,11 +77,10 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
         detachTimer = StartCoroutine(DetachCrateTimer());
         PumpHandle.tag = "Untagged";
         CurrentPumpStatus = PumpStatus.PumpOff;
+        RefreshPumpState();
 
         if (connectedPumpable != null)
             connectedPumpable.OnAdjacentChanged(); //trigger a recalculate for the connected thing
-
-        RefreshPumpState();
     }
 
     private IEnumerator DetachCrateTimer()
