@@ -20,11 +20,18 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
     public AudioClip HandleChangeClip;
     public AudioSource SoundSource;
 
+    public Mesh[] matterTypeMeshes;
+    public MeshFilter pumpFilter;
+
     internal enum PumpStatus { PumpOff, PumpIn, PumpOut, PumpOpen }
     internal PumpStatus CurrentPumpStatus;
+    internal PromptInfo CurrentPromptBasedOnPumpStatus;
+    public bool PumpMode { get { return connectedSink != null && connectedSink.HasContainerFor(this.valveType); } }
+    public bool ValveMode { get { return !PumpMode; } }
 
     private IPumpable connectedPumpable;
-    private Matter valveType;
+    private ISink connectedSink;
+    private Matter valveType = Matter.Unspecified;
 
     public const float PumpPerSecond = .04f;
     public const float PumpUpdateIntervalSeconds = .25f;
@@ -33,7 +40,6 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
     private Coroutine detachTimer;
     private ResourceComponent capturedResource;
     private Coroutine Pumping;
-    private ISink connectedSink;
 
     public override string GetText()
     {
@@ -43,19 +49,22 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
     void Start()
     {
         this.AdjacentPumpables = new List<IPumpable>();
+        RefreshPumpState();
     }
 
-    protected override void OnSnap()
-    {
-        
-    }
+    //handled by AttachTo
+    //protected override void OnSnap() {}
 
     protected override void OnDetach()
     {
-        //if (connectedPumpable != null)
-        //{
-        //    IndustryExtensions.RemoveAdjacentPumpable(this, connectedPumpable);
-        //}     
+        if (connectedPumpable != null)
+        {
+            IndustryExtensions.RemoveAdjacentPumpable(this, connectedPumpable);
+            connectedPumpable = null;
+            connectedSink = null;
+        }
+        CurrentPumpStatus = PumpStatus.PumpOff;
+        RefreshPumpState();
     }
 
     public void DetachCrate(IMovableSnappable detaching)
@@ -63,6 +72,12 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
         capturedResource = null;
         detachTimer = StartCoroutine(DetachCrateTimer());
         PumpHandle.tag = "Untagged";
+        CurrentPumpStatus = PumpStatus.PumpOff;
+
+        if (connectedPumpable != null)
+            connectedPumpable.OnAdjacentChanged(); //trigger a recalculate for the connected thing
+
+        RefreshPumpState();
     }
 
     private IEnumerator DetachCrateTimer()
@@ -73,9 +88,6 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
-        print(child.transform.name);
-        print(c.transform.name);
-        print(c.transform.tag);
         if (res == null && child.transform.name == "PumpSnap")
         {
             string valveTag = c.tag.ToLower();
@@ -90,6 +102,7 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
             {
                 capturedResource = res as ResourceComponent;
                 capturedResource.SnapCrate(this, CrateAnchor.position);
+                RefreshPumpState();
             }
         }
     }
@@ -98,13 +111,22 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
     {
         connectedPumpable = c.transform.root.GetComponent<IPumpable>();
         connectedSink = connectedPumpable as ISink;
+        print("valve mode: " + ValveMode);
+        print("pump mode: " + PumpMode);
 
         if (connectedPumpable != null)
         {
             valveType = MatterExtensions.FromValveTag(valveTag);
+            SyncMeshesToMatterType();
+            this.SnapCrate(c.transform, c.transform.position + (c.transform.TransformDirection(Vector3.forward) * 1.3f));
             IndustryExtensions.AddAdjacentPumpable(this, connectedPumpable);
-            this.SnapCrate(c.transform, c.transform.TransformPoint(Vector3.forward * 2.65f));
+            RefreshPumpState();
         }
+    }
+
+    private void SyncMeshesToMatterType()
+    {
+        pumpFilter.mesh = matterTypeMeshes[Math.Abs((int)this.valveType)];
     }
 
     private bool ResourceMatchesCurrentPumpable(ResourceComponent resourceComponent)
@@ -152,6 +174,26 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
                 StopCoroutine(Pumping);
 
             Pumping = StartCoroutine(DoPump(true));
+        }
+
+        RefreshPumpState();
+    }
+
+    public void ToggleValve()
+    {
+        if (CurrentPumpStatus == PumpStatus.PumpOpen)
+        {
+            CurrentPumpStatus = PumpStatus.PumpOff;
+
+            if (connectedPumpable != null)
+                connectedPumpable.OnAdjacentChanged(); //trigger a recalculate for the connected thing
+        }
+        else if (CurrentPumpStatus == PumpStatus.PumpOff)
+        {
+            CurrentPumpStatus = PumpStatus.PumpOpen;
+
+            if (connectedPumpable != null)
+                connectedPumpable.OnAdjacentChanged(); //trigger a recalculate for the connected thing
         }
 
         RefreshPumpState();
@@ -222,20 +264,28 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
         switch (this.CurrentPumpStatus)
         {
             case PumpStatus.PumpOff:
-                this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
+                this.PumpHandle.localRotation = Quaternion.Euler(0, 0, 0);
+                this.IconRenderer.transform.localRotation = Quaternion.Euler(0, -90, 0);
                 this.IconRenderer.sprite = this.PumpSprites[0];
+                CurrentPromptBasedOnPumpStatus = this.ValveMode ? Prompts.OpenPumpHint : Prompts.TurnPumpOnHint;
                 break;
             case PumpStatus.PumpIn:
-                this.PumpHandle.localRotation = Quaternion.Euler(0, -90, 0);
+                this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
+                this.IconRenderer.transform.localRotation = Quaternion.Euler(0, -90, -90);
                 this.IconRenderer.sprite = this.PumpSprites[1];
+                CurrentPromptBasedOnPumpStatus = Prompts.StopPumpingInHint;
                 break;
             case PumpStatus.PumpOut:
-                this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
+                this.PumpHandle.localRotation = Quaternion.Euler(0, -90, 0);
+                this.IconRenderer.transform.localRotation = Quaternion.Euler(0, -90, 90);
                 this.IconRenderer.sprite = this.PumpSprites[1];
+                CurrentPromptBasedOnPumpStatus = Prompts.StopPumpingInHint;
                 break;
             case PumpStatus.PumpOpen:
                 this.PumpHandle.localRotation = Quaternion.Euler(0, 90, 0);
+                this.IconRenderer.transform.localRotation = Quaternion.Euler(0, -90, 0);
                 this.IconRenderer.sprite = this.PumpSprites[2];
+                CurrentPromptBasedOnPumpStatus = Prompts.ClosePumpHint;
                 break;
         }
         
@@ -254,7 +304,7 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
 
     public ResourceContainer Get(Matter c)
     {
-        if (capturedResource != null && capturedResource.data.Container.MatterType == c)
+        if (HasContainerFor(c))
             return capturedResource.data.Container;
         else
             return null;
@@ -262,6 +312,6 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
 
     public bool HasContainerFor(Matter c)
     {
-        return capturedResource != null && capturedResource.data.Container.MatterType == c;
+        return capturedResource != null && capturedResource.data.Container.MatterType == c && CurrentPumpStatus == PumpStatus.PumpOpen;
     }
 }

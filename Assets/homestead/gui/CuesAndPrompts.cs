@@ -456,4 +456,14 @@ public static class Prompts {
         Description = "Destroy Hallway",
         Key = "E"
     };
+    internal static PromptInfo OpenPumpHint = new PromptInfo()
+    {
+        Description = "Open Valve",
+        Key = "E"
+    };
+    internal static PromptInfo ClosePumpHint = new PromptInfo()
+    {
+        Description = "Close Valve",
+        Key = "E"
+    };
 }

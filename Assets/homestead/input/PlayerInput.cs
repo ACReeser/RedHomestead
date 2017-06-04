@@ -1067,30 +1067,24 @@ public class PlayerInput : MonoBehaviour {
 
                     if (pump != null)
                     {
-                        if (Input.GetMouseButtonUp(0))
+                        if (pump.PumpMode && Input.GetMouseButtonUp(1))
                         {
                             pump.StartPumpingIn();
                             PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
                         }
-                        else if (Input.GetMouseButtonUp(1))
+                        else if (pump.PumpMode && Input.GetMouseButtonUp(0))
                         {
                             pump.StartPumpingOut();
                             PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
                         }
+                        else if (pump.ValveMode && doInteract)
+                        {
+                            pump.ToggleValve();
+                            PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
+                        }
                         else
                         {
-                            switch (pump.CurrentPumpStatus)
-                            {
-                                case Pump.PumpStatus.PumpOff:
-                                    newPrompt = Prompts.TurnPumpOnHint;
-                                    break;
-                                case Pump.PumpStatus.PumpIn:
-                                    newPrompt = Prompts.StopPumpingInHint;
-                                    break;
-                                case Pump.PumpStatus.PumpOut:
-                                    newPrompt = Prompts.StopPumpingOutHint;
-                                    break;
-                            }
+                            newPrompt = pump.CurrentPromptBasedOnPumpStatus;
                         }
                     }
                     else

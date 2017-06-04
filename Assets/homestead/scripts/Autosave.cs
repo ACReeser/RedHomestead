@@ -19,7 +19,14 @@ public class Autosave : MonoBehaviour
                 ChosenFinancing = RedHomestead.Economy.BackerFinancing.Government,
                 BuyRover = true,
                 ChosenPlayerTraining = RedHomestead.Perks.Perk.Athlete,
-                RemainingFunds = 1000000
+                RemainingFunds = 1000000,
+                BoughtMatter = new System.Collections.Generic.Dictionary<RedHomestead.Simulation.Matter, int>()
+                {
+                    { RedHomestead.Simulation.Matter.Water, 1 },
+                    { RedHomestead.Simulation.Matter.Oxygen, 1 },
+                    { RedHomestead.Simulation.Matter.Hydrogen, 2 }
+                },
+                BoughtCraftables = new System.Collections.Generic.Dictionary<RedHomestead.Crafting.Craftable, int>()
             });
         }
 #endif
