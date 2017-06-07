@@ -1067,12 +1067,12 @@ public class PlayerInput : MonoBehaviour {
 
                     if (pump != null)
                     {
-                        if (pump.PumpMode && Input.GetMouseButtonUp(1))
+                        if (pump.PumpMode && Input.GetMouseButtonUp(0))
                         {
                             pump.StartPumpingIn();
                             PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
                         }
-                        else if (pump.PumpMode && Input.GetMouseButtonUp(0))
+                        else if (pump.PumpMode && Input.GetMouseButtonUp(1))
                         {
                             pump.StartPumpingOut();
                             PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
