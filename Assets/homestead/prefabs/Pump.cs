@@ -105,6 +105,17 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
             {
                 capturedResource = res as ResourceComponent;
                 capturedResource.SnapCrate(this, CrateAnchor.position);
+
+                if (valveType == Matter.Unspecified)
+                {
+                    if (connectedPumpable is GasStorage && (connectedPumpable as GasStorage).Data.Container.CurrentAmount <= 0f)
+                    {
+                        this.valveType = capturedResource.Data.Container.MatterType;
+                        (connectedPumpable as GasStorage).SpecifyCompound(capturedResource.Data.Container.MatterType);
+                        this.SyncMeshesToMatterType();
+                    }
+                }
+
                 RefreshPumpState();
             }
         }
@@ -134,7 +145,7 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
 
     private bool ResourceMatchesCurrentPumpable(ResourceComponent resourceComponent)
     {
-        return (connectedPumpable != null) && resourceComponent.Data.Container.MatterType == valveType;
+        return (connectedPumpable != null) && ((resourceComponent.Data.Container.MatterType == valveType) || (valveType == Matter.Unspecified));
     }
 
     public void OnAdjacentChanged()
