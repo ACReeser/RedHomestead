@@ -12,6 +12,7 @@ using RedHomestead.Persistence;
 using RedHomestead.Electricity;
 using RedHomestead.Perks;
 using RedHomestead.Industry;
+using RedHomestead.Crafting;
 
 namespace RedHomestead.Equipment
 {
@@ -225,6 +226,11 @@ public class PlayerInput : MonoBehaviour {
         PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
         DrillSparks.transform.SetParent(null);
+    }
+
+    internal void PlanCraftable(Craftable whatToBuild)
+    {
+        
     }
 
     // Update is called once per frame

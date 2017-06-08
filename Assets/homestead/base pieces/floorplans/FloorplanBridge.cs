@@ -6,6 +6,7 @@ using RedHomestead.Interiors;
 using UnityEngine.UI;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
+using RedHomestead.Crafting;
 
 [Serializable]
 public abstract class InteriorFields<G, C> where C : IConvertible
@@ -105,6 +106,18 @@ public class StuffFields: InteriorFields<StuffGroup, Stuff>
 }
 
 [Serializable]
+public class CraftableFields : InteriorFields<CraftableGroup, Craftable>
+{
+    public override Dictionary<CraftableGroup, Craftable[]> Map
+    {
+        get
+        {
+            return Crafting.CraftableGroupMap;
+        }
+    }
+}
+
+[Serializable]
 public class ModuleFields : InteriorFields<ConstructionGroup, Module>
 {
     public override Dictionary<ConstructionGroup, Module[]> Map
@@ -129,13 +142,15 @@ public class FloorplanBridge : MonoBehaviour {
     public FloorplanPrefabs Floorplans;
     public StuffFields StuffFields;
     public ModuleFields ModuleFields;
+    public CraftableFields CraftableFields;
 
-	// Use this for initialization
-	void Awake () {
+    // Use this for initialization
+    void Awake () {
         Instance = this;
         ToggleStuffPanel(false);
         ToggleFloorplanPanel(false);
         ToggleModulePanel(false);
+        ToggleCraftablePanel(false);
     }
 
     internal void ToggleStuffPanel(bool state)
@@ -153,6 +168,11 @@ public class FloorplanBridge : MonoBehaviour {
         this.ModuleFields.Toggle(state);
     }
 
+    internal void ToggleCraftablePanel(bool state)
+    {
+        this.CraftableFields.Toggle(state);
+    }
+
     public void SelectStuffGroup(int index)
     {
         this.StuffFields.SelectGroup(index);
@@ -168,40 +188,57 @@ public class FloorplanBridge : MonoBehaviour {
         this.ModuleFields.SelectGroup(index);
     }
 
+    public void SelectCraftableGroup(int index)
+    {
+        this.CraftableFields.SelectGroup(index);
+    }
+
     public void SelectStuffToBuild()
     {
-        Stuff whatToBuild = (Stuff)Enum.Parse(typeof(Stuff), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
-
-        this.StuffFields.GroupDetailPanel.gameObject.SetActive(false);
-        ToggleStuffPanel(false);
-
-        PlayerInput.Instance.PlanStuff(whatToBuild);
-        //code smell! :(
-        PlayerInput.Instance.FPSController.FreezeLook = false;
+        SelectThing(StuffFields, ToggleStuffPanel, PlayerInput.Instance.PlanStuff);
     }
 
     public void SelectFloorplanToBuild()
     {
-        Floorplan whatToBuild = (Floorplan)Enum.Parse(typeof(Floorplan), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
-
-        this.Floorplans.GroupDetailPanel.gameObject.SetActive(false);
-        ToggleFloorplanPanel(false);
-
-        PlayerInput.Instance.PlanFloor(whatToBuild);
-        //code smell! :(
-        PlayerInput.Instance.FPSController.FreezeLook = false;
+        SelectThing(Floorplans, ToggleFloorplanPanel, PlayerInput.Instance.PlanFloor);
     }
 
     public void SelectModuleToBuild()
     {
-        Module whatToBuild = (Module)Enum.Parse(typeof(Module), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+        SelectThing(ModuleFields, ToggleModulePanel, PlayerInput.Instance.PlanModule);
+    }
 
-        this.ModuleFields.GroupDetailPanel.gameObject.SetActive(false);
-        ToggleModulePanel(false);
+    public void SelectCraftableToBuild()
+    {
+        SelectThing(CraftableFields, ToggleCraftablePanel, PlayerInput.Instance.PlanCraftable);
+    }
 
-        PlayerInput.Instance.PlanModule(whatToBuild);
+    private void SelectThing<G, C>(InteriorFields<G, C> fields, Action<bool> toggle, Action<C> plan) where C : IConvertible
+    {
+        C whatToBuild = (C)Enum.Parse(typeof(C), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+
+        fields.GroupDetailPanel.gameObject.SetActive(false);
+        toggle(false);
+
+        plan(whatToBuild);
         //code smell! :(
         PlayerInput.Instance.FPSController.FreezeLook = false;
+    }
+
+    private Craftable currentCraftable;
+    public void HoverCraftableButton(int index)
+    {
+        Craftable whatToBuild = this.CraftableFields.Map[this.CraftableFields.CurrentGroup][index];
+
+        //avoid filling every frame that we're hovered
+        if (whatToBuild != this.currentCraftable)
+        {
+            if (Crafting.CraftData.ContainsKey(whatToBuild))
+            {
+                this.currentCraftable = whatToBuild;
+
+            }
+        }
     }
 
     private Module currentDetail = Module.Unspecified;

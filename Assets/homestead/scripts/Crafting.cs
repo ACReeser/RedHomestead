@@ -14,6 +14,12 @@ namespace RedHomestead.Crafting
         WaterCrate,
         SolarPanel,
         IceDrill,
+        Pump
+    }
+
+    public enum CraftableGroup
+    {
+        Power, Storage, Extraction
     }
 
     public interface IBlueprintDetailable
@@ -55,6 +61,34 @@ namespace RedHomestead.Crafting
         public static Dictionary<Craftable, CraftingData> CraftData = new Dictionary<Craftable, CraftingData>()
         {
 
+        };
+
+        public static Dictionary<CraftableGroup, Craftable[]> CraftableGroupMap = new Dictionary<CraftableGroup, Craftable[]>()
+        {
+            {
+                CraftableGroup.Power,
+                new Craftable[]
+                {
+                    Craftable.PowerCube,
+                    Craftable.SolarPanel
+                }
+            },
+            {
+                CraftableGroup.Storage,
+                new Craftable[]
+                {
+                    Craftable.WaterCrate,
+                    Craftable.GasCrate,
+                    Craftable.Pump
+                }
+            },
+            {
+                CraftableGroup.Extraction,
+                new Craftable[]
+                {
+                    Craftable.IceDrill,
+                }
+            },
         };
 
         public static Sprite AtlasSprite(this Craftable craft)
