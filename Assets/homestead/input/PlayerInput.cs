@@ -987,7 +987,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
-                        
+                        this.ToggleCraftableBlueprintMode(true);
                     }
                     else
                     {
@@ -1383,6 +1383,12 @@ public class PlayerInput : MonoBehaviour {
     {
         FPSController.FreezeLook = showBlueprint;
         FloorplanBridge.Instance.ToggleModulePanel(showBlueprint);
+    }
+
+    private void ToggleCraftableBlueprintMode(bool showBlueprint)
+    {
+        FPSController.FreezeLook = showBlueprint;
+        FloorplanBridge.Instance.ToggleCraftablePanel(showBlueprint);
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)

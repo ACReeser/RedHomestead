@@ -44,6 +44,8 @@ namespace RedHomestead.Crafting
         public int? PowerMax { get; set; }
         public int? EnergyStorage { get; set; }
         public Dictionary<Matter, float> IO { get; set; }
+        public Matter StorageType = Matter.Unspecified;
+        public int? Storage;
     }
 
     public class CraftingData: BlueprintData
@@ -60,7 +62,81 @@ namespace RedHomestead.Crafting
 
         public static Dictionary<Craftable, CraftingData> CraftData = new Dictionary<Craftable, CraftingData>()
         {
-
+            {
+                Craftable.SolarPanel, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Steel),
+                        new ResourceEntry(.25f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.SiliconWafers)
+                    },
+                    Description = "A portable solar panel that generates free energy, but only when the sun is shining and the sky is clear.",
+                    PowerMin = 0,
+                    PowerMax = 3
+                }
+            },
+            {
+                Craftable.PowerCube, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Steel),
+                        new ResourceEntry(.5f, Matter.Aluminium),
+                        new ResourceEntry(.5f, Matter.Glass)
+                    },
+                    Description = "A portable battery pack that stores energy.",
+                    EnergyStorage = 1
+                }
+            },
+            {
+                Craftable.WaterCrate, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Steel),
+                        new ResourceEntry(.25f, Matter.Polyethylene)
+                    },
+                    Description = "A portable water vessel.",
+                    Storage = 1,
+                    StorageType = Matter.Water
+                }
+            },
+            {
+                Craftable.GasCrate, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Steel)
+                    },
+                    Description = "A portable vessel for all types of gasses.",
+                    Storage = 1,
+                    StorageType = Matter.Hydrogen
+                }
+            },
+            {
+                Craftable.Pump, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Steel),
+                        new ResourceEntry(.25f, Matter.Copper)
+                    },
+                    Description = "A portable pump to fill and drain gas and water vessels.",
+                }
+            },
+            {
+                Craftable.IceDrill, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Steel),
+                        new ResourceEntry(.25f, Matter.Copper)
+                    },
+                    Description = "A portable drill to mine water ice from deposits.",
+                    PowerSteady = 1
+                }
+            }
         };
 
         public static Dictionary<CraftableGroup, Craftable[]> CraftableGroupMap = new Dictionary<CraftableGroup, Craftable[]>()

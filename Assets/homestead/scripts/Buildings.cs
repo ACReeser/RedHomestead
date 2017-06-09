@@ -35,15 +35,11 @@ namespace RedHomestead.Buildings
     /// Top level groups that organize modules
     /// "None" means no groups should show
     /// "Undecided" means groups can show but no group is selected
-    /// TODO: remove None and Undecided into their own booleans ShowingGroups and HasGroupSelected
     /// </summary>
     public enum ConstructionGroup { Undecided = -1, LifeSupport, Power, Extraction, Refinement, Storage, Other }
 
     public class BuildingData : Crafting.BlueprintData
     {
-        public Matter StorageType = Matter.Unspecified;
-        public int? Storage;
-
         public BuildingData()
         {
             this.BuildTime = Construction.DefaultBuildTimeSeconds;
@@ -99,7 +95,7 @@ namespace RedHomestead.Buildings
                     Requirements = new List<ResourceEntry>()
                     {
                         new ResourceEntry(1, Matter.Steel),
-                        new ResourceEntry(4, Matter.SiliconWafers)
+                        new ResourceEntry(2, Matter.SiliconWafers)
                     },
                     Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear.",
                     PowerMin = 0,
