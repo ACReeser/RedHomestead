@@ -3,9 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using RedHomestead.Crafting;
 
 public class Workshop : ResourcelessHabitatGameplay
 {
+    public Craftable CurrentCraftable;
+    public float CraftableProgress;
+
     public override float WattsConsumed
     {
         get
@@ -24,4 +28,6 @@ public class Workshop : ResourcelessHabitatGameplay
     public override void Report() {}
 
     public override void Tick() { }
+
+
 }
