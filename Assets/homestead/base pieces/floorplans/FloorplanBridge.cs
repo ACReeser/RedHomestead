@@ -228,35 +228,32 @@ public class FloorplanBridge : MonoBehaviour {
     private Craftable currentCraftable;
     public void HoverCraftableButton(int index)
     {
-        Craftable whatToBuild = this.CraftableFields.Map[this.CraftableFields.CurrentGroup][index];
-
-        //avoid filling every frame that we're hovered
-        if (whatToBuild != this.currentCraftable)
-        {
-            if (Crafting.CraftData.ContainsKey(whatToBuild))
-            {
-                this.currentCraftable = whatToBuild;
-
-            }
-        }
+        Hover(currentCraftable, CraftableFields, index, Crafting.CraftData, (current) => this.currentCraftable = current);
     }
 
     private Module currentDetail = Module.Unspecified;
     public void HoverModuleButton(int index)
     {
-        Module whatToBuild = this.ModuleFields.Map[this.ModuleFields.CurrentGroup][index];
+        Hover(currentDetail, ModuleFields, index, Construction.BuildData, (current) => this.currentDetail = current);
+    }
+
+    private static void Hover<G, C, D>(C currentChild, InteriorFields<G, C> fields, int index, Dictionary<C, D> buildData, Action<C> assignCurrentChild) where C : IConvertible where D : BlueprintData
+    {
+        C whatToBuild = fields.Map[fields.CurrentGroup][index];
 
         //avoid filling every frame that we're hovered
-        if (whatToBuild != this.currentDetail)
+        if (Convert.ToInt32(whatToBuild) != Convert.ToInt32(currentChild))
         {
-            if (Construction.BuildData.ContainsKey(whatToBuild))
+            if (buildData.ContainsKey(whatToBuild))
             {
-                this.currentDetail = whatToBuild;
-                BuildingData data = Construction.BuildData[whatToBuild];
-                ModuleFields.DetailHeader.text = whatToBuild.ToString();
-                ModuleFields.DetailDescription.text = data.Description;
+                assignCurrentChild(whatToBuild);
+
+                BlueprintData data = buildData[whatToBuild];
+
+                fields.DetailHeader.text = whatToBuild.ToString();
+                fields.DetailDescription.text = data.Description;
                 int i = 0;
-                foreach(RectTransform text in ModuleFields.DetailMaterialsParent)
+                foreach(RectTransform text in fields.DetailMaterialsParent)
                 {
                     if (i == 0)
                     {
@@ -277,37 +274,37 @@ public class FloorplanBridge : MonoBehaviour {
                     i++;
                 }
 
-                ModuleFields.DetailPower.transform.parent.gameObject.SetActive(data.PowerSteady.HasValue || data.PowerMin.HasValue);
+                fields.DetailPower.transform.parent.gameObject.SetActive(data.PowerSteady.HasValue || data.PowerMin.HasValue);
 
                 if (data.PowerSteady.HasValue)
-                    ModuleFields.DetailPower.text = data.PowerSteady.Value > 0 ? "+" + data.PowerSteady.Value : data.PowerSteady.Value.ToString();
+                    fields.DetailPower.text = data.PowerSteady.Value > 0 ? "+" + data.PowerSteady.Value : data.PowerSteady.Value.ToString();
                 else if (data.PowerMin.HasValue && data.PowerMin.Value >= 0)
-                    ModuleFields.DetailPower.text = String.Format("+[{0}-{1}]", data.PowerMin.Value, data.PowerMax.Value);
+                    fields.DetailPower.text = String.Format("+[{0}-{1}]", data.PowerMin.Value, data.PowerMax.Value);
 
-                ModuleFields.DetailPowerStorage.transform.parent.gameObject.SetActive(data.EnergyStorage.HasValue);
+                fields.DetailPowerStorage.transform.parent.gameObject.SetActive(data.EnergyStorage.HasValue);
                 if (data.EnergyStorage.HasValue)
-                    ModuleFields.DetailPower.text = data.EnergyStorage.ToString();
+                    fields.DetailPower.text = data.EnergyStorage.ToString();
 
-                ModuleFields.DetailTypedStorage.transform.parent.gameObject.SetActive(data.StorageType != Matter.Unspecified);
+                fields.DetailTypedStorage.transform.parent.gameObject.SetActive(data.StorageType != Matter.Unspecified);
                 if (data.StorageType != Matter.Unspecified)
                 {
-                    ModuleFields.DetailStorage.transform.parent.gameObject.SetActive(false);
-                    ModuleFields.DetailTypedStorage.text = data.Storage.Value.ToString();
+                    fields.DetailStorage.transform.parent.gameObject.SetActive(false);
+                    fields.DetailTypedStorage.text = data.Storage.Value.ToString();
                     if (data.StorageType == Matter.Methane)
-                        ModuleFields.DetailTypedStorageSprite.sprite = GuiBridge.Instance.Icons.MiscIcons[(int)MiscIcon.Molecule];
+                        fields.DetailTypedStorageSprite.sprite = GuiBridge.Instance.Icons.MiscIcons[(int)MiscIcon.Molecule];
                     else
-                        ModuleFields.DetailTypedStorageSprite.sprite = data.StorageType.Sprite();
+                        fields.DetailTypedStorageSprite.sprite = data.StorageType.Sprite();
                 }
                 else
                 {
-                    ModuleFields.DetailStorage.transform.parent.gameObject.SetActive(data.Storage.HasValue);
+                    fields.DetailStorage.transform.parent.gameObject.SetActive(data.Storage.HasValue);
                     if (data.Storage.HasValue)
-                        ModuleFields.DetailStorage.text = data.Storage.Value.ToString();
+                        fields.DetailStorage.text = data.Storage.Value.ToString();
                 }
 
                 if (data.IO == null)
                 {
-                    foreach(Text io in ModuleFields.DetailIO)
+                    foreach(Text io in fields.DetailIO)
                     {
                         io.transform.parent.gameObject.SetActive(false);
                     }
@@ -317,14 +314,14 @@ public class FloorplanBridge : MonoBehaviour {
                     i = 0;
                     foreach(KeyValuePair<Matter, float> entry in data.IO)
                     {
-                        ModuleFields.DetailIO[i].transform.parent.gameObject.SetActive(true);
-                        ModuleFields.DetailIO[i].text = entry.Value > 0 ? "+" + entry.Value : entry.Value.ToString();
-                        ModuleFields.DetailIO[i].transform.parent.GetChild(0).GetComponent<Image>().sprite = entry.Key.Sprite();
+                        fields.DetailIO[i].transform.parent.gameObject.SetActive(true);
+                        fields.DetailIO[i].text = entry.Value > 0 ? "+" + entry.Value : entry.Value.ToString();
+                        fields.DetailIO[i].transform.parent.GetChild(0).GetComponent<Image>().sprite = entry.Key.Sprite();
                         i++;
                     }
-                    for(int j = i;  j < ModuleFields.DetailIO.Length; j++)
+                    for(int j = i;  j < fields.DetailIO.Length; j++)
                     {
-                        ModuleFields.DetailIO[i].transform.parent.gameObject.SetActive(false);
+                        fields.DetailIO[i].transform.parent.gameObject.SetActive(false);
                     }
                 }
             }
