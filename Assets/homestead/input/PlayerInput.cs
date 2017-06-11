@@ -114,7 +114,7 @@ public class PlayerInput : MonoBehaviour {
 
     internal void PlanCraftable(Craftable whatToBuild)
     {
-        
+        CurrentCraftablePlanner.SetCurrentCraftable(whatToBuild);
     }
 
     // Update is called once per frame
