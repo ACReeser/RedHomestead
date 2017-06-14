@@ -250,6 +250,7 @@ public class FloorplanBridge : MonoBehaviour {
 
     private static void Hover<G, C, D>(C currentChild, InteriorFields<G, C> fields, int index, Dictionary<C, D> buildData, Action<C> assignCurrentChild) where C : IConvertible where D : BlueprintData
     {
+        print(String.Format("{0} {1}",fields.CurrentGroup, index));
         C whatToBuild = fields.Map[fields.CurrentGroup][index];
 
         //avoid filling every frame that we're hovered
@@ -341,11 +342,9 @@ public class FloorplanBridge : MonoBehaviour {
 
     internal void SetCurrentCraftableDetail(Craftable craftable, float? progress = null)
     {
-        this.hoverCraftable = Craftable.Unspecified;
-        Hover(craftable, CraftableFields, Convert.ToInt32(craftable), Crafting.CraftData, (current) => { });
-
         if (craftable != Craftable.Unspecified)
         {
+            Hover(Craftable.Unspecified, CraftableFields, Convert.ToInt32(craftable), Crafting.CraftData, (current) => { });
             UpdateDetailCraftableProgressView(craftable, progress);
         }
 

@@ -252,6 +252,8 @@ public class PlayerInput : MonoBehaviour {
             ToggleCraftableBlueprintMode(false);
 
             wakeyWakeySignal = null;
+
+            CurrentMode = InputMode.Normal;
         }
     }
 
