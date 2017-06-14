@@ -11,6 +11,7 @@ public class Workshop : ResourcelessHabitatGameplay
     public Craftable CurrentCraftable { get { return _currentCraftable; } private set { _currentCraftable = value; } }
     public float CraftableProgress;
     public Transform[] CraftableHolograms;
+    public Transform SpawnPosition;
     private bool CurrentlyViewing;
 
     public override float WattsConsumed
@@ -69,7 +70,18 @@ public class Workshop : ResourcelessHabitatGameplay
         {
             float moreHours = (SunOrbit.MartianSecondsPerGameSecond * deltaTime) / 60 / 60;
             CraftableProgress += moreHours / Crafting.CraftData[_currentCraftable].BuildTime;
+
+            if (CraftableProgress >= 1)
+            {
+                SpawnCraftable(_currentCraftable);
+                PlayerInput.Instance.wakeyWakeySignal = PlayerInput.WakeSignal.PlayerCancel;
+            }
         }
+    }
+
+    private void SpawnCraftable(Craftable _currentCraftable)
+    {
+        BounceLander.CreateCratelike(_currentCraftable, this.SpawnPosition.position);
     }
 
     internal void ToggleCraftableView(bool state)

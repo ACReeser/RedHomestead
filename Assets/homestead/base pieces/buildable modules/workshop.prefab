@@ -165,6 +165,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!1 &1217482861341894
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4933765667671718}
+  m_Layer: 0
+  m_Name: spawnPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1230416137077902
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,7 +918,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1664361716399376}
-  m_LocalRotation: {x: 0.43022797, y: -0.3096126, z: 0.6358489, w: -0.561017}
+  m_LocalRotation: {x: 0.430228, y: -0.30961263, z: 0.63584894, w: -0.56101704}
   m_LocalPosition: {x: 1.8491545, y: -0.84372723, z: -9.215684}
   m_LocalScale: {x: 0.23999302, y: 0.23999299, z: 0.23999253}
   m_Children:
@@ -1259,6 +1274,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4567619988552258}
+  - {fileID: 4933765667671718}
   m_Father: {fileID: 4470661507071546}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1473,6 +1489,19 @@ Transform:
   m_Father: {fileID: 4060278647042900}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: -90.00001, y: 0, z: 0}
+--- !u!4 &4933765667671718
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1217482861341894}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0, z: 1.407}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4612352182315012}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4955985442019136
 Transform:
   m_ObjectHideFlags: 1
@@ -3247,6 +3276,7 @@ MonoBehaviour:
   - {fileID: 4229429833328518}
   - {fileID: 4077732428950378}
   - {fileID: 4006287865619264}
+  SpawnPosition: {fileID: 4933765667671718}
 --- !u!122 &122246957821721614
 Halo:
   m_ObjectHideFlags: 1
