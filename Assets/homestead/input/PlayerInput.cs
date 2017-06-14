@@ -26,7 +26,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline }
+    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Crafting }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -115,6 +115,8 @@ public class PlayerInput : MonoBehaviour {
     internal void PlanCraftable(Craftable whatToBuild)
     {
         CurrentCraftablePlanner.SetCurrentCraftable(whatToBuild);
+        CurrentCraftablePlanner.ToggleCraftableView(true);
+        this.CurrentMode = InputMode.Crafting;
     }
 
     // Update is called once per frame
@@ -192,6 +194,9 @@ public class PlayerInput : MonoBehaviour {
             case InputMode.Sleep:
                 HandleSleepInput(ref newPrompt, doInteract);
                 break;
+            case InputMode.Crafting:
+                HandleCraftingInput(ref newPrompt, doInteract);
+                break;
             case InputMode.Terminal:
                 HandleTerminalInput(ref newPrompt, doInteract);
                 break;
@@ -219,6 +224,36 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleCraftingInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Comma))
+        {
+            SunOrbit.Instance.SlowDown();
+        }
+        else if (Input.GetKeyUp(KeyCode.Period))
+        {
+            SunOrbit.Instance.SpeedUp();
+        }
+        else if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            wakeyWakeySignal = WakeSignal.PlayerCancel;
+        }
+
+        if (CurrentCraftablePlanner != null)
+        {
+            CurrentCraftablePlanner.MakeProgress(Time.deltaTime);
+        }
+
+        if (wakeyWakeySignal.HasValue && wakeyWakeySignal.Value != WakeSignal.DayStart)
+        {
+            CurrentCraftablePlanner.ToggleCraftableView(false);
+            
+            ToggleCraftableBlueprintMode(false);
+
+            wakeyWakeySignal = null;
+        }
+    }
 
     private void HandleWrenchInput(ref PromptInfo newPrompt)
     {

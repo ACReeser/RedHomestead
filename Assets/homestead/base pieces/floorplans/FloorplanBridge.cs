@@ -108,6 +108,9 @@ public class StuffFields: InteriorFields<StuffGroup, Stuff>
 [Serializable]
 public class CraftableFields : InteriorFields<CraftableGroup, Craftable>
 {
+    public RectTransform DetailCurrentCraftingParent, DetailParent;
+    public Text Progress;
+
     public override Dictionary<CraftableGroup, Craftable[]> Map
     {
         get
@@ -171,6 +174,7 @@ public class FloorplanBridge : MonoBehaviour {
     internal void ToggleCraftablePanel(bool state)
     {
         this.CraftableFields.Toggle(state);
+        this.CraftableFields.DetailCurrentCraftingParent.gameObject.SetActive(false);
     }
 
     public void SelectStuffGroup(int index)
@@ -210,25 +214,32 @@ public class FloorplanBridge : MonoBehaviour {
 
     public void SelectCraftableToBuild()
     {
-        SelectThing(CraftableFields, ToggleCraftablePanel, PlayerInput.Instance.PlanCraftable);
+        SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);
     }
 
-    private void SelectThing<G, C>(InteriorFields<G, C> fields, Action<bool> toggle, Action<C> plan) where C : IConvertible
+    private void SelectThing<G, C>(InteriorFields<G, C> fields, Action<bool> toggleOff, Action<C> plan) where C : IConvertible
     {
         C whatToBuild = (C)Enum.Parse(typeof(C), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
 
-        fields.GroupDetailPanel.gameObject.SetActive(false);
-        toggle(false);
+        if (toggleOff != null)
+        {
+            fields.GroupDetailPanel.gameObject.SetActive(false);
+            toggleOff(false);
+        }
 
         plan(whatToBuild);
-        //code smell! :(
-        PlayerInput.Instance.FPSController.FreezeLook = false;
+
+        if (toggleOff != null)
+        {
+            //code smell! :(
+            PlayerInput.Instance.FPSController.FreezeLook = false;
+        }
     }
 
-    private Craftable currentCraftable;
+    private Craftable hoverCraftable;
     public void HoverCraftableButton(int index)
     {
-        Hover(currentCraftable, CraftableFields, index, Crafting.CraftData, (current) => this.currentCraftable = current);
+        Hover(hoverCraftable, CraftableFields, index, Crafting.CraftData, (current) => this.hoverCraftable = current);
     }
 
     private Module currentDetail = Module.Unspecified;
@@ -326,6 +337,33 @@ public class FloorplanBridge : MonoBehaviour {
                 }
             }
         }
+    }
+
+    internal void SetCurrentCraftableDetail(Craftable craftable, float? progress = null)
+    {
+        this.hoverCraftable = Craftable.Unspecified;
+        Hover(craftable, CraftableFields, Convert.ToInt32(craftable), Crafting.CraftData, (current) => { });
+
+        if (craftable != Craftable.Unspecified)
+        {
+            UpdateDetailCraftableProgressView(craftable, progress);
+        }
+
+        bool showingDetail = craftable != Craftable.Unspecified;
+
+        CraftableFields.DetailCurrentCraftingParent.gameObject.SetActive(showingDetail);
+        CraftableFields.DetailParent.offsetMin = new Vector2(showingDetail ? 0f : 200f, 0);
+        CraftableFields.DetailParent.offsetMax = new Vector2(showingDetail ? -200f : 0f, 0);
+        CraftableFields.DetailButtonsParent.gameObject.SetActive(!showingDetail);
+    }
+
+    public void UpdateDetailCraftableProgressView(Craftable craftable, float? progress)
+    {
+        string progressPercentageString = String.Format("{0:0.#}%", progress.Value * 100f);
+        int completionHours = Crafting.CraftData[craftable].BuildTime;
+        int currentHours = Mathf.FloorToInt(progress.Value * completionHours);
+
+        CraftableFields.Progress.text = String.Format("<b>{0}</b>\n{1}/{2} Hrs", progressPercentageString, currentHours, completionHours);
     }
 
     internal Transform GetPrefab(Floorplan s)
