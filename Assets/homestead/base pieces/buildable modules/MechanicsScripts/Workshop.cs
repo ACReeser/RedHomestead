@@ -12,7 +12,7 @@ public class Workshop : ResourcelessHabitatGameplay
     public float CraftableProgress;
     public Transform[] CraftableHolograms;
     public Transform SpawnPosition;
-    private bool CurrentlyViewing;
+    private bool CurrentlyViewingDetail = false;
 
     public override float WattsConsumed
     {
@@ -29,7 +29,7 @@ public class Workshop : ResourcelessHabitatGameplay
 
     void Update()
     {
-        if (this.CurrentlyViewing)
+        if (this.CurrentlyViewingDetail)
             FloorplanBridge.Instance.UpdateDetailCraftableProgressView(this._currentCraftable, this.CraftableProgress);
     }
 
@@ -74,6 +74,9 @@ public class Workshop : ResourcelessHabitatGameplay
             if (CraftableProgress >= 1)
             {
                 SpawnCraftable(_currentCraftable);
+                _currentCraftable = Craftable.Unspecified;
+                CraftableProgress = 0f;
+                SunOrbit.Instance.ResetToNormalTime();
                 PlayerInput.Instance.wakeyWakeySignal = PlayerInput.WakeSignal.PlayerCancel;
             }
         }
@@ -84,13 +87,16 @@ public class Workshop : ResourcelessHabitatGameplay
         BounceLander.CreateCratelike(_currentCraftable, this.SpawnPosition.position);
     }
 
-    internal void ToggleCraftableView(bool state)
+    internal void ToggleCraftableView(bool overallState)
     {
-        if (state)
+        bool detailState = _currentCraftable != Craftable.Unspecified;
+
+        FloorplanBridge.Instance.ToggleCraftablePanel(overallState, detailState);
+        this.CurrentlyViewingDetail = detailState;
+        
+        if (overallState && detailState)
             FloorplanBridge.Instance.SetCurrentCraftableDetail(this._currentCraftable, this.CraftableProgress);
         else
             FloorplanBridge.Instance.SetCurrentCraftableDetail(Craftable.Unspecified);
-
-        this.CurrentlyViewing = state;
     }
 }

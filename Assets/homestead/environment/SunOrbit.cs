@@ -213,9 +213,7 @@ public class SunOrbit : MonoBehaviour {
         }
         else
         {
-            Time.timeScale = 1f;
-            SpeedTier = 1;
-            UpdateClockSpeedArrows();
+            ResetToNormalTime();
             RunTilMorning = false;
 
             PlayerInput.Instance.wakeyWakeySignal = signal;
@@ -226,9 +224,7 @@ public class SunOrbit : MonoBehaviour {
     {
         if (SpeedTier > 1f || RunTilMorning)
         {
-            Time.timeScale = 1f;
-            SpeedTier = 1;
-            UpdateClockSpeedArrows();
+            ResetToNormalTime();
 
             if (RunTilMorning)
             {
@@ -236,5 +232,12 @@ public class SunOrbit : MonoBehaviour {
                 PlayerInput.Instance.wakeyWakeySignal = PlayerInput.WakeSignal.ResourceRequired;
             }
         }
+    }
+
+    public void ResetToNormalTime()
+    {
+        Time.timeScale = 1f;
+        SpeedTier = 1;
+        UpdateClockSpeedArrows();
     }
 }

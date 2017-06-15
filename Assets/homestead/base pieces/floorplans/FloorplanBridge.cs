@@ -23,7 +23,7 @@ public abstract class InteriorFields<G, C> where C : IConvertible
     {
         this.FullPanel.gameObject.SetActive(state);
         this.GroupsPanel.gameObject.SetActive(state);
-        this.GroupDetailPanel.gameObject.SetActive(false);
+        this.GroupDetailPanel.gameObject.SetActive(this.ShowGroupDetailOnToggle(state));
 
         Cursor.lockState = state ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = state;
@@ -40,6 +40,11 @@ public abstract class InteriorFields<G, C> where C : IConvertible
     protected virtual Transform[] GetPrefabs()
     {
         return Prefabs;
+    }
+
+    protected virtual bool ShowGroupDetailOnToggle(bool state)
+    {
+        return false;
     }
 
     public void FillDetail(G group)
@@ -118,6 +123,27 @@ public class CraftableFields : InteriorFields<CraftableGroup, Craftable>
             return Crafting.CraftableGroupMap;
         }
     }
+
+    private bool DetailState;
+    internal void Toggle(bool overallState, bool detailState)
+    {
+        DetailState = detailState;
+        Toggle(overallState);
+        GroupsPanel.gameObject.SetActive(!detailState);
+        DetailCurrentCraftingParent.gameObject.SetActive(detailState);
+    }
+
+    protected override bool ShowGroupDetailOnToggle(bool state)
+    {
+        if (state)
+        {
+            return this.DetailState;
+        }
+        else
+        {
+            return false;
+        }
+    }
 }
 
 [Serializable]
@@ -153,7 +179,7 @@ public class FloorplanBridge : MonoBehaviour {
         ToggleStuffPanel(false);
         ToggleFloorplanPanel(false);
         ToggleModulePanel(false);
-        ToggleCraftablePanel(false);
+        ToggleCraftablePanel(false, false);
     }
 
     internal void ToggleStuffPanel(bool state)
@@ -171,10 +197,9 @@ public class FloorplanBridge : MonoBehaviour {
         this.ModuleFields.Toggle(state);
     }
 
-    internal void ToggleCraftablePanel(bool state)
+    internal void ToggleCraftablePanel(bool overallState, bool detailState)
     {
-        this.CraftableFields.Toggle(state);
-        this.CraftableFields.DetailCurrentCraftingParent.gameObject.SetActive(false);
+        this.CraftableFields.Toggle(overallState, detailState);
     }
 
     public void SelectStuffGroup(int index)
@@ -250,9 +275,14 @@ public class FloorplanBridge : MonoBehaviour {
 
     private static void Hover<G, C, D>(C currentChild, InteriorFields<G, C> fields, int index, Dictionary<C, D> buildData, Action<C> assignCurrentChild) where C : IConvertible where D : BlueprintData
     {
-        print(String.Format("{0} {1}",fields.CurrentGroup, index));
+        print(String.Format("{0} {1}", fields.CurrentGroup, index));
         C whatToBuild = fields.Map[fields.CurrentGroup][index];
 
+        Hover(currentChild, whatToBuild, fields, buildData, assignCurrentChild);
+    }
+
+    private static void Hover<G, C, D>(C currentChild, C whatToBuild, InteriorFields<G, C> fields, Dictionary<C, D> buildData, Action<C> assignCurrentChild) where C : IConvertible where D : BlueprintData
+    {
         //avoid filling every frame that we're hovered
         if (Convert.ToInt32(whatToBuild) != Convert.ToInt32(currentChild))
         {
@@ -344,7 +374,7 @@ public class FloorplanBridge : MonoBehaviour {
     {
         if (craftable != Craftable.Unspecified)
         {
-            Hover(Craftable.Unspecified, CraftableFields, Convert.ToInt32(craftable), Crafting.CraftData, (current) => { });
+            Hover(Craftable.Unspecified, craftable, CraftableFields, Crafting.CraftData, (current) => { });
             UpdateDetailCraftableProgressView(craftable, progress);
         }
 

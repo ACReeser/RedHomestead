@@ -924,7 +924,13 @@ public class PlayerInput : MonoBehaviour {
                         if (w != null)
                         {
                             CurrentCraftablePlanner = w;
+
                             this.ToggleCraftableBlueprintMode(true);
+
+                            if (CurrentCraftablePlanner.CurrentCraftable != Craftable.Unspecified)
+                            {
+                                this.CurrentMode = InputMode.Crafting;
+                            }
                         }
                     }
                     else
@@ -1326,7 +1332,7 @@ public class PlayerInput : MonoBehaviour {
     private void ToggleCraftableBlueprintMode(bool showBlueprint)
     {
         FPSController.FreezeLook = showBlueprint;
-        FloorplanBridge.Instance.ToggleCraftablePanel(showBlueprint);
+        CurrentCraftablePlanner.ToggleCraftableView(showBlueprint);
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)
