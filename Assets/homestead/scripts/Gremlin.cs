@@ -46,6 +46,7 @@ public class Gremlin : MonoBehaviour {
     public const string GremlindTag = "gremlind";
     private const float RepairPercentagePerSecond = .1f;
     public Transform ElectricalFailureSparksPrefab, OutgassingFailurePrefab;
+    public AudioClip ElectricalFailureComputerTalk, PressureFailureComputerTalk;
     internal static Gremlin Instance { get; private set; }
 
     void Awake()
@@ -213,10 +214,12 @@ public class Gremlin : MonoBehaviour {
             effect.SetParent(victim.FailureEffectAnchors.Electrical);
             //alert the powergrid script
             FlowManager.Instance.PowerGrids.HandleElectricalFailure(victim);
+            GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.ElectricalFailureComputerTalk);
         }
         else if (fail == FailureType.Pressure)
         {
             effect.SetParent(victim.FailureEffectAnchors.Pressure);
+            GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.PressureFailureComputerTalk);
         }
 
         effect.transform.localPosition = Vector3.zero;

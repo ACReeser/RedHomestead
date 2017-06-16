@@ -79,6 +79,7 @@ public class Workshop : ResourcelessHabitatGameplay
 
             if (CraftableProgress >= 1)
             {
+                CraftableHolograms[Convert.ToInt32(this.Data.FlexCraftable)].gameObject.SetActive(false);
                 SpawnCraftable(this.Data.FlexCraftable);
                 this.Data.FlexCraftable = Craftable.Unspecified;
                 CraftableProgress = 0f;
