@@ -29,7 +29,13 @@ public abstract class ResourcefullModuleData: ModuleData
 }
 
 [Serializable]
-public class ResourcelessModuleData : ModuleData { }
+public class ResourcelessModuleData : ModuleData
+{
+    //OK so some of our Resourceless things have some state
+    //so let's have some "flex" slots that each Module can interpret
+    public RedHomestead.Crafting.Craftable FlexCraftable;
+    public float FlexFloat;
+}
 
 [Serializable]
 public class ResourceContainerDictionary: SerializableDictionary<Matter, ResourceContainer> { }

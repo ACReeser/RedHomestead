@@ -7,9 +7,8 @@ using RedHomestead.Crafting;
 
 public class Workshop : ResourcelessHabitatGameplay
 {
-    private Craftable _currentCraftable = Craftable.Unspecified;
-    public Craftable CurrentCraftable { get { return _currentCraftable; } private set { _currentCraftable = value; } }
-    public float CraftableProgress;
+    public Craftable CurrentCraftable { get { return this.Data.FlexCraftable; } private set { this.Data.FlexCraftable = value; } }
+    public float CraftableProgress { get { return this.Data.FlexFloat; } private set { this.Data.FlexFloat = value; } }
     public Transform[] CraftableHolograms;
     public Transform SpawnPosition;
     private bool CurrentlyViewingDetail = false;
@@ -27,10 +26,17 @@ public class Workshop : ResourcelessHabitatGameplay
         return Module.Workshop;
     }
 
+    public override void InitializeStartingData()
+    {
+        base.InitializeStartingData();
+        this.Data.FlexCraftable = Craftable.Unspecified;
+        this.Data.FlexFloat = 0f;
+    }
+
     void Update()
     {
         if (this.CurrentlyViewingDetail)
-            FloorplanBridge.Instance.UpdateDetailCraftableProgressView(this._currentCraftable, this.CraftableProgress);
+            FloorplanBridge.Instance.UpdateDetailCraftableProgressView(this.Data.FlexCraftable, this.CraftableProgress);
     }
 
     public override void OnAdjacentChanged() { }
@@ -41,40 +47,40 @@ public class Workshop : ResourcelessHabitatGameplay
 
     protected override void OnStart()
     {
-        this.SetCurrentCraftable(Craftable.Unspecified);
+        this.SetCurrentCraftable(this.Data.FlexCraftable);
     }
 
     public void SetCurrentCraftable(Craftable c)
     {
-        if (_currentCraftable != Craftable.Unspecified)
+        if (this.Data.FlexCraftable != Craftable.Unspecified)
         {
-            CraftableHolograms[Convert.ToInt32(_currentCraftable)].gameObject.SetActive(false);
+            CraftableHolograms[Convert.ToInt32(this.Data.FlexCraftable)].gameObject.SetActive(false);
         }
 
-        _currentCraftable = c;
+        this.Data.FlexCraftable = c;
 
-        if (_currentCraftable == Craftable.Unspecified)
+        if (this.Data.FlexCraftable == Craftable.Unspecified)
         {
             CraftableHolograms[0].parent.gameObject.SetActive(false);
         }
         else
         {
             CraftableHolograms[0].parent.gameObject.SetActive(true);
-            CraftableHolograms[Convert.ToInt32(_currentCraftable)].gameObject.SetActive(true);
+            CraftableHolograms[Convert.ToInt32(this.Data.FlexCraftable)].gameObject.SetActive(true);
         }
     }
 
     internal void MakeProgress(float deltaTime)
     {
-        if (_currentCraftable != Craftable.Unspecified)
+        if (this.Data.FlexCraftable != Craftable.Unspecified)
         {
             float moreHours = (SunOrbit.MartianSecondsPerGameSecond * deltaTime) / 60 / 60;
-            CraftableProgress += moreHours / Crafting.CraftData[_currentCraftable].BuildTime;
+            CraftableProgress += moreHours / Crafting.CraftData[this.Data.FlexCraftable].BuildTime;
 
             if (CraftableProgress >= 1)
             {
-                SpawnCraftable(_currentCraftable);
-                _currentCraftable = Craftable.Unspecified;
+                SpawnCraftable(this.Data.FlexCraftable);
+                this.Data.FlexCraftable = Craftable.Unspecified;
                 CraftableProgress = 0f;
                 SunOrbit.Instance.ResetToNormalTime();
                 PlayerInput.Instance.wakeyWakeySignal = PlayerInput.WakeSignal.PlayerCancel;
@@ -82,20 +88,20 @@ public class Workshop : ResourcelessHabitatGameplay
         }
     }
 
-    private void SpawnCraftable(Craftable _currentCraftable)
+    private void SpawnCraftable(Craftable craftable)
     {
-        BounceLander.CreateCratelike(_currentCraftable, this.SpawnPosition.position);
+        BounceLander.CreateCratelike(craftable, this.SpawnPosition.position);
     }
 
     internal void ToggleCraftableView(bool overallState)
     {
-        bool detailState = _currentCraftable != Craftable.Unspecified;
+        bool detailState = this.Data.FlexCraftable != Craftable.Unspecified;
 
         FloorplanBridge.Instance.ToggleCraftablePanel(overallState, detailState);
         this.CurrentlyViewingDetail = detailState;
         
         if (overallState && detailState)
-            FloorplanBridge.Instance.SetCurrentCraftableDetail(this._currentCraftable, this.CraftableProgress);
+            FloorplanBridge.Instance.SetCurrentCraftableDetail(this.Data.FlexCraftable, this.CraftableProgress);
         else
             FloorplanBridge.Instance.SetCurrentCraftableDetail(Craftable.Unspecified);
     }
