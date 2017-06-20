@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using RedHomestead.Persistence;
+using RedHomestead.Simulation;
 
 namespace RedHomestead.EVA
 {
@@ -68,8 +69,11 @@ namespace RedHomestead.EVA
             };
         }
 
-        public const float OxygenResupplyRatePerSecondKilograms = Constants.BasePackOxygenKilograms / 100f;
-        public const float PowerResupplyRatePerSecondWatts = Constants.BasePackPowerWatts / 100f;
+        public const float OxygenResupplySeconds = 4f;
+        public const float PowerResupplySeconds = 4f;
+
+        public static float OxygenResupplyKilogramsPerUnit = GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.KilogramsOxygenPerHour) * OxygenResupplySeconds / Simulation.Matter.Oxygen.Kilograms();
+        public static float PowerResupplyWattsPerSecond = GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour) * PowerResupplySeconds;
 
         public static void UpgradePower(PackData data)
         {
