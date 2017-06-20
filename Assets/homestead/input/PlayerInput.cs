@@ -707,17 +707,29 @@ public class PlayerInput : MonoBehaviour {
                 {
                     ConstructionZone zone = hitInfo.collider.GetComponent<ConstructionZone>();
 
-                    if (zone != null && carriedObject == null && zone.CanConstruct)
+                    if (zone != null && carriedObject == null)
                     {
-                        if (Input.GetKeyDown(KeyCode.E))
-                            PlayInteractionClip(zone.transform.position, Sfx.Construction);
-
-                        if (Input.GetKey(KeyCode.E))
+                        if (Input.GetKeyUp(KeyCode.X))
                         {
-                            zone.WorkOnConstruction(Time.deltaTime * PerkMultipliers.ConstructSpeed);
+                            zone.Deconstruct();
                         }
-                        Prompts.ConstructHint.Progress = zone.ProgressPercentage;
-                        newPrompt = Prompts.ConstructHint;
+                        else if (zone.CanConstruct)
+                        {
+                            if (Input.GetKeyDown(KeyCode.E))
+                                PlayInteractionClip(zone.transform.position, Sfx.Construction);
+
+                            if (Input.GetKey(KeyCode.E))
+                            {
+                                zone.WorkOnConstruction(Time.deltaTime * PerkMultipliers.ConstructSpeed);
+                            }
+
+                            Prompts.ConstructHint.Progress = zone.ProgressPercentage;
+                            newPrompt = Prompts.ConstructHint;
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.DeconstructHint;
+                        }
                     }
                 }
                 else if (hitInfo.collider.CompareTag("door"))

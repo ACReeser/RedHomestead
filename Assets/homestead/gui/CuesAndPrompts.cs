@@ -195,10 +195,17 @@ public static class Prompts {
         Description = "Drop",
         Key = "LMB"
     };
+    internal static PromptInfo DeconstructHint = new PromptInfo()
+    {
+        Description = "Cancel",
+        Key = "X",
+    };
     internal static PromptInfo ConstructHint = new PromptInfo()
     {
         Description = "Construct",
         Key = "E",
+        SecondaryDescription = "Cancel",
+        SecondaryKey = "X",
         UsesProgress = true
     };
     internal static PromptInfo OpenDoorHint = new PromptInfo()

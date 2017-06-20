@@ -217,4 +217,23 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
 
         Destroy(this.gameObject);
     }
+
+    internal void Deconstruct()
+    {
+        if (ResourceList != null && ResourceList.Count > 0)
+        {
+            foreach(var r in ResourceList)
+            {
+                r.IsInConstructionZone = false;
+            }
+        }
+
+        if (ZoneThatPlayerIsStandingIn == this)
+        {
+            ZoneThatPlayerIsStandingIn = null;
+            GuiBridge.Instance.HideConstruction();
+        }
+
+        Destroy(this.gameObject);
+    }
 }
