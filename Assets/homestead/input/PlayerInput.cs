@@ -212,6 +212,12 @@ public class PlayerInput : MonoBehaviour {
                 break;
         }
 
+
+        if (CurrentEVAStation != null && doInteract)
+        {
+            CurrentEVAStation.ToggleUse(false);
+            CurrentEVAStation = null;
+        }
         //if we were hovering or doing something that has a prompt
         //we will have a newPrompt
         //if we don't
@@ -991,14 +997,6 @@ public class PlayerInput : MonoBehaviour {
 
                         if (CurrentEVAStation != null)
                             CurrentEVAStation.ToggleUse(true);
-                    }
-                    else if (Input.GetKeyUp(KeyCode.E))
-                    {
-                        if (CurrentEVAStation != null)
-                        {
-                            CurrentEVAStation.ToggleUse(true);
-                            CurrentEVAStation = null;
-                        }
                     }
                     else
                     {

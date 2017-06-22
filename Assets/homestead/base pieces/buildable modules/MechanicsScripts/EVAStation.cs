@@ -11,6 +11,15 @@ using RedHomestead.Electricity;
 public class EVAStation : Converter, IPowerConsumer
 {
     private ISink OxygenIn;
+    public SpriteRenderer Lung, LungOnOff, Power, PowerOnOff;
+    public Color OnColor, OffColor;
+    public Sprite OnSprite, OffSprite;
+    public GameObject TaggedCollider;
+
+    private bool HasOxygen
+    {
+        get { return OxygenIn != null; }
+    }
 
     public override float WattsConsumed
     {
@@ -22,14 +31,27 @@ public class EVAStation : Converter, IPowerConsumer
     
     public bool IsOn { get; set; }
 
-    private void SyncMesh()
+    private void SyncStatusSprites()
     {
+        TaggedCollider.tag = (HasOxygen || HasPower) ? "evacharger" : "Untagged";
 
+        Lung.color = LungOnOff.color = HasOxygen ? OnColor : OffColor;
+        Power.color = PowerOnOff.color = HasPower ? OnColor : OffColor;
+
+        LungOnOff.sprite = HasOxygen ? OnSprite : OffSprite;
+        PowerOnOff.sprite = HasPower ? OnSprite : OffSprite;
+    }
+
+    protected override void OnStart()
+    {
+        base.OnStart();
+        this.SyncStatusSprites();
     }
 
     public override void ClearHooks()
     {
         OxygenIn = null;
+        this.SyncStatusSprites();
     }
 
     float oxygenBuffer;
@@ -76,16 +98,17 @@ public class EVAStation : Converter, IPowerConsumer
         if (s.HasContainerFor(Matter.Oxygen))
         {
             OxygenIn = s;
+            this.SyncStatusSprites();
         }
     }
 
     public void OnEmergencyShutdown()
     {
-        this.SyncMesh();
+        this.SyncStatusSprites();
     }
 
     public override void OnPowerChanged()
     {
-        this.SyncMesh();
+        this.SyncStatusSprites();
     }
 }
