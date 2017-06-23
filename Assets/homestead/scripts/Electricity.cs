@@ -498,9 +498,14 @@ namespace RedHomestead.Electricity
             Data.SurplusWatts = Data.CurrentCapacityWatts - Data.LoadWatts;
             Data.DeficitWatts = Data.LoadWatts - Data.CurrentCapacityWatts;
 
-            if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts == 0f)
+            if ((Data.CurrentCapacityWatts + Data.CurrentBatteryWatts == 0f) && Data.LoadWatts > 0f)
             {
                 newGridMode = GridMode.Blackout;
+
+                if (Mode != GridMode.Blackout)
+                {
+                    //GuiBridge.Instance.ComputerAudioSource.PlayOneShot();
+                }
             }
             else if (Data.CurrentCapacityWatts > Data.LoadWatts)
             {
@@ -509,12 +514,18 @@ namespace RedHomestead.Electricity
                 else //surplus > 0f
                     newGridMode = GridMode.BatteryRecharge;
             }
-            else //capacity < load
+            else if (Data.CurrentCapacityWatts < Data.LoadWatts)
             {
-                if (Data.CurrentCapacityWatts + Data.CurrentBatteryWatts > Data.DeficitWatts)
+                float availableWatts = Data.CurrentCapacityWatts + Data.CurrentBatteryWatts;
+
+                if (availableWatts >= Data.DeficitWatts)
                     newGridMode = GridMode.BatteryDrain;
-                else //deficit > capacity + battery
+                else //if (availableWatts < Data.DeficitWatts)
                     newGridMode = GridMode.Brownout;
+            }
+            else // capacity + battery > 0 || load == 0 && capacity == load
+            {
+                newGridMode = GridMode.Nominal;
             }
 
             if (Mode != newGridMode)
