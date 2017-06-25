@@ -5,9 +5,13 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
-public class Airlock : GenericBaseModule {
+public interface IDoorManager
+{
+    void ToggleDoor(Transform door);
+}
+
+public class Airlock : GenericBaseModule, IDoorManager {
     public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
-    public static Dictionary<Transform, Airlock> DoorToAirlock = new Dictionary<Transform, Airlock>();
     
     public Collider TerrainCollider;
     public Color OnColor, OffColor;
@@ -20,9 +24,6 @@ public class Airlock : GenericBaseModule {
 
     // Use this for initialization
     void Start () {
-        DoorToAirlock[OuterDoor] = this;
-        DoorToAirlock[InnerDoor] = this;
-
         OuterAnimator = OuterDoor.parent.GetComponent<Animator>();
         InnerAnimator = InnerDoor.parent.GetComponent<Animator>();
 
@@ -117,9 +118,9 @@ public class Airlock : GenericBaseModule {
         t.tag = isButtonEnabled ? "button" : "Untagged";
     }
 
-    public static void ToggleDoor(Transform t)
+    public void ToggleDoor(Transform t)
     {
-        DoorToAirlock[t]._ToggleDoor(t);
+        _ToggleDoor(t);
     }
 
     void OnTriggerEnter(Collider other)

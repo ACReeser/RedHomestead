@@ -5,13 +5,95 @@ using UnityEngine;
 using System;
 using RedHomestead.Crafting;
 
-public class Workshop : ResourcelessHabitatGameplay
+
+public class DoorRotationLerpContext
+{
+    public bool Done { get; private set; }
+    private Transform Target;
+    private Quaternion FromRotation, ToRotation, EffectiveFromRotation;
+    private float Duration;
+    private float Time;
+    private Coroutine ticker;
+
+    public DoorRotationLerpContext(Transform target, Quaternion from, Quaternion to, float duration = 1f)
+    {
+        FromRotation = from;
+        EffectiveFromRotation = from;
+        ToRotation = to;
+        Target = target;
+
+        this.Time = 0f;
+        this.Duration = Mathf.Max(duration, 0.00001f); //prevent divide by zero errors
+        this.Done = false;
+        this.ticker = null;
+    }
+
+    private void Reverse(bool setEffective = true)
+    {
+        var newToRot = FromRotation;
+
+        FromRotation = ToRotation;
+
+        if (setEffective)
+            EffectiveFromRotation = FromRotation;
+
+        ToRotation = newToRot;
+    }
+
+    public void Toggle(Func<IEnumerator, Coroutine> startCoroutine)
+    {
+        if (this.ticker == null)
+        {
+            this.ticker = startCoroutine(this._Toggle());
+        }
+        else
+        {
+            EffectiveFromRotation = Target.localRotation;
+            this.Reverse(false);
+            Time = Duration - Time;
+        }
+    }
+
+    private IEnumerator _Toggle()
+    {
+        Done = false;
+
+        while (!Done)
+        {
+            Tick();
+            yield return null;
+        }
+
+        this.Reverse();
+        this.Time = 0f;
+        this.ticker = null;
+        this.Target.name = this.Target.name == Airlock.OpenDoorName ? Airlock.ClosedDoorName : Airlock.OpenDoorName;
+    }
+
+    private void Tick()
+    {
+        this.Time += UnityEngine.Time.deltaTime;
+        if (this.Time > this.Duration)
+        {
+            Target.localRotation = ToRotation;
+
+            Done = true;
+        }
+        else
+        {
+            Target.localRotation = Quaternion.Lerp(EffectiveFromRotation, ToRotation, Time / Duration);
+        }
+    }
+}
+
+public class Workshop : ResourcelessHabitatGameplay, IDoorManager
 {
     public Craftable CurrentCraftable { get { return this.Data.FlexCraftable; } private set { this.Data.FlexCraftable = value; } }
     public float CraftableProgress { get { return this.Data.FlexFloat; } private set { this.Data.FlexFloat = value; } }
-    public Transform[] CraftableHolograms;
+    public Transform[] CraftableHolograms, Tools;
     public Transform SpawnPosition;
     private bool CurrentlyViewingDetail = false;
+    private Dictionary<Transform, DoorRotationLerpContext> doorRotator = new Dictionary<Transform, DoorRotationLerpContext>();
 
     public override float WattsConsumed
     {
@@ -105,5 +187,16 @@ public class Workshop : ResourcelessHabitatGameplay
             FloorplanBridge.Instance.SetCurrentCraftableDetail(this.Data.FlexCraftable, this.CraftableProgress);
         else
             FloorplanBridge.Instance.SetCurrentCraftableDetail(Craftable.Unspecified);
+    }
+
+    public void ToggleDoor(Transform door)
+    {
+        //assumes all door transforms start shut
+        if (!doorRotator.ContainsKey(door))
+        {
+            doorRotator[door] = new DoorRotationLerpContext(door, door.localRotation, Quaternion.Euler(0, 0, 90f), .4f);
+        }
+
+        doorRotator[door].Toggle(StartCoroutine);
     }
 }

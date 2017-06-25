@@ -740,6 +740,8 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("door"))
                 {
+                    IDoorManager doorM = hitInfo.collider.transform.root.GetComponent<IDoorManager>();
+
                     switch (hitInfo.collider.gameObject.name)
                     {
                         case Airlock.LockedDoorName:
@@ -747,13 +749,14 @@ public class PlayerInput : MonoBehaviour {
                             break;
                         case Airlock.OpenDoorName:
                             if (doInteract)
-                                Airlock.ToggleDoor(hitInfo.collider.transform);
+                                doorM.ToggleDoor(hitInfo.collider.transform);
                             else
                                 newPrompt = Prompts.CloseDoorHint;
                             break;
                         case Airlock.ClosedDoorName:
+                        default:
                             if (doInteract)
-                                Airlock.ToggleDoor(hitInfo.collider.transform);
+                                doorM.ToggleDoor(hitInfo.collider.transform);
                             else
                                 newPrompt = Prompts.OpenDoorHint;
                             break;
