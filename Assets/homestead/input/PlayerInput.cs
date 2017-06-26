@@ -93,8 +93,6 @@ public class PlayerInput : MonoBehaviour {
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
 
-    private Direction CurrentPlanningDirection;
-
     void Awake()
     {
         Instance = this;
@@ -721,16 +719,23 @@ public class PlayerInput : MonoBehaviour {
                         }
                         else if (zone.CanConstruct)
                         {
-                            if (Input.GetKeyDown(KeyCode.E))
-                                PlayInteractionClip(zone.transform.position, Sfx.Construction);
-
-                            if (Input.GetKey(KeyCode.E))
+                            if (Loadout.Equipped == Equipment.PowerDrill)
                             {
-                                zone.WorkOnConstruction(Time.deltaTime * PerkMultipliers.ConstructSpeed);
-                            }
+                                if (Input.GetMouseButtonDown(0))
+                                    PlayInteractionClip(zone.transform.position, Sfx.Construction);
 
-                            Prompts.ConstructHint.Progress = zone.ProgressPercentage;
-                            newPrompt = Prompts.ConstructHint;
+                                if (Input.GetMouseButton(0))
+                                {
+                                    zone.WorkOnConstruction(Time.deltaTime * PerkMultipliers.ConstructSpeed);
+                                }
+
+                                Prompts.ConstructHint.Progress = zone.ProgressPercentage;
+                                newPrompt = Prompts.ConstructHint;
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.RivetgunHint;
+                            }
                         }
                         else
                         {
@@ -775,7 +780,7 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("cavernwall"))
                 {
-                    if (Loadout.Equipped == Equipment.Drill)
+                    if (Loadout.Equipped == Equipment.PowerDrill)
                     {
                         if (hitInfo.collider.transform.parent != lastHobbitHoleTransform)
                         {
@@ -961,13 +966,17 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("locker"))
                 {
-                    if (doInteract)
+                    Workshop w = hitInfo.collider.transform.root.GetComponent<Workshop>();
+                    if (w != null)
                     {
-
-                    }
-                    else
-                    {
-                        newPrompt = Prompts.WorkshopHint;
+                        if (doInteract)
+                        {
+                            w.SwapEquipment(hitInfo.collider.transform);
+                        }
+                        else
+                        {
+                            newPrompt = w.GetLockerPrompt(hitInfo.collider.transform);
+                        }
                     }
                 }
                 else if (hitInfo.collider.CompareTag("suit"))

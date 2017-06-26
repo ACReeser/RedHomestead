@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using RedHomestead.Crafting;
-
+using RedHomestead.Equipment;
+using System.Linq;
 
 public class DoorRotationLerpContext
 {
@@ -90,10 +91,18 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager
 {
     public Craftable CurrentCraftable { get { return this.Data.FlexCraftable; } private set { this.Data.FlexCraftable = value; } }
     public float CraftableProgress { get { return this.Data.FlexFloat; } private set { this.Data.FlexFloat = value; } }
-    public Transform[] CraftableHolograms, Tools;
+    public Transform[] CraftableHolograms, Tools, Lockers;
     public Transform SpawnPosition;
+
     private bool CurrentlyViewingDetail = false;
     private Dictionary<Transform, DoorRotationLerpContext> doorRotator = new Dictionary<Transform, DoorRotationLerpContext>();
+    private Dictionary<Transform, Equipment> EquipmentLockers = new Dictionary<Transform, Equipment>();
+    private Equipment[] LockerEquipment = new Equipment[] {
+        Equipment.Sledge,
+        Equipment.PowerDrill,
+        Equipment.Wrench,
+        Equipment.Wrench
+    };
 
     public override float WattsConsumed
     {
@@ -130,6 +139,10 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager
     protected override void OnStart()
     {
         this.SetCurrentCraftable(this.Data.FlexCraftable);
+        for (int i = 0; i < Lockers.Length; i++)
+        {
+            EquipmentLockers[Lockers[i]] = LockerEquipment[i];
+        }
     }
 
     public void SetCurrentCraftable(Craftable c)
@@ -198,5 +211,39 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager
         }
 
         doorRotator[door].Toggle(StartCoroutine);
+    }
+
+    internal PromptInfo GetLockerPrompt(Transform transform)
+    {
+        Equipment fromLocker = EquipmentLockers[transform],
+            current = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
+
+        if (fromLocker != current)
+        {
+            Prompts.SwapEquipmentHint.Description = String.Format("Swap {0} for {1}", current.ToString(), fromLocker.ToString());
+            return Prompts.SwapEquipmentHint;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    internal void SwapEquipment(Transform transform)
+    {
+        Equipment fromLocker = EquipmentLockers[transform],
+            fromPlayer = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
+
+        int i = Array.IndexOf(Lockers, transform);
+
+        PlayerInput.Instance.Loadout.PutEquipmentInSlot(Slot.PrimaryTool, fromLocker);
+        EquipmentLockers[transform] = fromPlayer;
+        LockerEquipment[i] = fromPlayer;
+
+        //if (PlayerInput.Instance.Loadout.Equipped == fromPlayer)
+        //    PlayerInput.Instance.Loadout.ActiveSlot
+
+        GuiBridge.Instance.BuildRadialMenu(PlayerInput.Instance.Loadout);
+        GuiBridge.Instance.RefreshEquipped();
     }
 }

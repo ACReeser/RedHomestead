@@ -158,7 +158,7 @@ public class GuiBridge : MonoBehaviour {
 
     void Start()
     {
-        this.RefreshPlanningUI();
+        //this.RefreshPlanningUI();
 
         if (Game.Current.IsNewGame)
         {
@@ -362,13 +362,6 @@ public class GuiBridge : MonoBehaviour {
     {
         HelpPanel.gameObject.SetActive(!HelpPanel.gameObject.activeSelf);
     }
-
-    public void RefreshPlanningUI()
-    {
-        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior);
-        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior && selectedFloorplanGroup != FloorplanGroup.Undecided);
-    }
-    
     /// <summary>
     /// syncs player input mode
     /// </summary>
@@ -377,8 +370,7 @@ public class GuiBridge : MonoBehaviour {
         switch (PlayerInput.Instance.CurrentMode)
         {
             default:
-                this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
-                this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
+                RefreshEquipped();
                 break;
             case PlayerInput.InputMode.Pipeline:
                 this.EquippedText.text = "Pipeline";
@@ -395,7 +387,13 @@ public class GuiBridge : MonoBehaviour {
             this.PlacingPanel.gameObject.SetActive(false);
         }
 
-        this.RefreshPlanningUI();
+        //this.RefreshPlanningUI();
+    }
+
+    internal void RefreshEquipped()
+    {
+        this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
+        this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
     }
 
     internal void ShowKillMenu(string reason)

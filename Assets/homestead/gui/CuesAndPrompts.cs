@@ -400,6 +400,11 @@ public static class Prompts {
         Description = "(Requires Drill)",
         Key = "Tab"
     };
+    public static PromptInfo RivetgunHint = new PromptInfo()
+    {
+        Description = "(Requires Rivet Gun)",
+        Key = "Tab"
+    };
     internal static PromptInfo HarvestHint = new PromptInfo()
     {
         Description = "Harvest",
@@ -472,5 +477,12 @@ public static class Prompts {
     {
         Description = "Close Valve",
         Key = "E"
+    };
+    internal static PromptInfo SwapEquipmentHint = new PromptInfo()
+    {
+        Description = "Swap Valve",
+        Key = "E",
+        //SecondaryDescription = "",
+        //SecondaryKey = ""
     };
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RedHomestead.Equipment
 {
-    public enum Equipment { Locked = -1, EmptyHand = 0, Drill, Blueprints, ChemicalSniffer, Wheelbarrow, Scanner, Wrench, Sidearm, LMG, Screwdriver }
+    public enum Equipment { Locked = -1, EmptyHand = 0, PowerDrill, Blueprints, ChemicalSniffer, Wheelbarrow, Scanner, Wrench, Sidearm, LMG, Screwdriver, RockDrill, Sledge }
     public enum Slot { Unequipped = 4, PrimaryTool = 5, SecondaryTool = 3, PrimaryGadget = 1, SecondaryGadget = 0, TertiaryGadget = 2 }
 
     public class Loadout
@@ -16,7 +16,7 @@ namespace RedHomestead.Equipment
         private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
         {
             { Slot.Unequipped, Equipment.EmptyHand },
-            { Slot.PrimaryTool, Equipment.Drill },
+            { Slot.PrimaryTool, Equipment.PowerDrill },
             { Slot.SecondaryTool, Equipment.Locked },
             { Slot.PrimaryGadget, Equipment.Blueprints },
             { Slot.SecondaryGadget, Equipment.ChemicalSniffer },
@@ -95,6 +95,26 @@ namespace RedHomestead.Equipment
             else
             {
                 PutEquipmentInSlot(Slot.PrimaryTool, preWrenchPrimarySlot);
+            }
+        }
+
+        internal SlotHint GetSlotHint(Equipment e)
+        {
+            return new SlotHint()
+            {
+                MouseButton = (this[Slot.PrimaryTool] == e) ? 0 : 1
+            };
+        }
+    }
+
+    internal struct SlotHint
+    {
+        public int MouseButton;
+        public string KeyHint
+        {
+            get
+            {
+                return MouseButton == 0 ? "LMB" : "RMB";
             }
         }
     }
