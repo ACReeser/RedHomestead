@@ -91,7 +91,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager
 {
     public Craftable CurrentCraftable { get { return this.Data.FlexCraftable; } private set { this.Data.FlexCraftable = value; } }
     public float CraftableProgress { get { return this.Data.FlexFloat; } private set { this.Data.FlexFloat = value; } }
-    public Transform[] CraftableHolograms, Tools, Lockers;
+    public Transform[] CraftableHolograms, ToolsInLockers, Lockers, ToolPrefabs;
     public Transform SpawnPosition;
 
     private bool CurrentlyViewingDetail = false;
@@ -234,14 +234,16 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager
         Equipment fromLocker = EquipmentLockers[transform],
             fromPlayer = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
 
-        int i = Array.IndexOf(Lockers, transform);
+        int lockerIndex = Array.IndexOf(Lockers, transform);
 
         PlayerInput.Instance.Loadout.PutEquipmentInSlot(Slot.PrimaryTool, fromLocker);
         EquipmentLockers[transform] = fromPlayer;
-        LockerEquipment[i] = fromPlayer;
+        LockerEquipment[lockerIndex] = fromPlayer;
 
-        //if (PlayerInput.Instance.Loadout.Equipped == fromPlayer)
-        //    PlayerInput.Instance.Loadout.ActiveSlot
+        int equipmentIndex = Convert.ToInt32(fromPlayer);
+        Transform prefab = ToolPrefabs[equipmentIndex];
+        ToolsInLockers[lockerIndex].GetComponent<MeshFilter>().mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+        ToolsInLockers[lockerIndex].GetComponent<MeshRenderer>().materials = prefab.GetComponent<MeshRenderer>().sharedMaterials;
 
         GuiBridge.Instance.BuildRadialMenu(PlayerInput.Instance.Loadout);
         GuiBridge.Instance.RefreshEquipped();
