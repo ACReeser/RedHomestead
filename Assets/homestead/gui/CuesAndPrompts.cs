@@ -357,7 +357,7 @@ public static class Prompts {
     };
     internal static PromptInfo EVAChargeHint = new PromptInfo()
     {
-        Description = "Charge",
+        Description = "Fill EVA pack",
         Key = "E",
         UsesProgress = true
     };
