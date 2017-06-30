@@ -54,6 +54,14 @@ ModelImporter:
     100092: RearPassenger
     100094: RearPassenger_001
     100096: RearPassenger_002
+    100098: Default_000
+    100100: roverWindshield
+    100102: roverWindshield_MeshPart0
+    100104: roverWindshield_MeshPart1
+    100106: Default_000_MeshPart0
+    100108: Default_000_MeshPart1
+    100110: windshield
+    100112: roverTop
     400000: Cube
     400002: Cube_001
     400004: Cube_002
@@ -103,6 +111,14 @@ ModelImporter:
     400092: RearPassenger
     400094: RearPassenger_001
     400096: RearPassenger_002
+    400098: Default_000
+    400100: roverWindshield
+    400102: roverWindshield_MeshPart0
+    400104: roverWindshield_MeshPart1
+    400106: Default_000_MeshPart0
+    400108: Default_000_MeshPart1
+    400110: windshield
+    400112: roverTop
     2300000: Cube
     2300002: Cube_001
     2300004: Cube_002
@@ -150,6 +166,14 @@ ModelImporter:
     2300088: RearPassenger
     2300090: RearPassenger_001
     2300092: RearPassenger_002
+    2300094: Default_000
+    2300096: roverWindshield_MeshPart0
+    2300098: roverWindshield_MeshPart1
+    2300100: Default_000_MeshPart0
+    2300102: Default_000_MeshPart1
+    2300104: windshield
+    2300106: Default_001
+    2300108: roverTop
     3300000: Cube
     3300002: Cube_001
     3300004: Cube_002
@@ -197,6 +221,14 @@ ModelImporter:
     3300088: RearPassenger
     3300090: RearPassenger_001
     3300092: RearPassenger_002
+    3300094: Default_000
+    3300096: roverWindshield_MeshPart0
+    3300098: roverWindshield_MeshPart1
+    3300100: Default_000_MeshPart0
+    3300102: Default_000_MeshPart1
+    3300104: windshield
+    3300106: Default_001
+    3300108: roverTop
     4300000: Cube
     4300002: Cylinder
     4300004: Cylinder_001
@@ -244,16 +276,24 @@ ModelImporter:
     4300088: Cube_011
     4300090: Cylinder_010
     4300092: Cylinder_011
+    4300094: Default_000
+    4300096: roverWindshield_MeshPart0
+    4300098: roverWindshield_MeshPart1
+    4300100: windshield
+    4300102: Default_000_MeshPart0
+    4300104: Default_000_MeshPart1
+    4300106: Default_001
+    4300108: roverTop
     7400000: Default Take
     9500000: //RootNode
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
-    resampleRotations: 1
+    resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
     animationImportErrors: 
@@ -289,9 +329,10 @@ ModelImporter:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
+    serializedVersion: 2
     human: []
     skeleton: []
     armTwist: 0.5
@@ -302,7 +343,10 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 2
   humanoidOversampling: 1

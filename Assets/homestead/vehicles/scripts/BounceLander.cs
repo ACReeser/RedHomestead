@@ -1,11 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Economy;
+using RedHomestead.Simulation;
+using System.Collections.Generic;
+using RedHomestead.Crafting;
 
-public class BounceLander : MonoBehaviour
+public class BounceLander : MonoBehaviour, IDeliveryScript
 {
     public ParticleSystem[] Rockets = new ParticleSystem[4];
     public Transform airbagRoot, payloadCube, rocketRoot, payloadRoot;
+    public Transform cratePrefab, vesselPrefab;
 
     // Use this for initialization
     void Start()
@@ -144,7 +149,7 @@ public class BounceLander : MonoBehaviour
 
         while (deflateTime < deflateDuration)
         {
-            foreach(Transform t in airbagRoot)
+            foreach (Transform t in airbagRoot)
             {
                 t.localScale = Vector3.one * Mathf.Lerp(1f, .25f, deflateTime / deflateDuration);
             }
@@ -196,5 +201,67 @@ public class BounceLander : MonoBehaviour
         }
 
         GameObject.Destroy(this.gameObject);
+    }
+
+    public void Deliver(Order o)
+    {
+        PackLander(o.LineItemUnits);
+    }
+    
+    private void PackLander(ResourceCountDictionary lineItemUnits)
+    {
+        int i = 0;
+        foreach(KeyValuePair<Matter, float> kvp in lineItemUnits)
+        {
+            for (int vol = 0; vol < kvp.Value; vol++)
+            {
+                Vector3 localPos = new Vector3(
+                    (i % 4) > 1 ? .8f : -.8f,
+                    i > 3 ? 1f : -1f,
+                    (i % 2) == 0 ? .8f : -.8f
+                    );
+
+                CreateCratelike(kvp.Key, kvp.Value, localPos, payloadRoot);
+
+                i++;
+            }
+        }
+    }
+
+    public static void CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null)
+    {
+        Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
+
+        var rc = newT.GetComponent<ResourceComponent>();
+        rc.data.Container = new ResourceContainer(matter, amount);
+
+        AfterSpawnCratelike(position, parent, newT);
+    }
+
+    public static void CreateCratelike(Craftable craftable, Vector3 position, Transform parent = null)
+    {
+        Transform newT = Instantiate(craftable.Prefab());
+
+        AfterSpawnCratelike(position, parent, newT);
+    }
+
+    private static void AfterSpawnCratelike(Vector3 position, Transform parent, Transform newT)
+    {
+        if (parent == null)
+        {
+            newT.position = position;
+            newT.rotation = Quaternion.identity;
+        }
+        else
+        {
+            newT.SetParent(parent);
+            newT.localPosition = position;
+            newT.localRotation = Quaternion.identity;
+
+            newT.GetComponent<Collider>().enabled = false;
+            var rigibody = newT.GetComponent<Rigidbody>();
+            rigibody.isKinematic = true;
+            rigibody.useGravity = false;
+        }
     }
 }

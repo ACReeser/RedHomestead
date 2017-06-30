@@ -1,5 +1,21 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &118486
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 401984}
+  - 82: {fileID: 8279176}
+  m_Layer: 0
+  m_Name: Interaction Audio Source
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &125892
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,6 +28,7 @@ GameObject:
   - 54: {fileID: 5498730}
   - 82: {fileID: 8292960}
   - 114: {fileID: 11421442}
+  - 114: {fileID: 11422656}
   m_Layer: 0
   m_Name: FPSController
   m_TagString: Player
@@ -61,7 +78,7 @@ GameObject:
   - 4: {fileID: 474800}
   - 20: {fileID: 2090158}
   m_Layer: 0
-  m_Name: FlowCamera
+  m_Name: AlternativeCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -95,7 +112,6 @@ GameObject:
   - 45: {fileID: 4574634}
   - 114: {fileID: 11493248}
   - 114: {fileID: 11499320}
-  - 114: {fileID: 11437394}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: MainCamera
@@ -119,16 +135,29 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &401984
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 118486}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -292.8153, y: 395.3482, z: -982.561}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 408964}
+  m_RootOrder: 0
 --- !u!4 &408964
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 125892}
-  m_LocalRotation: {x: 0, y: 0.9833026, z: 0, w: 0.18197799}
-  m_LocalPosition: {x: 720, y: 1.19, z: 1011.8}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 715.372, y: 1.19, z: 982.561}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 401984}
   - {fileID: 423614}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -157,7 +186,7 @@ Transform:
   - {fileID: 429462}
   - {fileID: 474800}
   m_Father: {fileID: 408964}
-  m_RootOrder: 0
+  m_RootOrder: 1
 --- !u!4 &429462
 Transform:
   m_ObjectHideFlags: 1
@@ -234,7 +263,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294965759
-  m_RenderingPath: 3
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -327,6 +356,80 @@ AudioSource:
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 5
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+--- !u!82 &8279176
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 118486}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -542,7 +645,7 @@ MonoBehaviour:
   m_JumpSpeed: 10
   m_StickToGroundForce: 10
   m_GravityMultiplier: 1
-  m_MouseLook:
+  MouseLook:
     XSensitivity: 2
     YSensitivity: 2
     clampVerticalRotation: 1
@@ -624,6 +727,7 @@ MonoBehaviour:
   m_JumpSound: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   m_LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   SuspendInput: 0
+  FreezeLook: 0
   bootSprites:
   - {fileID: 0}
   - {fileID: 0}
@@ -634,25 +738,17 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   PlaceBootprints: 1
---- !u!114 &11437394
+--- !u!114 &11422656
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 194682}
+  m_GameObject: {fileID: 125892}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bd69a3d1df1d0e4383dd694418f8ab3, type: 3}
+  m_Script: {fileID: 0}
   m_Name: 
   m_EditorClassIdentifier: 
-  FloorPrefab: {fileID: 403102, guid: 9f51324f67ccf504a8af4e7275680364, type: 2}
-  MeshFloorPrefab: {fileID: 403102, guid: 9f51324f67ccf504a8af4e7275680364, type: 2}
-  WallPrefab: {fileID: 419304, guid: c69737d56bf3f5b4fbc10e5598288d1c, type: 2}
-  SingleCornerColumnPrefab: {fileID: 440040, guid: c5b821ef7c1776e49b83ad431ac841ac,
-    type: 2}
-  EdgeColumnPrefab: {fileID: 422066, guid: 634570a8188d5164daa8216c03d4fab6, type: 2}
-  DoorPrefab: {fileID: 413222, guid: 1442f73cacd4f9f4a8472e192b0ddc4b, type: 2}
-  ConcreteMaterial: {fileID: 2100000, guid: 34df2bd5a8fabc64cb08c0062b97798e, type: 2}
 --- !u!114 &11493248
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -664,7 +760,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ccc3c24a2ce84d40a4f94a5a3b98d08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FlowCamera: {fileID: 2090158}
+  AlternativeCamera: {fileID: 2090158}
   Headlamp1: {fileID: 10888764}
   Headlamp2: {fileID: 10817006}
   tubePrefab: {fileID: 463720, guid: 9d86cff3e08476b4389c61101a0f06dd, type: 2}
@@ -674,16 +770,9 @@ MonoBehaviour:
   ConstructionZonePrefab: {fileID: 484780, guid: 321c08093368d234292c4d1189edd6be,
     type: 2}
   PostItNotePrefab: {fileID: 407182, guid: b414ae3cf623a354f8b6eed66ed28175, type: 2}
-  SmallSolarFarmPrefab: {fileID: 491350, guid: 3dfa33079b916e641b7b3825e953557b, type: 2}
-  SmallGasTankPrefab: {fileID: 469504, guid: 1c934b355be8daa4e913f21bc3468299, type: 2}
-  SmallWaterTankPrefab: {fileID: 470818, guid: 59c859395974f3145a510915a770b40e, type: 2}
-  OxygenTank: {fileID: 499950, guid: c008327f633d6064d940c5527f99e5e4, type: 2}
-  SabatierPrefab: {fileID: 497914, guid: c70a5d7b7c5035145a4c5912c508bace, type: 2}
-  SplitterPrefab: {fileID: 422740, guid: e88a4b7ccf4e1374aaf90d89264c3ca5, type: 2}
-  OreExtractorPrefab: {fileID: 425088, guid: 1bc0cbbd20e62cf43907750ec56cb76d, type: 2}
-  InteriorLightPrefab: {fileID: 434370, guid: f4c9ca540ea3a8f46b5528bf418fd326, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
+  InteractionSource: {fileID: 8279176}
 --- !u!114 &11499320
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -720,7 +809,6 @@ MonoBehaviour:
     CurrentAmount: 6
     MaximumAmount: 6
     IsOnLastBar: 0
-  UsingPackResources: 1
 --- !u!143 &14362950
 CharacterController:
   m_ObjectHideFlags: 1

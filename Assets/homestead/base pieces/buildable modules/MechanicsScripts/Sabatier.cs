@@ -2,18 +2,26 @@
 using System.Collections;
 using System;
 using RedHomestead.Simulation;
+using RedHomestead.Buildings;
+using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
-public class Sabatier : Converter, IPowerToggleable
+public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
 {
+    public AudioClip HandleChangeClip;
+
     internal float HydrogenPerSecond = .1f;
     internal float MethanePerSecond = .1f;
     internal float WaterPerSecond = .1f;
-    internal bool _isOn = false;
+    public bool IsOn { get; set; }
+    public MeshFilter powerBacking { get; set; }
+    public Transform powerMask { get; set; }
+    public Transform powerActive { get; set; }
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
 
-    public override float WattRequirementsPerTick
+    public override float WattsConsumed
     {
         get
         {
@@ -21,7 +29,7 @@ public class Sabatier : Converter, IPowerToggleable
         }
     }
 
-    private Sink HydrogenSource, MethaneOut, WaterOut;
+    private ISink HydrogenSource, MethaneOut, WaterOut;
     private bool IsFullyConnected
     {
         get
@@ -30,13 +38,6 @@ public class Sabatier : Converter, IPowerToggleable
         }
     }
 
-    public bool IsOn
-    {
-        get
-        {
-            return _isOn;
-        }
-    }
 
     public override void Convert()
     {
@@ -57,10 +58,10 @@ public class Sabatier : Converter, IPowerToggleable
 
     private void PushMethaneAndWater()
     {
-        MethaneOut.Get(Compound.Methane).Push(MethanePerSecond * Time.fixedDeltaTime);
-        CompoundHistory.Produce(Compound.Methane, MethanePerSecond * Time.fixedDeltaTime);
-        WaterOut.Get(Compound.Water).Push(WaterPerSecond * Time.fixedDeltaTime);
-        CompoundHistory.Produce(Compound.Water, MethanePerSecond * Time.fixedDeltaTime);
+        MethaneOut.Get(Matter.Methane).Push(MethanePerSecond * Time.fixedDeltaTime);
+        Data.MatterHistory.Produce(Matter.Methane, MethanePerSecond * Time.fixedDeltaTime);
+        WaterOut.Get(Matter.Water).Push(WaterPerSecond * Time.fixedDeltaTime);
+        Data.MatterHistory.Produce(Matter.Water, MethanePerSecond * Time.fixedDeltaTime);
     }
 
     private float hydrogenBuffer = 0f;
@@ -68,9 +69,9 @@ public class Sabatier : Converter, IPowerToggleable
     {
         if (HydrogenSource != null)
         {
-            float newHydrogen = HydrogenSource.Get(Compound.Hydrogen).Pull(HydrogenPerSecond * Time.fixedDeltaTime);
+            float newHydrogen = HydrogenSource.Get(Matter.Hydrogen).Pull(HydrogenPerSecond * Time.fixedDeltaTime);
             hydrogenBuffer += newHydrogen;
-            CompoundHistory.Consume(Compound.Hydrogen, newHydrogen);
+            Data.MatterHistory.Consume(Matter.Hydrogen, newHydrogen);
 
             float hydrogenThisTick = HydrogenPerSecond * Time.fixedDeltaTime;
 
@@ -89,17 +90,17 @@ public class Sabatier : Converter, IPowerToggleable
         HydrogenSource = MethaneOut = WaterOut = null;
     }
 
-    public override void OnSinkConnected(Sink s)
+    public override void OnSinkConnected(ISink s)
     {
-        if (s.HasContainerFor(Compound.Hydrogen))
+        if (s.HasContainerFor(Matter.Hydrogen))
         {
             HydrogenSource = s;
         }
-        if (s.HasContainerFor(Compound.Methane))
+        if (s.HasContainerFor(Matter.Methane))
         {
             MethaneOut = s;
         }
-        if (s.HasContainerFor(Compound.Water))
+        if (s.HasContainerFor(Matter.Water))
         {
             WaterOut = s;
         }
@@ -110,21 +111,21 @@ public class Sabatier : Converter, IPowerToggleable
         //todo: report v3: flow is "0/1 kWh" etc, flow and amount update over time
         //using some sort of UpdateReport() call (which reuses built text boxes)
         //todo: report v4: each row gets a graph over time that shows effciency or flow
-        //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", CompoundHistory[Compound.Hydrogen].Consumed, CompoundHistory[Compound.Water].Produced, CompoundHistory[Compound.Methane].Produced, HasPower));
+        //print(String.Format("HasPower: {3} - Hydrogen in: {0} - Water out: {1} - Methane out: {2}", MatterHistory[Matter.Hydrogen].Consumed, MatterHistory[Matter.Water].Produced, MatterHistory[Matter.Methane].Produced, HasPower));
         GuiBridge.Instance.WriteReport(
             "Sabatier Reactor",
             "1 kWh + 1kg H2 => 1kg CH4 + 1kg H2O",
             "100%",
             "100%",
-            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
+            new ReportIOData() { Name = "Power", Flow = "1 kW/h", Amount = Data.EnergyHistory[Energy.Electrical].Consumed + " kWh", Connected = HasPower },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
+                new ReportIOData() { Name = "Hydrogen", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Hydrogen].Consumed + " kg", Connected = HydrogenSource != null  }
             },
             new ReportIOData[]
             {
-                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Methane].Produced + " kg", Connected = MethaneOut != null },
-                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = CompoundHistory[Compound.Water].Produced + " kg", Connected = WaterOut != null }
+                new ReportIOData() { Name = "Methane", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Methane].Produced + " kg", Connected = MethaneOut != null },
+                new ReportIOData() { Name = "Water", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Water].Produced + " kg", Connected = WaterOut != null }
             }
             );
     }
@@ -132,15 +133,16 @@ public class Sabatier : Converter, IPowerToggleable
     public void TogglePower()
     {
         //only allow power to turn on when power is connected
-        bool newPowerState = !_isOn;
+        bool newPowerState = !IsOn;
         if (newPowerState && HasPower)
         {
-            _isOn = newPowerState;
+            IsOn = newPowerState;
         }
         else
         {
-            _isOn = false;
+            IsOn = false;
         }
+
 
         RefreshPowerSwitch();
     }
@@ -149,5 +151,44 @@ public class Sabatier : Converter, IPowerToggleable
     {
         PowerCabinet.mesh = IsOn ? OnMesh : OffMesh;
         PowerCabinet.transform.GetChild(0).name = IsOn ? "on" : "off";
+
+        if (IsOn)
+            SoundSource.Play();
+        else
+            SoundSource.Stop();
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.SabatierReactor;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary()
+        {
+            {
+                Matter.Water,  new ResourceContainer() {
+                    MatterType = Matter.Water,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Hydrogen,  new ResourceContainer() {
+                    MatterType = Matter.Hydrogen,
+                    TotalCapacity = 1f
+                }
+            },
+            {
+                Matter.Methane,  new ResourceContainer() {
+                    MatterType = Matter.Methane,
+                    TotalCapacity = 1f
+                }
+            }
+        };
+    }
+
+    public void OnEmergencyShutdown()
+    {
     }
 }

@@ -5,12 +5,12 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 420820}
-  - 33: {fileID: 3314906}
-  - 23: {fileID: 2364136}
-  - 65: {fileID: 6534748}
+  - component: {fileID: 420820}
+  - component: {fileID: 3314906}
+  - component: {fileID: 2364136}
+  - component: {fileID: 6534748}
   m_Layer: 8
   m_Name: pipe
   m_TagString: pipe
@@ -23,10 +23,10 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 437088}
-  - 114: {fileID: 11472588}
+  - component: {fileID: 437088}
+  - component: {fileID: 11472588}
   m_Layer: 0
   m_Name: gasPipe
   m_TagString: Untagged
@@ -39,12 +39,12 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 424446}
-  - 33: {fileID: 3310906}
-  - 23: {fileID: 2392918}
-  - 114: {fileID: 11477892}
+  - component: {fileID: 424446}
+  - component: {fileID: 3310906}
+  - component: {fileID: 2392918}
+  - component: {fileID: 11477892}
   m_Layer: 9
   m_Name: MethaneNorth
   m_TagString: Untagged
@@ -57,12 +57,12 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 455164}
-  - 33: {fileID: 3368812}
-  - 23: {fileID: 2338620}
-  - 114: {fileID: 11441454}
+  - component: {fileID: 455164}
+  - component: {fileID: 3368812}
+  - component: {fileID: 2338620}
+  - component: {fileID: 11441454}
   m_Layer: 9
   m_Name: MethaneSouth
   m_TagString: Untagged
@@ -82,6 +82,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 437088}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &424446
 Transform:
   m_ObjectHideFlags: 1
@@ -94,6 +95,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 437088}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &437088
 Transform:
   m_ObjectHideFlags: 1
@@ -101,7 +103,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 116364}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 752.8983, y: 1.88, z: 975.6}
+  m_LocalPosition: {x: 719.3633, y: -0.00000011920929, z: 1002.83777}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 420820}
@@ -109,6 +111,7 @@ Transform:
   - {fileID: 455164}
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &455164
 Transform:
   m_ObjectHideFlags: 1
@@ -121,6 +124,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 437088}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &2338620
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -130,17 +134,22 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: a475b5d48db298143aedf0a9f568ebf7, type: 2}
-  m_SubsetIndices: 
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -156,17 +165,22 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: 91ffbd6afb8a0a44e8dd5707e71921dd, type: 2}
-  m_SubsetIndices: 
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -182,17 +196,22 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: a475b5d48db298143aedf0a9f568ebf7, type: 2}
-  m_SubsetIndices: 
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_SelectedEditorRenderState: 3
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -264,29 +283,26 @@ MonoBehaviour:
   NorthVis: {fileID: 3310906}
   SouthVis: {fileID: 3368812}
   CompoundUVSet:
-  - {fileID: 4300006, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
-  - {fileID: 4300006, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
-  - {fileID: 4300002, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
+  - {fileID: 4300008, guid: 23b817f47a5d545438b8667ee84370e2, type: 3}
+  - {fileID: 4300004, guid: 23b817f47a5d545438b8667ee84370e2, type: 3}
   - {fileID: 0}
-  - {fileID: 4300000, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
-  - {fileID: 4300004, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
-  - {fileID: 4300008, guid: 7f04231a81a94cf4599c4f2a4d53382c, type: 3}
+  - {fileID: 4300002, guid: 23b817f47a5d545438b8667ee84370e2, type: 3}
+  - {fileID: 4300006, guid: 23b817f47a5d545438b8667ee84370e2, type: 3}
+  - {fileID: 4300010, guid: 23b817f47a5d545438b8667ee84370e2, type: 3}
   NorthFlowVisualizationUVSet:
   - {fileID: 4300016, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
-  - {fileID: 4300016, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
   - {fileID: 4300022, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 4300012, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
-  - {fileID: 4300026, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
+  - {fileID: 4300012, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
+  - {fileID: 4300026, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
   SouthFlowVisualizationUVSet:
-  - {fileID: 4300018, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
-  - {fileID: 4300018, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
-  - {fileID: 4300020, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
+  - {fileID: 4300018, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
+  - {fileID: 4300020, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 4300014, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
-  - {fileID: 4300024, guid: 25dab872a8cef6a409497a9a4f54d40a, type: 3}
+  - {fileID: 4300014, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
+  - {fileID: 4300024, guid: 03fcf149f8fc9844791f14c7f94480e0, type: 3}
 --- !u!114 &11477892
 MonoBehaviour:
   m_ObjectHideFlags: 1

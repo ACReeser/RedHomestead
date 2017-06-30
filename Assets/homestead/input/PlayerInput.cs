@@ -6,77 +6,18 @@ using RedHomestead.Rovers;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Equipment;
+using RedHomestead.Interiors;
+using RedHomestead.Geography;
+using RedHomestead.Persistence;
+using RedHomestead.Electricity;
+using RedHomestead.Perks;
+using RedHomestead.Industry;
+using RedHomestead.Crafting;
 
-namespace RedHomestead.Equipment
+[Serializable]
+public struct InteractionClips
 {
-    public enum Equipment { Locked = -1, EmptyHand = 0, Drill, Blueprints, ChemicalSniffer, Stuff, Scanner, Wrench, Sidearm, LMG}
-    public enum Slot { Unequipped = 4, PrimaryTool = 5, SecondaryTool = 3, PrimaryGadget = 1, SecondaryGadget = 0, TertiaryGadget = 2 }
-
-    public class Loadout
-    {
-        private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
-        {
-            { Slot.Unequipped, Equipment.EmptyHand },
-            { Slot.PrimaryTool, Equipment.Drill },
-            { Slot.SecondaryTool, Equipment.Locked },
-            { Slot.PrimaryGadget, Equipment.Blueprints },
-            { Slot.SecondaryGadget, Equipment.ChemicalSniffer },
-            { Slot.TertiaryGadget, Equipment.Locked },
-        };
-
-        public Equipment this[Slot s]
-        {
-            get
-            {
-                return _loadout[s];
-            }
-        }
-
-        public Slot ActiveSlot { get; set; }
-        public Equipment Equipped
-        {
-            get
-            {
-                return this[this.ActiveSlot];
-            }
-        }
-
-        public Loadout()
-        {
-            this.ActiveSlot = Slot.Unequipped;
-        }
-
-        public bool IsConstructingExterior
-        {
-            get
-            {
-                return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.UsingPackResources;
-            }
-        }
-
-        public bool IsConstructingInterior
-        {
-            get
-            {
-                return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.IsInHabitat;
-            }
-        }
-    }
-
-    [Serializable]
-    public struct EquipmentSprites
-    {
-        public Sprite[] Sprites;
-        public Sprite Locked;
-
-        internal Sprite FromEquipment(Equipment e)
-        {
-            if (e == Equipment.Locked)
-                return Locked;
-
-            return Sprites[(int)e];
-        }
-    }
+    public AudioClip Drill, Construction;
 }
 
 /// <summary>
@@ -85,16 +26,13 @@ namespace RedHomestead.Equipment
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Normal, PostIt, Sleep }
+    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Crafting }
 
     private const float InteractionRaycastDistance = 10f;
-    private const float EVAChargerPerSecond = 7.5f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
-    private const float ExcavationPerSecond = 1f;
-    private float ConstructionPerSecond = 1f;
 
-    public Camera FlowCamera;
+    public Camera AlternativeCamera;
     public Light Headlamp1, Headlamp2;
     /// <summary>
     /// Tube prefab to be created when linking bulkheads
@@ -104,96 +42,83 @@ public class PlayerInput : MonoBehaviour {
     /// the FPS input script (usually on the parent transform)
     /// </summary>
     public CustomFPSController FPSController;
+
     /// <summary>
     /// The prefab for a construction zone
     /// </summary>
-    public Transform ConstructionZonePrefab, PostItNotePrefab,
-        //one of these for each module does NOT scale
-        SmallSolarFarmPrefab,
-        SmallGasTankPrefab,
-        SmallWaterTankPrefab,
-        OxygenTank,
-        SabatierPrefab,
-        SplitterPrefab,
-        OreExtractorPrefab,
-        InteriorLightPrefab;
+    public Transform PostItNotePrefab;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
     /// </summary>
     public Material translucentPlanningMat;
+    public ParticleSystem DrillSparks;
 
-    internal Module PlannedModule = Module.Unspecified;
+    public AudioSource InteractionSource;
+    public InteractionClips Sfx;
+    public AudioClip GoodMorningHomesteader;
+
     internal InputMode CurrentMode = InputMode.Normal;
     internal Loadout Loadout = new Loadout();
-
-    /// <summary>
-    /// Visualization == transparent preview of module to be built
-    /// Cache == only create 1 of each type of module because creation is expensive
-    /// </summary>
-    private Dictionary<Module, Transform> VisualizationCache = new Dictionary<Module, Transform>();
+    internal bool LookForRepairs = false;
 
     internal void SetPressure(bool pressurized)
     {
         FPSController.PlaceBootprints = !pressurized;
     }
 
-    //todo: same kind of cache for floorplan
-    private Dictionary<Transform, Transform> FloorplanVisCache = new Dictionary<Transform, Transform>();
-
     private RoverInput DrivingRoverInput;
-    private Collider selectedAirlock1, selectedGasValve, selectedPowerSocket, carriedObject;
-    private Compound selectedCompound = Compound.Unspecified;
+    private Collider selectedBulkhead, selectedGasValve, selectedPowerSocket;
+    private Rigidbody carriedObject;
+    private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
     private List<Transform> createdPowerlines = new List<Transform>();
     private bool playerIsOnFoot = true;
     private bool reportMenuOpen = false;
 
-    private bool playerInVehicle
+    private bool playerIsInVehicle
     {
         get
         {
             return !playerIsOnFoot;
         }
     }
-    
-    private Transform PlannedModuleVisualization, PlannedFloorplanVisualization;
+
+    private Workshop CurrentCraftablePlanner;
+    private Planning<Module> ModulePlan = new Planning<Module>();
+    private Planning<Stuff> StuffPlan = new Planning<Stuff>();
+    private Planning<Floorplan> FloorPlan = new Planning<Floorplan>();
+
     private Transform lastHobbitHoleTransform;
     private HobbitHole lastHobbitHole;
-    public enum Direction { North, East, South, West }
-
-    private Direction CurrentPlanningDirection;
 
     void Awake()
     {
         Instance = this;
+        InteractionSource.transform.SetParent(null);
     }
 
     void Start()
     {
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);
         Equip(Slot.Unequipped);
+        PrefabCache<Module>.TranslucentPlanningMat = translucentPlanningMat;
+        PrefabCache<Stuff>.TranslucentPlanningMat = translucentPlanningMat;
+        PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
+        Autosave.Instance.AutosaveEnabled = true;
+        DrillSparks.transform.SetParent(null);
+    }
+
+    internal void PlanCraftable(Craftable whatToBuild)
+    {
+        CurrentCraftablePlanner.SetCurrentCraftable(whatToBuild);
+        CurrentCraftablePlanner.ToggleCraftableView(true);
+        this.CurrentMode = InputMode.Crafting;
     }
 
     // Update is called once per frame
     void Update () {
-
-	    if (Input.GetKeyUp(KeyCode.Escape))
-        {
-            if (reportMenuOpen)
-                ToggleReport(null);
-            else if (playerIsOnFoot)
-            {
-                UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
-            }
-            else if (playerInVehicle)
-            {
-                ToggleVehicle(null);
-            }
-        }
-
-
 #if UNITY_EDITOR
         if (Input.GetKeyUp(KeyCode.Comma))
         {
@@ -203,51 +128,63 @@ public class PlayerInput : MonoBehaviour {
         {
             SunOrbit.Instance.SpeedUp();
         }
-#endif
-
-        if (CurrentMode != InputMode.PostIt)
+        else if (Input.GetKeyUp(KeyCode.I))
         {
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                GuiBridge.Instance.ToggleRadialMenu(true);
-                FPSController.FreezeLook = true;
-            }
-            else if (Input.GetKeyUp(KeyCode.Tab))
-            {
-                Equip(GuiBridge.Instance.ToggleRadialMenu(false));
-                FPSController.FreezeLook = false;
-            }
-            else if (GuiBridge.Instance.RadialMenuOpen)
-            {
-                HandleRadialInput();
-            }
-
-            if (Input.GetKeyUp(KeyCode.F))
-            {
-                Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
-            }
-
-            if (Input.GetKeyUp(KeyCode.F1))
-            {
-                GuiBridge.Instance.ToggleHelpMenu();
-            }
-
-            if (Input.GetKeyUp(KeyCode.V))
-            {
-                FlowCamera.enabled = !FlowCamera.enabled;
-            }
+            Loadout.PutEquipmentInSlot(Slot.SecondaryGadget, Equipment.Screwdriver);
         }
-
-
+        else if (Input.GetKeyUp(KeyCode.B))
+        {
+            Loadout.PutEquipmentInSlot(Slot.SecondaryGadget, Equipment.Wheelbarrow);
+        }
+        else if (Input.GetKeyUp(KeyCode.S) && Input.GetKey(KeyCode.RightShift))
+        {
+            Autosave.Instance.Save();
+        }
+#endif
+        if (Input.GetKeyUp(KeyCode.F1))
+        {
+            GuiBridge.Instance.ToggleHelpMenu();
+        } else if (Input.GetKeyUp(KeyCode.F2))
+        {
+            GuiBridge.Instance.ToggleCinematicMode();
+        }
+        
         PromptInfo newPrompt = null;
         bool doInteract = Input.GetKeyUp(KeyCode.E);
 
         switch (CurrentMode)
         {
             case InputMode.Normal:
+
                 HandleDefaultInput(ref newPrompt, doInteract);
-                HandleExteriorPlanningInput(ref newPrompt, doInteract);
-                HandleInteriorPlanningInput(ref newPrompt, doInteract);
+
+                switch (this.Loadout.Equipped)
+                {
+                    case Equipment.Blueprints:
+                        HandleExteriorPlanningInput(ref newPrompt, doInteract);
+                        break;
+                    case Equipment.Screwdriver:
+                        HandleStuffPlanningInput(ref newPrompt, doInteract);
+                        break;
+                    case Equipment.Wheelbarrow:
+                        HandleInteriorPlanningInput(ref newPrompt, doInteract);
+                        break;
+                    case Equipment.Wrench:
+                        HandleWrenchInput(ref newPrompt);
+                        break;
+                }
+
+                if (CurrentCraftablePlanner != null)
+                {
+                    if (Input.GetKeyUp(KeyCode.G))
+                    {
+                        ToggleCraftableBlueprintMode(true);
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Tab))
+                    {
+                        ToggleCraftableBlueprintMode(false);
+                    }
+                }
                 break;
             case InputMode.PostIt:
                 HandlePostItInput(ref newPrompt, doInteract);
@@ -255,8 +192,30 @@ public class PlayerInput : MonoBehaviour {
             case InputMode.Sleep:
                 HandleSleepInput(ref newPrompt, doInteract);
                 break;
+            case InputMode.Crafting:
+                HandleCraftingInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Terminal:
+                HandleTerminalInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Pipeline:
+                HandlePipelineInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Powerline:
+                HandlePowerlineInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.Menu:
+                if (Input.GetKeyUp(KeyCode.Escape))
+                    ToggleMenu();
+                break;
         }
 
+
+        if (CurrentEVAStation != null && doInteract)
+        {
+            CurrentEVAStation.ToggleUse(false);
+            CurrentEVAStation = null;
+        }
         //if we were hovering or doing something that has a prompt
         //we will have a newPrompt
         //if we don't
@@ -269,6 +228,185 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleCraftingInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Comma))
+        {
+            SunOrbit.Instance.SlowDown();
+        }
+        else if (Input.GetKeyUp(KeyCode.Period))
+        {
+            SunOrbit.Instance.SpeedUp();
+        }
+        else if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            wakeyWakeySignal = WakeSignal.PlayerCancel;
+        }
+
+        if (CurrentCraftablePlanner != null)
+        {
+            CurrentCraftablePlanner.MakeProgress(Time.deltaTime);
+        }
+
+        if (wakeyWakeySignal.HasValue && wakeyWakeySignal.Value != WakeSignal.DayStart)
+        {
+            CurrentCraftablePlanner.ToggleCraftableView(false);
+            
+            ToggleCraftableBlueprintMode(false);
+
+            wakeyWakeySignal = null;
+
+            CurrentMode = InputMode.Normal;
+        }
+    }
+
+    private void HandleWrenchInput(ref PromptInfo newPrompt)
+    {
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, layerNames: "Default"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.transform.root.CompareTag(Gremlin.GremlindTag))
+                {
+                    IRepairable repairable = hitInfo.collider.transform.root.GetComponent<IRepairable>();
+
+                    if (repairable != null)
+                    {
+                        if (Input.GetKey(KeyCode.E))
+                        {
+                            Gremlin.Instance.EffectRepair(repairable);
+                        }
+
+                        newPrompt = Prompts.RepairHint;
+                        newPrompt.Progress = 1f - repairable.FaultedPercentage;
+                    }
+                }
+            }
+        }
+    }
+
+    private void HandlePowerlineInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            selectedPowerSocket = null;
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
+        }
+
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.gameObject.CompareTag("powerplug"))
+                {
+                    newPrompt = OnPowerPlug(newPrompt, doInteract, hitInfo);
+                }
+                else
+                {
+                    newPrompt = Prompts.StopPowerPlugHint;
+                }
+            }
+            else
+            {
+                newPrompt = Prompts.StopPowerPlugHint;
+            }
+        }
+        else
+        {
+            newPrompt = Prompts.StopPowerPlugHint;
+        }
+    }
+
+    private void HandlePipelineInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            selectedGasValve = null;
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
+        }
+
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (IsGasValve(hitInfo.collider))
+                {
+                    newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
+                }
+                else
+                {
+                    newPrompt = Prompts.StopGasPipeHint;
+                }
+            }
+            else
+            {
+                newPrompt = Prompts.StopGasPipeHint;
+            }
+        }
+        else
+        {
+            newPrompt = Prompts.StopGasPipeHint;
+        }
+    }
+
+    private void HandleStuffPlanningInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (StuffPlan.IsActive)
+        {
+            if (Input.GetMouseButtonUp(0))
+            {
+                StuffPlan.Rotate(true, false, 45);
+            }
+            else if (Input.GetMouseButtonUp(1))
+            {
+                StuffPlan.Rotate(false, false, 45);
+            }
+
+            RaycastHit hitInfo;
+            if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
+            {
+                if (hitInfo.collider != null)
+                {
+                    if (hitInfo.collider.CompareTag("cavernstuff"))
+                    {
+                        if (doInteract)
+                        {
+                            PlaceStuffHere(hitInfo.collider);
+                        }
+                        else
+                        {
+                            if (StuffPlan.IsActive && StuffPlan.Visualization.parent != hitInfo.collider.transform)
+                            {
+                                StuffPlan.Visualization.SetParent(hitInfo.collider.transform);
+                                StuffPlan.Visualization.localPosition = Vector3.zero;
+                                StuffPlan.Visualization.localRotation = Quaternion.identity;
+                            }
+
+                            newPrompt = Prompts.PlaceStuffHint;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.G))
+            {
+                FloorplanBridge.Instance.ToggleStuffPanel(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                FloorplanBridge.Instance.ToggleStuffPanel(false);
+                StuffPlan.Reset();
+            }
+        }
+    }
 
     private void HandleRadialInput()
     {
@@ -288,7 +426,7 @@ public class PlayerInput : MonoBehaviour {
         {
             this.PostItText = null;
             this.CurrentMode = InputMode.Normal;
-            FPSController.SuspendInput = false;
+            FPSController.FreezeMovement = false;
 
             RefreshEquipmentState();
         }
@@ -354,154 +492,78 @@ public class PlayerInput : MonoBehaviour {
 
     private void HandleInteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
-        if (Input.GetMouseButtonUp(0))
+        if (FloorPlan.IsActive)
         {
-            CurrentPlanningDirection = CurrentPlanningDirection - 1;
-            if (CurrentPlanningDirection < 0)
-                CurrentPlanningDirection = Direction.West;
-        }
-        else if (Input.GetMouseButtonUp(1))
-        {
-            CurrentPlanningDirection = CurrentPlanningDirection + 1;
-
-            if (CurrentPlanningDirection > Direction.West)
-                CurrentPlanningDirection = Direction.North;
-        }
-
-        if (Input.GetKeyUp(KeyCode.T))
-        {
-            DisableAndForgetFloorplanVisualization();
-            CycleSubGroup();
-            Material mat;
-            Transform prefab = FloorplanBridge.Instance.GetPrefab(out mat);
-            if (prefab != null)
+            if (Input.GetMouseButtonUp(0))
             {
-                if (FloorplanVisCache.ContainsKey(prefab))
-                {
-                    PlannedFloorplanVisualization = FloorplanVisCache[prefab];
-                    PlannedFloorplanVisualization.gameObject.SetActive(true);
-                }
-                else
-                {
-                    Transform t = GameObject.Instantiate(prefab);
-                    FloorplanVisCache[prefab] = t;
-                    PlannedFloorplanVisualization = t;
-                }
-                PlannedFloorplanVisualization.GetChild(0).GetComponent<Renderer>().material = mat;
+                FloorPlan.Rotate(true, false);
             }
-        }
-
-        RaycastHit hitInfo;
-        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
-        {
-            if (hitInfo.collider != null)
+            else if (Input.GetMouseButtonUp(1))
             {
-                if (hitInfo.collider.gameObject.CompareTag("cavern"))
-                {
-                    if (doInteract)
-                    {
-                        PlaceFloorplanHere(hitInfo.collider);
-                    }
-                    else
-                    {
-                        if (PlannedFloorplanVisualization != null)
-                        {
-                            PlannedFloorplanVisualization.position = hitInfo.collider.transform.parent.position;
-                            PlannedFloorplanVisualization.localRotation = CurrentPlanningDirectionToQuaternion();
+                FloorPlan.Rotate(false, false);
+            }
 
-                            newPrompt = Prompts.PlaceFloorplanHint;
+            RaycastHit hitInfo;
+            if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, "interaction"))
+            {
+                if (hitInfo.collider != null)
+                {
+                    if (hitInfo.collider.gameObject.CompareTag("cavern"))
+                    {
+                        if (doInteract)
+                        {
+                            PlaceFloorplanHere(hitInfo.collider);
+                        }
+                        else
+                        {
+                            if (FloorPlan.IsActive && FloorPlan.Visualization.parent != hitInfo.collider.transform)
+                            {
+                                FloorPlan.Visualization.SetParent(hitInfo.collider.transform);
+                                FloorPlan.Visualization.localPosition = Vector3.zero;
+                                FloorPlan.Visualization.localRotation = Quaternion.identity;
+
+                                newPrompt = Prompts.PlaceFloorplanHint;
+                            }
                         }
                     }
                 }
-                else if (hitInfo.collider.CompareTag("cavernstuff"))
-                {
-                    if (doInteract)
-                    {
-                        PlaceStuffHere(hitInfo.collider);
-                    }
-                    else
-                    {
-                        newPrompt = Prompts.PlaceLightHint;
-                    }
-                }
             }
-        }
-    }
-
-    private void CycleSubGroup()
-    {
-        if (GuiBridge.Instance.selectedFloorplanGroup == FloorplanGroup.Undecided)
-        {
-            GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
-            GuiBridge.Instance.selectedFloorplanSubgroup = GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
         }
         else
         {
-            int nextSubGroup = (int)GuiBridge.Instance.selectedFloorplanSubgroup + 1;
-            if (nextSubGroup >= GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup].Length)
+            if (Input.GetKeyUp(KeyCode.G))
             {
-                CycleGroup();
+                FloorplanBridge.Instance.ToggleFloorplanPanel(true);
             }
-            else
+            else if (Input.GetKeyDown(KeyCode.Tab))
             {
-                GuiBridge.Instance.selectedFloorplanSubgroup = (FloorplanSubGroup)nextSubGroup;
+                FloorplanBridge.Instance.ToggleFloorplanPanel(false);
+                FloorPlan.Reset();
             }
-        }
-
-        GuiBridge.Instance.PlacingPanel.gameObject.SetActive(true);
-        GuiBridge.Instance.PlacingText.text = GuiBridge.Instance.selectedFloorplanMaterial + " " + GuiBridge.Instance.selectedFloorplanSubgroup + " " + GuiBridge.Instance.selectedFloorplanGroup;
-    }
-
-    private void CycleGroup()
-    {
-        int nextGroup = (int)GuiBridge.Instance.selectedFloorplanGroup + 1;
-        if (nextGroup >= GuiBridge.FloorplanGroupmap.Keys.Count)
-        {
-            GuiBridge.Instance.selectedFloorplanGroup = FloorplanGroup.Floor;
-        }
-        else
-        {
-            GuiBridge.Instance.selectedFloorplanGroup = (FloorplanGroup)nextGroup;
-            GuiBridge.Instance.selectedFloorplanSubgroup = GuiBridge.FloorplanGroupmap[GuiBridge.Instance.selectedFloorplanGroup][0];
         }
     }
-
-    private static Quaternion eastQ = Quaternion.Euler(0, 90, 0);
-    private static Quaternion southQ = Quaternion.Euler(0, 180, 0);
-    private static Quaternion westQ = Quaternion.Euler(0, 270, 0);
+    
     private TextMesh PostItText;
-
-    private Quaternion CurrentPlanningDirectionToQuaternion()
-    {
-        switch (CurrentPlanningDirection)
-        {
-            case Direction.North:
-                return Quaternion.identity;
-            case Direction.East:
-                return eastQ;
-            case Direction.South:
-                return southQ;
-            case Direction.West:
-                return westQ;
-        }
-
-        return Quaternion.identity;
-    }
 
     private void PlaceFloorplanHere(Collider place)
     {
-        Transform t = GameObject.Instantiate<Transform>(PlannedFloorplanVisualization);
+        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Floorplan>.Cache.GetPrefab(FloorPlan.Type), FloorPlan.Visualization.position, FloorPlan.Visualization.rotation);
+        t.GetChild(0).GetComponent<MeshRenderer>().material = FloorplanBridge.Instance.ConcreteMaterial;
         t.SetParent(place.transform.parent);
         t.localEulerAngles = Round(t.localEulerAngles);
-        //DisableAndForgetFloorplanVisualization();
+        t.localPosition = Vector3.zero;
+        Equip(Slot.Unequipped);
+        FloorPlan.Reset();
     }
 
     private void PlaceStuffHere(Collider place)
     {
-        Transform t = GameObject.Instantiate<Transform>(InteriorLightPrefab);
+        Transform t = GameObject.Instantiate<Transform>(PrefabCache<Stuff>.Cache.GetPrefab(StuffPlan.Type), StuffPlan.Visualization.position, StuffPlan.Visualization.rotation);
         t.SetParent(place.transform.parent);
         t.localEulerAngles = Round(t.localEulerAngles);
         t.localPosition = Vector3.down * .5f;
+        Equip(Slot.Unequipped);
+        StuffPlan.Reset();
     }
 
     private Vector3 Round(Vector3 localEulerAngles)
@@ -512,45 +574,100 @@ public class PlayerInput : MonoBehaviour {
 
         return localEulerAngles;
     }
-
-    private void DisableAndForgetFloorplanVisualization()
-    {
-        if (PlannedFloorplanVisualization != null)
-        {
-            PlannedFloorplanVisualization.gameObject.SetActive(false);
-            PlannedFloorplanVisualization = null;
-        }
-    }
-
+    
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            if (reportMenuOpen)
+            {
+                ToggleReport(null);
+            }
+            else if (playerIsInVehicle)
+            {
+                ToggleVehicle(null);
+            }
+            else
+            {
+                ToggleMenu();
+                return;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            GuiBridge.Instance.ToggleRadialMenu(true);
+            FPSController.FreezeLook = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            FPSController.FreezeLook = false;
+            Equip(GuiBridge.Instance.ToggleRadialMenu(false));
+        }
+        else if (GuiBridge.Instance.RadialMenuOpen)
+        {
+            HandleRadialInput();
+        }
+
+        if (Input.GetKeyUp(KeyCode.F))
+        {
+            Headlamp1.enabled = Headlamp2.enabled = !Headlamp1.enabled;
+        }
+        if (Input.GetKeyUp(KeyCode.V))
+        {
+            AlternativeCamera.enabled = !AlternativeCamera.enabled;
+        }
+        if (playerIsInVehicle && Input.GetKeyUp(KeyCode.C))
+        {
+            DrivingRoverInput.ChangeCameraMount();
+        }
+
         RaycastHit hitInfo;
-        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        if (CastRay(out hitInfo, carriedObject == null ? QueryTriggerInteraction.Collide : QueryTriggerInteraction.Ignore, layerNames: "interaction"))
         {
             if (hitInfo.collider != null)
             {
                 if (hitInfo.collider.gameObject.CompareTag("movable"))
                 {
+                    IMovableSnappable res = hitInfo.collider.GetComponent<IMovableSnappable>();
+
+                    if (res == null)
+                        res = hitInfo.collider.transform.root.GetComponent<IMovableSnappable>();
+
+                    bool isDeployable = res is IDeployable;
+
                     if (carriedObject == null)
                     {
-                        if (doInteract)
+                        if (Input.GetMouseButtonDown(0) && (!isDeployable || !(res as IDeployable).Deployed))
                         {
-                            PickUpObject(hitInfo);
+                            PickUpObject(hitInfo.rigidbody, res);
+                        }
+                        else if (isDeployable)
+                        {
+                            if (doInteract)
+                                (res as IDeployable).ToggleDeploy();
+                            else
+                            {
+                                newPrompt = (res as IDeployable).Deployed ? Prompts.DeployableRetractHint : Prompts.DeployableDeployHint;
+                            }
                         }
                         else
                         {
                             newPrompt = Prompts.PickupHint;
+                            newPrompt.ItalicizedText = res.GetText();
                         }
                     }
                     else
                     {
-                        if (doInteract)
+                        if (Input.GetMouseButtonUp(0))
                         {
                             DropObject();
                         }
                         else
                         {
                             newPrompt = Prompts.DropHint;
+                            if (res != null)
+                                newPrompt.ItalicizedText = res.GetText();
                         }
                     }
                 }
@@ -570,34 +687,66 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnExistingPipe(doInteract, hitInfo);
                 }
+                else if (hitInfo.collider.gameObject.CompareTag("powerline"))
+                {
+                    newPrompt = OnExistingPowerline(doInteract, hitInfo);
+                }
                 else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
-                    if (doInteract)
+                    RoverInput ri = hitInfo.collider.transform.GetComponent<RoverInput>();
+
+                    if (ri.CanDrive)
                     {
-                        ToggleVehicle(hitInfo.collider.transform.GetComponent<RoverInput>());
+                        if (doInteract)
+                            ToggleVehicle(ri);
+                        else
+                            newPrompt = Prompts.DriveRoverPrompt;
                     }
                     else
                     {
-                        newPrompt = Prompts.DriveRoverPrompt;
+                        newPrompt = Prompts.UnhookRoverPrompt;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("constructionzone"))
                 {
                     ConstructionZone zone = hitInfo.collider.GetComponent<ConstructionZone>();
 
-                    if (zone != null && carriedObject == null && zone.CanConstruct)
+                    if (zone != null && carriedObject == null)
                     {
-                        if (Input.GetKey(KeyCode.E))
+                        if (Input.GetKeyUp(KeyCode.X))
                         {
-                            zone.WorkOnConstruction(Time.deltaTime * this.ConstructionPerSecond);
+                            zone.Deconstruct();
                         }
+                        else if (zone.CanConstruct)
+                        {
+                            if (Loadout.Equipped == Equipment.PowerDrill)
+                            {
+                                if (Input.GetMouseButtonDown(0))
+                                    PlayInteractionClip(zone.transform.position, Sfx.Construction);
 
-                        Prompts.ConstructHint.Progress = zone.ProgressPercentage;
-                        newPrompt = Prompts.ConstructHint;
+                                if (Input.GetMouseButton(0))
+                                {
+                                    zone.WorkOnConstruction(Time.deltaTime * PerkMultipliers.ConstructSpeed);
+                                }
+
+                                Prompts.ConstructHint.Progress = zone.ProgressPercentage;
+                                newPrompt = Prompts.ConstructHint;
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.RivetgunHint;
+                            }
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.DeconstructHint;
+                        }
                     }
                 }
                 else if (hitInfo.collider.CompareTag("door"))
                 {
+                    IDoorManager doorM = hitInfo.collider.transform.root.GetComponent<IDoorManager>();
+
                     switch (hitInfo.collider.gameObject.name)
                     {
                         case Airlock.LockedDoorName:
@@ -605,21 +754,33 @@ public class PlayerInput : MonoBehaviour {
                             break;
                         case Airlock.OpenDoorName:
                             if (doInteract)
-                                Airlock.ToggleDoor(hitInfo.collider.transform);
+                                doorM.ToggleDoor(hitInfo.collider.transform);
                             else
                                 newPrompt = Prompts.CloseDoorHint;
                             break;
                         case Airlock.ClosedDoorName:
+                        default:
                             if (doInteract)
-                                Airlock.ToggleDoor(hitInfo.collider.transform);
+                                doorM.ToggleDoor(hitInfo.collider.transform);
                             else
                                 newPrompt = Prompts.OpenDoorHint;
                             break;
                     }
                 }
+                else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("hatchback"))
+                {
+                    if (doInteract)
+                    {
+                        hitInfo.collider.transform.root.GetComponent<RoverInput>().ToggleHatchback();
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.RoverDoorPrompt;
+                    }
+                }
                 else if (hitInfo.collider.CompareTag("cavernwall"))
                 {
-                    if (Loadout.Equipped == Equipment.Drill)
+                    if (Loadout.Equipped == Equipment.PowerDrill)
                     {
                         if (hitInfo.collider.transform.parent != lastHobbitHoleTransform)
                         {
@@ -628,12 +789,29 @@ public class PlayerInput : MonoBehaviour {
 
                         if (lastHobbitHole != null)
                         {
+                            if (Input.GetKeyDown(KeyCode.E))
+                            {
+                                PlayInteractionClip(hitInfo.collider.transform.position, Sfx.Drill, false);
+                                DrillSparks.Play();
+                            }
+
                             if (Input.GetKey(KeyCode.E))
                             {
-                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * ExcavationPerSecond);
+                                Prompts.ExcavateHint.Progress = lastHobbitHole.Excavate(hitInfo.collider.transform.localPosition, Time.deltaTime * PerkMultipliers.ExcavationSpeed);
+                                if (Prompts.ExcavateHint.Progress >= 1f)
+                                {
+                                    DrillSparks.Stop();
+                                    InteractionSource.Stop();
+                                }
+                                else
+                                {
+                                    DrillSparks.transform.position = hitInfo.point + hitInfo.normal.normalized * .02f;
+                                }
                             }
                             else
                             {
+                                DrillSparks.Stop();
+                                InteractionSource.Stop();
                                 Prompts.ExcavateHint.Progress = lastHobbitHole.ExcavationProgress(hitInfo.collider.transform.localPosition);
                             }
                         }
@@ -655,15 +833,19 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (hitInfo.collider.name == "depressurize")
                         {
-                            hitInfo.collider.transform.parent.GetComponent<Airlock>().Depressurize();
+                            hitInfo.collider.transform.parent.parent.GetComponent<Airlock>().Depressurize();
                         }
                         else if (hitInfo.collider.name == "pressurize")
                         {
-                            hitInfo.collider.transform.parent.GetComponent<Airlock>().Pressurize();
+                            hitInfo.collider.transform.parent.parent.GetComponent<Airlock>().Pressurize();
                         }
-                        else if (hitInfo.collider.name == "supplydrop")
+                        else if (hitInfo.collider.name == "RoverLightsButton")
                         {
-                            hitInfo.collider.transform.root.GetComponent<LandingZone>().CallLander();
+                            DrivingRoverInput.ToggleLights();
+                        }
+                        else if (hitInfo.collider.name == "HabitatLightsButton")
+                        {
+                            SurvivalTimer.Instance.CurrentHabitat.PlayerToggleLights();
                         }
                     }
                     else
@@ -724,15 +906,30 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("mealorganic"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealOrganicEatHint, MealType.Organic);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealOrganicEatHint, Matter.OrganicMeal);
                 }
                 else if (hitInfo.collider.CompareTag("mealprepared"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealPreparedEatHint, MealType.Prepared);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealPreparedEatHint, Matter.RationMeal);
                 }
                 else if (hitInfo.collider.CompareTag("mealshake"))
                 {
-                    newPrompt = OnFoodHover(doInteract, Prompts.MealShakeEatHint, MealType.Shake);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealShakeEatHint, Matter.MealShake);
+                }
+                else if (hitInfo.collider.CompareTag("terminal"))
+                {
+                    if (doInteract)
+                    {
+                        CurrentTerminal = hitInfo.collider.GetComponent<Terminal>();
+                        if (CurrentTerminal == null)
+                            CurrentTerminal = hitInfo.collider.transform.parent.GetChild(0).GetChild(0).GetComponent<Terminal>();
+
+                        BeginTerminal();
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.TerminalEnter;
+                    }
                 }
                 else if (hitInfo.collider.CompareTag("bed"))
                 {
@@ -743,6 +940,54 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         newPrompt = Prompts.BedEnterHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("workshop"))
+                {
+                    if (doInteract)
+                    {
+                        Workshop w = hitInfo.collider.transform.root.GetComponent<Workshop>();
+                        if (w != null)
+                        {
+                            CurrentCraftablePlanner = w;
+
+                            this.ToggleCraftableBlueprintMode(true);
+
+                            if (CurrentCraftablePlanner.CurrentCraftable != Craftable.Unspecified)
+                            {
+                                this.CurrentMode = InputMode.Crafting;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.WorkshopHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("locker"))
+                {
+                    Workshop w = hitInfo.collider.transform.root.GetComponent<Workshop>();
+                    if (w != null)
+                    {
+                        if (doInteract)
+                        {
+                            w.SwapEquipment(hitInfo.collider.transform);
+                        }
+                        else
+                        {
+                            newPrompt = w.GetLockerPrompt(hitInfo.collider.transform);
+                        }
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("suit"))
+                {
+                    if (doInteract)
+                    {
+
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.WorkshopSuitHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("postit"))
@@ -758,9 +1003,12 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("evacharger"))
                 {
-                    if (Input.GetKey(KeyCode.E))
+                    if (Input.GetKeyDown(KeyCode.E))
                     {
-                        SurvivalTimer.Instance.Power.Resupply(EVAChargerPerSecond * Time.deltaTime);
+                        CurrentEVAStation = hitInfo.collider.transform.root.GetComponent<EVAStation>();
+
+                        if (CurrentEVAStation != null)
+                            CurrentEVAStation.ToggleUse(true);
                     }
                     else
                     {
@@ -785,10 +1033,55 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.ReportHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("pumpHandle"))
+                {
+                    Pump pump = hitInfo.collider.transform.parent.parent.GetComponent<Pump>();
+
+                    if (pump != null)
+                    {
+                        if (pump.PumpMode && Input.GetMouseButtonUp(0))
+                        {
+                            pump.StartPumpingIn();
+                            PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
+                        }
+                        else if (pump.PumpMode && Input.GetMouseButtonUp(1))
+                        {
+                            pump.StartPumpingOut();
+                            PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
+                        }
+                        else if (pump.ValveMode && doInteract)
+                        {
+                            pump.ToggleValve();
+                            PlayInteractionClip(hitInfo.point, pump.HandleChangeClip);
+                        }
+                        else
+                        {
+                            newPrompt = pump.CurrentPromptBasedOnPumpStatus;
+                        }
+                    }
+                    else
+                    {
+                        IceDrill drill = hitInfo.collider.transform.root.GetComponent<IceDrill>();
+
+                        if (drill != null)
+                        {
+                            if (doInteract)
+                            {
+                                drill.ToggleDrilling();
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.StartDrillHint;
+                            }
+                        }
+                    }
+
+                }
                 else if (hitInfo.collider.CompareTag("powerSwitch"))
                 {
                     if (doInteract)
                     {
+                        //PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
                         hitInfo.collider.transform.root.GetComponent<IPowerToggleable>().TogglePower();
                     }
                     else
@@ -820,12 +1113,52 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.PayloadDisassembleHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("harvestable"))
+                {
+                    IHarvestable harvestable = hitInfo.collider.transform.parent.GetComponent<IHarvestable>();
+
+                    if (harvestable.CanHarvest)
+                    {
+                        if (doInteract)
+                        {
+                            harvestable.Harvest();
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.HarvestHint;
+                        }
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("deposit"))
+                {
+                    Deposit deposit = hitInfo.collider.GetComponent<Deposit>();
+
+                    newPrompt = Prompts.DepositHint;
+                    newPrompt.Progress = deposit.Data.Extractable.UtilizationPercentage;
+                    newPrompt.Description = deposit.Data.ExtractableHint;
+                }
+                else if (hitInfo.collider.CompareTag("corridor") && SurvivalTimer.Instance.UsingPackResources)
+                {
+                    Powerline powerline = hitInfo.collider.transform.parent.GetComponent<Powerline>();
+
+                    if (powerline != null)
+                    {
+                        if (doInteract)
+                        {
+                            powerline.Remove();
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.CorridorDeconstructHint;
+                        }
+                    }
+                }
             }
             else if (doInteract)
             {
-                if (selectedAirlock1 != null)
+                if (selectedBulkhead != null)
                 {
-                    selectedAirlock1 = null;
+                    selectedBulkhead = null;
                 }
                 if (selectedGasValve != null)
                 {
@@ -850,10 +1183,42 @@ public class PlayerInput : MonoBehaviour {
                 newPrompt = Prompts.LadderOffHint;
             }
         }
+        else if (CurrentEVAStation != null)
+        {
+            CurrentEVAStation.ToggleUse(false);
+            CurrentEVAStation = null;
+        }
 
         if (!doInteract && Input.GetKeyUp(KeyCode.P))
         {
             PlacePostIt();
+        }
+    }
+    
+    internal void ToggleRepairMode(bool isRepairMode)
+    {
+        Loadout.ToggleRepairWrench(isRepairMode);
+        Equip(Slot.PrimaryTool);
+    }
+
+    internal void ToggleMenu()
+    {
+        CurrentMode = CurrentMode == InputMode.Menu ? InputMode.Normal : InputMode.Menu;
+        GuiBridge.Instance._ToggleEscapeMenuProgrammatically();
+        FPSController.FreezeLook = CurrentMode == InputMode.Menu;
+        Time.timeScale = CurrentMode == InputMode.Menu ? 0 : 1f;
+    }
+
+    public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip, bool oneShot = true)
+    {
+        this.InteractionSource.transform.position = point;
+        if (oneShot)
+            this.InteractionSource.PlayOneShot(handleChangeClip);
+        else
+        {
+            this.InteractionSource.clip = handleChangeClip;
+            this.InteractionSource.loop = true;
+            this.InteractionSource.Play();
         }
     }
 
@@ -880,7 +1245,7 @@ public class PlayerInput : MonoBehaviour {
             t.SetParent(hitInfo.collider.transform);
             this.PostItText = t.GetChild(0).GetChild(0).GetComponent<TextMesh>();
             this.CurrentMode = InputMode.PostIt;
-            FPSController.SuspendInput = true;
+            FPSController.FreezeMovement = true;
             this.RefreshEquipmentState();
         }
     }
@@ -891,8 +1256,8 @@ public class PlayerInput : MonoBehaviour {
         {
             //pipe script is on parent object
             Pipe pipeScript = hitInfo.collider.transform.parent.GetComponent<Pipe>();
-            ModuleGameplay from = pipeScript.from.root.GetComponent<ModuleGameplay>();
-            ModuleGameplay to = pipeScript.to.root.GetComponent<ModuleGameplay>();
+            ModuleGameplay from = pipeScript.Data.From;
+            ModuleGameplay to = pipeScript.Data.To;
 
             if (from == null || to == null)
             {
@@ -900,8 +1265,7 @@ public class PlayerInput : MonoBehaviour {
             }
             else
             {
-                from.UnlinkFromModule(to);
-                to.UnlinkFromModule(from);
+                IndustryExtensions.RemoveAdjacentPumpable(from, to);
             }
             //pipe root is on parent object
             GameObject.Destroy(hitInfo.collider.transform.parent.gameObject);
@@ -913,74 +1277,84 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
+    private PromptInfo OnExistingPowerline(bool doInteract, RaycastHit hitInfo)
+    {
+        if (doInteract)
+        {
+            Powerline powerline = hitInfo.collider.transform.GetComponent<Powerline>();
+            powerline.Remove();
+            return null;
+        }
+        else
+        {
+            return Prompts.ExistingPowerlineRemovalHint;
+        }
+    }
+
     private void HandleExteriorPlanningInput(ref PromptInfo newPrompt, bool doInteract)
     {
-        RaycastHit hitInfo;
-        if (PlannedModule == Module.Unspecified)
-        {
-            if (Input.GetKeyUp(KeyCode.Q))
-            {
-                GuiBridge.Instance.CycleConstruction(-1);
-            }
-            else if (Input.GetKeyUp(KeyCode.Z))
-            {
-                GuiBridge.Instance.CycleConstruction(1);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha1))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(0);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha2))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(1);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha3))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(2);
-            }
-            else if (Input.GetKeyUp(KeyCode.Alpha4))
-            {
-                GuiBridge.Instance.SelectConstructionPlan(3);
-            }
-        }
-
-        if (PlannedModuleVisualization != null)
+        if (ModulePlan.IsActive)
         {
             if (Input.GetMouseButton(0))
             {
-                PlannedModuleVisualization.Rotate(Vector3.up * 90 * Time.deltaTime);
+                ModulePlan.Rotate(true);
             }
             else if (Input.GetMouseButton(1))
             {
-                PlannedModuleVisualization.Rotate(-Vector3.up * 90 * Time.deltaTime);
+                ModulePlan.Rotate(false);
             }
-        }
 
-        if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
-        {
-            if (hitInfo.collider != null)
+            RaycastHit hitInfo;
+            if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
             {
-                if (hitInfo.collider.CompareTag("terrain"))
+                if (hitInfo.collider != null)
                 {
-                    if (Loadout.Equipped == Equipment.Blueprints && PlannedModuleVisualization != null)
+                    if (hitInfo.collider.CompareTag("terrain"))
                     {
-                        //TODO: raycast 3 more times (other 3 corners)
-                        //then take the average height between them
-                        //and invalidate the placement if it passes some threshold
-                        PlannedModuleVisualization.position = hitInfo.point;
+                        if (Loadout.Equipped == Equipment.Blueprints && ModulePlan.IsActive)
+                        {
+                            //TODO: raycast 3 more times (other 3 corners)
+                            //then take the average height between them
+                            //and invalidate the placement if it passes some threshold
+                            ModulePlan.Visualization.position = hitInfo.point;
 
-                        if (doInteract)
-                        {
-                            PlaceConstructionHere(hitInfo.point);
-                        }
-                        else
-                        {
-                            newPrompt = Prompts.PlanConstructionZoneHint;
+                            if (doInteract)
+                            {
+                                PlaceConstructionHere(hitInfo.point);
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.PlanConstructionZoneHint;
+                            }
                         }
                     }
                 }
             }
         }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.G))
+            {
+                ToggleModuleBlueprintMode(true);
+            }
+            else if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                ToggleModuleBlueprintMode(false);
+                ModulePlan.Reset();
+            }
+        }        
+    }
+
+    private void ToggleModuleBlueprintMode(bool showBlueprint)
+    {
+        FPSController.FreezeLook = showBlueprint;
+        FloorplanBridge.Instance.ToggleModulePanel(showBlueprint);
+    }
+
+    private void ToggleCraftableBlueprintMode(bool showBlueprint)
+    {
+        FPSController.FreezeLook = showBlueprint;
+        CurrentCraftablePlanner.ToggleCraftableView(showBlueprint);
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)
@@ -988,11 +1362,11 @@ public class PlayerInput : MonoBehaviour {
         return Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask(layerNames), triggerInteraction);
     }
 
-    private PromptInfo OnFoodHover(bool doInteract, PromptInfo eatHint, MealType mealType)
+    private PromptInfo OnFoodHover(Collider collider, bool doInteract, PromptInfo eatHint, Matter mealType)
     {
         if (doInteract)
         {
-            SurvivalTimer.Instance.EatFood(mealType);
+            collider.transform.root.GetComponent<Habitat>().Eat(mealType);
             return null;
         }
         else
@@ -1013,19 +1387,30 @@ public class PlayerInput : MonoBehaviour {
 
     private PromptInfo OnPowerPlug(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => selectedPowerSocket = value, PlacePowerPlug, Prompts.PowerPlugPrompts);
+        return OnLinkable(doInteract, hitInfo, selectedPowerSocket, value => {
+            selectedPowerSocket = value;
+
+            if (value != null)
+            {
+                CurrentMode = InputMode.Powerline;
+                GuiBridge.Instance.RefreshMode();
+            }
+        }, PlacePowerPlug, Prompts.PowerPlugPrompts);
     }
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        return OnLinkable(doInteract, hitInfo, selectedAirlock1, value => selectedAirlock1 = value, PlaceTube, Prompts.BulkheadBridgePrompts);
+        return OnLinkable(doInteract, hitInfo, selectedBulkhead, value => {
+            selectedBulkhead = value;
+
+        }, PlaceTube, Prompts.BulkheadBridgePrompts);
     }
 
     private PromptInfo OnGasValve(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
     {
-        Compound other = GetCompoundFromValve(hitInfo.collider);
+        Matter other = GetCompoundFromValve(hitInfo.collider);
 
-        if (selectedCompound != Compound.Unspecified)
+        if (selectedCompound != Matter.Unspecified)
         {
             if (!CompoundsMatch(selectedCompound, other))
             {
@@ -1038,23 +1423,25 @@ public class PlayerInput : MonoBehaviour {
             selectedGasValve = value;
 
             if (value == null)
-                //todo: bug this actually should be nullable
-                selectedCompound = Compound.Unspecified;
-            else 
+                selectedCompound = Matter.Unspecified;
+            else {
                 selectedCompound = other;
+                CurrentMode = InputMode.Pipeline;
+                GuiBridge.Instance.RefreshMode();
+            }
 
         }, PlaceGasPipe, Prompts.GasPipePrompts);
     }
 
-    private static bool CompoundsMatch(Compound selectedCompound, Compound other)
+    private static bool CompoundsMatch(Matter selectedCompound, Matter other)
     {
-        if (selectedCompound == Compound.Unspecified &&
-            other == Compound.Unspecified)
+        if (selectedCompound == Matter.Unspecified &&
+            other == Matter.Unspecified)
         {
             return true;
         }
-        else if (selectedCompound != Compound.Unspecified &&
-            other == Compound.Unspecified)
+        else if (selectedCompound != Matter.Unspecified &&
+            other == Matter.Unspecified)
         {
             return true;
         }
@@ -1064,39 +1451,39 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private static Compound GetCompoundFromValve(Collider collider)
+    private static Matter GetCompoundFromValve(Collider collider)
     {
         switch (collider.tag)
         {
             case "oxygenvalve":
-                return Compound.Oxygen;
+                return Matter.Oxygen;
             case "hydrogenvalve":
-                return Compound.Hydrogen;
+                return Matter.Hydrogen;
             case "methanevalve":
-                return Compound.Methane;
+                return Matter.Methane;
             case "carbondioxidevalve":
-                return Compound.CarbonDioxide;
+                return Matter.CarbonDioxide;
             case "watervalve":
-                return Compound.Water;
+                return Matter.Water;
             default:
-                return Compound.Unspecified;
+                return Matter.Unspecified;
         }
     }
 
     //todo: move out of this class
-    public static string GetValveFromCompound(Compound c)
+    public static string GetValveFromCompound(Matter c)
     {
         switch (c)
         {
-            case Compound.Oxygen:
+            case Matter.Oxygen:
                 return "oxygenvalve";
-            case Compound.Hydrogen:
+            case Matter.Hydrogen:
                 return "hydrogenvalve";
-            case Compound.Methane:
+            case Matter.Methane:
                 return "methanevalve";
-            case Compound.CarbonDioxide:
+            case Matter.CarbonDioxide:
                 return "carbondioxidevalve";
-            case Compound.Water:
+            case Matter.Water:
                 return "watervalve";
             default:
                 return "valve";
@@ -1120,7 +1507,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 OnLinkPlaced(hitInfo.collider);
                 SetSaved(null);
-                newPrompt = promptGroup.WhenCompleted;
+                GuiBridge.Instance.ShowNews(promptGroup.WhenCompleted);
             }
         }
         else
@@ -1140,105 +1527,110 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceConstructionHere(Vector3 point)
     {
-        Transform zoneT = (Transform)GameObject.Instantiate(ConstructionZonePrefab, PlannedModuleVisualization.position, PlannedModuleVisualization.rotation);
+        Transform zoneT = (Transform)GameObject.Instantiate(ModuleBridge.Instance.ConstructionZonePrefab, ModulePlan.Visualization.position, ModulePlan.Visualization.rotation);
 
         ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
-        zone.UnderConstruction = PlannedModule;
-        zone.ModulePrefab = GetPlannedModulePrefab();
 
-        zone.InitializeRequirements();
+        zone.Initialize(ModulePlan.Type);
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
             zone.Complete();
 
+        ModulePlan.Reset();
         Equip(Slot.Unequipped);
-    }
-
-    private Transform GetPlannedModulePrefab()
-    {
-        switch(PlannedModule)
-        {
-            //storage
-            case Module.SmallGasTank:
-                return SmallGasTankPrefab;
-            case Module.LargeGasTank:
-                return OxygenTank;
-            case Module.SmallWaterTank:
-                return SmallWaterTankPrefab;
-            case Module.Splitter:
-                return SplitterPrefab;
-            //extraction
-            case Module.SabatierReactor:
-                return SabatierPrefab;
-            case Module.OreExtractor:
-                return OreExtractorPrefab;
-            //power
-            case Module.SolarPanelSmall:
-                return SmallSolarFarmPrefab;
-            default:
-                return SmallSolarFarmPrefab;
-        }
     }
 
     private void Equip(Slot s)
     {
+        Slot lastActive = Loadout.ActiveSlot;
         if (Loadout[s] == Equipment.Locked)
             s = Slot.Unequipped;
 
         Loadout.ActiveSlot = s;
 
-        RefreshEquipmentState();
+        RefreshEquipmentState(lastActive);
     }
 
-    private void RefreshEquipmentState()
+    private void CommonInteriorEquipmentState()
+    {
+        this.FPSController.FreezeLook = true;
+        AlternativeCamera.cullingMask = 1 << FloorplanLayerIndex;
+        AlternativeCamera.enabled = true;
+    }
+
+    private void RefreshEquipmentState(Slot? lastActive = null)
     {
         switch (Loadout.Equipped)
         {
             case Equipment.ChemicalSniffer:
-                FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
-                FlowCamera.enabled = true;
+                AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                AlternativeCamera.enabled = true;
                 break;
             case Equipment.Blueprints:
-                if (SurvivalTimer.Instance.IsInHabitat)
-                {
-                    FlowCamera.cullingMask = 1 << FloorplanLayerIndex;
-                }
-                else
-                {
-                    FlowCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
-                }
-                FlowCamera.enabled = true;
+                AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
+                AlternativeCamera.enabled = true;
+                ToggleModuleBlueprintMode(true);
+                break;
+            case Equipment.Screwdriver:
+                this.CommonInteriorEquipmentState();
+                FloorplanBridge.Instance.ToggleStuffPanel(true);
+                break;
+            case Equipment.Wheelbarrow:
+                this.CommonInteriorEquipmentState();
+                FloorplanBridge.Instance.ToggleFloorplanPanel(true);
                 break;
             default:
-                DisableAndForgetFloorplanVisualization();
-                DisableAndForgetModuleVisualization();
-                this.PlannedModule = Module.Unspecified;
-                FlowCamera.enabled = false;
+                AlternativeCamera.enabled = false;
                 break;
+        }
+
+        //if we're switching from one to another
+        //we want to do cleanup on objects
+        if (lastActive.HasValue && lastActive.Value != Loadout.ActiveSlot)
+        {
+            switch (Loadout[lastActive.Value])
+            {
+                case Equipment.Blueprints:
+                    ModulePlan.Reset();
+                    break;
+                case Equipment.Wheelbarrow:
+                    FloorPlan.Reset();
+                    break;
+                case Equipment.Screwdriver:
+                    StuffPlan.Reset();
+                    break;
+            }
         }
         GuiBridge.Instance.RefreshMode();
     }
 
-    private void DisableAndForgetModuleVisualization()
+    private float oldMass;
+    internal void PickUpObject(Rigidbody rigid, IMovableSnappable snappable)
     {
-        if (this.PlannedModuleVisualization != null)
+        if (snappable != null && snappable.IsSnapped)
         {
-            this.PlannedModuleVisualization.gameObject.SetActive(false);
-            this.PlannedModuleVisualization = null;
+            snappable.UnsnapCrate();
         }
-    }
 
-    private void PickUpObject(RaycastHit hitInfo)
-    {
-        carriedObject = hitInfo.collider;
-        carriedObject.GetComponent<Rigidbody>().useGravity = false;
+        carriedObject = rigid;
+        carriedObject.useGravity = false;
+        //carriedObject.isKinematic = true;
+        oldMass = rigid.mass;
+        carriedObject.mass = 0f;
         carriedObject.transform.SetParent(this.transform);
+        snappable.OnPickedUp();
     }
 
-    private void DropObject()
+    internal void DropObject()
     {
-        carriedObject.GetComponent<Rigidbody>().useGravity = true;
-        carriedObject.transform.SetParent(null);
+        if (carriedObject != null)
+        {
+            //carriedObject.isKinematic = false;
+            carriedObject.transform.SetParent(null);
+            carriedObject.useGravity = true;
+            carriedObject.mass = oldMass;
+        }
+
         carriedObject = null;
     }
 
@@ -1248,89 +1640,115 @@ public class PlayerInput : MonoBehaviour {
         if (roverInput == null && DrivingRoverInput != null)
         {
             playerIsOnFoot = true;
-            DrivingRoverInput.enabled = false;
+            DrivingRoverInput.AcceptInput = false;
+            DrivingRoverInput.ExitBrake();
             FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
             FPSController.transform.SetParent(null);
-            FPSController.SuspendInput = false;
+            FPSController.CharacterController.enabled = true;
+            FPSController.FreezeMovement = false;
         }
         else //entering vehicle
         {
             playerIsOnFoot = false;
+            Headlamp1.enabled = Headlamp2.enabled = false;
             //FPSController.enabled = false;
             DrivingRoverInput = roverInput;
-            DrivingRoverInput.enabled = true;
+            DrivingRoverInput.AcceptInput = true;
+            if (DrivingRoverInput.Data.HatchOpen)
+                DrivingRoverInput.ToggleHatchback(false);
             FPSController.transform.SetParent(DrivingRoverInput.transform.Find("Enter").transform);
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;
             FPSController.InitializeMouseLook();
-            FPSController.SuspendInput = true;
+            FPSController.FreezeMovement = true;
+            FPSController.CharacterController.enabled = false;
         }
     }
 
-    private void PlaceTube(Collider collider)
+    private void PlaceTube(Collider toBulkhead)
     {
-        PlaceRuntimeLinkingObject(selectedAirlock1, collider, tubePrefab, createdTubes, true, .2f);
+        Transform newCorridorParent = PlaceRuntimeLinkingObject(selectedBulkhead, toBulkhead, tubePrefab, createdTubes, hideObjectEnds: true, setScale: false);
+        Transform newCorridor = newCorridorParent.GetChild(0);
+        MeshFilter newCorridorFilter = newCorridor.GetComponent<MeshFilter>();
+
+        //create the interior mesh
+        Mesh baseCorridorMesh = newCorridorFilter.sharedMesh;
+        Mesh newCorridorMesh = (Mesh)Instantiate(baseCorridorMesh);
+
+        Transform anchorT1 = selectedBulkhead.transform.parent;
+        Mesh anchorM1 = anchorT1.GetComponent<MeshFilter>().mesh;
+
+        Transform anchorT2 = toBulkhead.transform.parent;
+        Mesh anchorM2 = anchorT2.GetComponent<MeshFilter>().mesh;
+
+        //modify the ends of the mesh
+        Construction.SetCorridorVertices(newCorridor, newCorridorMesh, anchorT1, anchorM1, anchorT2, anchorM2);
+
+        //assign the programmatically created mesh to the mesh filter
+        newCorridorFilter.mesh = newCorridorMesh;
+        //and tell the mesh collider to use this new mesh as well
+        newCorridor.GetComponent<MeshCollider>().sharedMesh = newCorridorMesh;
+
+        IHabitatModule habMod1 = anchorT1.root.GetComponent<IHabitatModule>();
+        IHabitatModule habMod2 = anchorT2.root.GetComponent<IHabitatModule>();
+
+        Powerline powerline = newCorridorParent.GetComponent<Powerline>();
+        powerline.AssignConnections(habMod1, habMod2, selectedBulkhead.transform.parent, toBulkhead.transform.parent);
     }
 
     private void PlaceGasPipe(Collider collider)
     {
-        Transform newPipe = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
+        Transform newPipeTransform = PlaceRuntimeLinkingObject(selectedGasValve, collider, gasPipePrefab, createdPipes);
 
-        if (selectedCompound == Compound.Unspecified)
+        if (selectedCompound == Matter.Unspecified)
             selectedCompound = GetCompoundFromValve(collider);
 
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            if (g2 is GasStorage)
-            {
-                (g2 as GasStorage).SpecifyCompound(selectedCompound);
-            }
-            else if (g1 is GasStorage)
-            {
-                (g1 as GasStorage).SpecifyCompound(selectedCompound);
-            }
-            g1.LinkToModule(g2);
-            g2.LinkToModule(g1);
+            newPipeTransform.GetComponent<Pipe>().AssignConnections(selectedCompound, g1, g2);
+
+            selectedCompound = Matter.Unspecified;
+
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
         }
-
-        Pipe pipeScript = newPipe.GetComponent<Pipe>();
-        pipeScript.PipeType = selectedCompound;
-        pipeScript.from = selectedGasValve.transform;
-        pipeScript.to = collider.transform;
-
-        selectedCompound = Compound.Unspecified;
     }
 
     private void PlacePowerPlug(Collider collider)
     {
-        PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
-
-        //turn on "plug" cylinders
-        collider.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-        selectedPowerSocket.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = true;
-
-        ModuleGameplay g1 = selectedPowerSocket.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
-        if (g1 != null && g2 != null)
+        Transform power = PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
+        
+        IPowerable g1 = selectedPowerSocket.transform.root.GetComponent<IPowerable>(), g2 = collider.transform.root.GetComponent<IPowerable>();
+        if (g1 != null && g2 != null && g1 != g2)
         {
-            if (g1.HasPower || g2.HasPower)
-            {
-                g1.HasPower = g2.HasPower = true;
-            }
+            power.GetComponent<Powerline>().AssignConnections(g1, g2, selectedPowerSocket.transform, collider.transform);
         }
+
+        CurrentMode = InputMode.Normal;
+        GuiBridge.Instance.RefreshMode();
     }
 
-    private static Transform PlaceRuntimeLinkingObject(Collider firstObject, Collider otherObject, Transform linkingObjectPrefab, List<Transform> addToList, bool hideObjectEnds = false, float extraScale = 0f)
+    private static Transform PlaceRuntimeLinkingObject(
+        Collider firstObject, 
+        Collider otherObject, 
+        Transform linkingObjectPrefab, List<Transform> addToList, 
+        bool hideObjectEnds = false, 
+        float extraScale = 0f,
+        bool setScale = true)
     {
         float distanceBetween = Vector3.Distance(firstObject.transform.position, otherObject.transform.position);
 
         Vector3 midpoint = Vector3.Lerp(firstObject.transform.position, otherObject.transform.position, 0.5f);
-        Transform newTube = GameObject.Instantiate<Transform>(linkingObjectPrefab);
+        Transform newObj = GameObject.Instantiate<Transform>(linkingObjectPrefab);
 
-        newTube.position = midpoint;
-        newTube.LookAt(otherObject.transform);
-        newTube.localScale = new Vector3(newTube.localScale.x, newTube.localScale.y, (distanceBetween / 2f) + extraScale);
-        addToList.Add(newTube);
+        newObj.position = midpoint;
+        newObj.LookAt(otherObject.transform);
+
+        if (setScale)
+            newObj.localScale = new Vector3(newObj.localScale.x, newObj.localScale.y, (distanceBetween / 2f) + extraScale);
+
+        addToList.Add(newObj);
 
         if (hideObjectEnds)
         {
@@ -1338,88 +1756,52 @@ public class PlayerInput : MonoBehaviour {
             otherObject.gameObject.SetActive(false);
         }
 
-        return newTube;
+        return newObj;
     }
 
     internal void PlanModule(Module planModule)
     {
-        this.PlannedModule = planModule;
-
-        if (VisualizationCache.ContainsKey(planModule))
-        {
-            PlannedModuleVisualization = VisualizationCache[planModule];
-            PlannedModuleVisualization.gameObject.SetActive(true);
-        }
-        else
-        {
-            PlannedModuleVisualization = GameObject.Instantiate<Transform>(GetPlannedModulePrefab());
-            VisualizationCache[planModule] = PlannedModuleVisualization;
-            RecurseDisableColliderSetTranslucentRenderer(PlannedModuleVisualization);
-        }        
+        this.ModulePlan.SetVisualization(planModule);
     }
 
-    private void RecurseDisableColliderSetTranslucentRenderer(Transform parent)
+    internal void PlanStuff(Stuff s)
     {
-        foreach (Transform child in parent)
-        {
-            //only default layer
-            if (child.gameObject.layer == 0)
-            {
-                Collider c = child.GetComponent<Collider>();
-                if (c != null)
-                    c.enabled = false;
-
-                Renderer r = child.GetComponent<Renderer>();
-                if (r != null)
-                {
-                    if (r.materials != null && r.materials.Length > 1)
-                    {
-                        var newMats = new Material[r.materials.Length];
-                        for (int i = 0; i < r.materials.Length; i++)
-                        {
-                            newMats[i] = translucentPlanningMat;
-                        }
-                        r.materials = newMats;
-                    }
-                    else
-                    {
-                        r.material = translucentPlanningMat;
-                    }
-                }
-            }
-
-            RecurseDisableColliderSetTranslucentRenderer(child);
-        }
+        this.StuffPlan.SetVisualization(s);
     }
 
-    public void KillPlayer()
+    internal void PlanFloor(Floorplan whatToBuild)
     {
-        GuiBridge.Instance.ShowKillMenu();
+        this.FloorPlan.SetVisualization(whatToBuild);
+    }
+
+    public void KillPlayer(string reason)
+    {
+        GuiBridge.Instance.ShowKillMenu(reason);
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.lockState = CursorLockMode.None;
+        Time.timeScale = 0f;
         FPSController.enabled = false;
         this.enabled = false;
     }
 
     #region sleep mechanic
-    private SleepLerpContext sleerpCtx;
-    private Vector2 lastRadialInputDirection;
+    private PlayerLerpContext lerpCtx;
 
-    private struct SleepLerpContext
+    private struct PlayerLerpContext
     {
-        public Vector3 FromPosition, ToPosition;
-        public Quaternion FromRotation, ToRotation;
+        public Vector3 FromPosition, ToPosition, ExitPosition;
+        public Quaternion FromRotation, ToRotation, ExitRotation;
         public float Duration;
         private float Time;
-        public Transform SleepExit;
         public bool Done;
+        public bool RotateCam;
 
         public void StandUp()
         {
             FromPosition = ToPosition;
             FromRotation = ToRotation;
-            ToPosition = SleepExit.position;
-            ToRotation = SleepExit.rotation;
+            ToPosition = ExitPosition;
+            ToRotation = ExitRotation;
             Done = false;
             Time = 0f;
         }
@@ -1430,32 +1812,38 @@ public class PlayerInput : MonoBehaviour {
             if (this.Time > this.Duration)
             {
                 body.position = ToPosition;
-                //camera.rotation = ToRotation;
+
+                if (RotateCam)
+                    camera.rotation = ToRotation;
+
                 Done = true;
             }
             else
             {
                 body.position = Vector3.Lerp(FromPosition, ToPosition, Time / Duration);
-                //camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
+
+                if (RotateCam)
+                    camera.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
             }
         }
     }
 
     private void BeginSleep(Transform enterTranform, Transform exitTransform)
     {
-        sleerpCtx = new SleepLerpContext()
+        lerpCtx = new PlayerLerpContext()
         {
             FromPosition = FPSController.transform.position,
             ToPosition = enterTranform.position,
             FromRotation = Camera.main.transform.rotation,
             ToRotation = enterTranform.rotation,
             Duration = .5f,
-            SleepExit = exitTransform
+            ExitPosition = exitTransform.position,
+            ExitRotation = exitTransform.rotation
         };
 
         ToggleSleep(true);
 
-        StartCoroutine(BedLerp());
+        StartCoroutine(LerpTick());
     }
 
     private void ExitSleep()
@@ -1463,12 +1851,56 @@ public class PlayerInput : MonoBehaviour {
         ToggleSleep(false);
     }
 
+    private Terminal CurrentTerminal;
+    private void BeginTerminal()
+    {
+        lerpCtx = new PlayerLerpContext()
+        {
+            FromPosition = FPSController.transform.position,
+            ToPosition = CurrentTerminal.transform.position + CurrentTerminal.transform.TransformDirection(Vector3.back) + (Vector3.down * 0.8f),
+            FromRotation = Camera.main.transform.rotation,
+            ToRotation = Quaternion.LookRotation(CurrentTerminal.transform.TransformDirection(Vector3.forward), CurrentTerminal.transform.TransformDirection(Vector3.up)),
+            Duration = .5f,
+            ExitPosition = FPSController.transform.position,
+            ExitRotation = FPSController.transform.rotation,
+            RotateCam = true
+        };
+
+        ToggleTerminal(true);
+
+        StartCoroutine(LerpTick());
+    }
+
+    private void ExitTerminal()
+    {
+        ToggleTerminal(false);
+    }
+
+    private void ToggleTerminal(bool inTerminal)
+    {
+        this.CurrentMode = inTerminal ? InputMode.Terminal : InputMode.Normal;
+
+        FPSController.FreezeMovement = inTerminal;
+        FPSController.FreezeLook = inTerminal;
+        Cursor.visible = inTerminal;
+        Cursor.lockState = CursorLockMode.None;
+        GuiBridge.Instance.Crosshair.gameObject.SetActive(!inTerminal);
+
+        this.RefreshEquipmentState();
+    }
+
     private void ToggleSleep(bool isAsleep)
     {
         this.CurrentMode = isAsleep ? InputMode.Sleep : InputMode.Normal;
-        FPSController.SuspendInput = isAsleep;
+
+        FPSController.FreezeMovement = isAsleep;
+
         this.RefreshEquipmentState();
     }
+
+    internal enum WakeSignal { PlayerCancel, ResourceRequired, DayStart }
+    internal WakeSignal? wakeyWakeySignal = null;
+    private EVAStation CurrentEVAStation;
 
     private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)
     {
@@ -1479,24 +1911,60 @@ public class PlayerInput : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.Period))
         {
             SunOrbit.Instance.SpeedUp();
+        } else if (doInteract)
+        {
+            if (SunOrbit.Instance.RunTilMorning)
+            {
+                SunOrbit.Instance.ToggleSleepUntilMorning(false, WakeSignal.PlayerCancel);
+            }
+            else
+            {
+                wakeyWakeySignal = WakeSignal.PlayerCancel;
+            }
         }
 
-        if (doInteract)
+        if (wakeyWakeySignal.HasValue)
         {
-            sleerpCtx.StandUp(); //reset ctx
-            StartCoroutine(BedLerp(true));
+            lerpCtx.StandUp(); //reset ctx
+            StartCoroutine(LerpTick(ExitSleep));
+
+            if (wakeyWakeySignal.Value == WakeSignal.DayStart)
+            {
+                GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.GoodMorningHomesteader);
+            }
+            wakeyWakeySignal = null;
+        }
+        else if (Input.GetKeyUp(KeyCode.Z))
+        {
+            SunOrbit.Instance.ToggleSleepUntilMorning(true);
         }
         else
         {
-            newPrompt = Prompts.BedExitHint;
+            if (SunOrbit.Instance.RunTilMorning)
+            {
+                newPrompt = Prompts.SleepTilMorningExitHint;
+            }
+            else
+            {
+                newPrompt = Prompts.BedExitHint;
+            }
         }
     }
 
-    private IEnumerator BedLerp(bool exitStateOnDone = false)
+    private void HandleTerminalInput(ref PromptInfo newPrompt, bool doInteract)
     {
-        while (!sleerpCtx.Done)
+        if (Input.GetKeyUp(KeyCode.Escape))
         {
-            sleerpCtx.Tick(FPSController.transform, Camera.main.transform);
+            lerpCtx.StandUp(); //reset ctx
+            StartCoroutine(LerpTick(ExitTerminal));
+        }
+    }
+
+    private IEnumerator LerpTick(Action onDone = null)
+    {
+        while (!lerpCtx.Done)
+        {
+            lerpCtx.Tick(FPSController.transform, Camera.main.transform);
 
             //every time we modify the camera via script we need to do this call
             FPSController.InitializeMouseLook();
@@ -1504,9 +1972,9 @@ public class PlayerInput : MonoBehaviour {
             yield return null;
         }
 
-        if (exitStateOnDone)
+        if (onDone != null)
         {
-            ExitSleep();
+            onDone();
         }
     }
     #endregion

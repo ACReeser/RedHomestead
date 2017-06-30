@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
+using RedHomestead.Interiors;
+using RedHomestead.Persistence;
 
 [Serializable]
 public struct ReportIORow
@@ -58,6 +60,23 @@ public struct ReportFields
     public Sprite Connected, Disconnected;
 }
 
+public enum MiscIcon { Information, Rocket, Pipe, Plug, Harvest, Molecule }
+
+[Serializable]
+public struct Icons
+{
+    public Sprite[] ResourceIcons, CompoundIcons, MiscIcons;
+}
+
+[Serializable]
+public struct NewsUI
+{
+    public RectTransform Panel, ProgressBar;
+    public Text Description;
+    public Image Icon, ProgressFill;
+}
+
+
 [Serializable]
 public class RadialMenu
 {
@@ -72,8 +91,8 @@ public class RadialMenu
 [Serializable]
 public struct PromptUI
 {
-    public RectTransform Panel, ProgressBar;
-    public Text Key, Description;
+    public RectTransform Panel, ProgressBar, Background;
+    public Text Key, Description, SecondaryKey, SecondaryDescription, TypeText;
     public Image ProgressFill;
 }
 
@@ -85,12 +104,13 @@ public struct PromptUI
 public class GuiBridge : MonoBehaviour {
     public static GuiBridge Instance { get; private set; }
 
-    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel;
-    public Text ConstructionHeader, EquippedText, PlacingText, TimeText;
+    public Canvas GUICanvas;
+    public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel, Crosshair;
+    public Text ConstructionHeader, EquippedText, PlacingText, TimeText, KilledByReasonText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage;
+    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage, AutosaveIcon, SprintIcon;
     public AudioSource ComputerAudioSource;
     private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
     public ReportIORow ReportRowTemplate;
@@ -98,6 +118,8 @@ public class GuiBridge : MonoBehaviour {
     public RadialMenu RadialMenu;
     public RedHomestead.Equipment.EquipmentSprites EquipmentSprites;
     public PromptUI Prompts;
+    public Icons Icons;
+    public NewsUI News;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -110,7 +132,6 @@ public class GuiBridge : MonoBehaviour {
         TogglePromptPanel(false);
         this.ConstructionPanel.gameObject.SetActive(false);
         ConstructionRequirementsText = new Text[ConstructionRequirements.Length];
-        this.RefreshPlanningUI();
         int i = 0;
         foreach (RectTransform t in ConstructionRequirements)
         {
@@ -124,6 +145,60 @@ public class GuiBridge : MonoBehaviour {
         PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
+        ToggleAutosave(false);
+        //same as ToggleEscapeMenu(false) basically
+        this.EscapeMenuPanel.gameObject.SetActive(false);
+        News.Panel.gameObject.SetActive(false);
+    }
+
+    internal void ToggleAutosave(bool state)
+    {
+        this.AutosaveIcon.gameObject.SetActive(state);
+    }
+
+    void Start()
+    {
+        //this.RefreshPlanningUI();
+
+        if (Game.Current.IsNewGame)
+        {
+            print("hello new gamer");
+            ShowNews(NewsSource.ToolOpenHint);
+            ShowNews(NewsSource.FOneHint);
+        }
+
+        RefreshSprintIcon(false);
+    }
+
+    private Coroutine newsTimer;
+
+    internal void ShowNews(News news)
+    {
+        if (news != null)
+        {
+            newsTimer = StartCoroutine(StartShowNews(news));
+        }
+    }
+
+    private IEnumerator StartShowNews(News news)
+    {
+        if (news.DelayMilliseconds > 0f)
+        {
+            yield return new WaitForSeconds(news.DelayMilliseconds / 1000f);
+        }
+
+        print("News: " + news.Text);
+        News.Panel.gameObject.SetActive(true);
+        News.Description.text = news.Text;
+
+        News.Icon.sprite = this.Icons.MiscIcons[(int)news.Icon];
+
+#warning news progressbar unimplemented
+        News.ProgressBar.gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(news.DurationMilliseconds / 1000f);
+
+        News.Panel.gameObject.SetActive(false);
     }
 
     private void TogglePromptPanel(bool isActive)
@@ -139,18 +214,23 @@ public class GuiBridge : MonoBehaviour {
 
         Prompts.ProgressBar.gameObject.SetActive(prompt.UsesProgress);
         Prompts.ProgressFill.fillAmount = prompt.Progress;
+        
+        Prompts.SecondaryDescription.gameObject.SetActive(prompt.HasSecondary);
+        Prompts.SecondaryDescription.text = prompt.SecondaryDescription;
+
+        Prompts.SecondaryKey.transform.parent.gameObject.SetActive(prompt.HasSecondary);
+        Prompts.SecondaryKey.text = prompt.SecondaryKey;
+
+        Prompts.Background.offsetMin = new Vector2(0, prompt.HasSecondary ? -66 : 0);
+
+        Prompts.TypeText.text = prompt.ItalicizedText;
 
         TogglePromptPanel(true);
         CurrentPrompt = prompt;
-
-        if (prompt.Duration > 0)
-        {
-            StartCoroutine(HidePromptAfter(prompt.Duration));
-        }
     }
 
     //todo: just pass constructionZone, it's less params
-    internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Resource, int> hasCount, Module toBeBuilt)
+    internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Matter, float> hasCount, Module toBeBuilt)
     {
         //show the name of the thing being built
         this.ConstructionPanel.gameObject.SetActive(true);
@@ -173,6 +253,92 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
+    #region cinematic mode
+    private enum CinematicModes { None, WithGUI, NoGUI }
+    private CinematicModes CinematicMode = CinematicModes.None;
+    private UnityStandardAssets.ImageEffects.CameraMotionBlur cinematicMotionBlur;
+    internal void ToggleCinematicMode()
+    {
+        int newCinematic = (((int)this.CinematicMode) + 1);
+
+        if (newCinematic > (int)CinematicModes.NoGUI)
+            newCinematic = 0;
+
+        CinematicMode = (CinematicModes)newCinematic;
+
+        switch (CinematicMode)
+        {
+            case CinematicModes.None:
+                cinematicMotionBlur.enabled = false;
+                GUICanvas.enabled = true;
+                PlayerInput.Instance.FPSController.MouseLook.smooth = false;
+                break;
+            case CinematicModes.WithGUI:
+                if (cinematicMotionBlur == null)
+                {
+                    cinematicMotionBlur = Camera.main.gameObject.AddComponent<UnityStandardAssets.ImageEffects.CameraMotionBlur>();
+                    cinematicMotionBlur.filterType = UnityStandardAssets.ImageEffects.CameraMotionBlur.MotionBlurFilter.Reconstruction;
+                    cinematicMotionBlur.velocityScale = 1f;
+                    cinematicMotionBlur.shader = this.blurShader;
+                    cinematicMotionBlur.noiseTexture = this.noiseTexture;
+                }
+                cinematicMotionBlur.enabled = true;
+                GUICanvas.enabled = true;
+                PlayerInput.Instance.FPSController.MouseLook.smooth = true;
+                break;
+            case CinematicModes.NoGUI:
+                cinematicMotionBlur.enabled = true;
+                PlayerInput.Instance.FPSController.MouseLook.smooth = true;
+                GUICanvas.enabled = false;
+                break;
+        }
+    }
+    #endregion
+
+    internal void RefreshSprintIcon(bool sprinting)
+    {
+        this.SprintIcon.gameObject.SetActive(sprinting);
+    }
+
+    private void _doToggleEscapeMenu()
+    {
+        bool escapeMenuWillBeVisible = !this.EscapeMenuPanel.gameObject.activeInHierarchy;
+        this.EscapeMenuPanel.gameObject.SetActive(escapeMenuWillBeVisible);
+
+        Cursor.visible = escapeMenuWillBeVisible;
+        Cursor.lockState = escapeMenuWillBeVisible ? CursorLockMode.None : CursorLockMode.Confined;
+    }
+
+    /// <summary>
+    /// Called by cancel button
+    /// </summary>
+    public void ToggleEscapeMenu()
+    {
+        //player input will actually call _ToggleEscapeMenuProgrammatically for us
+        //which calls _doToggleEscapeMenu
+        //so don't call _doToggleEscapeMenu here
+        PlayerInput.Instance.ToggleMenu();
+    }
+
+    /// <summary>
+    /// Called by player input
+    /// </summary>
+    internal void _ToggleEscapeMenuProgrammatically()
+    {
+        _doToggleEscapeMenu();
+    }
+
+    public void ConfirmQuit()
+    {
+        Autosave.Instance.AutosaveEnabled = false;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("menu", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+    public void ConfirmSaveAndQuit()
+    {
+        Autosave.Instance.Save();
+        this.ConfirmQuit();
+    }
+
     internal void ToggleReportMenu(bool isOn)
     {
         ReportPanel.gameObject.SetActive(isOn);
@@ -183,27 +349,12 @@ public class GuiBridge : MonoBehaviour {
         this.ConstructionPanel.gameObject.SetActive(false);
     }
 
-    private IEnumerator HidePromptAfter(float duration)
-    {
-        yield return new WaitForSeconds(duration / 1000f);
-
-        TogglePromptPanel(false);
-    }
-
     public void HidePrompt()
     {
         if (CurrentPrompt != null)
         {
-            //if it's manually turned on and off, hide it
-            if (CurrentPrompt.Duration <= 0f)
-            {
-                TogglePromptPanel(false);
-                CurrentPrompt = null;
-            }
-            else
-            {
-                //if it's timed, let it time out
-            }
+            TogglePromptPanel(false);
+            CurrentPrompt = null;
         }
     }
     
@@ -211,169 +362,44 @@ public class GuiBridge : MonoBehaviour {
     {
         HelpPanel.gameObject.SetActive(!HelpPanel.gameObject.activeSelf);
     }
-
-    /// <summary>
-    /// cycle the selected construction group button up or down
-    /// </summary>
-    /// <param name="delta"></param>
-    public void CycleConstruction(int delta)
-    {
-        //negative means up the list
-        if ((delta < 0 && currentlySelectedGroup > ConstructionGroup.Habitation) ||
-        //positive means down the list
-            (delta > 0 && currentlySelectedGroup < ConstructionGroup.Storage))
-        {
-            ConstructionGroupButtons[(int)currentlySelectedGroup + delta].onClick.Invoke();
-        }
-    }
-
-    /// <summary>
-    /// Top level groups that organize modules
-    /// "None" means no groups should show
-    /// "Undecided" means groups can show but no group is selected
-    /// TODO: remove None and Undecided into their own booleans ShowingGroups and HasGroupSelected
-    /// </summary>
-    public enum ConstructionGroup { Undecided = -1, Habitation, Power, Extraction, Refinement, Storage }
-
-    /// <summary>
-    /// from group to list of modules
-    /// </summary>
-    public static Dictionary<ConstructionGroup, Module[]> ConstructionGroupmap = new Dictionary<ConstructionGroup, Module[]>()
-    {
-        {
-            ConstructionGroup.Habitation,
-            new Module[]
-            {
-                Module.Habitat,
-                Module.Workspace
-            }
-        },
-        {
-            ConstructionGroup.Power,
-            new Module[]
-            {
-                Module.SolarPanelSmall
-            }
-        },
-        {
-            ConstructionGroup.Extraction,
-            new Module[]
-            {
-                Module.SabatierReactor,
-                Module.OreExtractor,
-            }
-        },
-        {
-            ConstructionGroup.Refinement,
-            new Module[]
-            {
-                Module.Smelter
-            }
-        },
-        {
-            ConstructionGroup.Storage,
-            new Module[]
-            {
-                Module.Splitter,
-                Module.SmallGasTank,
-                Module.LargeGasTank,
-                Module.SmallWaterTank
-            }
-        },
-    };
-    
-    private ConstructionGroup currentlySelectedGroup = ConstructionGroup.Undecided;
-
-    public void RefreshPlanningUI()
-    {
-        ConstructionGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior);
-        ConstructionModulesPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingExterior && currentlySelectedGroup != ConstructionGroup.Undecided);
-
-        FloorplanGroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior);
-        FloorplanSubgroupPanel.gameObject.SetActive(PlayerInput.Instance.Loadout.IsConstructingInterior && selectedFloorplanGroup != FloorplanGroup.Undecided);
-    }
-
-    public void SetConstructionGroup(int index)
-    {
-        ConstructionGroup newGroup = (ConstructionGroup)index;
-        currentlySelectedGroup = newGroup;
-
-        RefreshPlanningUI();
-
-        if (currentlySelectedGroup == ConstructionGroup.Undecided)
-        {
-            RefreshButtonKeyHints();
-        }
-        else if (index > -1)
-        {
-            Module[] lists = ConstructionGroupmap[currentlySelectedGroup];
-            for (int i = 0; i < this.ConstructionModuleButtons.Length; i++)
-            {
-                if (i < lists.Length)
-                {
-                    this.ConstructionModuleButtons[i].gameObject.SetActive(true);
-                    this.ConstructionModuleButtons[i].transform.GetChild(0).GetComponent<Text>().text = lists[i].ToString();
-                }
-                else
-                {
-                    this.ConstructionModuleButtons[i].gameObject.SetActive(false);
-                }
-            }
-
-            RefreshButtonKeyHints();
-        }
-    }
-
-    /// <summary>
-    /// to the left of the group names there are hints for which key to use to move to that group
-    /// this shows and hides those
-    /// </summary>
-    private void RefreshButtonKeyHints()
-    {
-        for (int i = 0; i < this.ConstructionGroupHints.Length; i++)
-        {
-            bool previousHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup - 1;
-            bool nextHint = currentlySelectedGroup < ConstructionGroup.Storage && i == (int)currentlySelectedGroup + 1;
-            //bool exitHint = currentlySelectedGroup > ConstructionGroup.Habitation && i == (int)currentlySelectedGroup;
-            
-            this.ConstructionGroupHints[i].transform.parent.gameObject.SetActive(previousHint || nextHint);
-            this.ConstructionGroupHints[i].text = previousHint ? "Q" : nextHint ? "Z" : "";
-        }
-    }
-
     /// <summary>
     /// syncs player input mode
     /// </summary>
     internal void RefreshMode()
     {
-        this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
-        this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
+        switch (PlayerInput.Instance.CurrentMode)
+        {
+            default:
+                RefreshEquipped();
+                break;
+            case PlayerInput.InputMode.Pipeline:
+                this.EquippedText.text = "Pipeline";
+                this.EquippedImage.sprite = Icons.MiscIcons[(int)MiscIcon.Pipe];
+                break;
+            case PlayerInput.InputMode.Powerline:
+                this.EquippedText.text = "Powerline";
+                this.EquippedImage.sprite = Icons.MiscIcons[(int)MiscIcon.Plug];
+                break;
+        }
 
         if (PlayerInput.Instance.Loadout.Equipped != RedHomestead.Equipment.Equipment.Blueprints)
         {
             this.PlacingPanel.gameObject.SetActive(false);
-            this.SetConstructionGroup(-1);
         }
 
-        this.RefreshPlanningUI();
+        //this.RefreshPlanningUI();
     }
 
-    /// <summary>
-    /// called when a specific module is selected to plan
-    /// </summary>
-    /// <param name="index"></param>
-    public void SelectConstructionPlan(int index)
+    internal void RefreshEquipped()
     {
-        Module planModule = ConstructionGroupmap[currentlySelectedGroup][index];
-        this.PlacingPanel.gameObject.SetActive(true);
-        this.PlacingText.text = planModule.ToString();
-        PlayerInput.Instance.PlanModule(planModule);
-        this.RefreshPlanningUI();
+        this.EquippedText.text = PlayerInput.Instance.Loadout.Equipped.ToString();
+        this.EquippedImage.sprite = EquipmentSprites.FromEquipment(PlayerInput.Instance.Loadout.Equipped);
     }
 
-    internal void ShowKillMenu()
+    internal void ShowKillMenu(string reason)
     {
         KilledPanel.transform.gameObject.SetActive(true);
+        KilledByReasonText.text = "DEATH BY " + reason;
     }
 
     public void Restart()
@@ -410,56 +436,22 @@ public class GuiBridge : MonoBehaviour {
         this.RadBar.fillAmount = percentage;
     }
 
-    internal void RefreshPowerBar(float powerPercentage, float heatPercentage, int hoursLeftHint)
+    internal void RefreshPowerBar(float percentage, int hoursLeftHint)
     {
-        this.PowerImage.enabled = (powerPercentage > 0f);
-        this.HotImage.enabled = (powerPercentage <= 0f) && (heatPercentage > .5f);
-        this.ColdImage.enabled = (powerPercentage <= 0f) && (heatPercentage <= .5f);
+        this.PowerBar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.PowerImageHours, hoursLeftHint);
+    }
 
-        if (this.PowerImage.enabled)
-        {
-            this.PowerBar.fillAmount = powerPercentage;
-        }
-        else
-        {
-            this.PowerBar.fillAmount = heatPercentage;
-        }
+    internal void RefreshTemperatureGauges()
+    {
+        this.HotImage.enabled = SurvivalTimer.Instance.ExternalTemperature == Temperature.Hot;
+        this.ColdImage.enabled = SurvivalTimer.Instance.ExternalTemperature == Temperature.Cold;
     }
 
     public FloorplanGroup selectedFloorplanGroup = FloorplanGroup.Undecided;
-    public FloorplanSubGroup selectedFloorplanSubgroup;
+    public Floorplan selectedFloorplanSubgroup;
     public FloorplanMaterial selectedFloorplanMaterial;
 
-    public static Dictionary<FloorplanGroup, FloorplanSubGroup[]> FloorplanGroupmap = new Dictionary<FloorplanGroup, FloorplanSubGroup[]>()
-    {
-        {
-            FloorplanGroup.Floor,
-            new FloorplanSubGroup[]
-            {
-                FloorplanSubGroup.Solid,
-                FloorplanSubGroup.Mesh
-            }
-        },
-        {
-            FloorplanGroup.Edge,
-            new FloorplanSubGroup[]
-            {
-                FloorplanSubGroup.Solid,
-                FloorplanSubGroup.Window,
-                FloorplanSubGroup.Door,
-                FloorplanSubGroup.SingleColumn,
-                FloorplanSubGroup.DoubleColumn
-            }
-        },
-        {
-            FloorplanGroup.Corner,
-            new FloorplanSubGroup[]
-            {
-                FloorplanSubGroup.SingleColumn
-            }
-        }
-    };
 
     private RedHomestead.Equipment.Slot lastHoverSlot = (RedHomestead.Equipment.Slot)(-1);
 
@@ -523,6 +515,9 @@ public class GuiBridge : MonoBehaviour {
     }
 
     private ReportIORow[] currentIORows;
+    public Texture2D noiseTexture;
+    public Shader blurShader;
+
     internal void WriteReport(string moduleName, string reaction, string energyEfficiency, string reactionEfficiency, 
         ReportIOData? power, ReportIOData[] inputs, ReportIOData[] outputs)
     {

@@ -1,40 +1,50 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using RedHomestead.Electricity;
+using System;
 
 public class FlowManager : MonoBehaviour
 {
+    public ElectricityIndicatorMeshes GeneratorMeshes;
+    public ElectricityIndicatorMeshes BatteryMeshes;
+    public ElectricityIndicatorMeshesForConsumers ConsumerMeshes;
+
     public static FlowManager Instance { get; private set; }
 
-    public List<PowerSupply> PowerSupplies = new List<PowerSupply>();
-    public List<Sink> Sinks = new List<Sink>();
+    public PowerGrids PowerGrids = new PowerGrids();
+    [HideInInspector]
+    public List<SingleResourceModuleGameplay> Sinks = new List<SingleResourceModuleGameplay>();
+    [HideInInspector]
     public List<Converter> Converters = new List<Converter>();
 
     void Awake() {
-        Instance = this;    
-	}	
-	
-	void FixedUpdate() {
+        Instance = this;
+        StartCoroutine(PowerAndIndustryUpdate());
+    }
+
+    private IEnumerator PowerAndIndustryUpdate()
+    {
+        while (isActiveAndEnabled)
+        {
+            PowerGrids.Tick();
+            IndustryUpdate();
+
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    private void IndustryUpdate() {
 	    foreach(Converter c in Converters)
         {
             if (c.isActiveAndEnabled)
                 c.Tick();
         }
 
-        foreach (Sink s in Sinks)
+        foreach (SingleResourceModuleGameplay s in Sinks)
         {
             if (s.isActiveAndEnabled)
                 s.Tick();
         }
-    }
-
-    public void RecalculatePowerConnections()
-    {
-
-    }
-
-    public void RecalculateAvailablePower()
-    {
-
     }
 }

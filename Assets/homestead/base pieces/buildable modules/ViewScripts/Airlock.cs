@@ -2,10 +2,16 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using RedHomestead.Simulation;
+using RedHomestead.Buildings;
 
-public class Airlock : MonoBehaviour {
+public interface IDoorManager
+{
+    void ToggleDoor(Transform door);
+}
+
+public class Airlock : GenericBaseModule, IDoorManager {
     public const string OpenDoorName = "opendoor", ClosedDoorName = "closeddoor", LockedDoorName = "lockeddoor";
-    public static Dictionary<Transform, Airlock> DoorToAirlock = new Dictionary<Transform, Airlock>();
     
     public Collider TerrainCollider;
     public Color OnColor, OffColor;
@@ -15,18 +21,13 @@ public class Airlock : MonoBehaviour {
     public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
     private Animator OuterAnimator, InnerAnimator;
-    private Habitat attachedHab;
 
-	// Use this for initialization
-	void Start () {
-        DoorToAirlock[OuterDoor] = this;
-        DoorToAirlock[InnerDoor] = this;
-
+    // Use this for initialization
+    void Start () {
         OuterAnimator = OuterDoor.parent.GetComponent<Animator>();
         InnerAnimator = InnerDoor.parent.GetComponent<Animator>();
 
         RefreshDoorAndLightState();
-        attachedHab = transform.root.GetComponent<Habitat>();
 	}
 
     private void RefreshDoorAndLightState()
@@ -41,14 +42,13 @@ public class Airlock : MonoBehaviour {
     public void Pressurize()
     {
         //only allow it if door is sealed properly
-        if (OuterDoorSealed && !IsPressurized)
+        if (LinkedHabitat != null && OuterDoorSealed && !IsPressurized)
         {
             IsPressurized = true;
             RefreshDoorAndLightState();
-            SurvivalTimer.Instance.EnterHabitat(attachedHab);
+            SurvivalTimer.Instance.EnterHabitat(LinkedHabitat);
             OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
-            PlayerInput.Instance.SetPressure(true);
             RefreshSealedButtons();
         }
     }
@@ -72,7 +72,6 @@ public class Airlock : MonoBehaviour {
             SurvivalTimer.Instance.BeginEVA();
             OutsideVisuals.ToggleAllParticles(true);
             SetPlayerTerrainCollision(false);
-            PlayerInput.Instance.SetPressure(false);
             RefreshSealedButtons();
         }
     }
@@ -119,9 +118,23 @@ public class Airlock : MonoBehaviour {
         t.tag = isButtonEnabled ? "button" : "Untagged";
     }
 
-    public static void ToggleDoor(Transform t)
+    public void ToggleDoor(Transform t)
     {
-        DoorToAirlock[t]._ToggleDoor(t);
+        _ToggleDoor(t);
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        ResourceComponent comp = other.GetComponent<ResourceComponent>();
+        if (comp != null && this.LinkedHabitat != null)
+        {
+            this.LinkedHabitat.ImportResource(comp);
+        }
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.Airlock;
     }
 }
 

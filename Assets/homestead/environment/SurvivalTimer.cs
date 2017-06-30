@@ -1,64 +1,46 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using RedHomestead.Persistence;
+using RedHomestead.Simulation;
+using RedHomestead.EVA;
+using System.Linq;
 
 namespace RedHomestead
 {
-    public static class Constants
-    {
-        public const float KilogramsOxygenPerHour = 0.0972f;
-        public const float CaloriesPerDay = 2400;
-        public const float LitersOfWaterPerDay = 3f;
-    }
 
     [Serializable]
     public struct SurvivalResourceAudio
     {
         public AudioClip WarningClip, CriticalClip;
     }
-
-    public enum ConsumptionPeriod { Daily, Hourly }
 }
 
 
 [Serializable]
 public abstract class SurvivalResource
 {
-    public readonly float ConsumptionPerSecond = .1f;
     public RedHomestead.SurvivalResourceAudio AudioClips;
-    public float CurrentAmount = 100f;
-    public float MaximumAmount = 100f;
+    internal PackResourceData Data;
 
     internal bool IsCritical = false;
     internal bool IsWarning = false;
+    internal float EnvironmentalConsumptionCoefficient = 1f;
+    internal float PerkConsumptionCoefficient = 1f;
+    internal float EffectiveConsumptionPerSecond
+    {
+        get { return Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient * PerkConsumptionCoefficient; }
+    }
 
     public int HoursLeftHint
     {
         get
         {
-            return (int)Math.Ceiling(CurrentAmount / (ConsumptionPerSecond * 60));
+            return (int)Math.Ceiling(Data.Current / (EffectiveConsumptionPerSecond * 60));
         }
     }
 
     public SurvivalResource() { }
-    public SurvivalResource(RedHomestead.ConsumptionPeriod consumes, float consumeAmountPerPeriod, float maxAmt, float? currAmt = null)
-    {
-        if (!currAmt.HasValue)
-            currAmt = maxAmt;
-
-        switch (consumes)
-        {
-            case RedHomestead.ConsumptionPeriod.Daily:
-                this.ConsumptionPerSecond = consumeAmountPerPeriod / SunOrbit.MartianMinutesPerDay * SunOrbit.GameSecondsPerMartianMinute;
-                break;
-            case RedHomestead.ConsumptionPeriod.Hourly:
-                this.ConsumptionPerSecond = consumeAmountPerPeriod / 60 * SunOrbit.GameSecondsPerMartianMinute;
-                break;
-        }
-
-        this.MaximumAmount = maxAmt;
-        this.CurrentAmount = currAmt.Value;
-    }
 
     public void Consume()
     {
@@ -74,6 +56,8 @@ public abstract class SurvivalResource
         else if (newWarning && !this.IsWarning)
         {
             GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.AudioClips.WarningClip);
+
+            SunOrbit.Instance.CheckEmergencyReset();
         }
 
         this.IsCritical = newCritical;
@@ -90,17 +74,16 @@ public abstract class SurvivalResource
 public class SingleSurvivalResource : SurvivalResource
 {
     public SingleSurvivalResource() { }
-    public SingleSurvivalResource(RedHomestead.ConsumptionPeriod consumes, float consumeAmountPerPeriod, float maxAmt, float? currAmt = null): base(consumes, consumeAmountPerPeriod, maxAmt, currAmt) { }
 
     protected override void DoConsume()
     {
-        CurrentAmount -= Time.deltaTime * ConsumptionPerSecond;
-        this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
+        Data.Current -= Time.deltaTime * EffectiveConsumptionPerSecond;
+        this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
     }
 
     public override void ResetToMaximum()
     {
-        CurrentAmount = MaximumAmount;
+        Data.Current = Data.Maximum;
         this.UpdateUI(1f, HoursLeftHint);
     }
 
@@ -111,20 +94,20 @@ public class SingleSurvivalResource : SurvivalResource
 
     internal void Increment(float amount)
     {
-        CurrentAmount += amount;
+        Data.Current += amount;
 
-        if (CurrentAmount > MaximumAmount)
-            CurrentAmount = MaximumAmount;
-        else if (CurrentAmount < 0)
-            CurrentAmount = 0f;
+        if (Data.Current > Data.Maximum)
+            Data.Current = Data.Maximum;
+        else if (Data.Current < 0)
+            Data.Current = 0f;
 
-        this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
+        this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
     }
 
     public override void Resupply(float additionalSecondsOfSupply)
     {
-        CurrentAmount = Mathf.Min(MaximumAmount, CurrentAmount + (additionalSecondsOfSupply * this.ConsumptionPerSecond));
-        this.UpdateUI(CurrentAmount / MaximumAmount, HoursLeftHint);
+        Data.Current = Mathf.Min(Data.Maximum, Data.Current + (additionalSecondsOfSupply * this.Data.ConsumptionPerSecond));
+        this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
     }
 }
 
@@ -134,30 +117,29 @@ public class DoubleSurvivalResource : SurvivalResource
     public bool IsOnLastBar = false;
 
     public DoubleSurvivalResource() { }
-    public DoubleSurvivalResource(RedHomestead.ConsumptionPeriod consumes, float consumeAmountPerPeriod, float maxAmt, float? currAmt = null): base(consumes, consumeAmountPerPeriod, maxAmt, currAmt) { }
 
     protected override void DoConsume()
     {
-        CurrentAmount -= Time.deltaTime * ConsumptionPerSecond;
+        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient;
         
         if (IsOnLastBar)
-            this.UpdateUI(0f, CurrentAmount / MaximumAmount, HoursLeftHint);
+            this.UpdateUI(0f, Data.Current / Data.Maximum, HoursLeftHint);
 
-        else if (CurrentAmount <= 0f)
+        else if (Data.Current <= 0f)
         {
             IsOnLastBar = true;
-            CurrentAmount = MaximumAmount;
-            this.UpdateUI(CurrentAmount / MaximumAmount, 0f, HoursLeftHint);
+            Data.Current = Data.Maximum;
+            this.UpdateUI(Data.Current / Data.Maximum, 0f, HoursLeftHint);
         }
         else
         {
-            this.UpdateUI(CurrentAmount / MaximumAmount, 0f, HoursLeftHint);
+            this.UpdateUI(Data.Current / Data.Maximum, 0f, HoursLeftHint);
         }
     }
 
     public override void ResetToMaximum()
     {
-        CurrentAmount = MaximumAmount;
+        Data.Current = Data.Maximum;
         IsOnLastBar = false;
         this.UpdateUI(1f, 0f, HoursLeftHint);
     }
@@ -166,24 +148,27 @@ public class DoubleSurvivalResource : SurvivalResource
 
     public override void Resupply(float additionalSecondsOfSupply)
     {
-        CurrentAmount = Mathf.Min(MaximumAmount, CurrentAmount + (additionalSecondsOfSupply * this.ConsumptionPerSecond));
-        this.UpdateUI(CurrentAmount / MaximumAmount, 0f, HoursLeftHint);
+        Data.Current = Mathf.Min(Data.Maximum, Data.Current + (additionalSecondsOfSupply * this.Data.ConsumptionPerSecond));
+        this.UpdateUI(Data.Current / Data.Maximum, 0f, HoursLeftHint);
     }
 }
+
+public enum Temperature { Cold, Temperate, Hot }
 
 public class SurvivalTimer : MonoBehaviour {
     public static SurvivalTimer Instance;
 
-    public SingleSurvivalResource Oxygen =
-        new SingleSurvivalResource(RedHomestead.ConsumptionPeriod.Hourly, RedHomestead.Constants.KilogramsOxygenPerHour, RedHomestead.Constants.KilogramsOxygenPerHour * 4f);
+    public SingleSurvivalResource Oxygen = new SingleSurvivalResource();
 
-    public SingleSurvivalResource Water =
-        new SingleSurvivalResource(RedHomestead.ConsumptionPeriod.Daily, RedHomestead.Constants.LitersOfWaterPerDay, RedHomestead.Constants.LitersOfWaterPerDay / 2);
+    public SingleSurvivalResource Water = new SingleSurvivalResource();
 
-    public SingleSurvivalResource Food = 
-        new SingleSurvivalResource(RedHomestead.ConsumptionPeriod.Daily, RedHomestead.Constants.CaloriesPerDay, RedHomestead.Constants.CaloriesPerDay);
+    public SingleSurvivalResource Food = new SingleSurvivalResource();
 
-    public DoubleSurvivalResource Power = new DoubleSurvivalResource(RedHomestead.ConsumptionPeriod.Hourly, 1f, 6f);
+    public SingleSurvivalResource Power = new SingleSurvivalResource();
+
+    internal PackData Data { get; private set; }
+    internal Temperature ExternalTemperature;
+    public AudioClip IncomingSolarFlare;
 
     public bool UsingPackResources
     {
@@ -199,10 +184,8 @@ public class SurvivalTimer : MonoBehaviour {
             return CurrentHabitat != null;
         }
     }
-    public Habitat CurrentHabitat
-    {
-        get; private set;
-    }
+
+    public Habitat CurrentHabitat { get; private set; }
 
     void Awake () {
         Instance = this;
@@ -211,64 +194,124 @@ public class SurvivalTimer : MonoBehaviour {
 
     void Start()
     {
+        SetData(Game.Current.Player.PackData);
+        Oxygen.PerkConsumptionCoefficient = RedHomestead.Perks.PerkMultipliers.AirUsage;
+
+        if (!String.IsNullOrEmpty(this.Data.CurrentHabitatModuleInstanceID))
+        {
+            CurrentHabitat = GameObject.FindObjectsOfType<Habitat>().FirstOrDefault(x => x.Data.ModuleInstanceID == Data.CurrentHabitatModuleInstanceID);
+            
+            Airlock[] airlocks = CurrentHabitat.transform.GetComponentsInChildren<Airlock>();
+
+            this.skipEnterHabitatPackRefill = true;
+            foreach (Airlock a in airlocks)
+            {
+                a.Pressurize();
+            }
+        }
+
         Oxygen.UpdateUI = GuiBridge.Instance.RefreshOxygenBar;
         Water.UpdateUI = GuiBridge.Instance.RefreshWaterBar;
         Food.UpdateUI = GuiBridge.Instance.RefreshFoodBar;
         Power.UpdateUI = GuiBridge.Instance.RefreshPowerBar;
+        SunOrbit.Instance.OnHourChange += OnHourChange;
+        OnHourChange(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour);
     }
-	
-	void Update () {
-        if (UsingPackResources)
+
+    private void OnHourChange(int sol, float hour)
+    {
+        if (Game.Current.Environment.CurrentHour > 8 && Game.Current.Environment.CurrentHour < 16)
+        {
+            ExternalTemperature = Temperature.Hot;
+            Power.EnvironmentalConsumptionCoefficient = .5f;
+        }
+        else if (Game.Current.Environment.CurrentHour < 4 | Game.Current.Environment.CurrentHour > 20)
+        {
+            ExternalTemperature = Temperature.Cold;
+            Power.EnvironmentalConsumptionCoefficient = 2f;
+        }
+        else
+        {
+            ExternalTemperature = Temperature.Temperate;
+            Power.EnvironmentalConsumptionCoefficient = 1f;
+        }
+        GuiBridge.Instance.RefreshTemperatureGauges();
+    }
+
+    void Update () {
+        if (UsingPackResources || !CurrentHabitat.HasPower)
         {
             Oxygen.Consume();
 
-            if (Oxygen.CurrentAmount < 0)
+            if (Oxygen.Data.Current < 0)
             {
-                //todo: accept reason why you died: e.g. You asphyxiated
-                KillPlayer();
+                KillPlayer("ASPHYXIATION");
                 return;
             }
 
             Power.Consume();
-            if (Power.IsOnLastBar && Power.CurrentAmount < 0f)
+            if (Power.Data.Current < 0f)
             {
-                //todo: accept reason why you died: e.g. You froze
-                KillPlayer();
+                KillPlayer("EXPOSURE");
                 return;
             }
         }
 
         Water.Consume();
 
-        if (Water.CurrentAmount < 0)
+        if (Water.Data.Current < 0)
         {
-            //todo: accept reason why you died: e.g. You terminally dehydrated
-            KillPlayer();
+            KillPlayer("DEHYDRATION");
             return;
         }
 
         Food.Consume();
 
-        if (Food.CurrentAmount < 0)
+        if (Food.Data.Current < 0)
         {
-            //todo: accept reason why you died: e.g. You starved
-            KillPlayer();
+            KillPlayer("STARVATION");
             return;
         }
     }
 
-    private void KillPlayer()
+    internal void SetData(PackData data)
     {
-        PlayerInput.Instance.KillPlayer();
+        this.Data = data;
+        Oxygen.Data = data.Oxygen;
+        Power.Data = data.Power;
+        Water.Data = data.Water;
+        Food.Data = data.Food;
+    }
+
+    private void KillPlayer(string reason)
+    {
+        PlayerInput.Instance.KillPlayer(reason);
         this.enabled = false;
     }
 
+    private bool skipEnterHabitatPackRefill = false;
     internal void EnterHabitat(Habitat hab)
     {
-        Oxygen.ResetToMaximum();
-        Power.ResetToMaximum();
+        if (skipEnterHabitatPackRefill)
+        {
+            this.skipEnterHabitatPackRefill = false;
+        }
+        else if (hab.HasPower)
+        {
+            Oxygen.ResetToMaximum();
+            Power.ResetToMaximum();
+        }
 
-        CurrentHabitat = hab;
+        //hab should only be null if the Airlock making this call hasn't finished its Start method
+        //which can happen on game load
+        if (hab != null)
+        {
+            CurrentHabitat = hab;
+            Data.CurrentHabitatModuleInstanceID = hab.Data.ModuleInstanceID;
+        }
+
+        PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
+        PlayerInput.Instance.SetPressure(true);
     }
 
     internal void FillWater()
@@ -276,29 +319,21 @@ public class SurvivalTimer : MonoBehaviour {
         Water.ResetToMaximum();
     }
 
-    internal void EatFood(MealType meal)
+    internal void EatFood(Matter meal)
     {
-        Food.Increment(meal.GetCalories());
+        Food.Increment(meal.Calories());
     }
 
     internal void BeginEVA()
     {
         CurrentHabitat = null;
+        PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
+        PlayerInput.Instance.SetPressure(false);
     }
-}
 
-public enum MealType { Prepared = 0, Organic, Shake }
-
-public static class MealTypeExtensions
-{
-    public static float GetCalories(this MealType meal)
+    internal void ToggleRun(bool isRunning)
     {
-        switch (meal)
-        {
-            case MealType.Shake:
-                return 600f;
-            default:
-                return 1200f;
-        }
+        Oxygen.EnvironmentalConsumptionCoefficient = isRunning ? 1.5f : 1f;
+        GuiBridge.Instance.RefreshSprintIcon(isRunning);
     }
 }

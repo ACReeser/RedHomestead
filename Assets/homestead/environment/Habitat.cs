@@ -3,32 +3,82 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
+using RedHomestead.Persistence;
+using RedHomestead.Buildings;
+using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
-public class Habitat : Converter
+public enum HabitatType { LuxuryLander, Burrow, Tent } //Lander, Tent
+
+[Serializable]
+public class HabitatExtraData : RedHomesteadData
+{
+    public string Name;
+    public HabitatType Type;
+    public EnergyContainer EnergyContainer;
+
+    [HideInInspector]
+    public string ModuleInstanceID;
+
+    public override void AfterDeserialize(Transform t = null)
+    {
+
+    }
+
+    protected override void BeforeMarshal(Transform t)
+    {
+        this.ModuleInstanceID = t.GetComponent<Habitat>().Data.ModuleInstanceID;
+        Name = t.name;
+    }
+}
+
+public class Habitat : Converter, IPowerConsumer, IBattery, IHabitatModule
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
-    private float _CurrentPowerRequirements = 1f;
+    private float _CurrentPowerRequirements = ElectricityConstants.WattsPerBlock * 4f;
 
-    //public override float WattRequirementsPerTick
-    //{
-    //    get
-    //    {
-    //        return _CurrentPowerRequirements;
-    //    }
-    //}
+    internal ResourceChangeHandler OnResourceChange;
+    public delegate void ResourceChangeHandler(params Matter[] type);
+    
+    public HabitatExtraData HabitatData;
+    public PowerVisualization BatteryViz;
+    public bool IsOn { get { return this.HasPower; } set { } }
 
-    internal Dictionary<Compound, SumContainer> BasicResourceTotals = new Dictionary<Compound, SumContainer>();
-    internal Dictionary<Resource, SumContainer> ComplexResourceTotals = new Dictionary<Resource, SumContainer>();
+    public EnergyContainer EnergyContainer { get { return HabitatData.EnergyContainer; } }
 
-    private List<Sink> WaterSinks = new List<Sink>(), OxygenSinks = new List<Sink>();
+    public GameObject EmergencyLight;
+    public Light[] Lights;
 
-    public override float WattRequirementsPerTick
+    private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
+
+    public override float WattsConsumed
     {
         get
         {
             return _CurrentPowerRequirements;
         }
+    }
+
+    public Habitat LinkedHabitat
+    {
+        get
+        {
+            return this;
+        }
+
+        set
+        {
+            //noop;
+        }
+    }
+
+    public List<IHabitatModule> AdjacentModules { get; set; }
+
+    protected override void OnStart()
+    {
+        base.OnStart();
+        FlowManager.Instance.PowerGrids.Add(this);
     }
 
     public override void ClearHooks()
@@ -39,16 +89,16 @@ public class Habitat : Converter
 
     public override void Convert()
     {
-        FlowWithExternal(Compound.Water, WaterSinks, WaterPullPerTick);
-        FlowWithExternal(Compound.Oxygen, OxygenSinks, OxygenPullPerTick);
+        FlowWithExternal(Matter.Water, WaterSinks, WaterPullPerTick);
+        FlowWithExternal(Matter.Oxygen, OxygenSinks, OxygenPullPerTick);
     }
 
-    private void FlowWithExternal(Compound compound, List<Sink> externals, float pullPerTick)
+    private void FlowWithExternal(Matter compound, List<ISink> externals, float pullPerTick)
     {
-        if (externals.Count > 0 && BasicResourceTotals[compound].AvailableCapacity >= pullPerTick)
+        if (externals.Count > 0 && Data.Containers[compound].AvailableCapacity >= pullPerTick)
         {
             float pulled = 0f;
-            foreach (Sink s in WaterSinks)
+            foreach (ISink s in externals)
             {
                 pulled += s.Get(compound).Pull(pullPerTick);
                 if (pulled >= pullPerTick)
@@ -56,110 +106,161 @@ public class Habitat : Converter
                     break;
                 }
             }
-            BasicResourceTotals[compound].Push(pulled);
+            Data.Containers[compound].Push(pulled);
         }
     }
 
-    public override void OnSinkConnected(Sink s)
+    public override void OnSinkConnected(ISink s)
     {
-        if (s.HasContainerFor(Compound.Water))
+        if (s.HasContainerFor(Matter.Water))
             WaterSinks.Add(s);
 
-        if (s.HasContainerFor(Compound.Oxygen))
+        if (s.HasContainerFor(Matter.Oxygen))
             OxygenSinks.Add(s);
     }
-    
-    void Awake () {
-        //todo: move this to individual Stuff adds
-        BasicResourceTotals[Compound.Water] = new SumContainer(10f)
-        {
-            SimpleCompoundType = Compound.Water,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 20f
-        };
-        BasicResourceTotals[Compound.Oxygen] = new SumContainer(20f)
-        {
-            SimpleCompoundType = Compound.Oxygen,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 20f
-        };
-        ComplexResourceTotals[Resource.Biomass] = new SumContainer(0f)
-        {
-            ComplexResourceType = Resource.Biomass,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 0
-        };
-        ComplexResourceTotals[Resource.OrganicMeal] = new SumContainer(10f)
-        {
-            ComplexResourceType = Resource.OrganicMeal,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 18f
-        };
-        ComplexResourceTotals[Resource.RationMeal] = new SumContainer(10f)
-        {
-            ComplexResourceType = Resource.RationMeal,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 18f
-        };
-        ComplexResourceTotals[Resource.MealPowder] = new SumContainer(20f)
-        {
-            ComplexResourceType = Resource.MealPowder,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 36f
-        };
-        ComplexResourceTotals[Resource.MealShake] = new SumContainer(6f)
-        {
-            ComplexResourceType = Resource.MealShake,
-            LastTickRateOfChange = 0,
-            TotalCapacity = 36f
-        };
-    }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 
-    public void HarvestPlanter(Transform t)
+    public void ImportResource(ResourceComponent r)
     {
-
-    }
-
-    public void ConsumePreparedMeal()
-    {
-
-    }
-
-    public void ConsumeMealShake()
-    {
-
-    }
-
-    public void ConsumeDrink()
-    {
-
+        if (r.Data.Container.MatterType.IsStoredInHabitat())
+        {
+            float amountLeft = Data.Containers[r.Data.Container.MatterType].Push(r.Data.Container.CurrentAmount);
+            
+            if (amountLeft <= 0)
+            {
+                GameObject.Destroy(r.gameObject);
+            }
+        }
     }
 
     public void PrepareBiomassToPreparedMeal()
     {
-        if (ComplexResourceTotals[Resource.Biomass].CurrentAmount > 0 && ComplexResourceTotals[Resource.OrganicMeal].AvailableCapacity >= 1f)
-        {
-            ComplexResourceTotals[Resource.Biomass].Pull(1f);
-            ComplexResourceTotals[Resource.OrganicMeal].Push(1f);
-        }
+        ConvertMealMatter(Matter.Biomass, Matter.OrganicMeal);
     }
 
     public void PreparePowderToShake()
     {
-        if (ComplexResourceTotals[Resource.MealPowder].CurrentAmount > 0 && ComplexResourceTotals[Resource.MealShake].AvailableCapacity >= 1f)
+        ConvertMealMatter(Matter.MealPowder, Matter.MealShake);
+    }
+
+    private void ConvertMealMatter(Matter from, Matter to)
+    {
+        if (Data.Containers[from].CurrentAmount >= from.CubicMetersPerMeal()  && Data.Containers[to].AvailableCapacity >= to.CubicMetersPerMeal())
         {
-            ComplexResourceTotals[Resource.MealPowder].Pull(1f);
-            ComplexResourceTotals[Resource.MealShake].Push(1f);
+            Data.MatterHistory.Consume(from, Data.Containers[from].Pull(from.CubicMetersPerMeal()));
+            Data.MatterHistory.Produce(to, Data.Containers[to].Push(to.CubicMetersPerMeal()));
+
+            OnResourceChange(from, to);
         }
     }
     
     public override void Report()
     {
         
+    }
+
+    protected override string GetModuleInstanceID()
+    {
+        if (this.Data != null)
+            return this.Data.ModuleInstanceID;
+        else
+            return base.GetModuleInstanceID();
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.Habitat;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        print("Getting new habitat data");
+        HabitatData = new HabitatExtraData()
+        {
+            EnergyContainer = new EnergyContainer()
+            {
+                TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 5f
+            }
+        };
+
+        return new ResourceContainerDictionary()
+        {
+            { Matter.Water, new ResourceContainer(10f)
+                {
+                    MatterType = Matter.Water,
+                    TotalCapacity = 20f
+                }
+            },
+            { Matter.Oxygen, new ResourceContainer(10f)
+            {
+                MatterType = Matter.Oxygen,
+                TotalCapacity = 10f
+            }},
+            { Matter.Biomass, new ResourceContainer(0f)
+            {
+                MatterType = Matter.Biomass,
+                TotalCapacity = 1f
+            }},
+            { Matter.OrganicMeal, new ResourceContainer(0f)
+            {
+                MatterType = Matter.OrganicMeal,
+                TotalCapacity = 1f
+            }},
+            { Matter.RationMeal, new ResourceContainer(Matter.RationMeal.CubicMetersPerMeal() * 6)
+            {
+                MatterType = Matter.RationMeal,
+                TotalCapacity = 1f
+            }},
+            { Matter.MealPowder, new ResourceContainer(Matter.RationMeal.CubicMetersPerMeal() * 12)
+            {
+                MatterType = Matter.MealPowder,
+                TotalCapacity = 1f
+            }},
+            { Matter.MealShake, new ResourceContainer(0f)
+            {
+                MatterType = Matter.MealShake,
+                TotalCapacity = 1f
+            }},
+
+        };
+    }
+
+    internal void Eat(Matter mealType)
+    {
+        Data.MatterHistory.Consume(mealType,  Get(mealType).Pull(mealType.CubicMetersPerMeal()));
+        SurvivalTimer.Instance.EatFood(mealType);
+        OnResourceChange(mealType);
+    }
+
+    public void OnEmergencyShutdown()
+    {
+        if (EmergencyLight != null)
+            EmergencyLight.SetActive(true);
+    }
+
+    public override void OnPowerChanged()
+    {
+        foreach(Light l in Lights)
+        {
+            l.enabled = this.HasPower;
+            Behaviour halo = (Behaviour)l.GetComponent("Halo");
+            if (halo != null)
+                halo.enabled = this.HasPower;
+        }
+
+        if (!this.HasPower && EmergencyLight != null && !EmergencyLight.activeInHierarchy)
+            EmergencyLight.SetActive(true);
+        else if (this.HasPower && EmergencyLight != null && EmergencyLight.activeInHierarchy)
+            EmergencyLight.SetActive(false);
+    }
+    
+    public void PlayerToggleLights()
+    {
+        if (this.HasPower)
+        {
+            foreach (Light l in Lights)
+            {
+                l.enabled = !l.enabled;
+            }
+        }
     }
 }

@@ -4,29 +4,287 @@ using System;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using RedHomestead.Persistence;
+using UnityStandardAssets.CrossPlatformInput;
+using RedHomestead.Geography;
+using RedHomestead.Perks;
+using RedHomestead.Economy;
+using RedHomestead.GameplayOptions;
+using RedHomestead.Simulation;
+using RedHomestead.Crafting;
+
+[Serializable]
+public abstract class MainMenuView
+{
+    public Transform CameraAnchor;
+    public RectTransform CanvasParent;
+    public virtual float TransitionToTime { get { return 1f; } }
+
+    internal int LogoBottom, LogoRight;
+
+    public void AfterTransitionTo()
+    {
+        CanvasParent.gameObject.SetActive(true);
+        this._AfterTransitionTo();
+    }
+    public void BeforeTransitionAway()
+    {
+        CanvasParent.gameObject.SetActive(false);
+        this._BeforeTransitionAway();
+    }
+
+    protected abstract void _AfterTransitionTo();
+    protected abstract void _BeforeTransitionAway();
+}
+
+[Serializable]
+public class ScoutView: MainMenuView
+{
+    public RectTransform ClaimHomesteadButton, SelectLocationButton;
+    public Transform ScoutRegions, ScoutOrreyVertical, ScoutOrreyHorizontal, ScoutCursor;
+    public Light Sun;
+    public Behaviour Halo;
+    public Spin PlanetSpin;
+    public Text RegionName, RegionSolar, RegionMinerals, RegionWater, RegionRemote, RegionMultiplier, LatLongText;
+
+    public void FillScoutInfo(MarsRegion region, LatLong latlong)
+    {
+        RegionName.text = region.Name();
+        LatLongText.text = latlong.ToString();
+        RegionWater.text = region.Data().WaterMultiplierString;
+        RegionMinerals.text = region.Data().MineralMultiplierString;
+        RegionSolar.text = region.Data().SolarMultiplierString;
+    }
+
+    internal void ToggleScoutMode(bool isScout)
+    {
+        RenderSettings.ambientLight = isScout ? new Color(1, 1, 1, .5f) : new Color(0, 0, 0, 0);
+
+        Halo.enabled = !isScout;
+        Sun.enabled = !isScout;
+        ScoutRegions.gameObject.SetActive(isScout);
+        CanvasParent.gameObject.SetActive(isScout);
+        PlanetSpin.enabled = !isScout;
+
+        if (isScout)
+            PlanetSpin.transform.localRotation = Quaternion.Euler(-90, -90, 0);
+        else
+        {
+            ScoutOrreyHorizontal.localRotation = Quaternion.identity;
+            ScoutOrreyVertical.localRotation = Quaternion.identity;
+        }
+    }
+
+    protected override void _AfterTransitionTo()
+    {
+        ToggleScoutMode(true);
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+        ToggleScoutMode(false);
+    }
+}
+
+[Serializable]
+public class FinanceAndSupplyView: MainMenuView
+{
+    public Text StartingFunds, AllocatedSupplyFunds, RemainingFunds;
+    public RectTransform SuppliesParent, CraftablesParent;
+    public Button LaunchButton;
+    
+    public void RefreshFunds(NewGameChoices choices)
+    {
+        StartingFunds.text = String.Format("Starting Funds: ${0:#,##0}k", choices.StartingFunds / 1000);
+        RemainingFunds.text = String.Format("Remaining Funds: ${0:#,##0}k", choices.RemainingFunds / 1000);
+    }
+
+    protected override void _AfterTransitionTo()
+    {
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+    }
+
+    internal static void Fill<K, V>(RectTransform parent, Dictionary<K, V> dictionary, Action<KeyValuePair<K, V>, Transform> bindFunction)
+    {
+        int i = 0;
+        foreach (KeyValuePair<K, V> data in dictionary)
+        {
+            if (i < parent.childCount)
+            {
+                Transform entry = parent.GetChild(i);
+                bindFunction(data, entry);
+            }
+
+            i++;
+        }
+        for (int j = i; j < parent.childCount; j++)
+        {
+            parent.GetChild(j).gameObject.SetActive(false);
+        }
+    }
+
+    internal void FillAll()
+    {
+        Fill(SuppliesParent, EconomyExtensions.StartingSupplies, (KeyValuePair<Matter, StartingSupplyData> data, Transform entry) =>
+        {
+            entry.GetChild(0).GetComponent<Text>().text = data.Value.Name;
+            entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.Value.PerUnitCost / 1000);
+            entry.GetChild(2).GetComponent<Image>().sprite = data.Key.AtlasSprite();
+            entry.name = ((int)data.Key).ToString();
+        });
+        Fill(CraftablesParent, EconomyExtensions.StartingCraftables, (KeyValuePair<Craftable, StartingCraftableData> data, Transform entry) =>
+        {
+            entry.GetChild(0).GetComponent<Text>().text = data.Value.Name;
+            entry.GetChild(1).GetComponent<Text>().text = String.Format("${0:#,##0}k", data.Value.PerUnitCost / 1000);
+            entry.GetChild(2).GetComponent<Image>().sprite = data.Key.AtlasSprite();
+            entry.name = ((int)data.Key).ToString();
+        });
+    }
+
+    internal void UpdateChoices(NewGameChoices choices)
+    {
+        foreach (RectTransform entry in SuppliesParent)
+        {
+            if (entry.gameObject.activeInHierarchy)
+            {
+                choices.BoughtMatter[(Matter)int.Parse(entry.name)] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
+            }
+        }
+        foreach (RectTransform entry in CraftablesParent)
+        {
+            if (entry.gameObject.activeInHierarchy)
+            {
+                choices.BoughtCraftables[(Craftable)int.Parse(entry.name)] = int.Parse(entry.GetChild(3).GetComponent<InputField>().text);
+            }
+        }
+
+        choices.RecalculateFunds();
+        RefreshFunds(choices);
+
+        LaunchButton.interactable = choices.RemainingFunds >= 0f;
+    }
+}
+
+[Serializable]
+public class TitleView: MainMenuView
+{
+    protected override void _AfterTransitionTo()
+    {
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+    }
+}
+
+[Serializable]
+public class QuickstartView : MainMenuView
+{
+    public override float TransitionToTime { get { return 0f; } }
+    public RectTransform QuickstartBackdrop, QuickstartTrainingEquipmentRow;
+
+    protected override void _AfterTransitionTo()
+    {
+        //QuickstartBackdrop.gameObject.SetActive(true);
+    }
+
+    protected override void _BeforeTransitionAway()
+    {
+        //QuickstartBackdrop.gameObject.SetActive(false);
+    }
+}
+
+public enum MainMenuCameraView { Title, Quickstart, Scout, Supply }
 
 public class MainMenu : MonoBehaviour {
     public Image BigLogo;
-    public RectTransform MainMenuButtons, NewGamePanels, QuickstartBackdrop, QuickstartTrainingEquipmentRow;
-    public Transform OrbitCameraAnchor;
+    public Button LoadButton;
+    public ScoutView ScoutView;
+    public FinanceAndSupplyView FinanceAndSupplyView;
+    public TitleView TitleView;
+    public QuickstartView QuickstartView;
 
-    private bool transitioning, onMainMenu = true;
-    private const float transitionDuration = 1f;
+    private MainMenuCameraView ViewState = MainMenuCameraView.Title;
+    private MainMenuView CurrentView;
+    private MainMenuView GetView(MainMenuCameraView viewState)
+    {
+        switch (viewState)
+        {
+            case MainMenuCameraView.Scout:
+                return ScoutView;
+            case MainMenuCameraView.Supply:
+                return FinanceAndSupplyView;
+            case MainMenuCameraView.Quickstart:
+                return QuickstartView;
+            default:
+                return TitleView;
+        }
+    }
+
+    private bool transitioning;
     private const string DefaultRadioButtonName = "default";
     private const string RadioTagPostfix = "radio";
-    private float transitionTime = 0f;
-    private int smallLogoW, smallLogoH;
-    private Vector3 mainMenuCameraPosition;
     private LerpContext cameraLerp;
+    private string lastPlayerName;
+    private string[] savedPlayerNames;
+
+    internal NewGameChoices NewGameChoices;
 
 	// Use this for initialization
 	void Start ()
     {
-        smallLogoW = UnityEngine.Screen.width / 2;
-        smallLogoH = UnityEngine.Screen.height / 2;
+        CurrentView = TitleView;
+        FinanceAndSupplyView.LogoRight = UnityEngine.Screen.width / 2;
+        FinanceAndSupplyView.LogoBottom = UnityEngine.Screen.height / 2;
+        ScoutView.LogoRight = (int)(UnityEngine.Screen.width * .6666f);
+        ScoutView.LogoBottom = (int)(UnityEngine.Screen.height * .6666f);
+
         cameraLerp.Seed(Camera.main.transform, null);
-        cameraLerp.Duration = transitionDuration;
-        NewGamePanels.gameObject.SetActive(false);
+
+        TitleView.CanvasParent.gameObject.SetActive(true);
+
+        //init radio buttons needs active gameobjects
+        FinanceAndSupplyView.CanvasParent.gameObject.SetActive(true);
+        InitializeRadioButtons();
+        FinanceAndSupplyView.CanvasParent.gameObject.SetActive(false);
+
+        QuickstartView.CanvasParent.gameObject.SetActive(false);
+
+        ScoutView.ToggleScoutMode(false);
+
+        NewGameChoices.Init();
+        NewGameChoices.RecalculateFunds();
+        FinanceAndSupplyView.RefreshFunds(NewGameChoices);
+        FinanceAndSupplyView.FillAll();
+
+        //if we start here from the escape menu, time is paused
+        Time.timeScale = 1f;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        loadSavedPlayers();
+    }
+
+    private void loadSavedPlayers()
+    {
+        try
+        {
+            lastPlayerName = PersistentDataManager.GetLastPlayedPlayerName();
+            savedPlayerNames = PersistentDataManager.GetPlayerNames();
+
+            if (!String.IsNullOrEmpty(lastPlayerName))
+            {
+                LoadButton.interactable = true;
+                LoadButton.transform.GetChild(0).GetComponent<Text>().text = "LOAD GAME as " + lastPlayerName;
+            }
+
+        }
+        catch (Exception e){
+            UnityEngine.Debug.LogError(e.ToString());
+        }
     }
 
     private GameObject[] defaultQuickstartClones = new GameObject[2];
@@ -43,7 +301,7 @@ public class MainMenu : MonoBehaviour {
                     if (defaultQuickstartClones[(int)r] == null)
                     {
                         defaultQuickstartClones[(int)r] = GameObject.Instantiate(g);
-                        defaultQuickstartClones[(int)r].transform.SetParent(QuickstartTrainingEquipmentRow);
+                        defaultQuickstartClones[(int)r].transform.SetParent(QuickstartView.QuickstartTrainingEquipmentRow);
                         //remove the checkbox
                         defaultQuickstartClones[(int)r].transform.GetChild(0).gameObject.SetActive(false);
                         defaultQuickstartClones[(int)r].tag = "Untagged";
@@ -56,98 +314,118 @@ public class MainMenu : MonoBehaviour {
             }
         }
     }
-
-    // Update is called once per frame
-    void Update () {
-	
+    
+    void Update() {
+        if (ViewState == MainMenuCameraView.Scout)
+        {
+            HandleScoutInput();
+        }
 	}
 
-    public void NewGameToggle(bool state)
-    {
-        if (!transitioning)
-        {
-            transitioning = !transitioning;
+    private BaseLocation hoverLocation;
 
-            if (onMainMenu)
+    private void HandleScoutInput()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (NewGameChoices.ChosenLocation == null && Physics.Raycast(ray, out hit))
+        {
+            hoverLocation = new BaseLocation()
             {
-                cameraLerp.Seed(Camera.main.transform, OrbitCameraAnchor);
-            }
-            else
-            {
-                NewGamePanels.gameObject.SetActive(false);
-            }
-
-            ToggleLogoAndCamera(!state, AfterNewGame);
+                Region = GeoExtensions.ParseRegion(hit.collider.name),
+                LatLong = LatLong.FromPointOnUnitSphere(ScoutView.ScoutOrreyHorizontal.transform.InverseTransformPoint(hit.point))
+            };
+            ScoutView.FillScoutInfo(hoverLocation.Region, hoverLocation.LatLong);
+            ScoutView.ScoutCursor.position = hit.point;
+            ScoutView.ScoutCursor.rotation = Quaternion.LookRotation(hit.normal);
         }
-    }
 
-    private void AfterNewGame()
-    {
-        MainMenuButtons.gameObject.SetActive(onMainMenu);
-
-        if (!onMainMenu)
+        if (Input.GetMouseButtonDown(0))
         {
-            NewGamePanels.gameObject.SetActive(true);
-
-            //unselect all radio buttons
-            InitializeRadioButtons();
-
-            QuickstartBackdrop.gameObject.SetActive(true);
+            SetSelectedLocation(hoverLocation);
         }
-    }
-
-    public void SettingsClick(bool state)
-    {
-        if (!transitioning)
+        else if (Input.GetMouseButtonDown(1))
         {
-            transitioning = !transitioning;
-            if (onMainMenu)
-            {
-                cameraLerp.Seed(Camera.main.transform, OrbitCameraAnchor);
-            }
-            ToggleLogoAndCamera(!state, AfterSettings);
-        }
-    }
-
-    private void AfterSettings()
-    {
-        MainMenuButtons.gameObject.SetActive(onMainMenu);
-    }
-
-    private void ToggleLogoAndCamera(bool toMainMenuView, Action onFinishTransition)
-    {
-        if (toMainMenuView)
-        {
-            cameraLerp.Reverse();
-            //toggle to fullscreen and non-orbit camera
-            StartCoroutine(LogoCameraChange(smallLogoH, smallLogoW, 0, 0, onFinishTransition));
+            SetSelectedLocation(null);
         }
         else
         {
-            //toggle to off
-            StartCoroutine(LogoCameraChange(0, 0, smallLogoH, smallLogoW, onFinishTransition));
+            float xDelta = CrossPlatformInputManager.GetAxis("Horizontal");
+            float yDelta = CrossPlatformInputManager.GetAxis("Vertical");
+
+            if (xDelta != 0f)
+                ScoutView.ScoutOrreyHorizontal.transform.Rotate(Vector3.up, xDelta, Space.Self);
+
+            if (yDelta != 0f)
+                ScoutView.ScoutOrreyVertical.transform.Rotate(Vector3.forward, -yDelta, Space.Self);
         }
+    }
+
+    private void SetSelectedLocation(BaseLocation loc)
+    {
+        NewGameChoices.ChosenLocation = loc;
+        ScoutView.ClaimHomesteadButton.gameObject.SetActive(loc != null);
+        ScoutView.SelectLocationButton.gameObject.SetActive(loc == null);
+        ScoutView.ScoutCursor.transform.SetParent(loc == null ? null : ScoutView.ScoutOrreyHorizontal);
+    }
+
+    public void ChangeViewInt(int newView)
+    {
+        ChangeView((MainMenuCameraView)newView);
+    }
+
+    public void ChangeView(MainMenuCameraView newView)
+    {
+        if (!transitioning)
+        {
+            transitioning = !transitioning;
+
+            MainMenuView fromView = CurrentView;
+            MainMenuView toView = GetView(newView);
+
+            cameraLerp.Seed(fromView.CameraAnchor, toView.CameraAnchor, toView.TransitionToTime);
+
+            if (newView == MainMenuCameraView.Scout)
+                SetSelectedLocation(null);
+
+            fromView.BeforeTransitionAway();
+            ToggleLogoAndCamera(fromView, toView, () => {
+                CurrentView = toView;
+                CurrentView.AfterTransitionTo();
+
+                ViewState = newView;
+
+                //if (newView == MainMenuCameraView.Supply)
+                //{
+                //    //unselect all radio buttons
+                //    InitializeRadioButtons();
+
+                //    QuickstartBackdrop.gameObject.SetActive(true);
+                //}
+            });
+        }
+    }
+
+    private void ToggleLogoAndCamera(MainMenuView fromView, MainMenuView toView, Action onFinishTransition)
+    {
+        StartCoroutine(LogoCameraChange(fromView.LogoBottom, fromView.LogoRight, toView.LogoBottom, toView.LogoRight, onFinishTransition));
     }
 
     private IEnumerator LogoCameraChange(float startBottom, float startRight, int endBottom, int endRight, Action onFinishTransition)
     {
         while(transitioning)
         {
-            transitionTime += Time.deltaTime;
-
             cameraLerp.Tick(Camera.main.transform);
 
-            if (transitionTime > transitionDuration)
+            if (cameraLerp.Done)
             {
                 SetBottomRight(BigLogo, endBottom, endRight);
                 transitioning = false;
-                transitionTime = 0f;
-                onMainMenu = !onMainMenu;
                 onFinishTransition();
             }
             else
             {
-                float lerpAmt = transitionTime / transitionDuration;
+                float lerpAmt = cameraLerp.Time / cameraLerp.Duration;
                 SetBottomRight(BigLogo, (int)Mathf.Lerp(startBottom, endBottom, lerpAmt), (int)Mathf.Lerp(startRight, endRight, lerpAmt) );
 
                 yield return null;
@@ -168,18 +446,15 @@ public class MainMenu : MonoBehaviour {
 
     public void LaunchGame()
     {
+        PersistentDataManager.StartNewGame(NewGameChoices);
         UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
     public void StartQuickstart()
     {
 #warning todo: make sure quickstart at quickstart equipment/training
+        this.NewGameChoices.LoadQuickstart();
         LaunchGame();
-    }
-
-    public void StartCustomize()
-    {
-        QuickstartBackdrop.gameObject.SetActive(false);
     }
 
     private enum NewGameRadioButtons { financing, training }
@@ -190,11 +465,17 @@ public class MainMenu : MonoBehaviour {
     public void SelectTraining(int trainingIndex)
     {
         OnRadioSelect(NewGameRadioButtons.training);
+        NewGameChoices.ChosenPlayerTraining = (Perk)trainingIndex;
+        NewGameChoices.RecalculateFunds();
+        FinanceAndSupplyView.RefreshFunds(NewGameChoices);
     }
 
     public void SelectFinancing(int financeIndex)
     {
         OnRadioSelect(NewGameRadioButtons.financing);
+        NewGameChoices.ChosenFinancing = (BackerFinancing)financeIndex;
+        NewGameChoices.RecalculateFunds();
+        FinanceAndSupplyView.RefreshFunds(NewGameChoices);
     }
 
     private void OnRadioSelect(NewGameRadioButtons radioGroup)
@@ -213,15 +494,31 @@ public class MainMenu : MonoBehaviour {
         thisT.GetChild(0).gameObject.SetActive(true);
     }
 
+    public void OnSupplyChange()
+    {
+        this.FinanceAndSupplyView.UpdateChoices(NewGameChoices);
+    }
+
+    public void LoadLastGame()
+    {
+        if (!String.IsNullOrEmpty(lastPlayerName))
+        {
+            GameObject g = new GameObject("loadBridge");
+            LoadGameBridge loadScript = g.AddComponent<LoadGameBridge>();
+            loadScript.playerNameToLoad = lastPlayerName;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+    }
+
     private struct LerpContext
     {
         public Vector3 FromPosition, ToPosition;
         public Quaternion FromRotation, ToRotation;
         public float Duration;
-        private float Time;
-        public bool Done;
+        public float Time { get; private set; }
+        public bool Done { get; private set; }
 
-        public void Seed(Transform from, Transform to)
+        public void Seed(Transform from, Transform to, float duration = 1f)
         {
             FromPosition = from.position;
             FromRotation = Quaternion.LookRotation(from.forward, from.up);
@@ -230,6 +527,9 @@ public class MainMenu : MonoBehaviour {
                 ToPosition = to.position;
                 ToRotation = Quaternion.LookRotation(to.forward, to.up);
             }
+            this.Time = 0f;
+            this.Duration = Mathf.Max(duration, 0.00001f); //prevent divide by zero errors
+            this.Done = false;
         }
 
         public void Reverse()

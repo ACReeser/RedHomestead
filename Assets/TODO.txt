@@ -8,8 +8,8 @@ Fluid Flow:
 [x] Actually push fluids
 
 UX Improvement:
-[ ] Make storage module
-[ ] Make rover storage snap
+[x] Make storage module
+[x] Make rover storage snap
 [x] Ability to write post it notes!
 [ ] Press r for global industrial report
 [ ] Make global industrial report GUI
@@ -17,12 +17,18 @@ UX Improvement:
 [x] Make module report GUI
 [x] DEVCHEAT When holding down some modifier key, instabuild
 [x] Radial tool menu
+[ ] Remove Stuff after built
 
 Resource Flow Visualization feature:
 [x] View input pipe hookups 
 [x] View output pipe hookups
 [x] View pipe flow (simple - add 2 animated planes that are on a separate layer that are scaled with pipe parent)
 [x] View storage amounts
+
+Power:
+[x] Remove powerline when moving ice drill
+[ ] Remove socket "plugs" when removing powerlines
+[ ] Prevent plugs from being multiple use
 
 Basic Habitat resources and update
 [x] Habitat script
@@ -38,7 +44,7 @@ Basic Habitat resources and update
 [x] Habitat windows
 
 Demo Goals:
-[ ] Start with hydrogen storage tanks + basic habitat
+[x] Start with hydrogen storage tanks + basic habitat
 [x] Construct Solar Panel
 [x] Construct Atmosphere Miner
 [x] Hook up miner to power
@@ -52,7 +58,7 @@ Demo Goals:
 === can now make methane for storage
 [x] Construct splitter
 [ ] split water line
-[ ] Construct Electrolyzer
+[x] Construct Electrolyzer
 [ ] Hook up to water
 [ ] Hook up to power
 [x] Hook up to habitat
@@ -75,11 +81,8 @@ Demo Goals:
 [ ] Hook up induction furnace to reduction furnace
 === can now make steel
 [ ] Get oxygen from dispenser while outside
-[x] Get power from dispenser whiel outside
+[x] Get power from dispenser while outside
 
-
-Better Workflow:
-how to have one mesh with multiple UVs?
 
 Features:
 
@@ -88,10 +91,10 @@ Hobbit Holes
 [x] Simple Excavation
 [ ] Optimized Cavern walls
 [ ] Basic Floorplan
-    [ ] Floorplan planning mode UI/IO
+    [x] Floorplan planning mode UI/IO
     [x] Snap Rotation
 	[ ] Resource requirements
-[ ] Functional Interior Design
+[x] Functional Interior Design
 [ ] Bulk component storage (free, and store components for interiors/floorplans)
 [ ] Habitat resources
 
@@ -101,32 +104,130 @@ Exploration
 [ ] Notifications of radio beacons
 [ ] Crashes with salvage
 [ ] meteorites with rare elements
+1) radio beacon pops up
+2) open map, see distance involved
+3) pack up rover with supplies
+4) if supplies will last you the trip out and back, you can drive to the edge of the map 
+5) travel is watching the rover bump along on its own
+6) you get to a new map/level that is small and centered on a crashed satellite or abandoned rover or meteorite
+
+
+##Purchasing Resources
+###By Resource
+"I want the cheapest steel"
+* Select resource type
+* Select cheapest supplier
+* Add resources to cart
+* Select desired shipping method
+###By Supplier
+"I want a bunch of things"
+* Select supplier
+* Browse available resources
+* Add resources to cart
+* Select desired shipping method
 
 Trading
-[ ] Credits (money) resource
-[ ] Periodic income
-[ ] Console with price listing
-[ ] Ability to buy materials
-[ ] Materials dropped off by rocket
-[ ] Ability to select materials to drop off
+[x] Dollar (money) resource
+[x] Periodic income
+[x] Ability to buy materials
+    [x] Resource first or Supplier first screen
+    [ ] Resource first: List resources, list suppliers. Select supplier button on right.
+	    [ ] Sort resources by rarity (common to rare)
+	    [ ] Sort suppliers by price asc
+    [x] Supplier first: List suppliers, list resources. Select supplier button on bottom right.
+	    [ ] Sort vendors by total stock desc
+	    [ ] Sort stock by (quantity|price|rarity [rare to common])
+	[x] Once supplier is chosen, allow adding resources to cart
+    [x] Checkout screen (totals, shipping method selection, confirmation)
+        [x] replace resource first/supplier first with cancel button
+    [x] ~Success~ after placing order, open en route tab
+[x] Ability to see en route
+    [x] Incoming deliveries (delivery type, contents & time)
+    [ ] ?? Outgoing orders (delivery type, contents & time)
+[ ] Ability to sell materials
+    [ ] Put materials in warehouse/pickup zone
+    [ ] List all resources in warehouse in terminal
+	[ ] Set type & price (show low, avg, high prices of market)
+	[ ] Have some sort of buyer script
+[ ] Packing algorithm
+    [ ] 3to4 levels of cubes
+	[ ] lay cubes iteratively, large to small
+	[ ] Pack check in checkout for validity
+	    [ ] Disable all if vol == max
+	    [ ] Disable any of size X if cannot fit another one in
+[x] Create lander when order is due
+[x] Pack lander with order
 [x] Materials dropped off by airbag
+[ ] Materials dropped off by rocket
+[ ] Materials dropped off by rover
+[ ] Materials picked up by rover
+[ ] Materials picked up by rocket
+[ ] Materials picked up by airbag cannon???
 
 Game Management
 [x] Start Screen
 [x] Start new game
-[ ] Load primary save slot
-[ ] Autosave
-
+[x] Load primary save slot
+    [x] Load crates
+    [x] Load player
+    [x] Load construction zones
+    [x] Load habitats
+    [x] Load modules (tanks, converters, warehouse, power)
+    [x] Load rover
+    [x] Load pipes
+[ ] Load any save slot
+[x] Autosave
 
 Game Start
-[ ] Select funding method
+[x] Select funding method
 [ ] Select starting inventory
+
+Radio chat
+[ ] Buildable radio tower
+[ ] Channel selection
+[ ] Client
+[ ] Local server
+[ ] Cloud server
+[ ] Regional range, not global
 
 Radiation Risk
 [ ] Bring back bar
 [ ] Solar Flares
 [ ] Rad storm shelter
 [ ] Solar flare detector dish 
+
+Dust Storms
+[ ] Long duration, gradual onset
+[ ] Solar panel degredation
+[ ] Scoring
+
+Scoring Beta 1
+[ ] Time spent alive
+[ ] Matter mined
+[ ] Matter refined
+[ ] Matter sold
+[ ] Structures created
+[ ] Suit upgrades made/bought
+[ ] Repairs effected
+[ ] Death view of points
+[ ] Terminal summary view of points
+[ ] Terminal detail view of points
+[ ] Main menu summary view of leaderboard
+
+Scoring Beta 2
+[ ] Extra Training completed
+[ ] Solar Flares / Dust Storms survived
+[ ] Science data collected
+[ ] Main menu detail view of points
+
+Gremlin
+[x] Electrical breakdown
+[x] Repair hover/action
+[ ] Mechanical breakdown
+[ ] Points awarded
+[ ] Preventative Maintenance
+    [ ] List?
+    [ ] Pre warning?
 
 Custom habitat
 [ ] Selectable in new game start
@@ -139,19 +240,24 @@ Mini habitat
 
 Exterior Modules:
 [ ] Nuclear reactor
+    [ ] Some way to purchase
+    [ ] Some way to deliver to point
 [ ] Greenhouse
 
 Algae production
-[ ] Algae starter resouce
+[ ] Algae starter resource
 [ ] Algae tank 
-    [ ] mesh
-	    [ ] vacuum glass on top
-    [ ] constructable module
-	    [ ] requires glass, structural material
-    [ ] fill w/ water
-    [ ] harvest for oxygen
-    [ ] harvest for fertilizer/nitrogen
-    [ ] harvest for food
+    [x] mesh
+	    [x] vacuum glass on top
+    [x] constructable module
+	    [x] requires glass, structural material
+    [ ] gameplay script
+		[ ] no green goo when empty
+		[ ] fill w/ water
+		[ ] harvest for oxygen
+		[ ] harvest for fertilizer/nitrogen
+		[x] harvest for food
+		[ ] bubble when powered on
 // notes on uses: 
 // _Spirulina_ is edible - Aztecakes!
 // Algenol claim they can make ethanol
@@ -176,13 +282,13 @@ Polyetheylene production:
 Floorplan materials:
 //v1
 [x] Concrete
-[ ] Brick
 [ ] Metal
 //v2
 [ ] Plastic
+[ ] Glass
 //v3
 [ ] Rock
-[ ] Glass
+[ ] Brick
 
 Floorplan types:
 # Solid Floor
@@ -208,9 +314,9 @@ v1
     [x] Mesh
     [x] Sleep dialog (either for time, or start/stop)
 	[x] Fast time during sleep
-	[ ] Wake when life threatening conditions
+	[x] Wake when life threatening conditions
 	[ ] Speed scale prompts
-	[ ] Sleep til morning button
+	[x] Sleep til morning button
 	[ ] Dim the lights
     [ ] BUG: lerp to stand up doesn't start from _current_ rotated view
 [ ] Kitchen food prep
@@ -244,7 +350,7 @@ v1
 [ ] Kitchen table and chairs
     [x] Mesh
     [x] Eat all kinds of meals
-    [ ] Hide meals when not available
+    [x] Hide meals when not available
 [ ] Workshop
     [ ] Upgrade suit air supply
     [ ] Upgrade suit power supply
@@ -267,6 +373,20 @@ v3
 [ ] Scientific funding method
 [ ] Medical (something with radiation?)
 [ ] Heater //heating is...complicated
+
+Player archetypes roadmaps
+Survivor (degredation/repair, accidents, radiation)
+Shooter (combat, defensive modules)
+Explorer (rover exploration)
+Builder (heavy hobbit hole, colonists)
+Merchant (arbitrage, industry, mining)
+
+Allow arbitrary lat/long just map Mars to individual levels
+
+Exploration: use node/edge instead of open world
+Use nasa models for crashed sats
+
+Gate big things (power generators, rover, catalysts, etc) as grants from UMDF (UnitedMarsDevelopmentFund) after goals are met
 
 
 Efficiency and Power Usage:
@@ -308,6 +428,8 @@ ASRG:
 Efficiency: 26%
 14 year service life
 Total assembly weighs 32kg
+3198 Wh / day
+3.198 kWh / day
 
 MHW-RTG:
 4.5kg of Pu-238, 157 We, 2.4kWt
@@ -316,18 +438,30 @@ Total assembly weighs 38 kg
 
 Solar Panels:
 284 W insolation maximum, 1.8 kWh maximum
-triple junction ga-arsenide: 1.3 m2, generating 140w peak for 4h, or 2.1 MJ (.58 kWh) a day, or .9kWh
-1m2 peak of 108 W, .69 kWh
+triple junction ga-arsenide: 1.3 m2, generating 140w peak for 4h, or 2.1 MJ (.58 kWh) a day
+1m2 is 76.93% of 1.3m2
+triple junction ga-arsenide: 1 m2, generating 108w peak for 4h, or 1.6155 MJ (.446 kWh) a day
+1m2 peak of 108 W, .446 kWh
 efficiency around 38%
 
 single crystal: 22% efficiency
-1m2 peak of 63 W, .4 kWh
+1m2 peak of 63 W, .341 kWh
 
 polycrystalline: 16%
-1m2 peak of 45 W, .29 kWh
+1m2 peak of 45 W, .24 kWh
 
 amorphous: 14%
-1m2 peak of 40 W, .25 kWh
+1m2 peak of 40 W, .21 kWh
 
-X * .38 = .58
-X = .58 / .38
+X * .38 = .446
+X = .446 / .38
+X = 1.174
+
+http://gimpchat.com/viewtopic.php?f=23&t=7520
+
+
+
+players aren't interested in combat, it really means that this game isn't built for it thematically
+players are interested in seeing npc colonists wander around, and having much more detailed survival mechanics/gameplay
+early/midgame quests and voice-comm backstory are both in line with existing features and gives a lot of oomph
+exploration as a feature lacks a lot of agency if encounter sites are lifeless

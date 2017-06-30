@@ -1,6 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public class News
+{
+    public string Text { get; set; }
+    public float DelayMilliseconds { get; set; }
+    public float DurationMilliseconds { get; set; }
+    public MiscIcon Icon;
+}
+
+
 /// <summary>
 /// Information for things like "[E] Pick Up"
 /// </summary>
@@ -8,7 +17,17 @@ public class PromptInfo
 {
     public string Key { get; set; }
     public string Description { get; set; }
-    public float Duration { get; set; }
+
+    public string SecondaryKey { get; set; }
+    public string SecondaryDescription { get; set; }
+    public bool HasSecondary
+    {
+        get
+        {
+            return SecondaryKey != null;
+        }
+    }
+
     /// <summary>
     /// 0 to 1f percentage
     /// </summary>
@@ -17,13 +36,88 @@ public class PromptInfo
     /// Whether to show the progressbar, default to false
     /// </summary>
     public bool UsesProgress { get; set; }
+
+    public string ItalicizedText { get; set; }
 }
 
 public struct LinkablePrompts
 {
     public PromptInfo HoverWhenNoneSelected;
     public PromptInfo HoverWhenOneSelected;
-    public PromptInfo WhenCompleted;
+    public News WhenCompleted;
+}
+
+public static class NewsSource
+{
+    public static News DroppodHere = new News()
+    {
+        Text = "Incoming Drop Pod",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Rocket
+    };
+    public static News AlgaeHarvestable = new News()
+    {
+        Text = "Algae Harvest Ready",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Harvest
+    };
+    public static News ToolOpenHint = new News()
+    {
+        Text = "[TAB] for tools",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+    public static News FOneHint = new News()
+    {
+        Text = "[F1] for help",
+        DelayMilliseconds = 10000,
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+    private static News ElectricalFailure = new News()
+    {
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+    private static News PressureFailure = new News()
+    {
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+    internal static News MalfunctionRepaired = new News()
+    {
+        Text = "Malfunction Repaired",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Information
+    };
+
+    public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
+    {
+        string thingName = GetThingName(victim);
+
+        if (failType == Gremlin.FailureType.Electrical)
+        {
+            ElectricalFailure.Text = thingName + " Electrical Failure!";
+            return ElectricalFailure;
+        }
+        else
+        {
+            PressureFailure.Text = thingName + " Pressure Failure!";
+            return PressureFailure;
+        }
+    }
+
+    private static string GetThingName(IRepairable victim)
+    {
+        if (victim is ModuleGameplay)
+            return (victim as ModuleGameplay).GetModuleType().ToString();
+        else if (victim is IceDrill)
+            return "Ice Drill";
+        else if (victim is PowerCube)
+            return "Power Cube";
+
+        return "";
+    }
 }
 
 public static class Prompts {
@@ -39,63 +133,79 @@ public static class Prompts {
         Key = "E"
     };
 
-    public static PromptInfo BulkheadBridgeCompletedPrompt = new PromptInfo()
+    public static News BulkheadBridgeCompleted = new News()
     {
-        Description = "Bulkheads connected",
-        Key = "E",
-        Duration = 1500
+        Text = "Bulkheads connected",
+        DurationMilliseconds = 1500
     };
     public static PromptInfo StartGasPipeHint = new PromptInfo()
     {
-        Description = "Select gas valve to connect",
+        Description = "Run new pipeline",
         Key = "E"
     };
     public static PromptInfo EndGasPipeHint = new PromptInfo()
     {
-        Description = "Connect gas pipe",
+        Description = "End pipeline here",
         Key = "E"
     };
-    public static PromptInfo GasPipeCompletedPrompt = new PromptInfo()
+    public static News GasPipeCompleted = new News()
     {
-        Description = "Gas Pipe connected",
-        Key = "E",
-        Duration = 1500
+        Text = "Gas Pipe connected",
+        DurationMilliseconds = 1500,
+        Icon = MiscIcon.Pipe
     };
     public static PromptInfo StartPowerPlugHint = new PromptInfo()
     {
-        Description = "Select power socket to connect",
+        Description = "Run new powerline",
         Key = "E"
     };
     public static PromptInfo EndPowerPlugHint = new PromptInfo()
     {
-        Description = "Connect power",
+        Description = "Connect powerline here",
         Key = "E"
     };
-    public static PromptInfo PowerPlugCompletedPrompt = new PromptInfo()
+    public static News PowerPlugCompleted = new News()
     {
-        Description = "Power connected",
-        Key = "E",
-        Duration = 1500
+        Text = "Power connected",
+        DurationMilliseconds = 1500,
+        Icon = MiscIcon.Plug
     };
     public static PromptInfo DriveRoverPrompt = new PromptInfo()
     {
         Description = "Drive Rover",
         Key = "E"
     };
+    public static PromptInfo UnhookRoverPrompt = new PromptInfo()
+    {
+        Description = "Rover Docked",
+        Key = ""
+    };
+    public static PromptInfo RoverDoorPrompt = new PromptInfo()
+    {
+        Description = "Move Hatch",
+        Key = "E"
+    };
     public static PromptInfo PickupHint = new PromptInfo()
     {
         Description = "Pick up",
-        Key = "E"
+        Key = "LMB"
     };
     internal static PromptInfo DropHint = new PromptInfo()
     {
         Description = "Drop",
-        Key = "E"
+        Key = "LMB"
+    };
+    internal static PromptInfo DeconstructHint = new PromptInfo()
+    {
+        Description = "Cancel",
+        Key = "X",
     };
     internal static PromptInfo ConstructHint = new PromptInfo()
     {
         Description = "Construct",
         Key = "E",
+        SecondaryDescription = "Cancel",
+        SecondaryKey = "X",
         UsesProgress = true
     };
     internal static PromptInfo OpenDoorHint = new PromptInfo()
@@ -153,19 +263,19 @@ public static class Prompts {
     {
         HoverWhenNoneSelected = StartBulkheadBridgeHint,
         HoverWhenOneSelected = EndBulkheadBridgeHint,
-        WhenCompleted = BulkheadBridgeCompletedPrompt
+        WhenCompleted = BulkheadBridgeCompleted
     };
     internal static LinkablePrompts GasPipePrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartGasPipeHint,
         HoverWhenOneSelected = EndGasPipeHint,
-        WhenCompleted = GasPipeCompletedPrompt
+        WhenCompleted = GasPipeCompleted
     };
     internal static LinkablePrompts PowerPlugPrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartPowerPlugHint,
         HoverWhenOneSelected = EndPowerPlugHint,
-        WhenCompleted = PowerPlugCompletedPrompt
+        WhenCompleted = PowerPlugCompleted
     };
 
     internal static PromptInfo LadderOnHint = new PromptInfo()
@@ -198,14 +308,19 @@ public static class Prompts {
         Description = "Remove Connection",
         Key = "E"
     };
+    internal static PromptInfo ExistingPowerlineRemovalHint = new PromptInfo()
+    {
+        Description = "Remove Powerline",
+        Key = "E"
+    };
     internal static PromptInfo PayloadDisassembleHint = new PromptInfo()
     {
         Description = "Disassemble Lander",
         Key = "E"
     };
-    internal static PromptInfo PlaceLightHint = new PromptInfo()
+    internal static PromptInfo PlaceStuffHint = new PromptInfo()
     {
-        Description = "Place Light",
+        Description = "Place Here",
         Key = "E"
     };
     internal static PromptInfo PlaceFloorplanHint = new PromptInfo()
@@ -231,11 +346,18 @@ public static class Prompts {
     internal static PromptInfo BedExitHint = new PromptInfo()
     {
         Description = "Wake Up",
-        Key = "E"
+        Key = "E",
+        SecondaryDescription = "Sleep Until Morning",
+        SecondaryKey = "Z"
+    };
+    internal static PromptInfo SleepTilMorningExitHint = new PromptInfo()
+    {
+        Description = "Wake Up",
+        Key = "E",
     };
     internal static PromptInfo EVAChargeHint = new PromptInfo()
     {
-        Description = "Charge",
+        Description = "Fill EVA pack",
         Key = "E",
         UsesProgress = true
     };
@@ -255,9 +377,112 @@ public static class Prompts {
         Key = "E"
     };
 
+    internal static PromptInfo StopPumpingOutHint = new PromptInfo()
+    {
+        Description = "Disable Pump",
+        Key = "LMB"
+    };
+    internal static PromptInfo StopPumpingInHint = new PromptInfo()
+    {
+        Description = "Disable Pump",
+        Key = "RMB"
+    };
+    internal static PromptInfo TurnPumpOnHint = new PromptInfo()
+    {
+        Description = "Pump Into Tank",
+        Key = "LMB",
+        SecondaryDescription = "Pump Out of Tank",
+        SecondaryKey = "RMB"
+    };
+
     public static PromptInfo DrillHint = new PromptInfo()
     {
         Description = "(Requires Drill)",
-        Key = " "
+        Key = "Tab"
+    };
+    public static PromptInfo RivetgunHint = new PromptInfo()
+    {
+        Description = "(Requires Rivet Gun)",
+        Key = "Tab"
+    };
+    internal static PromptInfo HarvestHint = new PromptInfo()
+    {
+        Description = "Harvest",
+        Key = "E"
+    };
+    internal static PromptInfo TerminalEnter = new PromptInfo()
+    {
+        Description = "Terminal",
+        Key = "E"
+    };
+    internal static PromptInfo StopPowerPlugHint = new PromptInfo()
+    {
+        Description = "Stop running powerline",
+        Key = "Esc"
+    };
+    internal static PromptInfo StopGasPipeHint = new PromptInfo()
+    {
+        Description = "Stop running pipeline",
+        Key = "Esc"
+    };
+    internal static PromptInfo StartDrillHint = new PromptInfo()
+    {
+        Description = "Start Drill",
+        Key = "E"
+    };
+    internal static PromptInfo DepositHint = new PromptInfo()
+    {
+        Description = "Deposit",
+        UsesProgress  = true
+    };
+    internal static PromptInfo RepairHint = new PromptInfo()
+    {
+        Description = "Repair",
+        Key = "E",
+        UsesProgress = true
+    };
+    internal static PromptInfo WorkshopHint = new PromptInfo()
+    {
+        Description = "Craft",
+        Key = "E"
+    };
+    internal static PromptInfo WorkshopSuitHint = new PromptInfo()
+    {
+        Description = "Upgrade",
+        Key = "E"
+    };
+    internal static PromptInfo DeployableDeployHint = new PromptInfo()
+    {
+        Description = "Pick up",
+        Key = "LMB",
+        SecondaryKey = "E",
+        SecondaryDescription = "Deploy"
+    };
+    internal static PromptInfo DeployableRetractHint = new PromptInfo()
+    {
+        Description = "Retract",
+        Key = "E"
+    };
+    internal static PromptInfo CorridorDeconstructHint = new PromptInfo()
+    {
+        Description = "Destroy Hallway",
+        Key = "E"
+    };
+    internal static PromptInfo OpenPumpHint = new PromptInfo()
+    {
+        Description = "Open Valve",
+        Key = "E"
+    };
+    internal static PromptInfo ClosePumpHint = new PromptInfo()
+    {
+        Description = "Close Valve",
+        Key = "E"
+    };
+    internal static PromptInfo SwapEquipmentHint = new PromptInfo()
+    {
+        Description = "Swap Valve",
+        Key = "E",
+        //SecondaryDescription = "",
+        //SecondaryKey = ""
     };
 }

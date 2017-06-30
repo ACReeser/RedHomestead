@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RedHomestead.Perks;
+using System;
 using UnityEngine;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityStandardAssets.CrossPlatformInput;
@@ -10,13 +11,13 @@ using Random = UnityEngine.Random;
 public class CustomFPSController : MonoBehaviour
 {
     [SerializeField]
-    private bool m_IsWalking;
+    public bool m_IsWalking;
     [SerializeField]
     public bool m_IsOnLadder, m_IsTransitioningLadder, m_PostTransitionLadderState;
     [SerializeField]
     private float m_WalkSpeed;
     [SerializeField]
-    private float m_RunSpeed;
+    internal float m_RunSpeed;
     [SerializeField]
     [Range(0f, 1f)]
     private float m_RunstepLenghten;
@@ -31,7 +32,7 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private bool m_UseFovKick;
     [SerializeField]
-    private FOVKick m_FovKick = new FOVKick();
+    private CustomFOVKick m_FovKick = new CustomFOVKick();
     [SerializeField]
     private bool m_UseHeadBob;
     [SerializeField]
@@ -51,13 +52,15 @@ public class CustomFPSController : MonoBehaviour
     private bool m_Jump;
     private float m_YRotation;
     private Vector2 m_Input;
-    private Vector3 m_MoveDir = Vector3.zero;
+    private Vector3 moveDirection = Vector3.zero;
+    private Vector3 jumpDirection = Vector3.zero;
 
     private Vector3 moveToLadderPos, moveFromLadderPos;
     private float ladderMoveTime = 0f;
     private const float ladderMoveDuration = .25f;
 
     private CharacterController m_CharacterController;
+    internal CharacterController CharacterController { get { return m_CharacterController; } }
     private CollisionFlags m_CollisionFlags;
     private bool m_PreviouslyGrounded;
     private Vector3 m_OriginalCameraPosition;
@@ -66,7 +69,7 @@ public class CustomFPSController : MonoBehaviour
     private bool m_Jumping;
     private AudioSource m_AudioSource;
 
-    public bool SuspendInput = false;
+    public bool FreezeMovement = false;
     public bool FreezeLook = false;
 
     // Use this for initialization
@@ -81,6 +84,7 @@ public class CustomFPSController : MonoBehaviour
         m_NextStep = m_StepCycle / 2f;
         m_Jumping = false;
         m_AudioSource = GetComponent<AudioSource>();
+        m_RunSpeed *= PerkMultipliers.RunSpeed;
         //alex
         this.InitializeMouseLook();        
     }
@@ -103,12 +107,12 @@ public class CustomFPSController : MonoBehaviour
             //land
             StartCoroutine(m_JumpBob.DoBobCycle());
             PlayLandingSound();
-            m_MoveDir.y = 0f;
+            moveDirection.y = 0f;
             m_Jumping = false;
         }
         if (!m_CharacterController.isGrounded && !m_Jumping && m_PreviouslyGrounded)
         {
-            m_MoveDir.y = 0f;
+            moveDirection.y = 0f;
         }
 
         m_PreviouslyGrounded = m_CharacterController.isGrounded;
@@ -146,7 +150,7 @@ public class CustomFPSController : MonoBehaviour
                     m_IsOnLadder = m_PostTransitionLadderState;
                 }
             }
-            else if (transform.position.y < maximumLadderY)
+            else if (transform.position.y + m_Input.y < maximumLadderY)
             {
                 m_CharacterController.Move(new Vector3(0, m_Input.y, 0) * Time.fixedDeltaTime * speed / 2f);
             }
@@ -154,28 +158,29 @@ public class CustomFPSController : MonoBehaviour
         else
         {
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward * m_Input.y + transform.right * m_Input.x;
+            Vector3 desiredMove = m_Jumping ? jumpDirection : transform.forward * m_Input.y + transform.right * m_Input.x;
 
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
             Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
                                 m_CharacterController.height / 2f, ~0, QueryTriggerInteraction.Ignore);
+
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
             currentHitNormal = hitInfo.normal;
             currentHitPosition = hitInfo.point;
 
-            m_MoveDir.x = desiredMove.x * speed;
-            m_MoveDir.z = desiredMove.z * speed;
-
+            moveDirection.x = desiredMove.x * speed;
+            moveDirection.z = desiredMove.z * speed;
 
             if (m_CharacterController.isGrounded)
             {
-                m_MoveDir.y = -m_StickToGroundForce;
+                moveDirection.y = -m_StickToGroundForce;
 
                 if (m_Jump)
                 {
-                    m_MoveDir.y = m_JumpSpeed;
+                    moveDirection.y = m_JumpSpeed;
+                    jumpDirection = desiredMove;
                     PlayJumpSound();
                     m_Jump = false;
                     m_Jumping = true;
@@ -183,14 +188,16 @@ public class CustomFPSController : MonoBehaviour
             }
             else
             {
-                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                moveDirection += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
             }
 
-            if (!SuspendInput)
-                m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
+            if (!FreezeMovement)
+            {
+                m_CollisionFlags = m_CharacterController.Move(moveDirection * Time.fixedDeltaTime);
 
-            ProgressStepCycle(speed);
-            UpdateCameraHeadBob(speed);
+                ProgressStepCycle(speed);
+                UpdateCameraHeadBob(speed);
+            }
         }
 
         //alex
@@ -275,25 +282,33 @@ public class CustomFPSController : MonoBehaviour
 
         bool waswalking = m_IsWalking;
 
-        if (SuspendInput)
+        if (FreezeMovement)
         {
-            horizontal = vertical = 0f;
+            speed = 0f;
+            m_Input = new Vector2(0, 0);
+        }
+        else if (m_Jumping)
+        {
+            speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
+        }
+        else
+        {
+    #if !MOBILE_INPUT
+            // On standalone builds, walk/run speed is modified by a key press.
+            // keep track of whether or not the character is walking or running
+            m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
+    #endif
+            // set the desired speed to be walking or running
+            speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
+            m_Input = new Vector2(horizontal, vertical);
+
+            // normalize input if it exceeds 1 in combined length:
+            if (m_Input.sqrMagnitude > 1)
+            {
+                m_Input.Normalize();
+            }
         }
 
-#if !MOBILE_INPUT
-        // On standalone builds, walk/run speed is modified by a key press.
-        // keep track of whether or not the character is walking or running
-        m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
-#endif
-        // set the desired speed to be walking or running
-        speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
-        m_Input = new Vector2(horizontal, vertical);
-
-        // normalize input if it exceeds 1 in combined length:
-        if (m_Input.sqrMagnitude > 1)
-        {
-            m_Input.Normalize();
-        }
 
         // handle speed change to give an fov kick
         // only if the player is going to a run, is running and the fovkick is to be used
