@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using UnityEngine;
 using RedHomestead.Persistence;
-using UnityEditor.Animations;
 using RedHomestead.Electricity;
 
 [Serializable]
