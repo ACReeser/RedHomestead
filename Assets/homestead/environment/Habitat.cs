@@ -16,6 +16,10 @@ public class HabitatExtraData : RedHomesteadData
     public string Name;
     public HabitatType Type;
     public EnergyContainer EnergyContainer;
+    /// <summary>
+    /// ONLY HABITAT.CS IS ALLOWED TO ACCCESS THIS
+    /// </summary>
+    public bool IsOxygenOn = true, IsHeatOn = true;
 
     [HideInInspector]
     public string ModuleInstanceID;
@@ -32,17 +36,33 @@ public class HabitatExtraData : RedHomesteadData
     }
 }
 
-public class Habitat : Converter, IPowerConsumer, IBattery, IHabitatModule
+public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModule
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
-    private float _CurrentPowerRequirements = ElectricityConstants.WattsPerBlock * 4f;
+    private const float MaximumPowerRequirements = ElectricityConstants.WattsPerBlock * 4f;
+
+    private float _CurrentPowerRequirements = MaximumPowerRequirements;
 
     internal ResourceChangeHandler OnResourceChange;
     public delegate void ResourceChangeHandler(params Matter[] type);
-    
+    internal PowerChangeHandler OnPowerChange;
+    public delegate void PowerChangeHandler();
+
     public HabitatExtraData HabitatData;
     public PowerVisualization BatteryViz;
+    
+    public bool IsHeatOn { get { return this.HabitatData.IsHeatOn; } set { HabitatData.IsHeatOn = value; RecalcPowerRequirements(); } }
+    public bool IsOxygenOn { get { return HabitatData.IsOxygenOn; } set { HabitatData.IsOxygenOn = value; RecalcPowerRequirements(); } }
+
+    private void RecalcPowerRequirements()
+    {
+        this._CurrentPowerRequirements = ((HabitatData.IsHeatOn ? 2f : 0) + (HabitatData.IsOxygenOn ? 2f : 0)) * ElectricityConstants.WattsPerBlock;
+        this.OnPowerChanged();
+
+        (this as IVariablePowerConsumer).RefreshVisualization();
+    }
+
     public bool IsOn { get { return this.HasPower; } set { } }
 
     public EnergyContainer EnergyContainer { get { return HabitatData.EnergyContainer; } }
@@ -53,6 +73,14 @@ public class Habitat : Converter, IPowerConsumer, IBattery, IHabitatModule
     private List<ISink> WaterSinks = new List<ISink>(), OxygenSinks = new List<ISink>();
 
     public override float WattsConsumed
+    {
+        get
+        {
+            return _CurrentPowerRequirements;
+        }
+    }
+
+    public float MaximumWattsConsumed
     {
         get
         {
@@ -251,6 +279,9 @@ public class Habitat : Converter, IPowerConsumer, IBattery, IHabitatModule
             EmergencyLight.SetActive(true);
         else if (this.HasPower && EmergencyLight != null && EmergencyLight.activeInHierarchy)
             EmergencyLight.SetActive(false);
+
+        if (OnPowerChange != null)
+            OnPowerChange();
     }
     
     public void PlayerToggleLights()

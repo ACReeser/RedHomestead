@@ -37,4 +37,17 @@ public class HabitatResourceInterface : HabitatReadout
             //"g/s" //todo: make human readable with large/small quants and scales
             );
     }
+
+    void OnDestroy()
+    {
+        this._OnDestroy();
+    }
+
+    protected virtual void _OnDestroy()
+    {
+        if (this.LinkedHab != null)
+        {
+            LinkedHab.OnResourceChange -= this.OnResourceChange;
+        }
+    }
 }

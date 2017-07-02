@@ -62,6 +62,11 @@ namespace RedHomestead.Electricity
 #warning todo: add a priority field for shutdown
     }
 
+    public interface IVariablePowerConsumer : IPowerConsumer
+    {
+        float MaximumWattsConsumed { get; }
+    }
+
     public static class ElectricityConstants
     {
         public const float WattHoursPerBatteryBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f / 2f;
@@ -115,7 +120,14 @@ namespace RedHomestead.Electricity
         {
             if (powerable is IPowerConsumer)
             {
-                powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.ConsumerMeshes.BackingMeshes[(powerable as IPowerConsumer).ConsumptionInPowerUnits() - 1];
+                if (powerable is IVariablePowerConsumer)
+                {
+                    powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.ConsumerMeshes.BackingMeshes[(powerable as IVariablePowerConsumer).MaximumConsumptionInPowerUnits() - 1];
+                }
+                else
+                {
+                    powerable.PowerViz.PowerBacking.mesh = FlowManager.Instance.ConsumerMeshes.BackingMeshes[(powerable as IPowerConsumer).ConsumptionInPowerUnits() - 1];
+                }
                 (powerable as IPowerConsumer).RefreshVisualization();
             }
 
@@ -147,7 +159,9 @@ namespace RedHomestead.Electricity
 
         public static void RefreshVisualization(this IPowerConsumer c)
         {
-            if (c.PowerViz.PowerActive != null)
+            if (c is IVariablePowerConsumer)
+                (c as IVariablePowerConsumer).RefreshVisualization();
+            else if (c.PowerViz.PowerActive != null)
                 c.PowerViz.PowerActive.gameObject.SetActive((!(c.FaultedPercentage > 0f)) && c.IsOn);
         }
 
@@ -177,6 +191,21 @@ namespace RedHomestead.Electricity
                 viz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward *  (10 - b.CurrentBatteryUnits());
         }
 
+        public static void RefreshVisualization(this IVariablePowerConsumer c)
+        {
+            if (c.PowerViz.PowerActive != null)
+            {
+                if (!c.IsOn || c.FaultedPercentage > 0f)
+                {
+                    c.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * 10f;
+                }
+                else
+                {
+                    c.PowerViz.PowerMask.transform.localScale = ElectricityConstants._BackingScale + Vector3.forward * (10 - c.ConsumptionInPowerUnits());
+                }
+            }
+        }
+
         public static int BatteryUnitCapacity(this IBattery b)
         {
             return Math.Max(1, Mathf.RoundToInt(b.EnergyContainer.AvailableCapacity / ElectricityConstants.WattHoursPerBatteryBlock));
@@ -200,6 +229,11 @@ namespace RedHomestead.Electricity
         public static int MaximumGenerationInPowerUnits(this IVariablePowerSupply c)
         {
             return Math.Max(1, Mathf.RoundToInt(c.MaximumWattsGenerated / ElectricityConstants.WattsPerBlock));
+        }
+
+        public static int MaximumConsumptionInPowerUnits(this IVariablePowerConsumer c)
+        {
+            return Math.Max(1, Mathf.RoundToInt(c.MaximumWattsConsumed / ElectricityConstants.WattsPerBlock));
         }
     }
 
@@ -554,7 +588,7 @@ namespace RedHomestead.Electricity
                                 c.EmergencyShutdown();
 
                                 Data.DeficitWatts -= c.WattsConsumed;
-
+                                
                                 c.RefreshVisualization();
 
                                 //stop the brownout when we have a new equilibrium

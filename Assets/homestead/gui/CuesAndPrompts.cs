@@ -485,4 +485,9 @@ public static class Prompts {
         //SecondaryDescription = "",
         //SecondaryKey = ""
     };
+    internal static PromptInfo ToggleHint = new PromptInfo()
+    {
+        Description = "Toggle",
+        Key = "E"
+    };
 }

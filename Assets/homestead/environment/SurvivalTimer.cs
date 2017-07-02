@@ -239,7 +239,9 @@ public class SurvivalTimer : MonoBehaviour {
     }
 
     void Update () {
-        if (UsingPackResources || !CurrentHabitat.HasPower)
+        bool usingPack = UsingPackResources;
+
+        if (usingPack || !CurrentHabitat.HasPower || !CurrentHabitat.IsOxygenOn)
         {
             Oxygen.Consume();
 
@@ -248,6 +250,10 @@ public class SurvivalTimer : MonoBehaviour {
                 KillPlayer("ASPHYXIATION");
                 return;
             }
+        }
+
+        if (usingPack || !CurrentHabitat.HasPower || !CurrentHabitat.IsHeatOn)
+        {
 
             Power.Consume();
             if (Power.Data.Current < 0f)

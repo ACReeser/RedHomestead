@@ -1033,6 +1033,19 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.ReportHint;
                     }
                 }
+                else if (hitInfo.collider.CompareTag("toggle"))
+                {
+                    if (doInteract)
+                    {
+                        OxygenHeatInterface @interface = null;
+                        if (OxygenHeatInterface.ToggleLookup.TryGetValue(hitInfo.collider.transform, out @interface))
+                        {
+                            @interface.Toggle(hitInfo.collider.transform);
+                        }
+                    }
+
+                    newPrompt = Prompts.ToggleHint;
+                }
                 else if (hitInfo.collider.CompareTag("pumpHandle"))
                 {
                     Pump pump = hitInfo.collider.transform.parent.parent.GetComponent<Pump>();
