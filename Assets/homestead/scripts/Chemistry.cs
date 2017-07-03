@@ -22,7 +22,8 @@ namespace RedHomestead.Simulation
         Silver,
         Bauxite,
         Canvas,
-        Iron
+        Iron,
+        Produce
     }
 
     public class ResourceEntry

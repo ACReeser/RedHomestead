@@ -4,13 +4,22 @@ using System;
 using RedHomestead.Simulation;
 using System.Collections.Generic;
 
-public class OxygenHeatInterface : HabitatResourceInterface
+public interface IToggleReceiver
+{
+    void Toggle(Transform toggleHandle);
+}
+
+public static class ToggleMap
+{
+    public static Dictionary<Transform, IToggleReceiver> ToggleLookup = new Dictionary<Transform, IToggleReceiver>();
+}
+
+public class OxygenHeatInterface : HabitatResourceInterface, IToggleReceiver
 {
     public SpriteRenderer flowAmountRenderer, oxygenSprite, heatSprite;
     public Color onColor, offColor, invalidColor;
     public Transform OxygenSwitch, HeatSwitch;
 
-    public static Dictionary<Transform, OxygenHeatInterface> ToggleLookup = new Dictionary<Transform, OxygenHeatInterface>();
 
     // Use this for initialization
     protected override void OnStart()
@@ -24,8 +33,8 @@ public class OxygenHeatInterface : HabitatResourceInterface
             this.RefreshSwitch(HeatSwitch, this.LinkedHab.IsHeatOn);
         }
 
-        ToggleLookup[this.OxygenSwitch] = this;
-        ToggleLookup[this.HeatSwitch] = this;
+        ToggleMap.ToggleLookup[this.OxygenSwitch] = this;
+        ToggleMap.ToggleLookup[this.HeatSwitch] = this;
     }
 
     protected override void _OnDestroy()

@@ -1037,8 +1037,8 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
-                        OxygenHeatInterface @interface = null;
-                        if (OxygenHeatInterface.ToggleLookup.TryGetValue(hitInfo.collider.transform, out @interface))
+                        IToggleReceiver @interface = null;
+                        if (ToggleMap.ToggleLookup.TryGetValue(hitInfo.collider.transform, out @interface))
                         {
                             @interface.Toggle(hitInfo.collider.transform);
                         }

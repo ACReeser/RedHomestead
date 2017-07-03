@@ -6,6 +6,7 @@ using System;
 
 public class FlowManager : MonoBehaviour
 {
+    private const float TickPeriodSeconds = 1f;
     public ElectricityIndicatorMeshes GeneratorMeshes;
     public ElectricityIndicatorMeshes BatteryMeshes;
     public ElectricityIndicatorMeshesForConsumers ConsumerMeshes;
@@ -30,7 +31,7 @@ public class FlowManager : MonoBehaviour
             PowerGrids.Tick();
             IndustryUpdate();
 
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(TickPeriodSeconds);
         }
     }
 
