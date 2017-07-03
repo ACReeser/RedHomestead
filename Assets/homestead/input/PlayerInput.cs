@@ -734,7 +734,7 @@ public class PlayerInput : MonoBehaviour {
                             }
                             else
                             {
-                                newPrompt = Prompts.RivetgunHint;
+                                newPrompt = Prompts.PowerDrillHint;
                             }
                         }
                         else

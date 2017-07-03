@@ -203,7 +203,7 @@ public static class Prompts {
     internal static PromptInfo ConstructHint = new PromptInfo()
     {
         Description = "Construct",
-        Key = "E",
+        Key = "LMB",
         SecondaryDescription = "Cancel",
         SecondaryKey = "X",
         UsesProgress = true
@@ -400,9 +400,9 @@ public static class Prompts {
         Description = "(Requires Drill)",
         Key = "Tab"
     };
-    public static PromptInfo RivetgunHint = new PromptInfo()
+    public static PromptInfo PowerDrillHint = new PromptInfo()
     {
-        Description = "(Requires Rivet Gun)",
+        Description = "(Requires Power Drill)",
         Key = "Tab"
     };
     internal static PromptInfo HarvestHint = new PromptInfo()
