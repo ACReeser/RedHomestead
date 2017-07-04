@@ -60,7 +60,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
         this._CurrentPowerRequirements = ((HabitatData.IsHeatOn ? 2f : 0) + (HabitatData.IsOxygenOn ? 2f : 0)) * ElectricityConstants.WattsPerBlock;
         this.OnPowerChanged();
 
-        (this as IVariablePowerConsumer).RefreshVisualization();
+        (this as IPowerConsumer).RefreshVisualization();
     }
 
     public bool IsOn { get { return this.HasPower; } set { } }

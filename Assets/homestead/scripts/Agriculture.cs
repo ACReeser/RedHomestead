@@ -14,8 +14,10 @@ namespace RedHomestead.Agriculture{
         float BiomassProductionPerTickInUnits { get; }
         float HarvestThresholdInUnits { get; }
         float CurrentBiomassInUnits { get; }
+        float OxygenProductionPerTickInUnits { get; }
         void Harvest();
         bool CanHarvest { get; }
+        ISink WaterIn { get; }
     }
 
     public abstract class FarmConverter : Converter, IFarm, IPowerConsumer, IToggleReceiver
@@ -23,8 +25,10 @@ namespace RedHomestead.Agriculture{
         public abstract bool IsOn { get; set; }
         public abstract float WaterConsumptionPerTickInUnits { get; }
         public abstract float BiomassProductionPerTickInUnits { get; }
+        public abstract float OxygenProductionPerTickInUnits { get; }
         public abstract float HarvestThresholdInUnits { get; }
         public Transform HeatToggle;
+        public UnityEngine.TextMesh DisplayText;
 
         /// <summary>
         /// Coefficient that is multiplied against BiomassProductionPerTickInUnits and subtracted every tick that power is not on
@@ -40,7 +44,7 @@ namespace RedHomestead.Agriculture{
             }
         }
 
-        protected virtual ISink WaterIn { get; set; }
+        public virtual ISink WaterIn { get; protected set; }
 
         public bool CanHarvest
         {
@@ -63,7 +67,7 @@ namespace RedHomestead.Agriculture{
             {
                 ticksFrozen = 0;
 
-                if (this.WaterIn != null)
+                if (this.WaterIn != null && !this.CanHarvest)
                 {
                     if (Data.Containers[Matter.Water].CurrentAmount < this.WaterConsumptionPerTickInUnits)
                     {
@@ -98,6 +102,13 @@ namespace RedHomestead.Agriculture{
                     }
                 }
             }
+
+            UpdateText();
+        }
+        
+        private void UpdateText()
+        {            
+            DisplayText.text = String.Format("Hydroponics\n\nHarvest:\n{0}\n\nWater Supply:\n<size=22>{1} Days</size>\n\nYield:\n{2} Meals\n\nOxygen:\n{3}kg a Day", this.HarvestDays(), this.WaterSupplyDays(), this.YieldMeals(), this.OxygenADayKgs());
         }
 
         public override void OnSinkConnected(ISink s)
@@ -137,14 +148,24 @@ namespace RedHomestead.Agriculture{
 
     public static class AgricultureExtensions
     {
-        public static float HarvestPercentage(this IFarm farm)
+        public static string HarvestDays(this IFarm farm)
         {
-            return farm.CurrentBiomassInUnits / farm.HarvestThresholdInUnits;
+            return farm.CanHarvest ? "<size=32><color=green>READY</color></size>" : String.Format("<size=32>{0:0.#} Days</size>", (farm.HarvestThresholdInUnits - farm.Get(Matter.Biomass).CurrentAmount) / farm.BiomassProductionPerTickInUnits / SunOrbit.GameSecondsPerGameDay);
         }
 
-        public static string HarvestPercentageString(this IFarm farm)
+        public static string WaterSupplyDays(this IFarm farm)
         {
-            return String.Format("{0:0.#}%", farm.HarvestPercentage() * 100f);
+            return farm.WaterIn == null ? "0" : String.Format("{0:#.#}", farm.WaterIn.Get(Matter.Water).CurrentAmount / farm.WaterConsumptionPerTickInUnits / SunOrbit.GameSecondsPerGameDay);
+        }
+
+        public static string YieldMeals(this IFarm farm)
+        {
+            return String.Format("{0:0.#}", Matter.Biomass.MealsPerCubicMeter() * farm.Get(Matter.Biomass).CurrentAmount);
+        }
+
+        public static string OxygenADayKgs(this IFarm farm)
+        {
+            return String.Format("{0:0.##}", Matter.Oxygen.Kilograms() * farm.OxygenProductionPerTickInUnits * SunOrbit.GameSecondsPerGameDay);
         }
     }
 

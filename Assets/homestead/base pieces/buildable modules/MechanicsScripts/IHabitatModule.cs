@@ -44,6 +44,9 @@ public static class HabitatModuleExtensions
     {
         self.LinkedHabitat = habitat;
 
+        if (self is Converter)
+            (self as Converter).OnSinkConnected(habitat);
+
         if (self.AdjacentModules != null)
         {
             foreach (IHabitatModule sibling in self.AdjacentModules)
