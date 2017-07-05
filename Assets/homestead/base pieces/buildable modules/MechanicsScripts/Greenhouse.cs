@@ -5,10 +5,14 @@ using RedHomestead.Buildings;
 using UnityEngine;
 using RedHomestead.Agriculture;
 using RedHomestead.Electricity;
+using RedHomestead.Simulation;
 
 public class Greenhouse : FarmConverter, IHabitatModule
 {
     public List<IHabitatModule> AdjacentModules { get; set; }
+    public MeshRenderer[] plants;
+    public Color youngColor, oldColor;
+    public Vector3 youngScale, oldScale;
 
     private const float _harvestUnits = .5f;
     private const float _biomassPerTick = 5 / SunOrbit.GameSecondsPerGameDay;
@@ -85,5 +89,31 @@ public class Greenhouse : FarmConverter, IHabitatModule
     protected override void OnHarvest(float harvestAmountUnits)
     {
 
+    }
+
+    protected override void RefreshFarmVisualization()
+    {
+        bool show = this.Get(Matter.Biomass).CurrentAmount > 0f;
+
+        if (show)
+        {
+            float percentage = this.Get(Matter.Biomass).CurrentAmount / this.HarvestThresholdInUnits;
+            Vector3 scale = Vector3.Lerp(youngScale, oldScale, percentage);
+            Color color = Color.Lerp(youngColor, oldColor, percentage);
+
+            foreach (var leaf in plants)
+            {
+                leaf.enabled = true;
+                leaf.transform.localScale = scale;
+                leaf.material.color = color;
+            }
+        }
+        else
+        {
+            foreach (var leaf in plants)
+            {
+                leaf.enabled = false;
+            }
+        }
     }
 }

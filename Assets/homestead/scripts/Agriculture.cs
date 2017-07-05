@@ -58,8 +58,12 @@ namespace RedHomestead.Agriculture{
         {
             base.OnStart();
             ToggleMap.ToggleLookup[this.HeatToggle] = this;
+            this.RefreshFarmVisualization();
         }
 
+        protected abstract void RefreshFarmVisualization();
+
+        private float oldBiomass;
         private int ticksFrozen = 0;
         protected virtual void FarmTick()
         {
@@ -76,8 +80,10 @@ namespace RedHomestead.Agriculture{
 
                     if (Data.Containers[Matter.Water].CurrentAmount >= this.WaterConsumptionPerTickInUnits)
                     {
+                        oldBiomass = Data.Containers[Matter.Biomass].CurrentAmount;
                         Data.Containers[Matter.Water].Pull(WaterConsumptionPerTickInUnits);
                         Data.Containers[Matter.Biomass].Push(BiomassProductionPerTickInUnits);
+                        CheckForAmountChange();
                     }
                 }
             }
@@ -85,7 +91,11 @@ namespace RedHomestead.Agriculture{
             {
                 if (this.Data.Containers[Matter.Biomass].CurrentAmount > 0f)
                 {
+                    oldBiomass = Data.Containers[Matter.Biomass].CurrentAmount;
+
                     Data.Containers[Matter.Biomass].Pull(BiomassProductionPerTickInUnits * FrostBiomassDamageCoefficient);
+
+                    CheckForAmountChange();
 
                     if (ticksFrozen == 0)
                     {
@@ -105,7 +115,15 @@ namespace RedHomestead.Agriculture{
 
             UpdateText();
         }
-        
+
+        private void CheckForAmountChange()
+        {
+            if (Mathf.RoundToInt(oldBiomass * 10f) != Mathf.RoundToInt(Data.Containers[Matter.Biomass].CurrentAmount * 10f))
+            {
+                this.RefreshFarmVisualization();
+            }
+        }
+
         private void UpdateText()
         {            
             DisplayText.text = String.Format("Hydroponics\n\nHarvest:\n{0}\n\nWater Supply:\n<size=22>{1} Days</size>\n\nYield:\n{2} Meals\n\nOxygen:\n{3}kg a Day", this.HarvestDays(), this.WaterSupplyDays(), this.YieldMeals(), this.OxygenADayKgs());
@@ -134,6 +152,7 @@ namespace RedHomestead.Agriculture{
         public void Harvest()
         {
             this.OnHarvest(Data.Containers[Matter.Biomass].Pull(HarvestThresholdInUnits));
+            this.RefreshFarmVisualization();
         }
 
         protected abstract void OnHarvest(float harvestAmountUnits);
