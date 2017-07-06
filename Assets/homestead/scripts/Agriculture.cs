@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using RedHomestead.Persistence;
 
 namespace RedHomestead.Agriculture{
     
@@ -19,16 +20,25 @@ namespace RedHomestead.Agriculture{
         bool CanHarvest { get; }
         ISink WaterIn { get; }
     }
+    
+    [Serializable]
+    public class FarmFlexData
+    {
+        public bool IsHeatOn;
+        public bool IsWaterOn;
+    }
 
-    public abstract class FarmConverter : Converter, IFarm, IPowerConsumer, IToggleReceiver
+    public abstract class FarmConverter : Converter, IFarm, IPowerConsumer, IToggleReceiver, IFlexDataContainer<MultipleResourceModuleData, FarmFlexData>
     {
         public abstract bool IsOn { get; set; }
         public abstract float WaterConsumptionPerTickInUnits { get; }
         public abstract float BiomassProductionPerTickInUnits { get; }
         public abstract float OxygenProductionPerTickInUnits { get; }
         public abstract float HarvestThresholdInUnits { get; }
-        public Transform HeatToggle;
+        public Transform HeatToggle, WaterToggle;
         public UnityEngine.TextMesh DisplayText;
+        public SpriteRenderer heatSprite, waterSprite;
+        public FarmFlexData FlexData { get; set; }
 
         /// <summary>
         /// Coefficient that is multiplied against BiomassProductionPerTickInUnits and subtracted every tick that power is not on
@@ -59,6 +69,12 @@ namespace RedHomestead.Agriculture{
             base.OnStart();
             ToggleMap.ToggleLookup[this.HeatToggle] = this;
             this.RefreshFarmVisualization();
+            this.RefreshIcons();
+        }
+
+        private void RefreshIcons()
+        {
+            //this.heatSprite.color = this.HasPower && this.FlexData.IsHeatOn;
         }
 
         protected abstract void RefreshFarmVisualization();
@@ -133,11 +149,20 @@ namespace RedHomestead.Agriculture{
         {
             if (s.HasContainerFor(Matter.Water))
                 this.WaterIn = s;
+
+            this.RefreshIcons();
         }
 
         public override void ClearHooks()
         {
             this.WaterIn = null;
+            this.RefreshIcons();
+        }
+
+        public override void InitializeStartingData()
+        {
+            base.InitializeStartingData();
+            this.FlexData = new FarmFlexData();
         }
 
         public override ResourceContainerDictionary GetStartingDataContainers()
@@ -159,9 +184,16 @@ namespace RedHomestead.Agriculture{
 
         public void Toggle(Transform toggleHandle)
         {
-            this.IsOn = !this.IsOn;
-            this.OnPowerChanged();
-            this.RefreshVisualization();
+            if (toggleHandle == HeatToggle)
+            {
+                this.IsOn = !this.IsOn;
+                this.OnPowerChanged();
+                this.RefreshVisualization();
+            }
+            else if (toggleHandle == WaterToggle)
+            {
+
+            }
         }
     }
 
@@ -169,7 +201,7 @@ namespace RedHomestead.Agriculture{
     {
         public static string HarvestDays(this IFarm farm)
         {
-            return farm.CanHarvest ? "<size=32><color=green>READY</color></size>" : String.Format("<size=32>{0:0.#} Days</size>", (farm.HarvestThresholdInUnits - farm.Get(Matter.Biomass).CurrentAmount) / farm.BiomassProductionPerTickInUnits / SunOrbit.GameSecondsPerGameDay);
+            return farm.CanHarvest ? "<size=32><color=green>READY</color></size>" : farm.Get(Matter.Biomass).CurrentAmount > 0 ? String.Format("<size=32>{0:0.#} Days</size>", (farm.HarvestThresholdInUnits - farm.Get(Matter.Biomass).CurrentAmount) / farm.BiomassProductionPerTickInUnits / SunOrbit.GameSecondsPerGameDay) : "<size=32>NEVER</size>";
         }
 
         public static string WaterSupplyDays(this IFarm farm)

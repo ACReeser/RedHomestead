@@ -7,6 +7,16 @@ using RedHomestead.Agriculture;
 using RedHomestead.Electricity;
 using RedHomestead.Simulation;
 
+[Serializable]
+public class TerminalIconSpriteColors
+{
+    public Color On = new Color(51f, 255f, 0f, 255f);
+    public Color Off = new Color(255f, 255f, 255f, 133f);
+    public Color Invalid = new Color(255f, 0f, 0f, 255f);
+
+    public readonly static TerminalIconSpriteColors Defaults = new TerminalIconSpriteColors();
+}
+
 public class Greenhouse : FarmConverter, IHabitatModule
 {
     public List<IHabitatModule> AdjacentModules { get; set; }

@@ -20,6 +20,25 @@ public abstract class ModuleData : FacingData
     public string ModuleInstanceID;
     public float FaultedPercentage;
     public string PowerableInstanceID { get { return ModuleInstanceID; } }
+
+    /// <summary>
+    /// Flex data
+    /// </summary>
+    public string Flex;
+    /// <summary>
+    /// cached MB for use when serializing
+    /// </summary>
+    private ModuleGameplay owner;
+
+    protected override void BeforeMarshal(Transform t = null)
+    {
+        base.BeforeMarshal(t);
+
+        if (owner == null)
+            owner = t.GetComponent<ModuleGameplay>();
+
+        Base.SerializeFlexData(this, owner);
+    }
 }
 
 public abstract class ResourcefullModuleData: ModuleData
@@ -29,13 +48,7 @@ public abstract class ResourcefullModuleData: ModuleData
 }
 
 [Serializable]
-public class ResourcelessModuleData : ModuleData
-{
-    //OK so some of our Resourceless things have some state
-    //so let's have some "flex" slots that each Module can interpret
-    public RedHomestead.Crafting.Craftable FlexCraftable;
-    public float FlexFloat;
-}
+public class ResourcelessModuleData : ModuleData { }
 
 [Serializable]
 public class ResourceContainerDictionary: SerializableDictionary<Matter, ResourceContainer> { }

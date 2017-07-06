@@ -23,7 +23,7 @@ public class Airlock : GenericBaseModule, IDoorManager {
     private Animator OuterAnimator, InnerAnimator;
 
     // Use this for initialization
-    void Start () {
+    protected override void OnStart () {
         OuterAnimator = OuterDoor.parent.GetComponent<Animator>();
         InnerAnimator = InnerDoor.parent.GetComponent<Animator>();
 

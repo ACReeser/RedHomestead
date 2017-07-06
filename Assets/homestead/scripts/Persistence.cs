@@ -17,6 +17,11 @@ namespace RedHomestead.Persistence
     {
         D Data { get; set; }
     }
+    
+    public interface IFlexDataContainer<D, F> : IDataContainer<D> where D : RedHomesteadData where F : class, new()
+    {
+        F FlexData { get; set; }
+    }
 
     [Serializable]
     public abstract class RedHomesteadData
@@ -202,7 +207,6 @@ namespace RedHomestead.Persistence
         public PowerCubeData[] PowerCubeData;
         public MobileSolarPanelData[] MobileSolarPanelData;
         public DepositData[] Deposits;
-        ////pipe data
         internal Dictionary<Simulation.Matter, int> InitialMatterPurchase;
         internal Dictionary<Crafting.Craftable, int> InitialCraftablePurchase;
 
@@ -243,24 +247,42 @@ namespace RedHomestead.Persistence
 
             Dictionary<string, ModuleGameplay> moduleMap = new Dictionary<string, ModuleGameplay>();
 
+#if UNITY_EDITOR
+            reflectionRuns = 0;
+            reflectionCheckTime.Reset();
+            reflectionPropertyTime.Reset();
+#endif
+
             //we have to look at each data to figure out which prefab to use
             foreach (ResourcelessModuleData data in ResourcelessData)
             {
                 Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+
                 ResourcelessGameplay r = t.GetComponent<ResourcelessGameplay>();
+
                 r.Data = data;
+
                 moduleMap.Add(data.ModuleInstanceID, r);
+
                 if (!String.IsNullOrEmpty(data.PowerableInstanceID))
                     powerableMap.Add(data.PowerableInstanceID, r);
+
+                DeserializeFlexData(data, r);
             }
             foreach (SingleResourceModuleData data in SingleResourceContainerData)
             {
                 Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+
                 SingleResourceModuleGameplay r = t.GetComponent<SingleResourceModuleGameplay>();
+
                 r.Data = data;
+
                 moduleMap.Add(data.ModuleInstanceID, r);
+
                 if (!String.IsNullOrEmpty(data.PowerableInstanceID))
                     powerableMap.Add(data.PowerableInstanceID, r);
+
+                DeserializeFlexData(data, r);
             }
             foreach (MultipleResourceModuleData data in MultiResourceContainerData)
             {
@@ -271,11 +293,17 @@ namespace RedHomestead.Persistence
                 else
                 {
                     Transform t = GameObject.Instantiate(ModuleBridge.Instance.Modules[(int)data.ModuleType], data.Position, data.Rotation) as Transform;
+
                     MultipleResourceModuleGameplay r = t.GetComponent<MultipleResourceModuleGameplay>();
+
                     r.Data = data;
+
                     moduleMap.Add(data.ModuleInstanceID, r);
+
                     if (!String.IsNullOrEmpty(data.PowerableInstanceID))
                         powerableMap.Add(data.PowerableInstanceID, r);
+
+                    DeserializeFlexData(data, r);
                 }
             }
             foreach (PipelineData data in PipeData)
@@ -294,8 +322,71 @@ namespace RedHomestead.Persistence
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
-#warning need to find sockets
                 r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID], null, null);
+            }
+#if UNITY_EDITOR
+            UnityEngine.Debug.Log(String.Format("deserialize reflection: {0} run, type checks: {1}ms, property reflection: {2}ms", reflectionRuns, reflectionCheckTime.ElapsedMilliseconds, reflectionPropertyTime.ElapsedMilliseconds));
+#endif
+        }
+
+#if UNITY_EDITOR
+        private static System.Diagnostics.Stopwatch reflectionCheckTime = new System.Diagnostics.Stopwatch();
+        private static System.Diagnostics.Stopwatch reflectionPropertyTime = new System.Diagnostics.Stopwatch();
+        private static int reflectionRuns = 0;
+#endif
+
+        public static void SerializeFlexData(ModuleData data, ModuleGameplay gameplay)
+        {
+#if UNITY_EDITOR
+            reflectionRuns++;
+            reflectionCheckTime.Start();
+#endif
+            Type ty = gameplay.GetType();
+            if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), ty))
+            {
+#if UNITY_EDITOR
+                reflectionCheckTime.Stop();
+                reflectionPropertyTime.Start();
+#endif
+                System.Reflection.PropertyInfo pi = ty.GetProperty("FlexData");
+                data.Flex = JsonUtility.ToJson(pi.GetValue(gameplay, null));
+#if UNITY_EDITOR
+                reflectionPropertyTime.Stop();
+#endif
+            }
+            else
+            {
+#if UNITY_EDITOR
+                reflectionCheckTime.Stop();
+#endif
+            }
+        }
+
+        public static void DeserializeFlexData(ModuleData data, ModuleGameplay gameplay)
+        {
+#if UNITY_EDITOR
+            reflectionRuns++;
+            reflectionCheckTime.Start();
+#endif
+            Type gameplayType = gameplay.GetType();
+            if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), gameplayType))
+            {
+#if UNITY_EDITOR
+                reflectionCheckTime.Stop();
+                reflectionPropertyTime.Start();
+#endif
+                System.Reflection.PropertyInfo pi = gameplayType.GetProperty("FlexData");
+                object deserialized = JsonUtility.FromJson(data.Flex, pi.PropertyType);
+                pi.SetValue(gameplay, deserialized, null);
+#if UNITY_EDITOR
+                reflectionPropertyTime.Stop();
+#endif
+            }
+            else
+            {
+#if UNITY_EDITOR
+                reflectionCheckTime.Stop();
+#endif
             }
         }
 
@@ -382,6 +473,11 @@ namespace RedHomestead.Persistence
 
         public void OnBeforeSerialize()
         {
+#if UNITY_EDITOR
+            reflectionRuns = 0;
+            reflectionCheckTime.Reset();
+            reflectionPropertyTime.Reset();
+#endif
             this._MarshalManyFromScene<ResourceComponent, CrateData>((crates) => this.Crates = crates);
             this._MarshalManyFromScene<ConstructionZone, ConstructionData>((zones) => this.ConstructionZones = zones);
             this._MarshalManyFromScene<ResourcelessGameplay, ResourcelessModuleData>((modules) => this.ResourcelessData = modules);
@@ -398,6 +494,10 @@ namespace RedHomestead.Persistence
             Rovers.RoverInput rovIn = GameObject.FindObjectOfType<Rovers.RoverInput>();
             if (rovIn != null)
                 this.RoverData = (RoverData)rovIn.Data.Marshal(rovIn.transform);
+
+#if UNITY_EDITOR
+            UnityEngine.Debug.Log(String.Format("serialize reflection: {0} run, type checks: {1}ms, property reflection: {2}ms", reflectionRuns, reflectionCheckTime.ElapsedMilliseconds, reflectionPropertyTime.ElapsedMilliseconds));
+#endif
         }
 
         private void _MarshalHabitats()
@@ -420,6 +520,28 @@ namespace RedHomestead.Persistence
                     return (D)container.Data.Marshal(container.transform);
                 }
             ));
+        }
+
+        private static Queue<Type> typeQueue = new Queue<Type>();
+        //https://stackoverflow.com/questions/457676/check-if-a-class-is-derived-from-a-generic-class
+        private static bool IsSubclassOfRawGeneric(Type generic, Type toCheck)
+        {
+            typeQueue.Clear();
+            while (toCheck != null && toCheck != typeof(object))
+            {
+                var concreteOrGenericType = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
+                if (generic == concreteOrGenericType)
+                {
+                    return true;
+                }
+                foreach(Type @interface in concreteOrGenericType.GetInterfaces())
+                {
+                    typeQueue.Enqueue(@interface);
+                }
+                typeQueue.Enqueue(toCheck.BaseType);
+                toCheck = typeQueue.Dequeue();
+            }
+            return false;
         }
     }
 
@@ -563,5 +685,4 @@ namespace RedHomestead.Persistence
             Perks.PerkMultipliers.LoadFromPlayerPerkProgress();
         }
     }
-
 }
