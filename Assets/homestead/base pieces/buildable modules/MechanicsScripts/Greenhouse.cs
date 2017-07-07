@@ -7,14 +7,15 @@ using RedHomestead.Agriculture;
 using RedHomestead.Electricity;
 using RedHomestead.Simulation;
 
-[Serializable]
-public class TerminalIconSpriteColors
+public class ToggleTerminalStateData
 {
-    public Color On = new Color(51f, 255f, 0f, 255f);
-    public Color Off = new Color(255f, 255f, 255f, 133f);
-    public Color Invalid = new Color(255f, 0f, 0f, 255f);
+    public Color On = new Color(0f, 1f, 33f/255f, 1f);
+    public Color Off = new Color(1f, 1f, 1f, 133f/255f);
+    public Color Invalid = new Color(1f, 0f, 0f, 1f);
 
-    public readonly static TerminalIconSpriteColors Defaults = new TerminalIconSpriteColors();
+    public Quaternion ToggleOffPosition = Quaternion.Euler(-90f, 0f, 0f);
+
+    public readonly static ToggleTerminalStateData Defaults = new ToggleTerminalStateData();
 }
 
 public class Greenhouse : FarmConverter, IHabitatModule
@@ -47,9 +48,7 @@ public class Greenhouse : FarmConverter, IHabitatModule
             return 1f;
         }
     }
-
-    public override bool IsOn { get; set; }
-
+    
     public Habitat LinkedHabitat { get; set; }
 
     public override float OxygenProductionPerTickInUnits
@@ -88,8 +87,7 @@ public class Greenhouse : FarmConverter, IHabitatModule
 
     public override void OnEmergencyShutdown()
     {
-#warning give IToggle a state override
-        Toggle(HeatToggle);
+        RefreshIconsAndHandles();
     }
 
     public override void Report()

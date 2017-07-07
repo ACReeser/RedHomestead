@@ -322,6 +322,7 @@ namespace RedHomestead.Persistence
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
+#warning need to sanity check instance IDs here
                 r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID], null, null);
             }
 #if UNITY_EDITOR
@@ -341,14 +342,14 @@ namespace RedHomestead.Persistence
             reflectionRuns++;
             reflectionCheckTime.Start();
 #endif
-            Type ty = gameplay.GetType();
-            if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), ty))
+            Type gameplayType = gameplay.GetType();
+            if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), gameplayType))
             {
 #if UNITY_EDITOR
                 reflectionCheckTime.Stop();
                 reflectionPropertyTime.Start();
 #endif
-                System.Reflection.PropertyInfo pi = ty.GetProperty("FlexData");
+                System.Reflection.PropertyInfo pi = gameplayType.GetProperty("FlexData");
                 data.Flex = JsonUtility.ToJson(pi.GetValue(gameplay, null));
 #if UNITY_EDITOR
                 reflectionPropertyTime.Stop();

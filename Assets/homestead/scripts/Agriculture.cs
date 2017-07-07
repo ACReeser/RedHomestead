@@ -30,7 +30,7 @@ namespace RedHomestead.Agriculture{
 
     public abstract class FarmConverter : Converter, IFarm, IPowerConsumer, IToggleReceiver, IFlexDataContainer<MultipleResourceModuleData, FarmFlexData>
     {
-        public abstract bool IsOn { get; set; }
+        public bool IsOn { get { return FlexData.IsHeatOn; } set { FlexData.IsHeatOn = value; } }
         public abstract float WaterConsumptionPerTickInUnits { get; }
         public abstract float BiomassProductionPerTickInUnits { get; }
         public abstract float OxygenProductionPerTickInUnits { get; }
@@ -44,6 +44,10 @@ namespace RedHomestead.Agriculture{
         /// Coefficient that is multiplied against BiomassProductionPerTickInUnits and subtracted every tick that power is not on
         /// </summary>
         public const float FrostBiomassDamageCoefficient = .5f;
+        /// <summary>
+        /// Coefficient that is multiplied against BiomassProductionPerTickInUnits and subtracted every tick that water is not on
+        /// </summary>
+        public const float DroughtBiomassDamageCoefficient = .5f;
 
         public abstract void OnEmergencyShutdown();
         public float CurrentBiomassInUnits
@@ -68,24 +72,29 @@ namespace RedHomestead.Agriculture{
         {
             base.OnStart();
             ToggleMap.ToggleLookup[this.HeatToggle] = this;
+            ToggleMap.ToggleLookup[this.WaterToggle] = this;
             this.RefreshFarmVisualization();
-            this.RefreshIcons();
+            this.RefreshIconsAndHandles();
         }
 
-        private void RefreshIcons()
+        protected void RefreshIconsAndHandles()
         {
-            //this.heatSprite.color = this.HasPower && this.FlexData.IsHeatOn;
+            this.heatSprite.color = !this.HasPower ? ToggleTerminalStateData.Defaults.Invalid : this.FlexData.IsHeatOn ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
+            this.waterSprite.color = this.WaterIn == null ? ToggleTerminalStateData.Defaults.Invalid : this.FlexData.IsWaterOn ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
+
+            this.HeatToggle.localRotation = this.FlexData.IsHeatOn ? Quaternion.identity : ToggleTerminalStateData.Defaults.ToggleOffPosition;
+            this.WaterToggle.localRotation = this.FlexData.IsWaterOn ? Quaternion.identity : ToggleTerminalStateData.Defaults.ToggleOffPosition;
         }
 
         protected abstract void RefreshFarmVisualization();
 
         private float oldBiomass;
-        private int ticksFrozen = 0;
+        private int cropFailureTicks = 0;
         protected virtual void FarmTick()
         {
-            if (this.HasPower && this.IsOn)
+            if (this.HasPower && this.IsOn && this.FlexData.IsWaterOn && this.FlexData.IsHeatOn)
             {
-                ticksFrozen = 0;
+                cropFailureTicks = 0;
 
                 if (this.WaterIn != null && !this.CanHarvest)
                 {
@@ -107,24 +116,30 @@ namespace RedHomestead.Agriculture{
             {
                 if (this.Data.Containers[Matter.Biomass].CurrentAmount > 0f)
                 {
+                    float lossAmount = 0;
+                    if (!FlexData.IsHeatOn)
+                        lossAmount += BiomassProductionPerTickInUnits * FrostBiomassDamageCoefficient;
+                    if (!FlexData.IsWaterOn)
+                        lossAmount += BiomassProductionPerTickInUnits * DroughtBiomassDamageCoefficient;
+
                     oldBiomass = Data.Containers[Matter.Biomass].CurrentAmount;
 
-                    Data.Containers[Matter.Biomass].Pull(BiomassProductionPerTickInUnits * FrostBiomassDamageCoefficient);
+                    Data.Containers[Matter.Biomass].Pull(lossAmount);
 
                     CheckForAmountChange();
 
-                    if (ticksFrozen == 0)
+                    if (cropFailureTicks == 0)
                     {
-                        //GuiBridge.Instance.ComputerAudioSource.PlayOneShot(GreenhouseFreezing)
-                        ticksFrozen++;
+                        //GuiBridge.Instance.ComputerAudioSource.PlayOneShot(CropFailure)
+                        cropFailureTicks++;
                     }
-                    else if (ticksFrozen > 60 * 2)
+                    else if (cropFailureTicks > 59 * 2)
                     {
-                        ticksFrozen = 0;
+                        cropFailureTicks = 0;
                     }
                     else
                     {
-                        ticksFrozen++;
+                        cropFailureTicks++;
                     }
                 }
             }
@@ -134,7 +149,7 @@ namespace RedHomestead.Agriculture{
 
         private void CheckForAmountChange()
         {
-            if (Mathf.RoundToInt(oldBiomass * 10f) != Mathf.RoundToInt(Data.Containers[Matter.Biomass].CurrentAmount * 10f))
+            if (Mathf.RoundToInt(oldBiomass * 100f) != Mathf.RoundToInt(Data.Containers[Matter.Biomass].CurrentAmount * 100f))
             {
                 this.RefreshFarmVisualization();
             }
@@ -150,13 +165,13 @@ namespace RedHomestead.Agriculture{
             if (s.HasContainerFor(Matter.Water))
                 this.WaterIn = s;
 
-            this.RefreshIcons();
+            this.RefreshIconsAndHandles();
         }
 
         public override void ClearHooks()
         {
             this.WaterIn = null;
-            this.RefreshIcons();
+            this.RefreshIconsAndHandles();
         }
 
         public override void InitializeStartingData()
@@ -186,14 +201,21 @@ namespace RedHomestead.Agriculture{
         {
             if (toggleHandle == HeatToggle)
             {
-                this.IsOn = !this.IsOn;
+                this.FlexData.IsHeatOn = !this.FlexData.IsHeatOn;
                 this.OnPowerChanged();
                 this.RefreshVisualization();
             }
             else if (toggleHandle == WaterToggle)
             {
-
+                this.FlexData.IsWaterOn = !this.FlexData.IsWaterOn;
             }
+            RefreshIconsAndHandles();
+        }
+
+        public override void OnPowerChanged()
+        {
+            base.OnPowerChanged();
+            RefreshIconsAndHandles();
         }
     }
 
