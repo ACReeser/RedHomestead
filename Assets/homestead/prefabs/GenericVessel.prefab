@@ -166,7 +166,7 @@ MeshRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e49ed2e7a69e36842b75b06c8122fdbf, type: 2}
+  - {fileID: 2100000, guid: b27931de1938a9e4699d464da9a2f96c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -183,6 +183,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!23 &2374718
 MeshRenderer:
@@ -214,6 +215,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!23 &2384928
 MeshRenderer:
@@ -245,6 +247,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!33 &3333966
 MeshFilter:
@@ -252,7 +255,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 123786}
-  m_Mesh: {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  m_Mesh: {fileID: 4300026, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
 --- !u!33 &3334444
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -309,9 +312,10 @@ MonoBehaviour:
   data:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
-    ResourceType: 0
-    Quantity: 1
-  MetalBang: {fileID: 8300000, guid: 506247dc65c5ef543a5ba252f689dbce, type: 3}
+    Container:
+      TotalCapacity: 1
+      Amount: 0
+      MatterType: 0
   ResourceLabelMeshes:
   - {fileID: 4300018, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
   - {fileID: 4300004, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
@@ -330,13 +334,16 @@ MonoBehaviour:
   - {fileID: 4300010, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
   - {fileID: 4300010, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
   - {fileID: 4300010, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300022, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300010, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300022, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
   CompoundLabelMeshes:
-  - {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
-  - {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
-  - {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
-  - {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
-  - {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
-  - {fileID: 4300000, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300026, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300028, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300030, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300032, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300034, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
+  - {fileID: 4300024, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
   LabelMeshFilter: {fileID: 3333966}
 --- !u!1001 &100100000
 Prefab:
