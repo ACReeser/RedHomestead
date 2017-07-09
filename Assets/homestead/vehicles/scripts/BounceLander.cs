@@ -228,7 +228,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         }
     }
 
-    public static void CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null)
+    public static Transform CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null)
     {
         Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
 
@@ -236,6 +236,8 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         rc.data.Container = new ResourceContainer(matter, amount);
 
         AfterSpawnCratelike(position, parent, newT);
+
+        return newT;
     }
 
     public static void CreateCratelike(Craftable craftable, Vector3 position, Transform parent = null)

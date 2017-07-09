@@ -18,14 +18,15 @@ public class ToggleTerminalStateData
     public readonly static ToggleTerminalStateData Defaults = new ToggleTerminalStateData();
 }
 
-public class Greenhouse : FarmConverter, IHabitatModule
+public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICrateSnapper
 {
     public List<IHabitatModule> AdjacentModules { get; set; }
     public MeshRenderer[] plants;
     public Color youngColor, oldColor;
     public Vector3 youngScale, oldScale;
+    public Transform defaultSnap;
 
-    private const float _harvestUnits = .5f;
+    private const float _harvestUnits = .25f;
     private const float _biomassPerTick = 5 / SunOrbit.GameSecondsPerGameDay;
     private const float OxygenPerDayPerLeafInKilograms = .0001715f;
     private const int MaximumLeafCount = 1000;
@@ -96,7 +97,20 @@ public class Greenhouse : FarmConverter, IHabitatModule
 
     protected override void OnHarvest(float harvestAmountUnits)
     {
-
+        if (outputs[0] != null)
+        {
+            outputs[0].Data.Container.Push(harvestAmountUnits);
+        }
+        else if (outputs[1] != null)
+        {
+            outputs[1].Data.Container.Push(harvestAmountUnits);
+        }
+        else
+        {
+            Transform t = BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position);
+            t.GetComponent<ResourceComponent>().Data.Container.TotalCapacity = .25f;
+            t.localScale = new Vector3(.5f, .5f, .5f);
+        }
     }
 
     protected override void RefreshFarmVisualization()
@@ -123,5 +137,46 @@ public class Greenhouse : FarmConverter, IHabitatModule
                 leaf.enabled = false;
             }
         }
+    }
+
+    private ResourceComponent[] outputs = new ResourceComponent[2];
+    private Coroutine detachTimer = null;
+
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable moveSnap)
+    {
+        ResourceComponent res = c.GetComponent<ResourceComponent>();
+        if (res != null && detachTimer == null && res.Data.Container.MatterType == Matter.Produce)
+        {
+            if (outputs[0] == null)
+            {
+                outputs[0] = res;
+                res.SnapCrate(this, child.transform.position);
+            }
+            else if (outputs[1] == null)
+            {
+                outputs[1] = res;
+                res.SnapCrate(this, child.transform.position);
+            }
+        }
+    }
+
+    public void DetachCrate(IMovableSnappable detaching)
+    {
+        if (outputs[0] == (object)detaching)
+        {
+            outputs[0] = null;
+            detachTimer = StartCoroutine(Timer());
+        }
+        else if (outputs[1] == (object)detaching)
+        {
+            outputs[1] = null;
+            detachTimer = StartCoroutine(Timer());
+        }
+    }
+
+    private IEnumerator Timer()
+    {
+        yield return new WaitForSeconds(2f);
+        detachTimer = null;
     }
 }
