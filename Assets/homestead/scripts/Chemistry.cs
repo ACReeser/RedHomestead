@@ -5,6 +5,8 @@ using System;
 
 namespace RedHomestead.Simulation
 {
+    public enum ContainerSize { Quarter = 1, Full = 4 } //, Quadratic = 16 }
+
     public enum Energy { Electrical, Thermal }
     
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
@@ -342,9 +344,10 @@ namespace RedHomestead.Simulation
     public class Container
     {
         public Container() { }
-        public Container(float initialAmount)
+        public Container(float initialAmount, ContainerSize size = ContainerSize.Full)
         {
             this.Amount = initialAmount;
+            this.TotalCapacity = (float)size / 4f;
         }
 
         //Serializable
@@ -446,6 +449,11 @@ namespace RedHomestead.Simulation
         public ResourceContainer() { }
         public ResourceContainer(float initialAmount) : base(initialAmount) { }
         public ResourceContainer(Matter type, float initialAmount) : base(initialAmount)
+        {
+            this.MatterType = type;
+        }
+
+        public ResourceContainer(Matter type, float initialAmount, ContainerSize size) : base(initialAmount, size)
         {
             this.MatterType = type;
         }

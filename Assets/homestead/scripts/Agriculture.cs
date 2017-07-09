@@ -8,16 +8,23 @@ using System;
 using RedHomestead.Persistence;
 
 namespace RedHomestead.Agriculture{
-    
-    public interface IFarm: ISink
+
+
+    public interface IHarvestable
+    {
+        bool CanHarvest { get; }
+        float HarvestProgress { get; }
+        void Harvest(float addtlProgress);
+        void CompleteHarvest();
+    }
+
+    public interface IFarm: ISink, IHarvestable
     {
         float WaterConsumptionPerTickInUnits { get; }
         float BiomassProductionPerTickInUnits { get; }
         float HarvestThresholdInUnits { get; }
         float CurrentBiomassInUnits { get; }
         float OxygenProductionPerTickInUnits { get; }
-        void Harvest();
-        bool CanHarvest { get; }
         ISink WaterIn { get; }
     }
     
@@ -26,11 +33,13 @@ namespace RedHomestead.Agriculture{
     {
         public bool IsHeatOn;
         public bool IsWaterOn;
+        public float HarvestProgress;
     }
 
     public abstract class FarmConverter : Converter, IFarm, IPowerConsumer, IToggleReceiver, IFlexDataContainer<MultipleResourceModuleData, FarmFlexData>
     {
         public bool IsOn { get { return FlexData.IsHeatOn; } set { FlexData.IsHeatOn = value; } }
+        public float HarvestProgress { get { return FlexData.HarvestProgress; } }
         public abstract float WaterConsumptionPerTickInUnits { get; }
         public abstract float BiomassProductionPerTickInUnits { get; }
         public abstract float OxygenProductionPerTickInUnits { get; }
@@ -39,6 +48,9 @@ namespace RedHomestead.Agriculture{
         public UnityEngine.TextMesh DisplayText;
         public SpriteRenderer heatSprite, waterSprite;
         public FarmFlexData FlexData { get; set; }
+        public Collider[] HarvestTriggers;
+
+        protected virtual float HarvestTimeSeconds { get { return 1f; } }
 
         /// <summary>
         /// Coefficient that is multiplied against BiomassProductionPerTickInUnits and subtracted every tick that power is not on
@@ -75,6 +87,18 @@ namespace RedHomestead.Agriculture{
             ToggleMap.ToggleLookup[this.WaterToggle] = this;
             this.RefreshFarmVisualization();
             this.RefreshIconsAndHandles();
+            if (this.CanHarvest)
+            {
+                ToggleHarvestTrigger(true);
+            }
+        }
+
+        private void ToggleHarvestTrigger(bool enabled)
+        {
+            foreach(Collider c in HarvestTriggers)
+            {
+                c.enabled = enabled;
+            }
         }
 
         protected void RefreshIconsAndHandles()
@@ -95,7 +119,7 @@ namespace RedHomestead.Agriculture{
             if (this.HasPower && this.IsOn && this.FlexData.IsWaterOn && this.FlexData.IsHeatOn)
             {
                 cropFailureTicks = 0;
-
+                
                 if (this.WaterIn != null && !this.CanHarvest)
                 {
                     if (Data.Containers[Matter.Water].CurrentAmount < this.WaterConsumptionPerTickInUnits)
@@ -109,6 +133,11 @@ namespace RedHomestead.Agriculture{
                         Data.Containers[Matter.Water].Pull(WaterConsumptionPerTickInUnits);
                         Data.Containers[Matter.Biomass].Push(BiomassProductionPerTickInUnits);
                         CheckForAmountChange();
+
+                        if (CanHarvest)
+                        {
+                            ToggleHarvestTrigger(true);
+                        }
                     }
                 }
             }
@@ -189,13 +218,23 @@ namespace RedHomestead.Agriculture{
             };
         }
 
-        public void Harvest()
+        public void Harvest(float addtlHarvest)
         {
-            this.OnHarvest(Data.Containers[Matter.Biomass].Pull(HarvestThresholdInUnits));
+            this.FlexData.HarvestProgress += addtlHarvest;
+
+            if (this.FlexData.HarvestProgress >= HarvestTimeSeconds)
+                this.CompleteHarvest();
+        }
+
+        public void CompleteHarvest()
+        {
+            this.FlexData.HarvestProgress = 0f;
+            this.OnHarvestComplete(Data.Containers[Matter.Biomass].Pull(HarvestThresholdInUnits));
+            ToggleHarvestTrigger(false);
             this.RefreshFarmVisualization();
         }
 
-        protected abstract void OnHarvest(float harvestAmountUnits);
+        protected abstract void OnHarvestComplete(float harvestAmountUnits);
 
         public void Toggle(Transform toggleHandle)
         {

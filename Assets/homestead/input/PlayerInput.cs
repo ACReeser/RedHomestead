@@ -13,6 +13,7 @@ using RedHomestead.Electricity;
 using RedHomestead.Perks;
 using RedHomestead.Industry;
 using RedHomestead.Crafting;
+using RedHomestead.Agriculture;
 
 [Serializable]
 public struct InteractionClips
@@ -1128,18 +1129,18 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("harvestable"))
                 {
-                    IHarvestable harvestable = hitInfo.collider.transform.parent.GetComponent<IHarvestable>();
+                    IHarvestable harvestable = hitInfo.collider.transform.root.GetComponent<IHarvestable>();
 
                     if (harvestable.CanHarvest)
                     {
-                        if (doInteract)
+                        if (Input.GetKey(KeyCode.E))
                         {
-                            harvestable.Harvest();
+                            harvestable.Harvest(Time.deltaTime);
                         }
-                        else
-                        {
-                            newPrompt = Prompts.HarvestHint;
-                        }
+
+                        Prompts.HarvestHint.Progress = harvestable.HarvestProgress;
+
+                        newPrompt = Prompts.HarvestHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("deposit"))

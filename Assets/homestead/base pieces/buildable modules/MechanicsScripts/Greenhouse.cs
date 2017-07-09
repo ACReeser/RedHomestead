@@ -46,7 +46,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
         get
         {
-            return 1f;
+            return _harvestUnits;
         }
     }
     
@@ -95,7 +95,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
     }
 
-    protected override void OnHarvest(float harvestAmountUnits)
+    protected override void OnHarvestComplete(float harvestAmountUnits)
     {
         if (outputs[0] != null)
         {
@@ -107,9 +107,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
         }
         else
         {
-            Transform t = BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position);
-            t.GetComponent<ResourceComponent>().Data.Container.TotalCapacity = .25f;
-            t.localScale = new Vector3(.5f, .5f, .5f);
+            BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position, null, ContainerSize.Quarter);
         }
     }
 

@@ -408,7 +408,8 @@ public static class Prompts {
     internal static PromptInfo HarvestHint = new PromptInfo()
     {
         Description = "Harvest",
-        Key = "E"
+        Key = "E",
+        UsesProgress = true
     };
     internal static PromptInfo TerminalEnter = new PromptInfo()
     {

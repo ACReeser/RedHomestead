@@ -293,16 +293,16 @@ namespace RedHomestead.Rovers
         // these effects are controlled through the WheelEffects class
         private void CheckForWheelSpin()
         {
+            //alex - take out for now
             // loop through all wheels
-            for (int i = 0; i < WheelCount; i++)
-            {
-                WheelHit wheelHit;
-                m_WheelColliders[i].GetGroundHit(out wheelHit);
+            //for (int i = 0; i < WheelCount; i++)
+            //{
+                //WheelHit wheelHit;
+                //m_WheelColliders[i].GetGroundHit(out wheelHit);
 
                 // is the tire slipping above the given threshhold
-                if (Mathf.Abs(wheelHit.forwardSlip) >= m_SlipLimit || Mathf.Abs(wheelHit.sidewaysSlip) >= m_SlipLimit)
-                {
-                    //alex - take out for now
+                //if (Mathf.Abs(wheelHit.forwardSlip) >= m_SlipLimit || Mathf.Abs(wheelHit.sidewaysSlip) >= m_SlipLimit)
+                //{
                     //m_WheelEffects[i].EmitTyreSmoke();
                     //
                     //// avoiding all four tires screeching at the same time
@@ -311,10 +311,9 @@ namespace RedHomestead.Rovers
                     //{
                     //    m_WheelEffects[i].PlayAudio();
                     //}
-                    continue;
-                }
+                    //continue;
+                //}
 
-                //alex - take out for now
                 // if it wasnt slipping stop all the audio
                 //if (m_WheelEffects[i].PlayingAudio)
                 //{
@@ -322,7 +321,7 @@ namespace RedHomestead.Rovers
                 //}
                 //// end the trail generation
                 //m_WheelEffects[i].EndSkidTrail();
-            }
+            //}
         }
 
         // crude traction control that reduces the power to wheel if the car is wheel spinning too much

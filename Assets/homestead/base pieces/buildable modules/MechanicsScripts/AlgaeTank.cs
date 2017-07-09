@@ -5,6 +5,7 @@ using RedHomestead.Buildings;
 using System;
 using RedHomestead.Electricity;
 using RedHomestead.Industry;
+using RedHomestead.Agriculture;
 
 public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnapper, ITriggerSubscriber, IPowerConsumer
 {
@@ -52,6 +53,14 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         {
             return BiomassCollected > LeastBiomassHarvestKilograms &&
                 ((capturedResource == null) || (capturedResource.Data.Container.CurrentAmount < MaximumBiomass));
+        }
+    }
+
+    public float HarvestProgress
+    {
+        get
+        {
+            return 0f;
         }
     }
 
@@ -239,6 +248,14 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     }
 
     public void OnEmergencyShutdown()
+    {
+    }
+
+    public void Harvest(float addtlProgress)
+    {
+    }
+
+    public void CompleteHarvest()
     {
     }
 }

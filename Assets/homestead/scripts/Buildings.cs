@@ -471,10 +471,4 @@ namespace RedHomestead.Buildings
     {
         void InitializeStartingData();
     }
-
-    public interface IHarvestable
-    {
-        bool CanHarvest { get; }
-        void Harvest();
-    }
 }

@@ -228,12 +228,20 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         }
     }
 
-    public static Transform CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null)
+    public static Vector3 HalfSize = new Vector3(.5f, .5f, .5f);
+    public static Transform CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null, ContainerSize size = ContainerSize.Full)
     {
         Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
 
         var rc = newT.GetComponent<ResourceComponent>();
-        rc.data.Container = new ResourceContainer(matter, amount);
+        rc.data.Container = new ResourceContainer(matter, amount, size);
+
+        switch (size)
+        {
+            case ContainerSize.Quarter:
+                newT.localScale = HalfSize;
+                break;
+        }
 
         AfterSpawnCratelike(position, parent, newT);
 
