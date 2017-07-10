@@ -1631,6 +1631,7 @@ public class PlayerInput : MonoBehaviour {
         //carriedObject.isKinematic = true;
         oldMass = rigid.mass;
         carriedObject.mass = 0f;
+        carriedObject.velocity = Vector3.zero;
         carriedObject.transform.SetParent(this.transform);
         snappable.OnPickedUp();
     }

@@ -11,7 +11,13 @@ namespace RedHomestead.Equipment
     public class Loadout
     {
         private Equipment[] OutdoorGadgets = new Equipment[] { Equipment.Blueprints, Equipment.ChemicalSniffer, Equipment.Locked };
-        private Equipment[] IndoorGadgets = new Equipment[] { Equipment.Screwdriver, Equipment.Wheelbarrow, Equipment.Locked };
+        private Equipment[] IndoorGadgets = new Equipment[] {
+            //Equipment.Screwdriver,
+            //Equipment.Wheelbarrow,
+            Equipment.Locked,
+            Equipment.Locked,
+            Equipment.Locked
+        };
 
         private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
         {
