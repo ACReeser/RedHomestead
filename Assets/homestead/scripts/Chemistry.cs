@@ -60,6 +60,7 @@ namespace RedHomestead.Simulation
             { Matter.Bauxite, 1280f },
             //metals
             { Matter.Steel, 7850f },
+            { Matter.Iron, 7850f },
             { Matter.Aluminium, 2800f },
             { Matter.Copper, 8790 },
             { Matter.Uranium, 19100 },
@@ -79,6 +80,7 @@ namespace RedHomestead.Simulation
             { Matter.MealPowder, 1600 }, //same as sand??
             { Matter.RationMeal, 870 }, //same as butter
             { Matter.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking
+            { Matter.Produce, 950 }, //same as beef tallow??? what am i thinking
         };
 
         public static float Kilograms(this Matter r, float? volumeCubicMeter = null)
@@ -135,6 +137,7 @@ namespace RedHomestead.Simulation
                 case Matter.OrganicMeal:
                 case Matter.RationMeal:
                 case Matter.Biomass:
+                case Matter.Produce:
                     return 18f;
                 default:
                     return 0;
@@ -207,6 +210,7 @@ namespace RedHomestead.Simulation
                 case Matter.MealPowder:
                 case Matter.MealShake:
                 case Matter.RationMeal:
+                case Matter.Produce:
                     return true;
                 default:
                     return false;
