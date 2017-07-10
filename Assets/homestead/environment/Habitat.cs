@@ -115,6 +115,22 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
         OxygenSinks.Clear();
     }
 
+    internal void ImportProduceToOrganicMeal(ResourceComponent res)
+    {
+        if (res != null && res.Data.Container.MatterType == Matter.Produce)
+        {
+            float overage = Data.Containers[Matter.OrganicMeal].Push(res.Data.Container.Pull(res.Data.Container.CurrentAmount));
+
+            if (OnResourceChange != null)
+                OnResourceChange();
+
+            if (overage <= 0)
+            {
+                Destroy(res.gameObject);
+            }
+        }
+    }
+
     public override void Convert()
     {
         FlowWithExternal(Matter.Water, WaterSinks, WaterPullPerTick);

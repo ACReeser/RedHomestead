@@ -27,7 +27,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     public Transform defaultSnap;
 
     private const float _harvestUnits = .25f;
-    private const float _biomassPerTick = 5 / SunOrbit.GameSecondsPerGameDay;
+    private const float _biomassPerTick = .25f / 5f / SunOrbit.GameSecondsPerGameDay;
     private const float OxygenPerDayPerLeafInKilograms = .0001715f;
     private const int MaximumLeafCount = 1000;
     private const float _oxygenAtFullBiomassPerTick = OxygenPerDayPerLeafInKilograms * MaximumLeafCount / SunOrbit.GameSecondsPerGameDay;

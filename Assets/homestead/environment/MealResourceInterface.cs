@@ -64,4 +64,12 @@ public class MealResourceInterface : HabitatResourceInterface {
             rationC.TotalCapacity * Matter.RationMeal.MealsPerCubicMeter()
             );
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (LinkedHab != null)
+        {
+            LinkedHab.ImportProduceToOrganicMeal(other.GetComponent<ResourceComponent>());
+        }
+    }
 }
