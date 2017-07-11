@@ -83,8 +83,13 @@ namespace RedHomestead.Agriculture{
         protected override void OnStart()
         {
             base.OnStart();
-            ToggleMap.ToggleLookup[this.HeatToggle] = this;
-            ToggleMap.ToggleLookup[this.WaterToggle] = this;
+
+            if (this.WaterToggle != null)
+            {
+                ToggleMap.ToggleLookup[this.HeatToggle] = this;
+                ToggleMap.ToggleLookup[this.WaterToggle] = this;
+            }
+
             this.RefreshFarmVisualization();
             this.RefreshIconsAndHandles();
             if (this.CanHarvest)
@@ -103,11 +108,14 @@ namespace RedHomestead.Agriculture{
 
         protected void RefreshIconsAndHandles()
         {
-            this.heatSprite.color = !this.HasPower ? ToggleTerminalStateData.Defaults.Invalid : this.FlexData.IsHeatOn ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
-            this.waterSprite.color = this.WaterIn == null ? ToggleTerminalStateData.Defaults.Invalid : this.FlexData.IsWaterOn ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
+            if (this.WaterToggle != null)
+            {
+                this.heatSprite.color = !this.HasPower ? ToggleTerminalStateData.Defaults.Invalid : this.FlexData.IsHeatOn ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
+                this.waterSprite.color = this.WaterIn == null ? ToggleTerminalStateData.Defaults.Invalid : this.FlexData.IsWaterOn ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
 
-            this.HeatToggle.localRotation = this.FlexData.IsHeatOn ? Quaternion.identity : ToggleTerminalStateData.Defaults.ToggleOffPosition;
-            this.WaterToggle.localRotation = this.FlexData.IsWaterOn ? Quaternion.identity : ToggleTerminalStateData.Defaults.ToggleOffPosition;
+                this.HeatToggle.localRotation = this.FlexData.IsHeatOn ? Quaternion.identity : ToggleTerminalStateData.Defaults.ToggleOffPosition;
+                this.WaterToggle.localRotation = this.FlexData.IsWaterOn ? Quaternion.identity : ToggleTerminalStateData.Defaults.ToggleOffPosition;
+            }
         }
 
         protected abstract void RefreshFarmVisualization();

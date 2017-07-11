@@ -7,7 +7,7 @@ using RedHomestead.Electricity;
 using RedHomestead.Industry;
 using RedHomestead.Agriculture;
 
-public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnapper, ITriggerSubscriber, IPowerConsumer
+public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, ICrateSnapper
 {
     public AudioClip HandleChangeClip;
 
@@ -16,63 +16,67 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
     // least harvest kg per five days per seconds per day
     internal const float BiomassPerSecond = LeastBiomassHarvestKilograms / 5f / SunOrbit.MartianSecondsPerDay;
     internal const float MaximumBiomass = 760f;
-
-    internal float BiomassCollected = 0f;
-
-#warning these are made up numbers
-    internal float WaterPerSecond = .001f;
-    internal float OxygenPerSecond = .001f;
+    
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
     public Transform CratePrefab, CrateAnchor;
     private ResourceComponent capturedResource;
 
+    private const float _harvestUnits = .1f;
+    private const float _biomassPerTick = .1f / 3f / SunOrbit.GameSecondsPerGameDay;
+
+    //same as greenhouse
+    private const float OxygenPerDayPerLeafInKilograms = .0001715f;
+    private const int MaximumLeafCount = 1000;
+    private const float _oxygenAtFullBiomassPerTick = OxygenPerDayPerLeafInKilograms * MaximumLeafCount / SunOrbit.GameSecondsPerGameDay;
+
+    private const float _waterPerTick = .1f / SunOrbit.GameSecondsPerGameDay;
+    private const float _heaterWatts = 2 * ElectricityConstants.WattsPerBlock;
+
     public override float WattsConsumed
     {
         get
         {
-            return 1f;
+            return _heaterWatts;
         }
     }
 
-    private ISink WaterIn;
-    private bool IsFullyConnected
+    public override float WaterConsumptionPerTickInUnits
     {
         get
         {
-            return WaterIn != null;
+            return _waterPerTick;
         }
     }
 
-    public bool IsOn { get; set; }
-
-    public bool CanHarvest
+    public override float BiomassProductionPerTickInUnits
     {
         get
         {
-            return BiomassCollected > LeastBiomassHarvestKilograms &&
-                ((capturedResource == null) || (capturedResource.Data.Container.CurrentAmount < MaximumBiomass));
+            return _biomassPerTick;
         }
     }
 
-    public float HarvestProgress
+    public override float OxygenProductionPerTickInUnits
     {
         get
         {
-            return 0f;
+            return _oxygenAtFullBiomassPerTick * Get(RedHomestead.Simulation.Matter.Biomass).CurrentAmount;
+        }
+    }
+
+    public override float HarvestThresholdInUnits
+    {
+        get
+        {
+            return _harvestUnits;
         }
     }
 
     public override void Convert()
     {
-        if (HasPower && IsOn && IsFullyConnected && BiomassCollected < MaximumBiomass)
-        {
-            if (PullWater())
-            {
-                BuildUpBiomass();
-            }
-        }
+        this.FarmTick();
     }
 
     protected override void OnStart()
@@ -80,55 +84,21 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
         base.OnStart();
         RefreshPowerSwitch();
     }
-
-    private bool lastTickUnharvestable = true;
-    private void BuildUpBiomass()
-    {
-        BiomassCollected += BiomassPerSecond;
-
-        if (lastTickUnharvestable && CanHarvest)
-        {
-            GuiBridge.Instance.ShowNews(NewsSource.AlgaeHarvestable);
-            lastTickUnharvestable = false;
-        }
-        else
-        {
-            lastTickUnharvestable = true;
-        }
-    }
-
-    private float waterBuffer = 0f;
-    private bool PullWater()
-    {
-        if (WaterIn != null)
-        {
-            float newWater = WaterIn.Get(Matter.Water).Pull(WaterPerSecond * Time.fixedDeltaTime);
-            waterBuffer += newWater;
-            Data.MatterHistory.Consume(Matter.Water, newWater);
-
-            float waterThisTick = WaterPerSecond * Time.fixedDeltaTime;
-
-            if (waterBuffer >= waterThisTick)
-            {
-                waterBuffer -= waterThisTick;
-                return true;
-            }
-        }
-
-        return false;
-    }
+    //GuiBridge.Instance.ShowNews(NewsSource.AlgaeHarvestable);
+    
 
     public override void ClearHooks()
     {
         WaterIn = null;
+
+        FlexData.IsWaterOn = WaterIn != null;
     }
 
     public override void OnSinkConnected(ISink s)
     {
-        if (s.HasContainerFor(Matter.Water))
-        {
-            WaterIn = s;
-        }
+        base.OnSinkConnected(s);
+
+        FlexData.IsWaterOn = WaterIn != null;
     }
 
     public override void Report()
@@ -181,7 +151,7 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
             SoundSource.Stop();
     }
 
-    public void Harvest()
+    protected override void OnHarvestComplete(float harvestAmountUnits)
     {
         if (capturedResource == null)
         {
@@ -191,10 +161,9 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
             capturedResource.SnapCrate(this, CrateAnchor.position);
         }
 
-        if (capturedResource.Data.Container.CurrentAmount < MaximumBiomass)
+        if (capturedResource.Data.Container.AvailableCapacity >= harvestAmountUnits)
         {
-            capturedResource.Data.Container.Push(BiomassCollected);
-            BiomassCollected = 0;
+            capturedResource.Data.Container.Push(harvestAmountUnits);
         }
     }
 
@@ -246,17 +215,16 @@ public class AlgaeTank : Converter, IPowerToggleable, IHarvestable, ICrateSnappe
             },
         };
     }
+    
 
-    public void OnEmergencyShutdown()
+    public override void OnEmergencyShutdown()
     {
+        
     }
 
-    public void Harvest(float addtlProgress)
+    protected override void RefreshFarmVisualization()
     {
-    }
-
-    public void CompleteHarvest()
-    {
+        
     }
 }
 
