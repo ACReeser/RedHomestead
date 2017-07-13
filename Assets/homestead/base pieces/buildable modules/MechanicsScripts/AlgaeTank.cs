@@ -20,6 +20,8 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
 
     public MeshFilter PowerCabinet;
     public Mesh OnMesh, OffMesh;
+    public MeshRenderer algaeRenderer;
+    public AnimatedTexture animatedTexture;
     public Transform CratePrefab, CrateAnchor;
     private ResourceComponent capturedResource;
 
@@ -222,9 +224,17 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
         
     }
 
+    public Color algaeColor = new Color(0, 221f / 255f, 84 / 255f);
     protected override void RefreshFarmVisualization()
     {
-        
+        algaeColor.a = this.HarvestProgress;
+        algaeRenderer.material.color = algaeColor;
+    }
+
+    public override void OnPowerChanged()
+    {
+        base.OnPowerChanged();
+        animatedTexture.speed = HasPower && IsOn ? .01f : 0f;
     }
 }
 

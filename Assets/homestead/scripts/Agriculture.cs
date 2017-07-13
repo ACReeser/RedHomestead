@@ -13,6 +13,9 @@ namespace RedHomestead.Agriculture{
     public interface IHarvestable
     {
         bool CanHarvest { get; }
+        /// <summary>
+        /// zero to one 
+        /// </summary>
         float HarvestProgress { get; }
         void Harvest(float addtlProgress);
         void CompleteHarvest();
