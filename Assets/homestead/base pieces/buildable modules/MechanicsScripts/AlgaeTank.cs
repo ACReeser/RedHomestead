@@ -176,7 +176,7 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     {
         if (detachTimer == null && res is ResourceComponent)
         {
-            if ((res as ResourceComponent).Data.Container.MatterType == Matter.Biomass)
+            if ((res as ResourceComponent).Data.Container.MatterType == Matter.Produce)
             {
                 capturedResource = res as ResourceComponent;
                 capturedResource.SnapCrate(this, CrateAnchor.position);
