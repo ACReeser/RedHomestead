@@ -32,6 +32,10 @@ public class PlayerInput : MonoBehaviour {
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
+    
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+    public static bool DoNotDisturb;
+#endif
 
     public Camera AlternativeCamera;
     public Light Headlamp1, Headlamp2;
@@ -142,6 +146,11 @@ public class PlayerInput : MonoBehaviour {
             Autosave.Instance.Save();
         }
 #endif
+
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+        if (Input.GetKeyUp(KeyCode.End) && Input.GetKey(KeyCode.LeftShift)) DoNotDisturb = !DoNotDisturb;
+#endif
+
         if (Input.GetKeyUp(KeyCode.F1))
         {
             GuiBridge.Instance.ToggleHelpMenu();

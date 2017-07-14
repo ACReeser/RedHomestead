@@ -86,6 +86,10 @@ public class Gremlin : MonoBehaviour {
 
             print("Player rolled a " + roll + " vs a Gremlin DC of " + dc);
 
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+            if (PlayerInput.DoNotDisturb) roll += 9999999;
+#endif
+
             if (roll > dc)
             {
                 Game.Current.Player.GremlinMissStreak++;
@@ -158,6 +162,10 @@ public class Gremlin : MonoBehaviour {
             yield return new WaitForSeconds(1f);
 
             hasGremlinedRepairable = gremlindMap.Keys.Count > 0;
+
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+            if (PlayerInput.DoNotDisturb) hasGremlinedRepairable = false;
+#endif
         }
 
         BeginLurk();

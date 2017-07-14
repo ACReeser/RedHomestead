@@ -44,6 +44,9 @@ public abstract class SurvivalResource
 
     public void Consume()
     {
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+        if (PlayerInput.DoNotDisturb) return;
+#endif
         DoConsume();
 
         bool newCritical = HoursLeftHint <= 1;

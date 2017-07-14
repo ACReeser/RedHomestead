@@ -85,6 +85,7 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     {
         base.OnStart();
         RefreshPowerSwitch();
+        RefreshAlgaeBubbleSpeed();
     }
     //GuiBridge.Instance.ShowNews(NewsSource.AlgaeHarvestable);
     
@@ -139,6 +140,7 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
             IsOn = false;
         }
 
+        RefreshPowerSwitch();
         RefreshPowerSwitch();
     }
 
@@ -227,14 +229,19 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     public Color algaeColor = new Color(0, 221f / 255f, 84 / 255f);
     protected override void RefreshFarmVisualization()
     {
-        algaeColor.a = this.HarvestProgress;
+        algaeColor.a = (this.Get(Matter.Biomass).CurrentAmount / this.HarvestThresholdInUnits) * 1.5f;
         algaeRenderer.material.color = algaeColor;
     }
 
     public override void OnPowerChanged()
     {
         base.OnPowerChanged();
-        animatedTexture.speed = HasPower && IsOn ? .01f : 0f;
+        RefreshAlgaeBubbleSpeed();
+    }
+
+    private void RefreshAlgaeBubbleSpeed()
+    {
+        animatedTexture.speed = HasPower && IsOn ? .2f : 0.01f;
     }
 }
 

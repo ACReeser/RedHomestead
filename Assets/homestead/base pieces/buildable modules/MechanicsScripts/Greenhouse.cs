@@ -118,7 +118,6 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
         if (show)
         {
             float percentage = this.Get(Matter.Biomass).CurrentAmount / this.HarvestThresholdInUnits;
-            print(percentage);
             Vector3 scale = Vector3.Lerp(youngScale, oldScale, percentage);
             Color color = Color.Lerp(youngColor, oldColor, percentage);
 
