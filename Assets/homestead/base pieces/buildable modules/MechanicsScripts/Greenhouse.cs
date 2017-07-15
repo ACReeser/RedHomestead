@@ -107,7 +107,10 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
         }
         else
         {
-            BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position, null, ContainerSize.Quarter);
+
+            ResourceComponent res = BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position, null, ContainerSize.Quarter).GetComponent<ResourceComponent>();
+            res.SnapCrate(this, defaultSnap.position);
+            outputs[0] = res;
         }
     }
 

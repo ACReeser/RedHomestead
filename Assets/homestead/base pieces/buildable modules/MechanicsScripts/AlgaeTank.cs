@@ -159,9 +159,8 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     {
         if (capturedResource == null)
         {
-            capturedResource = GameObject.Instantiate<Transform>(CratePrefab).GetComponent<ResourceComponent>();
-            capturedResource.Data.Container = new ResourceContainer(Matter.Biomass, 0f);
-            capturedResource.RefreshLabel();
+            capturedResource = BounceLander.CreateCratelike(Matter.Produce, 0f, CrateAnchor.position, size: ContainerSize.Quarter).GetComponent<ResourceComponent>();
+            //capturedResource.RefreshLabel();
             capturedResource.SnapCrate(this, CrateAnchor.position);
         }
 

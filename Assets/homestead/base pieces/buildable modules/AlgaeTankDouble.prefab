@@ -54,6 +54,7 @@ GameObject:
   - component: {fileID: 4851342173946066}
   - component: {fileID: 33844851686501260}
   - component: {fileID: 23301664903491302}
+  - component: {fileID: 65659395728328120}
   m_Layer: 0
   m_Name: crateAnchorAndTrigger (1)
   m_TagString: Untagged
@@ -493,7 +494,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1117726279651478}
   m_LocalRotation: {x: -0.00000011920929, y: -0.70722896, z: -0.7069846, w: -0.00000011920929}
-  m_LocalPosition: {x: 0.1213, y: 0.3006, z: -0.1691}
+  m_LocalPosition: {x: -0.076, y: 0.1844, z: -0.1537}
   m_LocalScale: {x: 0.33333334, y: 0.33333334, z: 0.33333334}
   m_Children:
   - {fileID: 4381248212841762}
@@ -549,7 +550,7 @@ Transform:
   m_GameObject: {fileID: 1767257084764224}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071067}
   m_LocalPosition: {x: 0, y: 0, z: -0.275}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 0.33, y: 0.33, z: 0.33}
   m_Children: []
   m_Father: {fileID: 4115044217596218}
   m_RootOrder: 0
@@ -626,7 +627,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1824148184231864}
   m_LocalRotation: {x: 0.00000008940697, y: 0.7071068, z: 0.7071068, w: -0.00000008940697}
-  m_LocalPosition: {x: 0.436, y: 1.1462338, z: 4.927}
+  m_LocalPosition: {x: -0.262, y: 1.357, z: 5.376}
   m_LocalScale: {x: 3.0000002, y: 2.9999998, z: 2.9999995}
   m_Children:
   - {fileID: 4621215157220288}
@@ -698,7 +699,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1960039504930184}
   m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000020861623}
-  m_LocalPosition: {x: 0.148, y: 2.0998, z: 5.561}
+  m_LocalPosition: {x: 0.148, y: 2.308, z: 5.561}
   m_LocalScale: {x: 1.0000005, y: 1, z: 1.0000005}
   m_Children: []
   m_Father: {fileID: 4438266896221450}
@@ -1284,7 +1285,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1824148184231864}
-  m_Mesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  m_Mesh: {fileID: 4300020, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
 --- !u!33 &33190681168680080
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -1397,7 +1398,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.05, y: 0.22, z: 0.3}
-  m_Center: {x: 0.27, y: 0.21, z: 0}
+  m_Center: {x: 0.06, y: 0.21, z: 0}
 --- !u!65 &65452250858447418
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -1422,6 +1423,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.6, y: 0.6, z: 0.6}
   m_Center: {x: 0, y: 0, z: -0.78}
+--- !u!65 &65659395728328120
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1081276438722762}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.868896, y: 1.9457159, z: 1.2000006}
+  m_Center: {x: -0.013642904, y: -1.7371138, z: -0.0001220679}
 --- !u!65 &65822802377459858
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -1481,7 +1494,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.1, y: 0.15, z: 0.05}
-  m_Center: {x: 0, y: 0, z: -0.3}
+  m_Center: {x: 0.21, y: 0, z: -0.39}
 --- !u!82 &82418597334542092
 AudioSource:
   m_ObjectHideFlags: 1
@@ -1582,7 +1595,7 @@ TextMesh:
   m_Font: {fileID: 12800000, guid: bc676c21e9c7cc14da585bb2f33e696a, type: 3}
   m_Color:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4278228223
 --- !u!114 &114138121196440638
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1738,12 +1751,13 @@ MonoBehaviour:
   - {fileID: 65833377636204682}
   HandleChangeClip: {fileID: 8300000, guid: 9d6e34029f51262458002bc29b39a063, type: 3}
   PowerCabinet: {fileID: 33174003317220372}
-  OnMesh: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
-  OffMesh: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  OnMesh: {fileID: 4300022, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  OffMesh: {fileID: 4300020, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
   algaeRenderer: {fileID: 23897913031350236}
   animatedTexture: {fileID: 114340842929587554}
   CratePrefab: {fileID: 434448, guid: 2eadcf53d0112eb4bac2d8edb7fb393f, type: 2}
   CrateAnchor: {fileID: 4058327883043290}
+  algaeColor: {r: 0, g: 0.8666667, b: 0.32941177, a: 1}
 --- !u!114 &114340842929587554
 MonoBehaviour:
   m_ObjectHideFlags: 1
