@@ -96,6 +96,28 @@ public struct PromptUI
     public Image ProgressFill;
 }
 
+[Serializable]
+public class SurvivalBar
+{
+    public Image Bar;
+    internal Text Hours;
+    public virtual void Initialize()
+    {
+        Hours = Bar.transform.GetChild(0).GetComponent<Text>();
+    }
+}
+
+[Serializable]
+public struct SurvivalBarsUI
+{
+    public SurvivalBar Food;
+    public SurvivalBar Water;
+    public SurvivalBar Power;
+    public SurvivalBar Oxygen;
+    public SurvivalBar RoverPower;
+    public SurvivalBar RoverOxygen;
+}
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -110,9 +132,9 @@ public class GuiBridge : MonoBehaviour {
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;
-    public Image EquippedImage, OxygenBar, WaterBar, PowerBar, FoodBar, RadBar, PowerImage, ColdImage, HotImage, AutosaveIcon, SprintIcon;
+    public Image EquippedImage, ColdImage, HotImage, AutosaveIcon, SprintIcon;
     public AudioSource ComputerAudioSource;
-    private Text OxygenBarHours, WaterBarHours, PowerBarHours, FoodBarHours, RadBarHours, PowerImageHours, ColdImageHours, HotImageHours;
+    public SurvivalBarsUI SurvivalBars;
     public ReportIORow ReportRowTemplate;
     public ReportFields ReportTexts;
     public RadialMenu RadialMenu;
@@ -138,11 +160,10 @@ public class GuiBridge : MonoBehaviour {
             ConstructionRequirementsText[i] = t.GetChild(0).GetComponent<Text>();
             i++;
         }
-        OxygenBarHours = OxygenBar.transform.GetChild(1).GetComponent<Text>();
-        WaterBarHours = WaterBar.transform.GetChild(1).GetComponent<Text>();
-        PowerBarHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
-        FoodBarHours = FoodBar.transform.GetChild(1).GetComponent<Text>();
-        PowerImageHours = PowerBar.transform.GetChild(1).GetComponent<Text>();
+        SurvivalBars.Oxygen.Initialize();
+        SurvivalBars.Power.Initialize();
+        SurvivalBars.Water.Initialize();
+        SurvivalBars.Food.Initialize();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
         ToggleAutosave(false);
@@ -415,31 +436,31 @@ public class GuiBridge : MonoBehaviour {
 
     internal void RefreshOxygenBar(float percentage, int hoursLeftHint)
     {
-        this.OxygenBar.fillAmount = percentage;
-        this.RefreshBarWarningCriticalText(this.OxygenBarHours, hoursLeftHint);
+        this.SurvivalBars.Oxygen.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.Oxygen.Hours, hoursLeftHint);
     }
 
     internal void RefreshWaterBar(float percentage, int hoursLeftHint)
     {
-        this.WaterBar.fillAmount = percentage;
-        this.RefreshBarWarningCriticalText(this.WaterBarHours, hoursLeftHint);
+        this.SurvivalBars.Water.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.Water.Hours, hoursLeftHint);
     }
 
     internal void RefreshFoodBar(float percentage, int hoursLeftHint)
     {
-        this.FoodBar.fillAmount = percentage;
-        this.RefreshBarWarningCriticalText(this.FoodBarHours, hoursLeftHint);
+        this.SurvivalBars.Food.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.Food.Hours, hoursLeftHint);
     }
 
-    internal void RefreshRadiationBar(float percentage)
-    {
-        this.RadBar.fillAmount = percentage;
-    }
+    //internal void RefreshRadiationBar(float percentage)
+    //{
+    //    this.SurvivalBars.Rad.Bar.fillAmount = percentage;
+    //}
 
     internal void RefreshPowerBar(float percentage, int hoursLeftHint)
     {
-        this.PowerBar.fillAmount = percentage;
-        this.RefreshBarWarningCriticalText(this.PowerImageHours, hoursLeftHint);
+        this.SurvivalBars.Power.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.Power.Hours, hoursLeftHint);
     }
 
     internal void RefreshTemperatureGauges()
@@ -554,5 +575,11 @@ public class GuiBridge : MonoBehaviour {
             currentIORows[i+j] = ReportRowTemplate.CreateNew(ReportTexts.OutputRow);
             currentIORows[i+j].Bind(outputs[j], ReportTexts.Connected, ReportTexts.Disconnected);
         }
+    }
+
+    internal void RefreshSurvivalPanel()
+    {
+        this.SurvivalBars.RoverOxygen.Bar.transform.parent.gameObject.SetActive(PlayerInput.Instance.IsInVehicle);
+        this.SurvivalBars.RoverPower.Bar.transform.parent.gameObject.SetActive(PlayerInput.Instance.IsInVehicle);
     }
 }

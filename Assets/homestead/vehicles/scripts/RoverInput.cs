@@ -6,11 +6,12 @@ using System;
 using RedHomestead.Simulation;
 using System.Collections.Generic;
 using RedHomestead.Electricity;
+using RedHomestead.Industry;
 
 namespace RedHomestead.Rovers
 { 
     [RequireComponent(typeof(SixWheelCarController))]
-    public class RoverInput : MonoBehaviour, IDataContainer<RoverData>, ICrateSnapper, ITriggerSubscriber, IBattery
+    public class RoverInput : MonoBehaviour, IDataContainer<RoverData>, ICrateSnapper, ITriggerSubscriber, IBattery, ISink
     {
         private SixWheelCarController m_Car; // the car controller we want to use
         private Rigidbody carRigid;
@@ -31,6 +32,8 @@ namespace RedHomestead.Rovers
         public PowerVisualization PowerViz { get { return powerViz; } }
         public string PowerGridInstanceID { get; set; }
         public string PowerableInstanceID { get { return data.PowerableInstanceID; } }
+
+        public List<IPumpable> AdjacentPumpables { get; private set; }
         #endregion
 
         #region camera members
@@ -67,9 +70,11 @@ namespace RedHomestead.Rovers
                     {
                         TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 3
                     },
-                    PowerableInstanceID = Guid.NewGuid().ToString()
+                    PowerableInstanceID = Guid.NewGuid().ToString(),
+                    Oxygen = new ResourceContainer(Matter.Oxygen, .5f, ContainerSize.Full)
                 };
             }
+            this.AdjacentPumpables = new List<IPumpable>();
             this.InitializePowerVisualization();
 
             HatchDegrees = GetRotationXFromHatchState();
@@ -218,6 +223,24 @@ namespace RedHomestead.Rovers
         private void SnapToLatch(TriggerForwarder child, IMovableSnappable res, float offset)
         {
             res.SnapCrate(this, child.transform.position + child.transform.TransformDirection(new Vector3(0, 0, -offset)), carRigid);
+        }
+
+        public ResourceContainer Get(Matter c)
+        {
+            if (c == Matter.Oxygen)
+                return Data.Oxygen;
+            else
+                return null;
+        }
+
+        public bool HasContainerFor(Matter c)
+        {
+            return c == Matter.Oxygen;
+        }
+
+        public void OnAdjacentChanged()
+        {
+            
         }
     }
 }

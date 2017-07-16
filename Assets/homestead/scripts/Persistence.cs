@@ -87,6 +87,7 @@ namespace RedHomestead.Persistence
         public EnergyContainer EnergyContainer;
         public string PowerableInstanceID;
         public float FaultedPercentage;
+        public ResourceContainer Oxygen;
     }
 
     public abstract class ConnectionData : FacingData

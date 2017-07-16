@@ -79,14 +79,22 @@ public class PlayerInput : MonoBehaviour {
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
     private List<Transform> createdPowerlines = new List<Transform>();
-    private bool playerIsOnFoot = true;
+    internal bool IsOnFoot { get; private set; }
+    internal bool IsInSuit { get; private set; }
     private bool reportMenuOpen = false;
 
-    private bool playerIsInVehicle
+    internal bool IsInVehicle
     {
         get
         {
-            return !playerIsOnFoot;
+            return !IsOnFoot;
+        }
+    }
+    internal bool IsInShirtsleeves
+    {
+        get
+        {
+            return !IsInSuit;
         }
     }
 
@@ -102,6 +110,7 @@ public class PlayerInput : MonoBehaviour {
     {
         Instance = this;
         InteractionSource.transform.SetParent(null);
+        IsOnFoot = true;
     }
 
     void Start()
@@ -113,6 +122,7 @@ public class PlayerInput : MonoBehaviour {
         PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
         DrillSparks.transform.SetParent(null);
+        GuiBridge.Instance.RefreshSurvivalPanel();
     }
 
     internal void PlanCraftable(Craftable whatToBuild)
@@ -593,7 +603,7 @@ public class PlayerInput : MonoBehaviour {
             {
                 ToggleReport(null);
             }
-            else if (playerIsInVehicle)
+            else if (IsInVehicle)
             {
                 ToggleVehicle(null);
             }
@@ -627,7 +637,7 @@ public class PlayerInput : MonoBehaviour {
         {
             AlternativeCamera.enabled = !AlternativeCamera.enabled;
         }
-        if (playerIsInVehicle && Input.GetKeyUp(KeyCode.C))
+        if (IsInVehicle && Input.GetKeyUp(KeyCode.C))
         {
             DrivingRoverInput.ChangeCameraMount();
         }
@@ -701,7 +711,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnExistingPowerline(doInteract, hitInfo);
                 }
-                else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
+                else if (IsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
                     RoverInput ri = hitInfo.collider.transform.GetComponent<RoverInput>();
 
@@ -777,7 +787,7 @@ public class PlayerInput : MonoBehaviour {
                             break;
                     }
                 }
-                else if (playerIsOnFoot && hitInfo.collider.gameObject.CompareTag("hatchback"))
+                else if (IsOnFoot && hitInfo.collider.gameObject.CompareTag("hatchback"))
                 {
                     if (doInteract)
                     {
@@ -1663,7 +1673,7 @@ public class PlayerInput : MonoBehaviour {
         //exiting vehicle
         if (roverInput == null && DrivingRoverInput != null)
         {
-            playerIsOnFoot = true;
+            IsOnFoot = true;
             DrivingRoverInput.AcceptInput = false;
             DrivingRoverInput.ExitBrake();
             FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
@@ -1673,7 +1683,7 @@ public class PlayerInput : MonoBehaviour {
         }
         else //entering vehicle
         {
-            playerIsOnFoot = false;
+            IsOnFoot = false;
             Headlamp1.enabled = Headlamp2.enabled = false;
             //FPSController.enabled = false;
             DrivingRoverInput = roverInput;
@@ -1687,6 +1697,8 @@ public class PlayerInput : MonoBehaviour {
             FPSController.FreezeMovement = true;
             FPSController.CharacterController.enabled = false;
         }
+
+        GuiBridge.Instance.RefreshSurvivalPanel();
     }
 
     private void PlaceTube(Collider toBulkhead)
