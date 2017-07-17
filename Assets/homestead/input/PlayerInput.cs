@@ -122,7 +122,7 @@ public class PlayerInput : MonoBehaviour {
         PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
         DrillSparks.transform.SetParent(null);
-        GuiBridge.Instance.RefreshSurvivalPanel();
+        GuiBridge.Instance.RefreshSurvivalPanel(false);
     }
 
     internal void PlanCraftable(Craftable whatToBuild)
@@ -1170,7 +1170,7 @@ public class PlayerInput : MonoBehaviour {
                     newPrompt.Progress = deposit.Data.Extractable.UtilizationPercentage;
                     newPrompt.Description = deposit.Data.ExtractableHint;
                 }
-                else if (hitInfo.collider.CompareTag("corridor") && SurvivalTimer.Instance.UsingPackResources)
+                else if (hitInfo.collider.CompareTag("corridor") && SurvivalTimer.Instance.IsNotInHabitat)
                 {
                     Powerline powerline = hitInfo.collider.transform.parent.GetComponent<Powerline>();
 
@@ -1680,6 +1680,7 @@ public class PlayerInput : MonoBehaviour {
             FPSController.transform.SetParent(null);
             FPSController.CharacterController.enabled = true;
             FPSController.FreezeMovement = false;
+            DrivingRoverInput = null;
         }
         else //entering vehicle
         {
@@ -1698,7 +1699,8 @@ public class PlayerInput : MonoBehaviour {
             FPSController.CharacterController.enabled = false;
         }
 
-        GuiBridge.Instance.RefreshSurvivalPanel();
+        SurvivalTimer.Instance.RefreshResources(IsInVehicle, DrivingRoverInput);
+        GuiBridge.Instance.RefreshSurvivalPanel(IsInVehicle);
     }
 
     private void PlaceTube(Collider toBulkhead)

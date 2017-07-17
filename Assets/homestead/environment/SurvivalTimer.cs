@@ -5,6 +5,7 @@ using RedHomestead.Persistence;
 using RedHomestead.Simulation;
 using RedHomestead.EVA;
 using System.Linq;
+using RedHomestead.Rovers;
 
 namespace RedHomestead
 {
@@ -36,16 +37,16 @@ public abstract class SurvivalResource
     {
         get
         {
-            return (int)Math.Ceiling(Data.Current / (EffectiveConsumptionPerSecond * 60));
+            return (int)Math.Ceiling(Data.Container.CurrentAmount / (EffectiveConsumptionPerSecond * 60));
         }
     }
 
     public SurvivalResource() { }
 
-    public void Consume()
+    public bool TryConsume()
     {
 #if (DEVELOPMENT_BUILD || UNITY_EDITOR)
-        if (PlayerInput.DoNotDisturb) return;
+        if (PlayerInput.DoNotDisturb) return true;
 #endif
         DoConsume();
 
@@ -65,6 +66,7 @@ public abstract class SurvivalResource
 
         this.IsCritical = newCritical;
         this.IsWarning = newWarning;
+        return this.Data.Container.CurrentAmount > 0f;
     }
 
     protected abstract void DoConsume();
@@ -80,13 +82,13 @@ public class SingleSurvivalResource : SurvivalResource
 
     protected override void DoConsume()
     {
-        Data.Current -= Time.deltaTime * EffectiveConsumptionPerSecond;
-        this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
+        Data.Container.Pull(Time.deltaTime * EffectiveConsumptionPerSecond);
+        this.UpdateUI(Data.Container.UtilizationPercentage, HoursLeftHint);
     }
 
     public override void ResetToMaximum()
     {
-        Data.Current = Data.Maximum;
+        Data.Container.Push(Data.Container.TotalCapacity);
         this.UpdateUI(1f, HoursLeftHint);
     }
 
@@ -97,62 +99,16 @@ public class SingleSurvivalResource : SurvivalResource
 
     internal void Increment(float amount)
     {
-        Data.Current += amount;
+        Data.Container.Push(amount);
 
-        if (Data.Current > Data.Maximum)
-            Data.Current = Data.Maximum;
-        else if (Data.Current < 0)
-            Data.Current = 0f;
-
-        this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
+        this.UpdateUI(Data.Container.UtilizationPercentage, HoursLeftHint);
     }
 
     public override void Resupply(float additionalSecondsOfSupply)
     {
-        Data.Current = Mathf.Min(Data.Maximum, Data.Current + (additionalSecondsOfSupply * this.Data.ConsumptionPerSecond));
-        this.UpdateUI(Data.Current / Data.Maximum, HoursLeftHint);
-    }
-}
+        Data.Container.Push(additionalSecondsOfSupply * this.Data.ConsumptionPerSecond);
 
-[Serializable]
-public class DoubleSurvivalResource : SurvivalResource
-{
-    public bool IsOnLastBar = false;
-
-    public DoubleSurvivalResource() { }
-
-    protected override void DoConsume()
-    {
-        Data.Current -= Time.deltaTime * Data.ConsumptionPerSecond * EnvironmentalConsumptionCoefficient;
-        
-        if (IsOnLastBar)
-            this.UpdateUI(0f, Data.Current / Data.Maximum, HoursLeftHint);
-
-        else if (Data.Current <= 0f)
-        {
-            IsOnLastBar = true;
-            Data.Current = Data.Maximum;
-            this.UpdateUI(Data.Current / Data.Maximum, 0f, HoursLeftHint);
-        }
-        else
-        {
-            this.UpdateUI(Data.Current / Data.Maximum, 0f, HoursLeftHint);
-        }
-    }
-
-    public override void ResetToMaximum()
-    {
-        Data.Current = Data.Maximum;
-        IsOnLastBar = false;
-        this.UpdateUI(1f, 0f, HoursLeftHint);
-    }
-
-    internal Action<float, float, int> UpdateUI;
-
-    public override void Resupply(float additionalSecondsOfSupply)
-    {
-        Data.Current = Mathf.Min(Data.Maximum, Data.Current + (additionalSecondsOfSupply * this.Data.ConsumptionPerSecond));
-        this.UpdateUI(Data.Current / Data.Maximum, 0f, HoursLeftHint);
+        this.UpdateUI(Data.Container.UtilizationPercentage, HoursLeftHint);
     }
 }
 
@@ -169,11 +125,14 @@ public class SurvivalTimer : MonoBehaviour {
 
     public SingleSurvivalResource Power = new SingleSurvivalResource();
 
+    internal SingleSurvivalResource RoverOxygen;
+    internal SingleSurvivalResource RoverPower;
+
     internal PackData Data { get; private set; }
     internal Temperature ExternalTemperature;
     public AudioClip IncomingSolarFlare;
 
-    public bool UsingPackResources
+    public bool IsNotInHabitat
     {
         get
         {
@@ -242,41 +201,47 @@ public class SurvivalTimer : MonoBehaviour {
     }
 
     void Update () {
-        bool usingPack = UsingPackResources;
+        bool isNotInHab = IsNotInHabitat;
 
-        if (usingPack || !CurrentHabitat.HasPower || !CurrentHabitat.IsOxygenOn)
+        bool nonSuitOxygenSuccess = false, nonSuitPowerSuccess = false;
+        if (PlayerInput.Instance.IsInVehicle)
         {
-            Oxygen.Consume();
-
-            if (Oxygen.Data.Current < 0)
-            {
-                KillPlayer("ASPHYXIATION");
-                return;
-            }
+            nonSuitOxygenSuccess = RoverOxygen.TryConsume();
+            nonSuitPowerSuccess = RoverPower.TryConsume();
         }
-
-        if (usingPack || !CurrentHabitat.HasPower || !CurrentHabitat.IsHeatOn)
+        else if (IsInHabitat && CurrentHabitat.HasPower)
         {
 
-            Power.Consume();
-            if (Power.Data.Current < 0f)
+            if (CurrentHabitat.IsOxygenOn)
             {
-                KillPlayer("EXPOSURE");
-                return;
+                //oxygen = CurrentHabitat.Data.Containers[Matter.Oxygen];                
+            }
+
+            if (CurrentHabitat.IsHeatOn)
+            {
+                //power = CurrentHabitat.EnergyContainer;
             }
         }
+        
+        if (!nonSuitOxygenSuccess && !Oxygen.TryConsume())
+        {
+            KillPlayer("ASPHYXIATION");
+            return;
+        }
+        
+        if (!nonSuitPowerSuccess && !Power.TryConsume())
+        {
+            KillPlayer("EXPOSURE");
+            return;
+        }
 
-        Water.Consume();
-
-        if (Water.Data.Current < 0)
+        if (!Water.TryConsume())
         {
             KillPlayer("DEHYDRATION");
             return;
         }
-
-        Food.Consume();
-
-        if (Food.Data.Current < 0)
+        
+        if (!Food.TryConsume())
         {
             KillPlayer("STARVATION");
             return;
@@ -344,5 +309,21 @@ public class SurvivalTimer : MonoBehaviour {
     {
         Oxygen.EnvironmentalConsumptionCoefficient = isRunning ? 1.5f : 1f;
         GuiBridge.Instance.RefreshSprintIcon(isRunning);
+    }
+
+    internal void RefreshResources(bool isInVehicle, RoverInput roverInput)
+    {
+        RoverOxygen = isInVehicle ? new SingleSurvivalResource()
+        {
+            Data = new PackResourceData(roverInput.Data.Oxygen, Oxygen.Data.ConsumptionPerSecond),
+            AudioClips = Oxygen.AudioClips,
+            UpdateUI = GuiBridge.Instance.RefreshRoverOxygenBar
+        } : null;
+        RoverPower = isInVehicle ? new SingleSurvivalResource()
+        {
+            Data = new PackResourceData(roverInput.Data.EnergyContainer, Power.Data.ConsumptionPerSecond),
+            AudioClips = Power.AudioClips,
+            UpdateUI = GuiBridge.Instance.RefreshRoverPowerBar
+        } : null;
     }
 }

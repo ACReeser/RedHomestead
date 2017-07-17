@@ -164,6 +164,8 @@ public class GuiBridge : MonoBehaviour {
         SurvivalBars.Power.Initialize();
         SurvivalBars.Water.Initialize();
         SurvivalBars.Food.Initialize();
+        SurvivalBars.RoverOxygen.Initialize();
+        SurvivalBars.RoverPower.Initialize();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
         ToggleAutosave(false);
@@ -462,6 +464,16 @@ public class GuiBridge : MonoBehaviour {
         this.SurvivalBars.Power.Bar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.SurvivalBars.Power.Hours, hoursLeftHint);
     }
+    internal void RefreshRoverOxygenBar(float percentage, int hoursLeftHint)
+    {
+        this.SurvivalBars.RoverOxygen.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.RoverOxygen.Hours, hoursLeftHint);
+    }
+    internal void RefreshRoverPowerBar(float percentage, int hoursLeftHint)
+    {
+        this.SurvivalBars.RoverPower.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.RoverPower.Hours, hoursLeftHint);
+    }
 
     internal void RefreshTemperatureGauges()
     {
@@ -577,9 +589,9 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
-    internal void RefreshSurvivalPanel()
+    internal void RefreshSurvivalPanel(bool isInVehicle)
     {
-        this.SurvivalBars.RoverOxygen.Bar.transform.parent.gameObject.SetActive(PlayerInput.Instance.IsInVehicle);
-        this.SurvivalBars.RoverPower.Bar.transform.parent.gameObject.SetActive(PlayerInput.Instance.IsInVehicle);
+        this.SurvivalBars.RoverOxygen.Bar.transform.parent.gameObject.SetActive(isInVehicle);
+        this.SurvivalBars.RoverPower.Bar.transform.parent.gameObject.SetActive(isInVehicle);
     }
 }

@@ -55,7 +55,7 @@ namespace RedHomestead.Equipment
         {
             get
             {
-                return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.UsingPackResources;
+                return Equipped == Equipment.Blueprints && SurvivalTimer.Instance.IsNotInHabitat;
             }
         }
 

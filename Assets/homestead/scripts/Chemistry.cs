@@ -348,9 +348,14 @@ namespace RedHomestead.Simulation
     public class Container
     {
         public Container() { }
-        public Container(float initialAmount, ContainerSize size = ContainerSize.Full)
+        public Container(float initialAmountUnits, float capacityUnits)
         {
-            this.Amount = initialAmount;
+            this.Amount = initialAmountUnits;
+            this.TotalCapacity = capacityUnits;
+        }
+        public Container(float Units, ContainerSize size = ContainerSize.Full)
+        {
+            this.Amount = Units;
             this.TotalCapacity = (float)size / 4f;
         }
 

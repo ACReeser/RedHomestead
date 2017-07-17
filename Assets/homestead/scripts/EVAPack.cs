@@ -9,15 +9,19 @@ namespace RedHomestead.EVA
     [Serializable]
     public class PackResourceData
     {
-        public float Maximum;
-        public float Current;
+        public Container Container;
+        
         public float ConsumptionPerSecond;
 
         public PackResourceData() { }
         public PackResourceData(float max, float consumption)
         {
-            this.Maximum = max;
-            this.Current = max;
+            this.Container = new Container(max, max);
+            this.ConsumptionPerSecond = consumption;
+        }
+        public PackResourceData(Container container, float consumption)
+        {
+            this.Container = container;
             this.ConsumptionPerSecond = consumption;
         }
     }
@@ -77,12 +81,12 @@ namespace RedHomestead.EVA
 
         public static void UpgradePower(PackData data)
         {
-            data.Power.Maximum = Constants.UpgradedPackPowerWatts;
+            data.Power.Container.TotalCapacity = Constants.UpgradedPackPowerWatts;
         }
 
         public static void UpgradeOxygen(PackData data)
         {
-            data.Oxygen.Maximum = Constants.UpgradedPackOxygenKilograms;
+            data.Oxygen.Container.TotalCapacity = Constants.UpgradedPackOxygenKilograms;
         }
 
         private static float GetConsumptionPerSecond(ConsumptionPeriod period, float amountPerPeriod)
