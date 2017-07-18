@@ -125,8 +125,8 @@ public class SurvivalTimer : MonoBehaviour {
 
     public SingleSurvivalResource Power = new SingleSurvivalResource();
 
-    internal SingleSurvivalResource RoverOxygen;
-    internal SingleSurvivalResource RoverPower;
+    internal SingleSurvivalResource RoverOxygen, HabitatOxygen;
+    internal SingleSurvivalResource RoverPower, HabitatPower;
 
     internal PackData Data { get; private set; }
     internal Temperature ExternalTemperature;
@@ -211,15 +211,14 @@ public class SurvivalTimer : MonoBehaviour {
         }
         else if (IsInHabitat && CurrentHabitat.HasPower)
         {
-
             if (CurrentHabitat.IsOxygenOn)
             {
-                //oxygen = CurrentHabitat.Data.Containers[Matter.Oxygen];                
+                nonSuitOxygenSuccess = HabitatOxygen.TryConsume();
             }
 
             if (CurrentHabitat.IsHeatOn)
             {
-                //power = CurrentHabitat.EnergyContainer;
+                nonSuitPowerSuccess = true; //HabitatPower.TryConsume(); //heater is just on, already factored in
             }
         }
         
@@ -284,8 +283,15 @@ public class SurvivalTimer : MonoBehaviour {
             Data.CurrentHabitatModuleInstanceID = hab.Data.ModuleInstanceID;
         }
 
+        this.OnEnterExitHabitat(true);
+    }
+
+    private void OnEnterExitHabitat(bool isInHabitat)
+    {
         PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
-        PlayerInput.Instance.SetPressure(true);
+        PlayerInput.Instance.SetPressure(IsInHabitat);
+        this.RefreshResources(false);
+        GuiBridge.Instance.RefreshSurvivalPanel(false, isInHabitat);
     }
 
     internal void FillWater()
@@ -301,8 +307,7 @@ public class SurvivalTimer : MonoBehaviour {
     internal void BeginEVA()
     {
         CurrentHabitat = null;
-        PlayerInput.Instance.Loadout.RefreshGadgetsBasedOnLocation();
-        PlayerInput.Instance.SetPressure(false);
+        this.OnEnterExitHabitat(false);
     }
 
     internal void ToggleRun(bool isRunning)
@@ -311,7 +316,7 @@ public class SurvivalTimer : MonoBehaviour {
         GuiBridge.Instance.RefreshSprintIcon(isRunning);
     }
 
-    internal void RefreshResources(bool isInVehicle, RoverInput roverInput)
+    internal void RefreshResources(bool isInVehicle, RoverInput roverInput = null)
     {
         RoverOxygen = isInVehicle ? new SingleSurvivalResource()
         {
@@ -324,6 +329,21 @@ public class SurvivalTimer : MonoBehaviour {
             Data = new PackResourceData(roverInput.Data.EnergyContainer, Power.Data.ConsumptionPerSecond),
             AudioClips = Power.AudioClips,
             UpdateUI = GuiBridge.Instance.RefreshRoverPowerBar
+        } : null;
+
+        bool isInHabitat = CurrentHabitat != null;
+
+        HabitatOxygen = isInHabitat ? new SingleSurvivalResource()
+        {
+            Data = new PackResourceData(CurrentHabitat.Data.Containers[Matter.Oxygen], Oxygen.Data.ConsumptionPerSecond),
+            AudioClips = Oxygen.AudioClips,
+            UpdateUI = GuiBridge.Instance.RefreshHabitatOxygenBar
+        } : null;
+        HabitatPower = isInHabitat ? new SingleSurvivalResource()
+        {
+            Data = new PackResourceData(CurrentHabitat.HabitatData.EnergyContainer, Power.Data.ConsumptionPerSecond),
+            AudioClips = Power.AudioClips,
+            UpdateUI = GuiBridge.Instance.RefreshHabitatPowerBar
         } : null;
     }
 }

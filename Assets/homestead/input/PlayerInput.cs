@@ -122,7 +122,7 @@ public class PlayerInput : MonoBehaviour {
         PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
         DrillSparks.transform.SetParent(null);
-        GuiBridge.Instance.RefreshSurvivalPanel(false);
+        GuiBridge.Instance.RefreshSurvivalPanel(false, false);
     }
 
     internal void PlanCraftable(Craftable whatToBuild)
@@ -1700,7 +1700,7 @@ public class PlayerInput : MonoBehaviour {
         }
 
         SurvivalTimer.Instance.RefreshResources(IsInVehicle, DrivingRoverInput);
-        GuiBridge.Instance.RefreshSurvivalPanel(IsInVehicle);
+        GuiBridge.Instance.RefreshSurvivalPanel(IsInVehicle, SurvivalTimer.Instance.IsInHabitat);
     }
 
     private void PlaceTube(Collider toBulkhead)

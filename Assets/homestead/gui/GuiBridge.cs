@@ -116,6 +116,8 @@ public struct SurvivalBarsUI
     public SurvivalBar Oxygen;
     public SurvivalBar RoverPower;
     public SurvivalBar RoverOxygen;
+    public SurvivalBar HabitatPower;
+    public SurvivalBar HabitatOxygen;
 }
 
 /// <summary>
@@ -166,6 +168,8 @@ public class GuiBridge : MonoBehaviour {
         SurvivalBars.Food.Initialize();
         SurvivalBars.RoverOxygen.Initialize();
         SurvivalBars.RoverPower.Initialize();
+        SurvivalBars.HabitatOxygen.Initialize();
+        SurvivalBars.HabitatPower.Initialize();
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
         ToggleAutosave(false);
@@ -474,6 +478,16 @@ public class GuiBridge : MonoBehaviour {
         this.SurvivalBars.RoverPower.Bar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.SurvivalBars.RoverPower.Hours, hoursLeftHint);
     }
+    internal void RefreshHabitatOxygenBar(float percentage, int hoursLeftHint)
+    {
+        this.SurvivalBars.HabitatOxygen.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.HabitatOxygen.Hours, hoursLeftHint);
+    }
+    internal void RefreshHabitatPowerBar(float percentage, int hoursLeftHint)
+    {
+        this.SurvivalBars.HabitatPower.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.HabitatPower.Hours, hoursLeftHint);
+    }
 
     internal void RefreshTemperatureGauges()
     {
@@ -589,9 +603,11 @@ public class GuiBridge : MonoBehaviour {
         }
     }
 
-    internal void RefreshSurvivalPanel(bool isInVehicle)
+    internal void RefreshSurvivalPanel(bool isInVehicle, bool isInHabitat)
     {
         this.SurvivalBars.RoverOxygen.Bar.transform.parent.gameObject.SetActive(isInVehicle);
         this.SurvivalBars.RoverPower.Bar.transform.parent.gameObject.SetActive(isInVehicle);
+        this.SurvivalBars.HabitatOxygen.Bar.transform.parent.gameObject.SetActive(isInHabitat);
+        this.SurvivalBars.HabitatPower.Bar.transform.parent.gameObject.SetActive(isInHabitat);
     }
 }
