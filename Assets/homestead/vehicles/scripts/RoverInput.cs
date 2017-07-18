@@ -21,6 +21,7 @@ namespace RedHomestead.Rovers
         internal bool AcceptInput;
         internal bool CanDrive { get { return !this.HasPowerGrid(); } }
         public bool CanMalfunction { get { return true; } }
+        public SpriteRenderer flowAmountRenderer;
 
         public FailureAnchors failureEffectAnchors;
         public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
@@ -80,6 +81,17 @@ namespace RedHomestead.Rovers
             HatchDegrees = GetRotationXFromHatchState();
             Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);
             ToggleLights(false);
+            updateOxygen = StartCoroutine(UpdateOxygenBar());
+        }
+
+        private IEnumerator UpdateOxygenBar()
+        {
+            while (isActiveAndEnabled)
+            {
+                yield return new WaitForSeconds(.5f);
+                
+                flowAmountRenderer.transform.localScale = new Vector3(1, this.Data.Oxygen.UtilizationPercentage, 1);
+            }
         }
 
         private float GetRotationXFromHatchState()
@@ -192,6 +204,8 @@ namespace RedHomestead.Rovers
         private IMovableSnappable[] attachedCrates = new IMovableSnappable[4];
 
         private Coroutine detachTimer;
+        private Coroutine updateOxygen;
+
         public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
         {
             if (detachTimer == null && res != null)
