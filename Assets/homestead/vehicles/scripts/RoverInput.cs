@@ -13,6 +13,7 @@ namespace RedHomestead.Rovers
     [RequireComponent(typeof(SixWheelCarController))]
     public class RoverInput : MonoBehaviour, IDataContainer<RoverData>, ICrateSnapper, ITriggerSubscriber, IBattery, ISink
     {
+        public const float RoverDrainWattsPerSecond = 100f;
         private SixWheelCarController m_Car; // the car controller we want to use
         private Rigidbody carRigid;
 
@@ -21,7 +22,7 @@ namespace RedHomestead.Rovers
         internal bool AcceptInput;
         internal bool CanDrive { get { return !this.HasPowerGrid(); } }
         public bool CanMalfunction { get { return true; } }
-        public SpriteRenderer flowAmountRenderer;
+        public SpriteRenderer flowAmountRenderer, dashboardPowerRenderer;
 
         public FailureAnchors failureEffectAnchors;
         public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
@@ -91,6 +92,10 @@ namespace RedHomestead.Rovers
                 yield return new WaitForSeconds(.5f);
                 
                 flowAmountRenderer.transform.localScale = new Vector3(1, this.Data.Oxygen.UtilizationPercentage, 1);
+                dashboardPowerRenderer.transform.localScale = new Vector3(1, this.Data.EnergyContainer.UtilizationPercentage * 0.7f, 1);
+
+                if (AcceptInput)
+                    this.RefreshVisualization();
             }
         }
 
@@ -151,7 +156,7 @@ namespace RedHomestead.Rovers
 
         private void FixedUpdate()
         {
-            if (AcceptInput)
+            if (AcceptInput && Data.EnergyContainer.CurrentAmount > 0f)
             {
                 // pass the input to the car!
                 float h = CrossPlatformInputManager.GetAxis("Horizontal");
@@ -159,6 +164,7 @@ namespace RedHomestead.Rovers
     #if !MOBILE_INPUT
                 float brake = CrossPlatformInputManager.GetAxis("Jump");
                 m_Car.Move(h, v, v, -brake);
+                Data.EnergyContainer.Pull(RoverDrainWattsPerSecond * Time.fixedDeltaTime * Mathf.Abs(v));
     #else
                 m_Car.Move(h, v, v, 0f);
     #endif

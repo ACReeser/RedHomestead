@@ -320,7 +320,7 @@ public class SurvivalTimer : MonoBehaviour {
     {
         RoverOxygen = isInVehicle ? new SingleSurvivalResource()
         {
-            Data = new PackResourceData(roverInput.Data.Oxygen, Oxygen.Data.ConsumptionPerSecond),
+            Data = new PackResourceData(roverInput.Data.Oxygen, Oxygen.Data.ConsumptionPerSecond / Matter.Oxygen.Kilograms()),
             AudioClips = Oxygen.AudioClips,
             UpdateUI = GuiBridge.Instance.RefreshRoverOxygenBar
         } : null;
@@ -335,7 +335,7 @@ public class SurvivalTimer : MonoBehaviour {
 
         HabitatOxygen = isInHabitat ? new SingleSurvivalResource()
         {
-            Data = new PackResourceData(CurrentHabitat.Data.Containers[Matter.Oxygen], Oxygen.Data.ConsumptionPerSecond),
+            Data = new PackResourceData(CurrentHabitat.Data.Containers[Matter.Oxygen], Oxygen.Data.ConsumptionPerSecond / Matter.Oxygen.Kilograms()),
             AudioClips = Oxygen.AudioClips,
             UpdateUI = GuiBridge.Instance.RefreshHabitatOxygenBar
         } : null;
