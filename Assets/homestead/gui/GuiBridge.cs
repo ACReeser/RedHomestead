@@ -7,6 +7,7 @@ using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Interiors;
 using RedHomestead.Persistence;
+using UnityEngine.PostProcessing;
 
 [Serializable]
 public struct ReportIORow
@@ -144,6 +145,7 @@ public class GuiBridge : MonoBehaviour {
     public PromptUI Prompts;
     public Icons Icons;
     public NewsUI News;
+    public PostProcessingProfile PostProfile;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -296,29 +298,20 @@ public class GuiBridge : MonoBehaviour {
         switch (CinematicMode)
         {
             case CinematicModes.None:
-                cinematicMotionBlur.enabled = false;
                 GUICanvas.enabled = true;
                 PlayerInput.Instance.FPSController.MouseLook.smooth = false;
                 break;
             case CinematicModes.WithGUI:
-                if (cinematicMotionBlur == null)
-                {
-                    cinematicMotionBlur = Camera.main.gameObject.AddComponent<UnityStandardAssets.ImageEffects.CameraMotionBlur>();
-                    cinematicMotionBlur.filterType = UnityStandardAssets.ImageEffects.CameraMotionBlur.MotionBlurFilter.Reconstruction;
-                    cinematicMotionBlur.velocityScale = 1f;
-                    cinematicMotionBlur.shader = this.blurShader;
-                    cinematicMotionBlur.noiseTexture = this.noiseTexture;
-                }
-                cinematicMotionBlur.enabled = true;
                 GUICanvas.enabled = true;
                 PlayerInput.Instance.FPSController.MouseLook.smooth = true;
                 break;
             case CinematicModes.NoGUI:
-                cinematicMotionBlur.enabled = true;
                 PlayerInput.Instance.FPSController.MouseLook.smooth = true;
                 GUICanvas.enabled = false;
                 break;
         }
+        PostProfile.motionBlur.enabled = CinematicMode != CinematicModes.None;
+        PlayerInput.Instance.FPSController.MouseLook.smooth = PostProfile.motionBlur.enabled;
     }
     #endregion
 
@@ -609,5 +602,10 @@ public class GuiBridge : MonoBehaviour {
         this.SurvivalBars.RoverPower.Bar.transform.parent.gameObject.SetActive(isInVehicle);
         this.SurvivalBars.HabitatOxygen.Bar.transform.parent.gameObject.SetActive(isInHabitat);
         this.SurvivalBars.HabitatPower.Bar.transform.parent.gameObject.SetActive(isInHabitat);
+    }
+
+    void OnDestroy()
+    {
+        PostProfile.motionBlur.enabled = false;
     }
 }
