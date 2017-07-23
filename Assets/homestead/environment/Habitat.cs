@@ -41,6 +41,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
     private const float MaximumPowerRequirements = ElectricityConstants.WattsPerBlock * 4f;
+    private const float OxygenLeakPerTickUnits = 1f / 500f;
 
     private float _CurrentPowerRequirements = MaximumPowerRequirements;
 
@@ -133,6 +134,14 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     public override void Convert()
     {
+        if (oxygenLeak)
+        {
+            Data.Containers[Matter.Oxygen].Pull(OxygenLeakPerTickUnits);
+
+            if (this.OnResourceChange != null)
+                this.OnResourceChange(Matter.Oxygen);
+        }
+
         FlowWithExternal(Matter.Water, WaterSinks, WaterPullPerTick);
         FlowWithExternal(Matter.Oxygen, OxygenSinks, OxygenPullPerTick);
     }
@@ -279,6 +288,13 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
     {
         if (EmergencyLight != null)
             EmergencyLight.SetActive(true);
+    }
+
+    private bool oxygenLeak;
+
+    internal void ToggleOxygenLeak(bool leak)
+    {
+        oxygenLeak = leak;
     }
 
     public override void OnPowerChanged()

@@ -158,7 +158,18 @@ public class PlayerInput : MonoBehaviour {
 #endif
 
 #if (DEVELOPMENT_BUILD || UNITY_EDITOR)
-        if (Input.GetKeyUp(KeyCode.End) && Input.GetKey(KeyCode.LeftShift)) DoNotDisturb = !DoNotDisturb;
+        if (Input.GetKeyUp(KeyCode.End) && Input.GetKey(KeyCode.LeftShift)) {
+            DoNotDisturb = !DoNotDisturb;
+            Debug.LogWarning("DoNotDisturb=" + DoNotDisturb);
+        }
+        if (Input.GetKeyUp(KeyCode.End) && Input.GetKey(KeyCode.RightControl))
+        {
+            Gremlin.Instance.TriggerFailure();
+        }
+        if (Input.GetKeyUp(KeyCode.Home) && Input.GetKey(KeyCode.RightControl))
+        {
+            Gremlin.Instance.TriggerRepair();
+        }
 #endif
 
         if (Input.GetKeyUp(KeyCode.F1))

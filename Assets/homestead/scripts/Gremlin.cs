@@ -99,17 +99,47 @@ public class Gremlin : MonoBehaviour {
         float extraBreathingRoom = Game.Current.Player.GremlinChastised ? ExtraLurkTimeAfterFixSeconds : 0f;
         lurkTime = UnityEngine.Random.Range(1f * 60f, 6f * 60f) + extraBreathingRoom;
 
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+        if (failMode) lurkTime = 0f;
+#endif
         print("Gremlin lurking for " + lurkTime + " seconds");
 
         yield return new WaitForSeconds(lurkTime);
     }
 
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+    internal void TriggerFailure()
+    {
+        Debug.LogWarning("Triggering the Gremlin");
+        StopCoroutine(GremlinCoroutine);
+        failMode = true;
+        GremlinCoroutine = StartCoroutine(Loop());
+    }
+    internal void TriggerRepair()
+    {
+        Debug.LogWarning("Triggering repair");
+        foreach(IRepairable key in gremlindMap.Keys)
+        {
+            FinishRepair(key);
+        }
+    }
+
+    private bool failMode = false;
+#endif
     private IEnumerator Plot()
     {
         if (registeredRepairables.Count > 0)
         {
             int roll = UnityEngine.Random.Range(1, 21);
-            int dc = GetDifficultyCheck(registeredRepairables);
+            int dc = GetDifficultyCheck(registeredRepairables)
+
+#if (DEVELOPMENT_BUILD || UNITY_EDITOR)
+                + (failMode ? 999: 0);
+
+            failMode = false;
+#else
+                ;
+#endif
 
 
 #if (DEVELOPMENT_BUILD || UNITY_EDITOR)
@@ -251,11 +281,12 @@ public class Gremlin : MonoBehaviour {
             announcementClip = this.PressureFailureComputerTalk;
             failClip = this.PressureFailureSound;
         }
-        else if (fail == FailureType.HabitatPressure)
+        else if (fail == FailureType.HabitatPressure && victim is IHabitatModule)
         {
             effect.SetParent(victim.FailureEffectAnchors.HabitatPressure);
             announcementClip = this.PressureFailureComputerTalk;
             failClip = this.PressureFailureSound;
+            (victim as IHabitatModule).LinkedHabitat.ToggleOxygenLeak(true);
         }
 
         effect.transform.localPosition = Vector3.zero;
@@ -326,6 +357,10 @@ public class Gremlin : MonoBehaviour {
         if (fixing.FailType == FailureType.Electrical)
         {
             FlowManager.Instance.PowerGrids.OnElectricalFailureChange(repaired);
+        }
+        else if (fixing.FailType == FailureType.HabitatPressure && repaired is IHabitatModule)
+        {
+            (repaired as IHabitatModule).LinkedHabitat.ToggleOxygenLeak(false);
         }
         Game.Current.Player.GremlinChastised = true;
         GuiBridge.Instance.ShowNews(NewsSource.MalfunctionRepaired);
