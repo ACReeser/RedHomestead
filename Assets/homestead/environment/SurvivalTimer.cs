@@ -56,6 +56,8 @@ public abstract class SurvivalResource
         if (newCritical && !this.IsCritical)
         {
             GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.AudioClips.CriticalClip);
+
+            SunOrbit.Instance.CheckEmergencyReset();
         }
         else if (newWarning && !this.IsWarning)
         {

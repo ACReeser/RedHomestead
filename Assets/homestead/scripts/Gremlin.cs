@@ -9,6 +9,7 @@ public struct FailureAnchors
 {
     public Transform Electrical;
     public Transform Pressure;
+    public Transform HabitatPressure;
 }
 
 public interface IRepairable
@@ -30,6 +31,22 @@ public static class RepairableExtensions
     {
         return rep.FailureEffectAnchors.Pressure != null;
     }
+
+    public static Gremlin.FailureType[] GetFailureModes(this IRepairable rep)
+    {
+        List<Gremlin.FailureType> modes = new List<Gremlin.FailureType>();
+
+        if (rep.FailureEffectAnchors.Electrical != null)
+            modes.Add(Gremlin.FailureType.Electrical);
+
+        if (rep.FailureEffectAnchors.Pressure != null)
+            modes.Add(Gremlin.FailureType.Pressure);
+
+        if (rep.FailureEffectAnchors.HabitatPressure != null)
+            modes.Add(Gremlin.FailureType.HabitatPressure);
+
+        return modes.ToArray();
+    }
 }
 
 public class Gremlin : MonoBehaviour {
@@ -45,8 +62,15 @@ public class Gremlin : MonoBehaviour {
     private const int GremlinMissesThreshold = 4;
     public const string GremlindTag = "gremlind";
     private const float RepairPercentagePerSecond = .1f;
-    public Transform ElectricalFailureSparksPrefab, OutgassingFailurePrefab;
+#if UNITY_EDITOR
+    private const float ExtraLurkTimeAfterFixSeconds = 5f;
+#else
+    private const float ExtraLurkTimeAfterFixSeconds = 30f;
+#endif
+    public Transform ElectricalFailureSparksPrefab, OutgassingFailurePrefab, HabitatPressureFailurePrefab;
     public AudioClip ElectricalFailureComputerTalk, PressureFailureComputerTalk;
+    public AudioClip ElectricalFailureSound, PressureFailureSound;
+    public AudioSource GremlinAudio;
     internal static Gremlin Instance { get; private set; }
 
     void Awake()
@@ -56,54 +80,52 @@ public class Gremlin : MonoBehaviour {
     
 	void Start()
     {
-        BeginLurk();
+        GremlinCoroutine = StartCoroutine(Loop());
     }
 
-    private void BeginLurk()
+    private IEnumerator Loop()
     {
-        LurkCoroutine = StartCoroutine(Lurk());
+        while (isActiveAndEnabled)
+        {
+            yield return Lurk();
+
+            yield return Plot();
+        }
     }
 
     private float lurkTime;
     private IEnumerator Lurk()
     {
-        float extraBreathingRoom = Game.Current.Player.GremlinChastised ? 5f : 0f;
+        float extraBreathingRoom = Game.Current.Player.GremlinChastised ? ExtraLurkTimeAfterFixSeconds : 0f;
         lurkTime = UnityEngine.Random.Range(1f * 60f, 6f * 60f) + extraBreathingRoom;
 
         print("Gremlin lurking for " + lurkTime + " seconds");
 
         yield return new WaitForSeconds(lurkTime);
-
-        Plot();
     }
 
-    private void Plot()
+    private IEnumerator Plot()
     {
         if (registeredRepairables.Count > 0)
         {
             int roll = UnityEngine.Random.Range(1, 21);
             int dc = GetDifficultyCheck(registeredRepairables);
 
-            print("Player rolled a " + roll + " vs a Gremlin DC of " + dc);
 
 #if (DEVELOPMENT_BUILD || UNITY_EDITOR)
             if (PlayerInput.DoNotDisturb) roll += 9999999;
 #endif
 
+            print("Player rolled a " + roll + " vs a Gremlin DC of " + dc);
             if (roll > dc)
             {
                 Game.Current.Player.GremlinMissStreak++;
-                BeginLurk();
             }
             else
             {
-                CauseRandomFailure();
-                StartCoroutine(WaitForRepair());
+                yield return CauseRandomFailure();
+                yield return WaitForRepair();
             }
-        }
-        else
-        {
-            BeginLurk();
         }
     }
     
@@ -167,11 +189,9 @@ public class Gremlin : MonoBehaviour {
             if (PlayerInput.DoNotDisturb) hasGremlinedRepairable = false;
 #endif
         }
-
-        BeginLurk();
     }
 
-    private void CauseRandomFailure()
+    private IEnumerator CauseRandomFailure()
     {
         int tries = 0;
         IRepairable victim = null;
@@ -190,19 +210,19 @@ public class Gremlin : MonoBehaviour {
         if (victim == null)
         {
             //give up
-            BeginLurk();
         }
         else
         {
-            FailureType fail = GetFailType(victim);
+            FailureType fail = GetRandomFailType(victim);
 
-            CauseFailure(victim, fail);
+            yield return CauseFailure(victim, fail);
         }
     }
 
-    private void CauseFailure(IRepairable victim, FailureType fail)
+    private IEnumerator CauseFailure(IRepairable victim, FailureType fail)
     {
         Transform effect = GetFailureParticleSystemFromPool(fail);
+        AudioClip failClip = null, announcementClip = null;
 
         gremlindMap.Add(victim, new Gremlind()
         {
@@ -222,49 +242,58 @@ public class Gremlin : MonoBehaviour {
             effect.SetParent(victim.FailureEffectAnchors.Electrical);
             //alert the powergrid script
             FlowManager.Instance.PowerGrids.HandleElectricalFailure(victim);
-            GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.ElectricalFailureComputerTalk);
+            announcementClip = this.ElectricalFailureComputerTalk;
+            failClip = this.ElectricalFailureSound;
         }
         else if (fail == FailureType.Pressure)
         {
             effect.SetParent(victim.FailureEffectAnchors.Pressure);
-            GuiBridge.Instance.ComputerAudioSource.PlayOneShot(this.PressureFailureComputerTalk);
+            announcementClip = this.PressureFailureComputerTalk;
+            failClip = this.PressureFailureSound;
+        }
+        else if (fail == FailureType.HabitatPressure)
+        {
+            effect.SetParent(victim.FailureEffectAnchors.HabitatPressure);
+            announcementClip = this.PressureFailureComputerTalk;
+            failClip = this.PressureFailureSound;
         }
 
         effect.transform.localPosition = Vector3.zero;
         effect.transform.localRotation = Quaternion.identity;
 
-        //alert the other scripts
+        GremlinAudio.transform.position = effect.transform.position;
+
         SunOrbit.Instance.CheckEmergencyReset();
+        GremlinAudio.PlayOneShot(failClip);
+
+        yield return new WaitForSeconds(failClip.length);
+
+        SunOrbit.Instance.CheckEmergencyReset();
+        GuiBridge.Instance.ComputerAudioSource.PlayOneShot(announcementClip);
         GuiBridge.Instance.ShowNews(NewsSource.GetFailureNews(victim, fail));
         PlayerInput.Instance.ToggleRepairMode(true);
     }
 
-    private FailureType GetFailType(IRepairable victim)
+    private FailureType GetRandomFailType(IRepairable victim)
     {
-        bool canElectricFailure = victim.CanHaveElectricalFailure();
-        bool canPressureFailure = victim.CanHavePressureFailure();
+        FailureType[] failureModes = victim.GetFailureModes();
 
-        if (canElectricFailure && canPressureFailure)
-            return UnityEngine.Random.Range(0, 2) == 0 ? FailureType.Electrical : FailureType.Pressure;
-        else if (canElectricFailure)
-            return FailureType.Electrical;
-        else //if (canPressureFailure)
-            return FailureType.Pressure;
+        return failureModes[UnityEngine.Random.Range(0, failureModes.Length)];
     }
 
     private List<IRepairable> registeredRepairables = new List<IRepairable>();
     internal void Register(IRepairable repairable)
     {
-        if (repairable.CanHaveElectricalFailure() || repairable.CanHavePressureFailure())
+        if (repairable.GetFailureModes().Length > 0)
         {
             registeredRepairables.Add(repairable);
 
             //should only happen after loading a game
             if (repairable.FaultedPercentage > 0f)
             {
-                StopCoroutine(LurkCoroutine);
+                StopCoroutine(GremlinCoroutine);
 #warning bug: may lose the right kind of failure here if supports both electrical and pressure
-                CauseFailure(repairable, GetFailType(repairable));
+                CauseFailure(repairable, GetRandomFailType(repairable));
             }
         }
     }
@@ -303,13 +332,14 @@ public class Gremlin : MonoBehaviour {
         PlayerInput.Instance.ToggleRepairMode(false);
     }
 
-    public enum FailureType { Electrical, Pressure }
+    public enum FailureType { Electrical, Pressure, HabitatPressure }
     private Dictionary<FailureType, List<Transform>> particleSystemPool = new Dictionary<FailureType, List<Transform>>()
     {
         { FailureType.Electrical, new List<Transform>() },
-        { FailureType.Pressure, new List<Transform>() }
+        { FailureType.Pressure, new List<Transform>() },
+        { FailureType.HabitatPressure, new List<Transform>() }
     };
-    private Coroutine LurkCoroutine;
+    private Coroutine GremlinCoroutine;
 
     private Transform GetParticleSystemPrefab(FailureType failType)
     {
@@ -317,6 +347,8 @@ public class Gremlin : MonoBehaviour {
         {
             case FailureType.Pressure:
                 return OutgassingFailurePrefab;
+            case FailureType.HabitatPressure:
+                return HabitatPressureFailurePrefab;
             default:
                 return ElectricalFailureSparksPrefab;
         }
