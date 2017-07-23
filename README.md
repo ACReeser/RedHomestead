@@ -15,6 +15,7 @@ Standard Assets are not included in this repository, and will need to be importe
  1. Characters
  2. ParticleSystems
  3. Vehicles
+ 4. Post Processing Stack
  
 Standard Assets are installed from Assets > Import Package
 
@@ -24,6 +25,7 @@ The following assets will need to be added from the Asset store, since they are 
 
  1. [Scifi Crate](https://www.assetstore.unity3d.com/en/#!/content/21965)
  2. [Yughues Free Stylized Foliages](https://www.assetstore.unity3d.com/en/#!/content/13392)
+ 3. Post Processing Stack
  
 ## Blender
 
