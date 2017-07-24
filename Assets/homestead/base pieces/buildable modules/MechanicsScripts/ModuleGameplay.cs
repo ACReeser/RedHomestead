@@ -167,6 +167,16 @@ public abstract class ResourcelessHabitatGameplay: ResourcelessGameplay, IHabita
     public List<IHabitatModule> AdjacentModules { get; set; }
     [HideInInspector]
     public Habitat LinkedHabitat { get; set; }
+    public override bool CanMalfunction
+    {
+        get
+        {
+            if (LinkedHabitat == null)
+                return false;
+
+            return base.CanMalfunction;
+        }
+    }
 }
 
 public abstract class MultipleResourceModuleGameplay: ModuleGameplay, IDataContainer<MultipleResourceModuleData>
@@ -230,6 +240,12 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
     public override bool HasContainerFor(Matter c)
     {
         return (Data.Container.MatterType == c);
+    }
+
+    protected override void OnStart()
+    {
+        base.OnStart();
+        FlowManager.Instance.Sinks.Add(this);
     }
 
     public override void InitializeStartingData()

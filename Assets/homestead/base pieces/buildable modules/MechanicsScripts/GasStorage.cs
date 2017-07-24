@@ -11,6 +11,19 @@ public class GasStorage : SingleResourceModuleGameplay {
     public Mesh UnspecifiedUV;
     public Color[] CompoundColors = new Color[6];
 
+    public override bool CanMalfunction
+    {
+        get
+        {
+            if (Data.Container.CurrentAmount <= 0f)
+                return false;
+
+            return base.CanMalfunction;
+        }
+    }
+    private bool isLeaking = false;
+    private const float LeakPerTickUnits = 1 / 180f; //1 per 2 minutes
+
     public override float WattsConsumed
     {
         get
@@ -78,6 +91,11 @@ public class GasStorage : SingleResourceModuleGameplay {
         flowAmountRenderer.transform.localScale = new Vector3(1, percentage, 1);
     }
 
+    public void ToggleLeak(bool leaking)
+    {
+        this.isLeaking = leaking;
+    }
+
     public void SpecifyCompound(Matter c)
     {
         if (this.ResourceType == Matter.Unspecified)
@@ -107,6 +125,10 @@ public class GasStorage : SingleResourceModuleGameplay {
     
     public override void Tick()
     {
+        if (isLeaking)
+        {
+            this.Data.Container.Pull(LeakPerTickUnits);
+        }
     }
 
     public override Module GetModuleType()

@@ -275,11 +275,12 @@ public class Gremlin : MonoBehaviour {
             announcementClip = this.ElectricalFailureComputerTalk;
             failClip = this.ElectricalFailureSound;
         }
-        else if (fail == FailureType.Pressure)
+        else if (fail == FailureType.Pressure && victim is GasStorage)
         {
             effect.SetParent(victim.FailureEffectAnchors.Pressure);
             announcementClip = this.PressureFailureComputerTalk;
             failClip = this.PressureFailureSound;
+            (victim as GasStorage).ToggleLeak(true);
         }
         else if (fail == FailureType.HabitatPressure && victim is IHabitatModule)
         {
@@ -357,6 +358,10 @@ public class Gremlin : MonoBehaviour {
         if (fixing.FailType == FailureType.Electrical)
         {
             FlowManager.Instance.PowerGrids.OnElectricalFailureChange(repaired);
+        }
+        else if (fixing.FailType == FailureType.Pressure && repaired is GasStorage)
+        {
+            (repaired as GasStorage).ToggleLeak(false);
         }
         else if (fixing.FailType == FailureType.HabitatPressure && repaired is IHabitatModule)
         {
