@@ -7,6 +7,8 @@ using System;
 public class FABRIK : MonoBehaviour
 {
     public string JointTagName = "joint";
+    public bool Constrain;
+    public float ConstrainAngle = 70f;
     private GameObject rootObject;
     private FABRIKChain rootChain;
 
@@ -14,6 +16,7 @@ public class FABRIK : MonoBehaviour
     private List<FABRIKChain> endChains = new List<FABRIKChain>();
 
     public Transform initialTarget;
+    public Transform[] initialTargets;
 
     public void Awake()
     {
@@ -30,7 +33,8 @@ public class FABRIK : MonoBehaviour
         // Inversely sort by layer, greater-first
         chains.Sort(delegate (FABRIKChain x, FABRIKChain y) { return y.layer.CompareTo(x.layer); });
 
-        endChains[0].Target = initialTarget.position;
+        if (initialTarget != null)
+            endChains[0].Target = initialTarget.position;
     }
 
     public void OnDestroy()
@@ -111,7 +115,7 @@ public class FABRIK : MonoBehaviour
             }
         }
 
-        FABRIKChain chain = new FABRIKChain(layer, parent, effectors.ToArray());
+        FABRIKChain chain = new FABRIKChain(layer, parent, Constrain, ConstrainAngle, effectors.ToArray());
 
         chains.Add(chain);
 
@@ -162,9 +166,13 @@ public class FABRIKChain
 
     public Vector3 targetPosition;
 
-    public FABRIKChain(int layer, FABRIKChain parent, params FABRIKEffector[] effectors)
+    internal readonly bool Constrain;
+    internal readonly float ConstrainAngle;
+    public FABRIKChain(int layer, FABRIKChain parent, bool constrain, float constrainAngle, params FABRIKEffector[] effectors)
     {
         this.layer = layer;
+        this.Constrain = constrain;
+        this.ConstrainAngle = constrainAngle;
 
         this.endEffector = effectors.Length - 1;
 
@@ -212,14 +220,17 @@ public class FABRIKChain
         {
             effectors[i].direction = Vector3.Normalize(effectors[i + 1].position - effectors[i].position);
 
-            /*if(i > 0)
-			{
-				effectors[i].ApplyConstraint(effectors[i - 1].direction, 70.0F);
-			}
-			else if(parent != null)
-			{
-				effectors[i].ApplyConstraint(parent.EndEffector.direction, 70.0F);
-			}*/
+            if (Constrain)
+            {
+                if(i > 0)
+			    {
+				    effectors[i].ApplyConstraint(effectors[i - 1].direction, ConstrainAngle);
+			    }
+			    else if(parent != null)
+			    {
+				    effectors[i].ApplyConstraint(parent.EndEffector.direction, ConstrainAngle);
+			    }
+            }
 
             effectors[i + 1].position = effectors[i].position + effectors[i].direction * effectors[i + 1].distance;
         }
