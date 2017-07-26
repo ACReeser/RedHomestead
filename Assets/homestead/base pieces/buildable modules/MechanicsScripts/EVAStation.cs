@@ -12,7 +12,6 @@ public class EVAStation : Converter, IPowerConsumer
 {
     private ISink OxygenIn;
     public SpriteRenderer Lung, LungOnOff, Power, PowerOnOff;
-    public Color OnColor, OffColor;
     public Sprite OnSprite, OffSprite;
     public GameObject TaggedCollider;
 
@@ -35,8 +34,8 @@ public class EVAStation : Converter, IPowerConsumer
     {
         TaggedCollider.tag = (HasOxygen || HasPower) ? "evacharger" : "Untagged";
 
-        Lung.color = LungOnOff.color = HasOxygen ? OnColor : OffColor;
-        Power.color = PowerOnOff.color = HasPower ? OnColor : OffColor;
+        Lung.color = LungOnOff.color = HasOxygen ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
+        Power.color = PowerOnOff.color = HasPower ? ToggleTerminalStateData.Defaults.On : ToggleTerminalStateData.Defaults.Off;
 
         LungOnOff.sprite = HasOxygen ? OnSprite : OffSprite;
         PowerOnOff.sprite = HasPower ? OnSprite : OffSprite;

@@ -28,7 +28,8 @@ namespace RedHomestead.Buildings
         HallwayNode,
         Flywheel,
         Airlock,
-        EVAStation
+        EVAStation,
+        RoverStation
     }
 
     /// <summary>
