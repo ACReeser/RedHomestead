@@ -61,7 +61,15 @@ public struct ReportFields
     public Sprite Connected, Disconnected;
 }
 
-public enum MiscIcon { Information, Rocket, Pipe, Plug, Harvest, Molecule }
+public enum MiscIcon {
+    Information,
+    Rocket,
+    Pipe,
+    Plug,
+    Harvest,
+    Molecule,
+    Umbilical
+}
 
 [Serializable]
 public struct Icons
@@ -399,6 +407,10 @@ public class GuiBridge : MonoBehaviour {
             case PlayerInput.InputMode.Powerline:
                 this.EquippedText.text = "Powerline";
                 this.EquippedImage.sprite = Icons.MiscIcons[(int)MiscIcon.Plug];
+                break;
+            case PlayerInput.InputMode.Umbilical:
+                this.EquippedText.text = "Umbilical";
+                this.EquippedImage.sprite = Icons.MiscIcons[(int)MiscIcon.Umbilical];
                 break;
         }
 

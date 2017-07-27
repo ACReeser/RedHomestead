@@ -170,6 +170,27 @@ public static class Prompts {
         DurationMilliseconds = 1500,
         Icon = MiscIcon.Plug
     };
+    public static PromptInfo StartUmbilicalHint = new PromptInfo()
+    {
+        Description = "Connect Umbilical",
+        Key = "E"
+    };
+    public static PromptInfo EndUmbilicalHint = new PromptInfo()
+    {
+        Description = "Connect umbilical here",
+        Key = "E"
+    };
+    public static News UmbilicalCompleted = new News()
+    {
+        Text = "Umbilical connected",
+        DurationMilliseconds = 1500,
+        Icon = MiscIcon.Umbilical
+    };
+    internal static PromptInfo StopUmbilicalHint = new PromptInfo()
+    {
+        Description = "Stop running umbilical",
+        Key = "Esc"
+    };
     public static PromptInfo DriveRoverPrompt = new PromptInfo()
     {
         Description = "Drive Rover",
@@ -276,6 +297,12 @@ public static class Prompts {
         HoverWhenNoneSelected = StartPowerPlugHint,
         HoverWhenOneSelected = EndPowerPlugHint,
         WhenCompleted = PowerPlugCompleted
+    };
+    internal static LinkablePrompts UmbilicalPrompts = new LinkablePrompts()
+    {
+        HoverWhenNoneSelected = StartUmbilicalHint,
+        HoverWhenOneSelected = EndUmbilicalHint,
+        WhenCompleted = UmbilicalCompleted
     };
 
     internal static PromptInfo LadderOnHint = new PromptInfo()

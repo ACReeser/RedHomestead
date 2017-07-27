@@ -27,7 +27,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Crafting }
+    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Umbilical, Crafting }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -235,6 +235,9 @@ public class PlayerInput : MonoBehaviour {
             case InputMode.Powerline:
                 HandlePowerlineInput(ref newPrompt, doInteract);
                 break;
+            case InputMode.Umbilical:
+                HandleUmbilicalInput(ref newPrompt, doInteract);
+                break;
             case InputMode.Menu:
                 if (Input.GetKeyUp(KeyCode.Escape))
                     ToggleMenu();
@@ -259,6 +262,40 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleUmbilicalInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            selectedUmbilical = null;
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
+        }
+
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Collide, layerNames: "interaction"))
+        {
+            if (hitInfo.collider != null)
+            {
+                if (hitInfo.collider.gameObject.CompareTag("umbilicalPlug"))
+                {
+                    newPrompt = OnUmbilical(newPrompt, doInteract, hitInfo);
+                }
+                else
+                {
+                    newPrompt = Prompts.StopUmbilicalHint;
+                }
+            }
+            else
+            {
+                newPrompt = Prompts.StopUmbilicalHint;
+            }
+        }
+        else
+        {
+            newPrompt = Prompts.StopUmbilicalHint;
+        }
+    }
 
     private void HandleCraftingInput(ref PromptInfo newPrompt, bool doInteract)
     {
@@ -714,6 +751,10 @@ public class PlayerInput : MonoBehaviour {
                 {
                     newPrompt = OnGasValve(newPrompt, doInteract, hitInfo);
                 }
+                else if (hitInfo.collider.gameObject.CompareTag("umbilicalPlug"))
+                {
+                    newPrompt = OnUmbilical(newPrompt, doInteract, hitInfo);
+                }
                 else if (hitInfo.collider.gameObject.CompareTag("pipe"))
                 {
                     newPrompt = OnExistingPipe(doInteract, hitInfo);
@@ -721,6 +762,10 @@ public class PlayerInput : MonoBehaviour {
                 else if (hitInfo.collider.gameObject.CompareTag("powerline"))
                 {
                     newPrompt = OnExistingPowerline(doInteract, hitInfo);
+                }
+                else if (hitInfo.collider.gameObject.CompareTag("umbilical"))
+                {
+                    newPrompt = OnExistingUmbilical(doInteract, hitInfo);
                 }
                 else if (IsOnFoot && hitInfo.collider.gameObject.CompareTag("rover"))
                 {
@@ -1238,7 +1283,57 @@ public class PlayerInput : MonoBehaviour {
             PlacePostIt();
         }
     }
-    
+
+    private Collider selectedUmbilical;
+    private PromptInfo OnUmbilical(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
+    {
+        return OnLinkable(doInteract, hitInfo, selectedUmbilical, value => {
+            selectedUmbilical = value;
+
+            if (value != null)
+            {
+                RoverInput.TogglePowerToUmbilical(true);
+                CurrentMode = InputMode.Umbilical;
+                GuiBridge.Instance.RefreshMode();
+            }
+        }, PlaceUmbilical, Prompts.UmbilicalPrompts);
+    }
+
+    private void PlaceUmbilical(Collider obj)
+    {
+        selectedUmbilical = null;
+        RoverInput.TogglePowerToUmbilical(false);
+        CurrentMode = InputMode.Normal;
+        GuiBridge.Instance.RefreshMode();
+    }
+
+    private PromptInfo OnExistingUmbilical(bool doInteract, RaycastHit hitInfo)
+    {
+        if (doInteract)
+        {
+            //pipe script is on parent object
+            //RoverStation pipeScript = hitInfo.collider.transform.parent.GetComponent<RoverStation>();
+            //ModuleGameplay from = pipeScript.Data.From;
+            //ModuleGameplay to = pipeScript.Data.To;
+
+            //if (from == null || to == null)
+            //{
+            //    UnityEngine.Debug.LogWarning("Pipe not connected to two modules!");
+            //}
+            //else
+            //{
+            //    IndustryExtensions.RemoveAdjacentPumpable(from, to);
+            //}
+            ////pipe root is on parent object
+            //GameObject.Destroy(hitInfo.collider.transform.parent.gameObject);
+            return null;
+        }
+        else
+        {
+            return Prompts.ExistingPipeRemovalHint;
+        }
+    }
+
     internal void ToggleRepairMode(bool isRepairMode)
     {
         Loadout.ToggleRepairWrench(isRepairMode);

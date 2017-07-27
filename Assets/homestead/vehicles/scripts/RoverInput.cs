@@ -28,6 +28,8 @@ namespace RedHomestead.Rovers
         public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
         public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
+        public Transform[] umbilicalEnds = new Transform[2];
+
         #region power
         public EnergyContainer EnergyContainer { get { return data.EnergyContainer; } }
         public PowerVisualization powerViz;
@@ -60,6 +62,7 @@ namespace RedHomestead.Rovers
             // get the car controller
             m_Car = GetComponent<SixWheelCarController>();
             carRigid = GetComponent<Rigidbody>();
+            rovers.Add(this);
         }
 
         void Start()
@@ -83,6 +86,11 @@ namespace RedHomestead.Rovers
             Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);
             ToggleLights(false);
             updateOxygen = StartCoroutine(UpdateOxygenBar());
+        }
+
+        void OnDestroy()
+        {
+            rovers.Remove(this);
         }
 
         private IEnumerator UpdateOxygenBar()
@@ -261,6 +269,18 @@ namespace RedHomestead.Rovers
         public void OnAdjacentChanged()
         {
             
+        }
+
+        internal static List<RoverInput> rovers = new List<RoverInput>();
+        internal static void TogglePowerToUmbilical(bool umbilicalMode)
+        {
+            foreach(RoverInput rover in rovers)
+            {
+                foreach(Transform end in rover.umbilicalEnds)
+                {
+                    end.tag = umbilicalMode ? "umbilicalPlug" : "powerplug";
+                }
+            }
         }
     }
 }
