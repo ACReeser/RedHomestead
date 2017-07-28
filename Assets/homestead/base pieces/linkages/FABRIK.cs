@@ -28,6 +28,10 @@ public class FABRIK : MonoBehaviour
 
         transform.parent = rootObject.transform;
 
+    }
+
+    public void Start()
+    {
         rootChain = CreateSystem(rootObject.transform);
 
         // Inversely sort by layer, greater-first

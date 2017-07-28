@@ -38,7 +38,7 @@ public class FABRIKEffector : MonoBehaviour
     private Vector3 ConstrainRotation(Vector3 from, Vector3 to, float angle)
     {
         float theta = Mathf.Abs(angle / Vector3.Angle(from, to));
-
+        
         if (theta < 1.0F)
         {
             return Vector3.Slerp(from, to, theta);

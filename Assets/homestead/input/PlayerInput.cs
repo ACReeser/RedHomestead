@@ -42,7 +42,7 @@ public class PlayerInput : MonoBehaviour {
     /// <summary>
     /// Tube prefab to be created when linking bulkheads
     /// </summary>
-    public Transform tubePrefab, gasPipePrefab, powerlinePrefab;
+    public Transform tubePrefab, gasPipePrefab, powerlinePrefab, umbilicalPrefab;
     /// <summary>
     /// the FPS input script (usually on the parent transform)
     /// </summary>
@@ -78,6 +78,7 @@ public class PlayerInput : MonoBehaviour {
     private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
     private List<Transform> createdPipes = new List<Transform>();
+    private List<Transform> createdUmbilicals = new List<Transform>();
     private List<Transform> createdPowerlines = new List<Transform>();
     internal bool IsOnFoot { get; private set; }
     internal bool IsInSuit { get; private set; }
@@ -1299,8 +1300,18 @@ public class PlayerInput : MonoBehaviour {
         }, PlaceUmbilical, Prompts.UmbilicalPrompts);
     }
 
-    private void PlaceUmbilical(Collider obj)
+    private void PlaceUmbilical(Collider secondUmbilical)
     {
+        var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals);
+
+        IPowerable g1 = selectedUmbilical.transform.root.GetComponent<IPowerable>(), 
+                   g2 = secondUmbilical.transform.root.GetComponent<IPowerable>();
+
+        if (g1 != null && g2 != null && g1 != g2)
+        {
+            umbilical.GetComponent<Umbilical>().AssignConnections(g1, g2, selectedUmbilical.transform, secondUmbilical.transform);
+        }
+
         selectedUmbilical = null;
         RoverInput.TogglePowerToUmbilical(false);
         CurrentMode = InputMode.Normal;
