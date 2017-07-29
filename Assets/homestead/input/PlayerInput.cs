@@ -1302,13 +1302,12 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceUmbilical(Collider secondUmbilical)
     {
-        var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals);
-
         IPowerable g1 = selectedUmbilical.transform.root.GetComponent<IPowerable>(), 
                    g2 = secondUmbilical.transform.root.GetComponent<IPowerable>();
 
         if (g1 != null && g2 != null && g1 != g2)
         {
+            var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals);
             umbilical.GetComponent<Umbilical>().AssignConnections(g1, g2, selectedUmbilical.transform, secondUmbilical.transform);
         }
 
@@ -1322,26 +1321,13 @@ public class PlayerInput : MonoBehaviour {
     {
         if (doInteract)
         {
-            //pipe script is on parent object
-            //RoverStation pipeScript = hitInfo.collider.transform.parent.GetComponent<RoverStation>();
-            //ModuleGameplay from = pipeScript.Data.From;
-            //ModuleGameplay to = pipeScript.Data.To;
-
-            //if (from == null || to == null)
-            //{
-            //    UnityEngine.Debug.LogWarning("Pipe not connected to two modules!");
-            //}
-            //else
-            //{
-            //    IndustryExtensions.RemoveAdjacentPumpable(from, to);
-            //}
-            ////pipe root is on parent object
-            //GameObject.Destroy(hitInfo.collider.transform.parent.gameObject);
+            Umbilical umbilicalScript = hitInfo.collider.transform.root.GetComponent<Umbilical>();
+            umbilicalScript.Remove();
             return null;
         }
         else
         {
-            return Prompts.ExistingPipeRemovalHint;
+            return Prompts.ExistingUmbilicalRemovalHint;
         }
     }
 
@@ -1545,7 +1531,7 @@ public class PlayerInput : MonoBehaviour {
                 CurrentMode = InputMode.Powerline;
                 GuiBridge.Instance.RefreshMode();
             }
-        }, PlacePowerPlug, Prompts.PowerPlugPrompts);
+        }, PlacePowerline, Prompts.PowerPlugPrompts);
     }
 
     private PromptInfo OnBulkhead(PromptInfo newPrompt, bool doInteract, RaycastHit hitInfo)
@@ -1870,7 +1856,7 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
-    private void PlacePowerPlug(Collider collider)
+    private void PlacePowerline(Collider collider)
     {
         Transform power = PlaceRuntimeLinkingObject(selectedPowerSocket, collider, powerlinePrefab, createdPowerlines);
         

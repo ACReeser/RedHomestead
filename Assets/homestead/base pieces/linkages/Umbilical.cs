@@ -25,10 +25,22 @@ public class Umbilical : Powerline
         lastLink = null;
 
     private FABRIK solver = null;
+    private RoverStation station = null;
     private int numLinks;
 
     protected override void ShowVisuals(IPowerable g1, IPowerable g2, Transform transform1, Transform transform2)
     {
+        if (g1 is RoverStation && g2 is RoverInput)
+        {
+            station = g1 as RoverStation;
+            station.OnRoverAttachedChange(g2 as RoverInput);
+        }
+        else if (g2 is RoverStation && g1 is RoverInput)
+        {
+            station = g2 as RoverStation;
+            station.OnRoverAttachedChange(g1 as RoverInput);
+        }
+
         Data.IsUmbilical = true;
 
         if (g1 is RoverInput)
@@ -77,6 +89,7 @@ public class Umbilical : Powerline
 
     protected override void HideVisuals()
     {
+        station.OnRoverAttachedChange(null);
     }
 
     private Transform CreateCap(Transform transform1)

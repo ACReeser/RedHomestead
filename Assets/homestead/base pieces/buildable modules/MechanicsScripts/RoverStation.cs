@@ -56,20 +56,25 @@ public class RoverStation : Converter, IPowerConsumer
     public override void ClearHooks()
     {
         OxygenIn = null;
+        WaterIn = null;
         this.SyncStatusSprites();
     }
+    
+    private const float WaterPerTickUnits = .002f;
+    private const float OxygenPerTickUnits = .002f;
 
-    float oxygenBuffer;
     public override void Convert()
     {
-        if (IsOn)
+        if (HasRover)
         {
-            if (HasPower)
+            if (HasWater)
             {
+                AttachedRover.Data.Oxygen.Push(WaterIn.Get(Matter.Water).Pull(WaterPerTickUnits));
             }
 
             if (HasOxygen)
             {
+                AttachedRover.Data.Oxygen.Push(OxygenIn.Get(Matter.Oxygen).Pull(OxygenPerTickUnits));
             }
         }
     }
@@ -112,6 +117,12 @@ public class RoverStation : Converter, IPowerConsumer
 
     public override void OnPowerChanged()
     {
+        this.SyncStatusSprites();
+    }
+
+    internal void OnRoverAttachedChange(RoverInput rover)
+    {
+        this.AttachedRover = rover;
         this.SyncStatusSprites();
     }
 }

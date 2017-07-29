@@ -340,6 +340,11 @@ public static class Prompts {
         Description = "Remove Powerline",
         Key = "E"
     };
+    internal static PromptInfo ExistingUmbilicalRemovalHint = new PromptInfo()
+    {
+        Description = "Remove Umbilical",
+        Key = "E"
+    };
     internal static PromptInfo PayloadDisassembleHint = new PromptInfo()
     {
         Description = "Disassemble Lander",
