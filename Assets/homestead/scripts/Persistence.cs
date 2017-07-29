@@ -124,6 +124,7 @@ namespace RedHomestead.Persistence
         [NonSerialized]
         public IPowerable From, To;
         public string FromPowerableInstanceID, ToPowerableInstanceID;
+        public bool IsUmbilical = false;
 
         protected override void BeforeMarshal(Transform t = null)
         {

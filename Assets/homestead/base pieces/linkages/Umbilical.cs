@@ -4,28 +4,19 @@ using System.Collections.Generic;
 using RedHomestead.Electricity;
 using UnityEngine;
 using RedHomestead.Rovers;
+using RedHomestead.Persistence;
 
-public class Umbilical : MonoBehaviour {
+public class Umbilical : Powerline
+{
     private const float CapZOffset = 0.66f;
     private const int LinkNumberAdjustment = 0;
     private const int FABRIKAngleConstraint = 5;
     private const float FABRIKSolveTimeSeconds = 2f;
-
+    
     public Transform UmbilicalLinkPrefab, UmbilicalCapPrefab;
     public float linkSeparation = .2f;
 
     internal Transform fromThing, toThing;
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
 
     private Transform 
         fromCap = null,
@@ -36,8 +27,10 @@ public class Umbilical : MonoBehaviour {
     private FABRIK solver = null;
     private int numLinks;
 
-    internal void AssignConnections(IPowerable g1, IPowerable g2, Transform transform1, Transform transform2)
+    protected override void ShowVisuals(IPowerable g1, IPowerable g2, Transform transform1, Transform transform2)
     {
+        Data.IsUmbilical = true;
+
         if (g1 is RoverInput)
             fromThing = transform1.GetChild(1);
         else
@@ -80,6 +73,10 @@ public class Umbilical : MonoBehaviour {
         solver.initialTarget = toCap;
 
         StartCoroutine(StopSolver(solver));
+    }
+
+    protected override void HideVisuals()
+    {
     }
 
     private Transform CreateCap(Transform transform1)

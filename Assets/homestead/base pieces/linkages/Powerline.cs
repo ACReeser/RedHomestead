@@ -30,12 +30,22 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
             IsCorridor = true;
         }
 
+        ShowVisuals(from, to, fromT, toT);
+    }
+
+    protected virtual void ShowVisuals(IPowerable from, IPowerable to, Transform fromT, Transform toT)
+    {
         if (fromT != null)
         {
             Ends[0] = fromT.GetChild(0);
             Ends[1] = toT.GetChild(0);
             SetEnds(true);
         }
+    }
+
+    protected virtual void HideVisuals()
+    {
+        SetEnds(false);
     }
 
     private void SetEnds(bool connected)
@@ -61,11 +71,10 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
         if (Data == null || Data.From == null || Data.To == null)
         {
             UnityEngine.Debug.LogWarning("Powerline in removal mode not fully connected!");
-
         }
         else
         {
-            SetEnds(false);
+            HideVisuals();
             
             FlowManager.Instance.PowerGrids.Detach(this, Data.From, Data.To);
 
