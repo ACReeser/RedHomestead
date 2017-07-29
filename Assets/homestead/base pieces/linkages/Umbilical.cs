@@ -3,12 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using RedHomestead.Electricity;
 using UnityEngine;
+using RedHomestead.Rovers;
 
 public class Umbilical : MonoBehaviour {
-    public Transform UmbilicalLinkPrefab;
+    private const float CapZOffset = 0.66f;
+    private const int LinkNumberAdjustment = 0;
+    private const int FABRIKAngleConstraint = 5;
+    private const float FABRIKSolveTimeSeconds = 2f;
+
+    public Transform UmbilicalLinkPrefab, UmbilicalCapPrefab;
     public float linkSeparation = .2f;
 
-    internal Transform oldFromParent, from, oldToParent, to;
+    internal Transform fromThing, toThing;
 
 	// Use this for initialization
 	void Start () {
@@ -21,39 +27,41 @@ public class Umbilical : MonoBehaviour {
 	}
 
 
-    private Transform rootLink = null, lastLink = null;
+    private Transform 
+        fromCap = null,
+        toCap = null,
+        rootLink = null, 
+        lastLink = null;
+
     private FABRIK solver = null;
     private int numLinks;
+
     internal void AssignConnections(IPowerable g1, IPowerable g2, Transform transform1, Transform transform2)
     {
-        from = transform1;
-        oldFromParent = from.parent;
+        if (g1 is RoverInput)
+            fromThing = transform1.GetChild(1);
+        else
+            fromThing = transform1;
 
-        to = transform2;
-        oldToParent = to.parent;
-        
-        transform1.GetChild(0).gameObject.SetActive(true);
-        transform2.GetChild(0).gameObject.SetActive(true);
+        if (g2 is RoverInput)
+            toThing = transform2.GetChild(1);
+        else
+            toThing = transform2;
 
-        from.SetParent(this.transform);
-        to.SetParent(this.transform);
+        fromCap = CreateCap(fromThing);
+        toCap = CreateCap(toThing);
 
-        float distanceBetween = Vector3.Distance(from.position, to.position);
-        numLinks = Mathf.RoundToInt(distanceBetween / linkSeparation) + 1;
-        
+        Vector3 fromPos = fromCap.position, 
+            toPos = toCap.position;
+
+        float distanceBetween = Vector3.Distance(fromPos, toPos);
+        numLinks = Mathf.RoundToInt(distanceBetween / linkSeparation) + LinkNumberAdjustment;
+
         rootLink = GameObject.Instantiate<Transform>(UmbilicalLinkPrefab);
         rootLink.SetParent(this.transform);
-        rootLink.position = from.position;
-        rootLink.rotation = from.rotation;
-        //rootLink.localScale = Vector3.one * 1.8f;
-
-        //Transform end2 = GameObject.Instantiate<Transform>(UmbilicalLinkPrefab);
-        //end2.SetParent(this.transform);
-        //end2.position = to.position;
-        //end2.rotation = to.rotation;
-
-        //Vector3 direction = (from.position - to.position).normalized * linkSeparation;
-        //Quaternion rotation = Quaternion.LookRotation(direction);
+        rootLink.position = fromPos;
+        rootLink.rotation = fromThing.rotation;
+        
         Transform parent = rootLink;
         for (int i = 0; i < numLinks - 1; i++)
         {
@@ -68,19 +76,29 @@ public class Umbilical : MonoBehaviour {
 
         solver = rootLink.gameObject.AddComponent<FABRIK>();
         solver.Constrain = true;
-        solver.ConstrainAngle = 5;
-        solver.initialTarget = to;
+        solver.ConstrainAngle = FABRIKAngleConstraint;
+        solver.initialTarget = toCap;
 
         StartCoroutine(StopSolver(solver));
     }
 
+    private Transform CreateCap(Transform transform1)
+    {
+        var cap = GameObject.Instantiate<Transform>(UmbilicalCapPrefab);
+        cap.position = transform1.position + transform1.TransformVector(Vector3.back * CapZOffset);
+        cap.rotation = transform1.rotation;
+        cap.localScale = transform1.lossyScale;
+        cap.SetParent(this.transform);
+        return cap;
+    }
+
     private IEnumerator StopSolver(FABRIK solver)
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(FABRIKSolveTimeSeconds);
         solver.enabled = false;
 
-        SetEnd(from, rootLink);
-        SetEnd(to, lastLink);
+        SetEnd(fromCap, rootLink);
+        SetEnd(toCap, lastLink);
 
         Rigidbody parentRigid = rootLink.GetComponent<Rigidbody>();
         ConfigurableJoint parentJoint = parentRigid.GetComponent<ConfigurableJoint>();
@@ -99,18 +117,16 @@ public class Umbilical : MonoBehaviour {
                 parentRigid = child;
             }
         }
+
+        //set the FABRIK root to under this for easier cleanup
+        rootLink.parent.SetParent(this.transform);
     }
 
-    private void SetEnd(Transform end, Transform link)
+    private void SetEnd(Transform endCap, Transform link)
     {
-        end.gameObject.GetComponent<Collider>().enabled = false;
-
-        var endRigid = end.gameObject.AddComponent<Rigidbody>();
-        endRigid.isKinematic = true;
-        AddLimitedJoint(end);
-
-        var linkRigid = link.GetComponent<Rigidbody>();
-        AddLimitedJoint(end).connectedBody = linkRigid;
+        var endRigid = endCap.gameObject.GetComponent<Rigidbody>();
+        
+        AddLimitedJoint(endCap).connectedBody = link.GetComponent<Rigidbody>();
 
         if (link == lastLink)
             link.GetComponent<ConfigurableJoint>().connectedBody = endRigid;
