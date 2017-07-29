@@ -31,6 +31,9 @@ public class Umbilical : MonoBehaviour {
 
         to = transform2;
         oldToParent = to.parent;
+        
+        transform1.GetChild(0).gameObject.SetActive(true);
+        transform2.GetChild(0).gameObject.SetActive(true);
 
         from.SetParent(this.transform);
         to.SetParent(this.transform);
