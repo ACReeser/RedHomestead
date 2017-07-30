@@ -1307,7 +1307,7 @@ public class PlayerInput : MonoBehaviour {
 
         if (g1 != null && g2 != null && g1 != g2)
         {
-            var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals, false, 0, false);
+            var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals);
             umbilical.GetComponent<Umbilical>().AssignConnections(g1, g2, selectedUmbilical.transform, secondUmbilical.transform);
         }
 
@@ -1808,7 +1808,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceTube(Collider toBulkhead)
     {
-        Transform newCorridorParent = PlaceRuntimeLinkingObject(selectedBulkhead, toBulkhead, tubePrefab, createdTubes, hideObjectEnds: true, setScale: false);
+        Transform newCorridorParent = PlaceRuntimeLinkingObject(selectedBulkhead, toBulkhead, tubePrefab, createdTubes, hideObjectEnds: true);
         Transform newCorridor = newCorridorParent.GetChild(0);
         MeshFilter newCorridorFilter = newCorridor.GetComponent<MeshFilter>();
 
@@ -1847,9 +1847,10 @@ public class PlayerInput : MonoBehaviour {
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            newPipeTransform.GetComponent<Pipe>().AssignConnections(selectedCompound, g1, g2);
+            newPipeTransform.GetComponent<Pipe>().AssignConnections(selectedCompound, g1, g2, selectedGasValve.transform, collider.transform);
 
             selectedCompound = Matter.Unspecified;
+            selectedGasValve = null;
 
             CurrentMode = InputMode.Normal;
             GuiBridge.Instance.RefreshMode();
@@ -1864,32 +1865,24 @@ public class PlayerInput : MonoBehaviour {
         if (g1 != null && g2 != null && g1 != g2)
         {
             power.GetComponent<Powerline>().AssignConnections(g1, g2, selectedPowerSocket.transform, collider.transform);
-        }
 
-        CurrentMode = InputMode.Normal;
-        GuiBridge.Instance.RefreshMode();
+            selectedPowerSocket = null;
+            CurrentMode = InputMode.Normal;
+            GuiBridge.Instance.RefreshMode();
+        }
     }
 
     private static Transform PlaceRuntimeLinkingObject(
         Collider firstObject, 
         Collider otherObject, 
         Transform linkingObjectPrefab, List<Transform> addToList, 
-        bool hideObjectEnds = false, 
-        float extraScale = 10f,
-        bool setScale = true)
+        bool hideObjectEnds = false)
     {
-        float distanceBetween = Vector3.Distance(firstObject.transform.position, otherObject.transform.position);
-
         Vector3 midpoint = Vector3.Lerp(firstObject.transform.position, otherObject.transform.position, 0.5f);
         Transform newObj = GameObject.Instantiate<Transform>(linkingObjectPrefab);
 
         newObj.position = midpoint;
         newObj.LookAt(otherObject.transform);
-
-        if (setScale)
-        {
-            newObj.GetChild(0).localScale = new Vector3(newObj.localScale.x, newObj.localScale.y, (distanceBetween / 2) * extraScale);
-        }
 
         addToList.Add(newObj);
 

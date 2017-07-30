@@ -94,6 +94,7 @@ namespace RedHomestead.Persistence
     {
         [HideInInspector]
         public Vector3 LocalScale;
+        public Vector3 fromPos, toPos;
     }
 
     [Serializable]
@@ -123,7 +124,6 @@ namespace RedHomestead.Persistence
     {
         [NonSerialized]
         public IPowerable From, To;
-        public Vector3 fromPos, toPos;
         public Quaternion fromRot, toRot;
         public Vector3 fromScale, toScale;
         public string FromPowerableInstanceID, ToPowerableInstanceID;
@@ -319,7 +319,7 @@ namespace RedHomestead.Persistence
 
                 Pipe r = t.GetComponent<Pipe>();
                 r.Data = data;
-                r.AssignConnections(data.MatterType, moduleMap[data.FromModuleInstanceID], moduleMap[data.ToModuleInstanceID]);
+                r.AssignConnections(data.MatterType, moduleMap[data.FromModuleInstanceID], moduleMap[data.ToModuleInstanceID], null, null);
             }
             foreach (PowerlineData data in PowerData)
             {
