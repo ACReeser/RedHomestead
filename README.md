@@ -26,6 +26,7 @@ The following assets will need to be added from the Asset store, since they are 
  1. [Scifi Crate](https://www.assetstore.unity3d.com/en/#!/content/21965)
  2. [Yughues Free Stylized Foliages](https://www.assetstore.unity3d.com/en/#!/content/13392)
  3. Post Processing Stack
+ 4. Legacy Image Effects
  
 ## Blender
 
