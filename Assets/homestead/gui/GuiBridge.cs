@@ -293,7 +293,6 @@ public class GuiBridge : MonoBehaviour {
     #region cinematic mode
     private enum CinematicModes { None, WithGUI, NoGUI }
     private CinematicModes CinematicMode = CinematicModes.None;
-    private UnityStandardAssets.ImageEffects.CameraMotionBlur cinematicMotionBlur;
     internal void ToggleCinematicMode()
     {
         int newCinematic = (((int)this.CinematicMode) + 1);
