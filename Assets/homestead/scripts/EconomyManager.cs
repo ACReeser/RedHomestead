@@ -4,6 +4,7 @@ using RedHomestead.Economy;
 using System;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
+using System.Collections.Generic;
 
 public class EconomyManager : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class EconomyManager : MonoBehaviour
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
     public AudioClip IncomingDelivery, BuyerFoundForGoods;
+    
+
 
     public int HoursUntilPayday
     {
@@ -85,6 +88,7 @@ public class EconomyManager : MonoBehaviour
     private void CheckOrdersForArrival()
     {
         SolHourStamp now = SolHourStamp.Now();
+        List<Order> ToBeDelivered = new List<Order>(); 
 
         foreach (Order candidate in RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.ToArray())
         {
@@ -92,10 +96,22 @@ public class EconomyManager : MonoBehaviour
 
             if (future.Sol <= 1 && future.Hour <= 1)
             {
-                Deliver(candidate);
+                ToBeDelivered.Add(candidate);
                 RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.Remove(candidate);
             }
+            
         }
+        StartCoroutine(DeliveryProcess(ToBeDelivered));
+    }
+
+    IEnumerator DeliveryProcess(List<Order> ToBeDelivered)
+    {
+        foreach(Order k in ToBeDelivered)
+        {
+            Deliver(k);
+            yield return new WaitForSeconds(8f);
+        }
+        
     }
 
     private void Deliver(Order order)
