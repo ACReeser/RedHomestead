@@ -8,15 +8,19 @@ using RedHomestead.Persistence;
 
 public class Umbilical : Powerline
 {
-    private const float CapZOffset = 0.66f;
+    private const float CapZOffset = 0.1f;
     private const int LinkNumberAdjustment = 0;
     private const int FABRIKAngleConstraint = 5;
     private const float FABRIKSolveTimeSeconds = 2f;
     
-    public Transform UmbilicalLinkPrefab, UmbilicalCapPrefab;
+    public Transform UmbilicalLinkPrefab;
     public float linkSeparation = .2f;
 
     internal Transform fromThing, toThing;
+    
+    protected override Vector3 EndCapLocalPosition { get { return Vector3.back * CapZOffset; } }
+    protected override Quaternion EndCapLocalRotation { get { return Quaternion.identity; } }
+    protected override Vector3 EndCapWorldScale { get { return Vector3.one; } }
 
     private Transform 
         fromCap = null,
@@ -28,7 +32,7 @@ public class Umbilical : Powerline
     private RoverStation station = null;
     private int numLinks;
 
-    protected override void ShowVisuals(IPowerable g1, IPowerable g2, Transform transform1, Transform transform2)
+    protected override void ShowVisuals(IPowerable g1, IPowerable g2)
     {
         if (g1 is RoverStation && g2 is RoverInput)
         {
@@ -43,18 +47,8 @@ public class Umbilical : Powerline
 
         Data.IsUmbilical = true;
 
-        if (g1 is RoverInput)
-            fromThing = transform1.GetChild(1);
-        else
-            fromThing = transform1;
-
-        if (g2 is RoverInput)
-            toThing = transform2.GetChild(1);
-        else
-            toThing = transform2;
-
-        fromCap = CreateCap(fromThing);
-        toCap = CreateCap(toThing);
+        fromCap = CreateCap(Data.fromPos, Data.fromRot, Data.fromScale);
+        toCap = CreateCap(Data.toPos, Data.toRot, Data.toScale);
 
         Vector3 fromPos = fromCap.position, 
             toPos = toCap.position;
@@ -65,7 +59,7 @@ public class Umbilical : Powerline
         rootLink = GameObject.Instantiate<Transform>(UmbilicalLinkPrefab);
         rootLink.SetParent(this.transform);
         rootLink.position = fromPos;
-        rootLink.rotation = fromThing.rotation;
+        rootLink.rotation = Data.fromRot;
         
         Transform parent = rootLink;
         for (int i = 0; i < numLinks - 1; i++)
@@ -90,16 +84,6 @@ public class Umbilical : Powerline
     protected override void HideVisuals()
     {
         station.OnRoverAttachedChange(null);
-    }
-
-    private Transform CreateCap(Transform transform1)
-    {
-        var cap = GameObject.Instantiate<Transform>(UmbilicalCapPrefab);
-        cap.position = transform1.position + transform1.TransformVector(Vector3.back * CapZOffset);
-        cap.rotation = transform1.rotation;
-        cap.localScale = transform1.lossyScale;
-        cap.SetParent(this.transform);
-        return cap;
     }
 
     private IEnumerator StopSolver(FABRIK solver)

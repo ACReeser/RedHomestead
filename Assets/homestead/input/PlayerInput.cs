@@ -1307,7 +1307,7 @@ public class PlayerInput : MonoBehaviour {
 
         if (g1 != null && g2 != null && g1 != g2)
         {
-            var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals);
+            var umbilical = PlaceRuntimeLinkingObject(selectedUmbilical, secondUmbilical, umbilicalPrefab, createdUmbilicals, false, 0, false);
             umbilical.GetComponent<Umbilical>().AssignConnections(g1, g2, selectedUmbilical.transform, secondUmbilical.transform);
         }
 
@@ -1875,7 +1875,7 @@ public class PlayerInput : MonoBehaviour {
         Collider otherObject, 
         Transform linkingObjectPrefab, List<Transform> addToList, 
         bool hideObjectEnds = false, 
-        float extraScale = 0f,
+        float extraScale = 10f,
         bool setScale = true)
     {
         float distanceBetween = Vector3.Distance(firstObject.transform.position, otherObject.transform.position);
@@ -1887,7 +1887,9 @@ public class PlayerInput : MonoBehaviour {
         newObj.LookAt(otherObject.transform);
 
         if (setScale)
-            newObj.localScale = new Vector3(newObj.localScale.x, newObj.localScale.y, (distanceBetween / 2f) + extraScale);
+        {
+            newObj.GetChild(0).localScale = new Vector3(newObj.localScale.x, newObj.localScale.y, (distanceBetween / 2) * extraScale);
+        }
 
         addToList.Add(newObj);
 

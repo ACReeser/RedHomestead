@@ -69,11 +69,13 @@ public class RoverStation : Converter, IPowerConsumer
         {
             if (HasWater)
             {
+#warning needs to only push if amount < max
                 AttachedRover.Data.Oxygen.Push(WaterIn.Get(Matter.Water).Pull(WaterPerTickUnits));
             }
 
             if (HasOxygen)
             {
+#warning needs to only push if amount < max
                 AttachedRover.Data.Oxygen.Push(OxygenIn.Get(Matter.Oxygen).Pull(OxygenPerTickUnits));
             }
         }

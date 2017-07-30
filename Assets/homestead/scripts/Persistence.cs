@@ -123,6 +123,9 @@ namespace RedHomestead.Persistence
     {
         [NonSerialized]
         public IPowerable From, To;
+        public Vector3 fromPos, toPos;
+        public Quaternion fromRot, toRot;
+        public Vector3 fromScale, toScale;
         public string FromPowerableInstanceID, ToPowerableInstanceID;
         public bool IsUmbilical = false;
 
@@ -222,8 +225,8 @@ namespace RedHomestead.Persistence
             UnityEngine.Debug.Log("deserializing con zones");
             _InstantiateMany<ConstructionZone, ConstructionData>(ConstructionZones, ModuleBridge.Instance.ConstructionZonePrefab);
             UnityEngine.Debug.Log("deserializing modules");
+            DeserializeRover(powerableMap);
             DeserializeModules(powerableMap);
-            DeserializeRover();
         }
 
         private void DeserializeDeposits()
@@ -232,12 +235,13 @@ namespace RedHomestead.Persistence
             _InstantiateMany<Deposit, DepositData>(Deposits, ModuleBridge.Instance.WaterDepositPrefab);
         }
 
-        private void DeserializeRover()
+        private void DeserializeRover(Dictionary<string, IPowerable> powerableMap)
         {
             Rovers.RoverInput rovIn = GameObject.FindObjectOfType<Rovers.RoverInput>();
             rovIn.Data = this.RoverData;
             rovIn.transform.position = this.RoverData.Position;
             rovIn.transform.rotation = this.RoverData.Rotation;
+            powerableMap.Add(rovIn.PowerableInstanceID, rovIn);
         }
 
         private void DeserializeModules(Dictionary<string, IPowerable> powerableMap)
@@ -319,12 +323,21 @@ namespace RedHomestead.Persistence
             }
             foreach (PowerlineData data in PowerData)
             {
-                Transform t = GameObject.Instantiate(PlayerInput.Instance.powerlinePrefab, data.Position, data.Rotation) as Transform;
+                Transform prefab = null;
+                if (data.IsUmbilical)
+                {
+                    prefab = PlayerInput.Instance.umbilicalPrefab;
+                }
+                else
+                {
+                    prefab = PlayerInput.Instance.powerlinePrefab;
+                }
+
+                Transform t = GameObject.Instantiate(prefab, data.Position, data.Rotation) as Transform;
                 t.localScale = data.LocalScale;
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
-#warning need to sanity check instance IDs here
                 r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID], null, null);
             }
 #if UNITY_EDITOR

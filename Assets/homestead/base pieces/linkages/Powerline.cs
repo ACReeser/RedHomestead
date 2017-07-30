@@ -7,17 +7,18 @@ using RedHomestead.Electricity;
 
 public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
     private PowerlineData data;
+    public Transform CapPrefab;
     public PowerlineData Data { get { return data; } set { data = value; } }
     private Transform[] Ends = new Transform[2];
     private bool IsCorridor = false;
 
+    protected virtual Vector3 EndCapLocalPosition { get { return Vector3.zero; } }
+    protected virtual Quaternion EndCapLocalRotation { get { return Quaternion.Euler(90f, 0f, 0f); } }
+    protected virtual Vector3 EndCapWorldScale { get { return Vector3.one * .3f; } }
+
     internal void AssignConnections(IPowerable from, IPowerable to, Transform fromT, Transform toT)
     {
-        Data = new PowerlineData()
-        {
-            From = from,
-            To = to
-        };
+        AddOrAugmentData(from, to, fromT, toT);
 
         FlowManager.Instance.PowerGrids.Attach(this, from, to);
 
@@ -30,17 +31,37 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
             IsCorridor = true;
         }
 
-        ShowVisuals(from, to, fromT, toT);
+        ShowVisuals(from, to);
     }
 
-    protected virtual void ShowVisuals(IPowerable from, IPowerable to, Transform fromT, Transform toT)
+    private void AddOrAugmentData(IPowerable from, IPowerable to, Transform fromT, Transform toT)
     {
-        if (fromT != null)
+        if (data == null)
         {
-            Ends[0] = fromT.GetChild(0);
-            Ends[1] = toT.GetChild(0);
-            SetEnds(true);
+            Data = new PowerlineData();
         }
+
+        Data.From = from;
+        Data.To = to;
+
+        if (fromT != null && toT != null)
+        {
+            Data.fromPos = fromT.position + fromT.TransformVector(EndCapLocalPosition);
+            Data.fromRot = fromT.rotation * EndCapLocalRotation;
+            Data.fromScale = EndCapWorldScale;
+
+            Data.toPos = toT.position + toT.TransformVector(EndCapLocalPosition);
+            Data.toRot = toT.rotation * EndCapLocalRotation;
+            Data.toScale = EndCapWorldScale;
+        }
+    }
+
+    protected virtual void ShowVisuals(IPowerable from, IPowerable to)
+    {
+        Ends[0] = CreateCap(data.fromPos, data.fromRot, data.fromScale);
+        Ends[1] = CreateCap(data.toPos, data.toRot, data.toScale);
+
+        //SetEnds(true);
     }
 
     protected virtual void HideVisuals()
@@ -59,11 +80,6 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
             Ends[0].gameObject.SetActive(!connected);
             Ends[1].gameObject.SetActive(!connected);
         }
-        else //regular powerline
-        {
-            Ends[0].GetComponent<MeshRenderer>().enabled = connected;
-            Ends[1].GetComponent<MeshRenderer>().enabled = connected;
-        }
     }
 
     internal void Remove()
@@ -80,5 +96,15 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
 
             GameObject.Destroy(gameObject);
         }
+    }
+
+    protected Transform CreateCap(Vector3 pos, Quaternion rot, Vector3 scale)
+    {
+        var cap = GameObject.Instantiate<Transform>(CapPrefab);
+        cap.SetParent(this.transform);
+        cap.position = pos;
+        cap.rotation = rot;
+        cap.localScale = new Vector3(scale.x, scale.y, scale.z / this.transform.localScale.z);
+        return cap;
     }
 }

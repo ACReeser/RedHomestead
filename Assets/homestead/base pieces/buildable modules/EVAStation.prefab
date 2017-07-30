@@ -194,7 +194,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1774551683761788
 GameObject:
   m_ObjectHideFlags: 1
@@ -358,27 +358,27 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1277941214750514}
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0.5, y: -0.5, z: 0.5, w: 0.5}
   m_LocalPosition: {x: -0.247, y: -0.03444109, z: -0.5966269}
   m_LocalScale: {x: 0.071026, y: 0.071026, z: 0.071026}
   m_Children:
   - {fileID: 4682023154534316}
   m_Father: {fileID: 4102647855510388}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 90}
 --- !u!4 &4682023154534316
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1765657482301770}
-  m_LocalRotation: {x: -0.7071068, y: 0.7071068, z: 0, w: 0}
-  m_LocalPosition: {x: 0.45, y: -0, z: 0}
-  m_LocalScale: {x: 1.3665684, y: 1.3665687, z: 1.3665687}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: -0, z: -0.25}
+  m_LocalScale: {x: 1.5125635, y: 1.5125644, z: 1.5125644}
   m_Children: []
   m_Father: {fileID: 4485810532611420}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -180, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!4 &4800744274623716
 Transform:
   m_ObjectHideFlags: 1
@@ -606,7 +606,7 @@ MeshRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1765657482301770}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_MotionVectors: 1
@@ -735,8 +735,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.930372, y: 2.0000005, z: 2.0000005}
-  m_Center: {x: 1.22, y: -0.00048828125, z: -0.0000021457672}
+  m_Size: {x: 2, y: 2.0000005, z: 3.6417303}
+  m_Center: {x: 0.00000009785484, y: -1.1665204e-14, z: -0.82086605}
 --- !u!65 &65565382216288694
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -767,6 +767,7 @@ MonoBehaviour:
   failureEffectAnchors:
     Electrical: {fileID: 0}
     Pressure: {fileID: 0}
+    HabitatPressure: {fileID: 0}
   data:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
@@ -790,6 +791,7 @@ MonoBehaviour:
     ModuleType: 0
     ModuleInstanceID: 
     FaultedPercentage: 0
+    Flex: 
     MatterHistory:
       _history:
         _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000140000001500000016000000170000001800000019000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -898,8 +900,6 @@ MonoBehaviour:
   LungOnOff: {fileID: 212057299482955654}
   Power: {fileID: 212417297261718808}
   PowerOnOff: {fileID: 212875499213301992}
-  OnColor: {r: 0.20000005, g: 1, b: 0, a: 1}
-  OffColor: {r: 1, g: 1, b: 1, a: 0.334}
   OnSprite: {fileID: 21300000, guid: 315ba5e4d9afeff4898e2962ac632a78, type: 3}
   OffSprite: {fileID: 21300000, guid: b69116a1d782da34d954af3b6b6558f6, type: 3}
   TaggedCollider: {fileID: 1025866277490986}
@@ -943,6 +943,7 @@ SpriteRenderer:
   m_Size: {x: 5.12, y: 5.12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
 --- !u!212 &212417297261718808
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -983,6 +984,7 @@ SpriteRenderer:
   m_Size: {x: 5.12, y: 5.12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
 --- !u!212 &212635029986472004
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -1023,6 +1025,7 @@ SpriteRenderer:
   m_Size: {x: 5.12, y: 5.12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
 --- !u!212 &212875499213301992
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -1063,3 +1066,4 @@ SpriteRenderer:
   m_Size: {x: 5.12, y: 5.12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
