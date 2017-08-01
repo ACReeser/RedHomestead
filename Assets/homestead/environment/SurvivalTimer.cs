@@ -74,7 +74,7 @@ public abstract class SurvivalResource
     protected abstract void DoConsume();
 
     public abstract void ResetToMaximum();
-    public abstract void Resupply(float additionalSecondsOfSupply);
+    public abstract void ResupplySeconds(float additionalSecondsOfSupply);
 }
 
 [Serializable]
@@ -106,7 +106,7 @@ public class SingleSurvivalResource : SurvivalResource
         this.UpdateUI(Data.Container.UtilizationPercentage, HoursLeftHint);
     }
 
-    public override void Resupply(float additionalSecondsOfSupply)
+    public override void ResupplySeconds(float additionalSecondsOfSupply)
     {
         Data.Container.Push(additionalSecondsOfSupply * this.Data.ConsumptionPerSecond);
 

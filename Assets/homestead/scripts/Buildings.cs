@@ -297,6 +297,16 @@ namespace RedHomestead.Buildings
                     },
                     Description = "A way to recharge oxygen and power during an EVA."
                 }
+            },
+            {
+                Module.RoverStation, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.Steel),
+                    },
+                    Description = "A way to transfer oxygen, water, and power to Rovers."
+                }
             }
         };
         
@@ -314,16 +324,15 @@ namespace RedHomestead.Buildings
                     Module.Airlock,
                     Module.HallwayNode,
                     Module.Workshop,
-                    Module.GreenhouseHall,
-                    Module.EVAStation
+                    Module.GreenhouseHall
                 }
             },
             {
                 ConstructionGroup.Other,
                 new Module[]
                 {
-                    //Module.Habitat,
-                    //Module.Workspace
+                    Module.EVAStation,
+                    Module.RoverStation
                 }
             },
             {

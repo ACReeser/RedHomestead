@@ -59,7 +59,7 @@ public class EVAStation : Converter, IPowerConsumer
         if (IsOn)
         {
             if (HasPower)
-                SurvivalTimer.Instance.Power.Resupply(EVA.PowerResupplySeconds);
+                SurvivalTimer.Instance.Power.ResupplySeconds(EVA.PowerResupplySeconds);
 
             if (OxygenIn != null)
             {
@@ -68,7 +68,7 @@ public class EVAStation : Converter, IPowerConsumer
 
                 if (oxygenBuffer >= EVA.OxygenResupplyKilogramsPerUnit)
                 {
-                    SurvivalTimer.Instance.Oxygen.Resupply(EVA.OxygenResupplySeconds);
+                    SurvivalTimer.Instance.Oxygen.ResupplySeconds(EVA.OxygenResupplySeconds);
                     oxygenBuffer -= EVA.OxygenResupplyKilogramsPerUnit;
                 }
             }

@@ -1777,8 +1777,7 @@ public class PlayerInput : MonoBehaviour {
         if (roverInput == null && DrivingRoverInput != null)
         {
             IsOnFoot = true;
-            DrivingRoverInput.AcceptInput = false;
-            DrivingRoverInput.ExitBrake();
+            DrivingRoverInput.ToggleDriver(false);
             FPSController.transform.position = DrivingRoverInput.transform.Find("Exit").transform.position;
             FPSController.transform.SetParent(null);
             FPSController.CharacterController.enabled = true;
@@ -1791,9 +1790,8 @@ public class PlayerInput : MonoBehaviour {
             Headlamp1.enabled = Headlamp2.enabled = false;
             //FPSController.enabled = false;
             DrivingRoverInput = roverInput;
-            DrivingRoverInput.AcceptInput = true;
-            if (DrivingRoverInput.Data.HatchOpen)
-                DrivingRoverInput.ToggleHatchback(false);
+            DrivingRoverInput.ToggleDriver(true);
+
             FPSController.transform.SetParent(DrivingRoverInput.transform.Find("Enter").transform);
             FPSController.transform.localPosition = Vector3.zero;
             FPSController.transform.localRotation = Quaternion.identity;

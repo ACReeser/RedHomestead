@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using RedHomestead.Electricity;
 using System;
 
+public delegate void FlowTickHandler();
+
 public class FlowManager : MonoBehaviour
 {
     private const float TickPeriodSeconds = 1f;
     public ElectricityIndicatorMeshes GeneratorMeshes;
     public ElectricityIndicatorMeshes BatteryMeshes;
     public ElectricityIndicatorMeshesForConsumers ConsumerMeshes;
+
+    internal event FlowTickHandler OnFlowTick;
 
     public static FlowManager Instance { get; private set; }
 
@@ -30,6 +34,9 @@ public class FlowManager : MonoBehaviour
         {
             PowerGrids.Tick();
             IndustryUpdate();
+
+            if (OnFlowTick != null)
+                OnFlowTick();
 
             yield return new WaitForSeconds(TickPeriodSeconds);
         }

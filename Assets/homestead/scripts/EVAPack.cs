@@ -57,6 +57,7 @@ namespace RedHomestead.EVA
             public const float CaloriesPerDay = 2400;
             public const float LitersOfWaterPerDay = 3f;
             public const float SuitHeatingWattsPerHour = 1000f;
+            public const float SuitHeatingWattsPerSecond = SuitHeatingWattsPerHour / 60f / 60f;
 
             public const float BasePackPowerWatts = SuitHeatingWattsPerHour * 6f;
             public const float UpgradedPackPowerWatts = SuitHeatingWattsPerHour * 10f;

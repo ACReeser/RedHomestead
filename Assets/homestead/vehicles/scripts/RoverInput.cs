@@ -7,6 +7,7 @@ using RedHomestead.Simulation;
 using System.Collections.Generic;
 using RedHomestead.Electricity;
 using RedHomestead.Industry;
+using RedHomestead.EVA;
 
 namespace RedHomestead.Rovers
 { 
@@ -88,9 +89,31 @@ namespace RedHomestead.Rovers
             updateOxygen = StartCoroutine(UpdateOxygenBar());
         }
 
+        private float oxygenBuffer = 0f;
+        private void Rover_OnFlowTick_WhenHasDriver()
+        {
+            if (SurvivalTimer.Instance.Power.Data.Container.AvailableCapacity > 0f)
+            {
+                float buffer = Data.EnergyContainer.Pull(EVA.EVA.PowerResupplyWattsPerSecond);
+                SurvivalTimer.Instance.Power.Increment(buffer);
+            }
+
+            if (SurvivalTimer.Instance.Oxygen.Data.Container.AvailableCapacity > 0f)
+            {
+                oxygenBuffer += Data.Oxygen.Pull(EVA.EVA.OxygenResupplyKilogramsPerUnit);
+                if (oxygenBuffer > EVA.EVA.OxygenResupplyKilogramsPerUnit)
+                {
+                    SurvivalTimer.Instance.Oxygen.Increment(EVA.EVA.OxygenResupplySeconds);
+                    oxygenBuffer -= EVA.EVA.OxygenResupplyKilogramsPerUnit;
+                }
+            }
+        }
+
         void OnDestroy()
         {
             rovers.Remove(this);
+            if (subscribedToFlowTick)
+                FlowManager.Instance.OnFlowTick -= Rover_OnFlowTick_WhenHasDriver;
         }
 
         private IEnumerator UpdateOxygenBar()
@@ -281,6 +304,26 @@ namespace RedHomestead.Rovers
                     end.tag = umbilicalMode ? "umbilicalPlug" : "powerplug";
                 }
             }
+        }
+
+        private bool subscribedToFlowTick = false;
+        internal void ToggleDriver(bool hasDriver)
+        {
+            if (hasDriver)
+            {
+                FlowManager.Instance.OnFlowTick += Rover_OnFlowTick_WhenHasDriver;
+                
+                if (Data.HatchOpen)
+                    ToggleHatchback(false);
+            }
+            else
+            {
+                FlowManager.Instance.OnFlowTick -= Rover_OnFlowTick_WhenHasDriver;
+                ExitBrake();
+            }
+
+            AcceptInput = false;
+            subscribedToFlowTick = hasDriver;
         }
     }
 }
