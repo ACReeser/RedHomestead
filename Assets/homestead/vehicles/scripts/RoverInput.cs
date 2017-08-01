@@ -125,8 +125,9 @@ namespace RedHomestead.Rovers
                 flowAmountRenderer.transform.localScale = new Vector3(1, this.Data.Oxygen.UtilizationPercentage, 1);
                 dashboardPowerRenderer.transform.localScale = new Vector3(1, this.Data.EnergyContainer.UtilizationPercentage * 0.7f, 1);
 
-                if (AcceptInput)
-                    this.RefreshVisualization();
+                //can't do this anymore, can refill o2 via rover station
+                //if (AcceptInput)
+                this.RefreshVisualization();
             }
         }
 
@@ -322,7 +323,7 @@ namespace RedHomestead.Rovers
                 ExitBrake();
             }
 
-            AcceptInput = false;
+            AcceptInput = CanDrive;
             subscribedToFlowTick = hasDriver;
         }
     }

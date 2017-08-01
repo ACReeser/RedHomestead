@@ -772,17 +772,10 @@ public class PlayerInput : MonoBehaviour {
                 {
                     RoverInput ri = hitInfo.collider.transform.GetComponent<RoverInput>();
 
-                    if (ri.CanDrive)
-                    {
-                        if (doInteract)
-                            ToggleVehicle(ri);
-                        else
-                            newPrompt = Prompts.DriveRoverPrompt;
-                    }
+                    if (doInteract)
+                        ToggleVehicle(ri);
                     else
-                    {
-                        newPrompt = Prompts.UnhookRoverPrompt;
-                    }
+                        newPrompt = Prompts.DriveRoverPrompt;
                 }
                 else if (hitInfo.collider.CompareTag("constructionzone"))
                 {
