@@ -224,7 +224,7 @@ public struct BuyFields
         }
     }
 }
-
+    
 public class Terminal : MonoBehaviour {
 
     public RectTransform[] ProgramPanels, MarketTabs, BuyTabs;
@@ -235,6 +235,8 @@ public class Terminal : MonoBehaviour {
     public EnRouteFields enroute;
     private RectTransform currentProgramPanel, currentMarketTab, currentBuyTab;
     internal Order CurrentOrder;
+    private Transform canvasParentRect;
+    private Canvas canvas;
 
 	// Use this for initialization
 	void Start ()
@@ -242,6 +244,10 @@ public class Terminal : MonoBehaviour {
         HideAll(ProgramPanels);
         HideAll(MarketTabs);
         HideAll(BuyTabs);
+        canvasParentRect = transform.parent.GetComponent<Transform>();
+        canvasParentRect.localScale = new Vector3(1, 0f, 1f);
+        canvas = GetComponent<Canvas>();
+        canvas.enabled = false;
 
         SetProgram(null);
         SunOrbit.Instance.OnHourChange += OnHourChange;
@@ -289,12 +295,7 @@ public class Terminal : MonoBehaviour {
             t.gameObject.SetActive(false);
         }
     }
-
-    // Update is called once per frame
-    void Update () {
-	
-	}
-
+    
     public void SwitchProgram(int p)
     {
         SetProgram(ProgramPanels[p]);
@@ -382,8 +383,7 @@ public class Terminal : MonoBehaviour {
     {
         Checkout(BySupplierVendorIndex);
     }
-
-
+    
     //todo: bug - selecting delivery will get around limits
     public void SelectDeliveryType(int type)
     {
@@ -433,5 +433,39 @@ public class Terminal : MonoBehaviour {
         };
         buys.RefreshBuyTabsTabs(false);
         SwitchBuyTab((int)BuyTab.BySupplier);
+    }
+
+    internal void Toggle(bool isViewing)
+    {
+        if (openCloseCoroutine != null)
+            StopCoroutine(openCloseCoroutine);
+
+        openCloseCoroutine = StartCoroutine(OpenOrCloseTerminal(isViewing));
+    }
+
+    private Coroutine openCloseCoroutine;
+    private const float openCanvasHeight = 1f;
+    private IEnumerator OpenOrCloseTerminal(bool isViewing)
+    {
+        if (isViewing)
+        {
+            yield return new WaitForSeconds(.5f);
+            canvas.enabled = true;
+        }
+
+        float startHeight = canvasParentRect.localScale.y;
+        float targetHeight = isViewing ? openCanvasHeight : 0f;
+        float time = 0f;
+        float duration = .40f;
+
+        while (canvasParentRect.localScale.y != targetHeight)
+        {
+            canvasParentRect.localScale = new Vector3(1f, Mathfx.Coserp(startHeight, targetHeight, time / duration), 1f);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        if (!isViewing)
+            canvas.enabled = false;
     }
 }

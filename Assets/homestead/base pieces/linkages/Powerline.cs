@@ -58,10 +58,13 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
 
     protected virtual void ShowVisuals(IPowerable from, IPowerable to)
     {
-        Ends[0] = CreateCap(data.fromPos, data.fromRot, data.fromScale);
-        Ends[1] = CreateCap(data.toPos, data.toRot, data.toScale);
-        
-        this.transform.GetChild(0).localScale = new Vector3(1f, 1f, (Vector3.Distance(data.fromPos, data.toPos) / 2) * 10f);
+        if (CapPrefab != null)
+        {
+            Ends[0] = CreateCap(data.fromPos, data.fromRot, data.fromScale);
+            Ends[1] = CreateCap(data.toPos, data.toRot, data.toScale);
+        }
+
+        this.transform.GetChild(0).localScale = new Vector3(1f, 1f, (Vector3.Distance(data.fromPos, data.toPos) / 2) * 10f);        
     }
 
     protected virtual void HideVisuals()

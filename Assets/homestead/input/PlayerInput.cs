@@ -2013,6 +2013,8 @@ public class PlayerInput : MonoBehaviour {
         Cursor.lockState = CursorLockMode.None;
         GuiBridge.Instance.Crosshair.gameObject.SetActive(!inTerminal);
 
+        CurrentTerminal.Toggle(inTerminal);
+
         this.RefreshEquipmentState();
     }
 
