@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using RedHomestead.Economy;
 using RedHomestead.Persistence;
+using RedHomestead.Environment;
 
 public delegate void HandleHourChange(int sol, float hour);
 public delegate void HandleSolChange(int sol);
@@ -33,6 +34,8 @@ public class SunOrbit : MonoBehaviour {
     internal event HandleSolChange OnSolChange;
 
     internal static SunOrbit Instance;
+    internal static DustManager DustManager;
+
     void Awake()
     {
         Instance = this;
@@ -42,6 +45,7 @@ public class SunOrbit : MonoBehaviour {
 	void Start () {
         RefreshClockTextMeshes();
         UpdateClockSpeedArrows();
+        DustManager = new DustManager(this, Game.Current, Base.Current);
 	}
 
     public void RefreshClockTextMeshes()
@@ -77,13 +81,7 @@ public class SunOrbit : MonoBehaviour {
 
         if (Game.Current.Environment.CurrentHour > 24 && Game.Current.Environment.CurrentMinute > 40f)
         {
-            Game.Current.Environment.CurrentSol += 1;
-            Game.Current.Environment.CurrentHour = 0;
-            Game.Current.Environment.CurrentMinute = 40 - Game.Current.Environment.CurrentMinute;
-            dawnMilestone = duskMilestone = dawnEnded = duskEnded = false;
-
-            if (OnSolChange != null)
-                OnSolChange(Game.Current.Environment.CurrentSol);
+            NewDay();
         }
 
         float percentOfDay = ((Game.Current.Environment.CurrentHour * 60) + Game.Current.Environment.CurrentMinute) / MartianMinutesPerDay;
@@ -129,6 +127,18 @@ public class SunOrbit : MonoBehaviour {
 
         GuiBridge.Instance.TimeText.text = textTime;
         UpdateClocks(textTime);
+    }
+
+    private void NewDay()
+    {
+        Game.Current.Environment.CurrentSol += 1;
+        Game.Current.Environment.CurrentHour = 0;
+        Game.Current.Environment.CurrentMinute = 40 - Game.Current.Environment.CurrentMinute;
+        dawnMilestone = duskMilestone = dawnEnded = duskEnded = false;
+
+
+        if (OnSolChange != null)
+            OnSolChange(Game.Current.Environment.CurrentSol);
     }
 
     private void UpdateClocks(string textTime)

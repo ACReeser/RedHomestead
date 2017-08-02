@@ -148,6 +148,10 @@ namespace RedHomestead.Persistence
         public float CurrentHour = 9;
         public float CurrentMinute = 0;
         public int CurrentSol = 1;
+        /// <summary>
+        /// Normalized: 0 is no dust, 1 is full dust storm
+        /// </summary>
+        public float DustIntensity = 0f;
 
         public float HoursSinceSol0
         {
@@ -196,6 +200,7 @@ namespace RedHomestead.Persistence
         public static Base Current;
 
         public string Name;
+        public int WeatherSeed;
         public CrateData[] Crates;
         public HabitatExtraData[] Habitats;
         public ConstructionData[] ConstructionZones;
@@ -214,6 +219,13 @@ namespace RedHomestead.Persistence
         public DepositData[] Deposits;
         internal Dictionary<Simulation.Matter, int> InitialMatterPurchase;
         internal Dictionary<Crafting.Craftable, int> InitialCraftablePurchase;
+
+        public Base() { }
+        public Base(bool generateSeeds)
+        {
+            if (generateSeeds)
+                WeatherSeed = new System.Random().Next(int.MinValue, int.MaxValue);
+        }
 
         public void OnAfterDeserialize()
         {
@@ -670,7 +682,7 @@ namespace RedHomestead.Persistence
                 IsNewGame = true,
                 Bases = new Base[]
                 {
-                    new Base()
+                    new Base(true)
                     {
                         InitialMatterPurchase = choices.BoughtMatter,
                         InitialCraftablePurchase = choices.BoughtCraftables,

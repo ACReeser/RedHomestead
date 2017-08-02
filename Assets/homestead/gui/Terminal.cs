@@ -224,9 +224,9 @@ public struct BuyFields
         }
     }
 }
-    
-public class Terminal : MonoBehaviour {
 
+public class Terminal : MonoBehaviour {
+    
     public RectTransform[] ProgramPanels, MarketTabs, BuyTabs;
     public RectTransform HomePanel;
     public ColonyFields colony;
