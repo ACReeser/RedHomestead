@@ -13,8 +13,8 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
     private bool IsCorridor = false;
 
     protected virtual Vector3 EndCapLocalPosition { get { return Vector3.zero; } }
-    protected virtual Quaternion EndCapLocalRotation { get { return Quaternion.Euler(90f, 0f, 0f); } }
-    protected virtual Vector3 EndCapWorldScale { get { return Vector3.one * .3f; } }
+    protected virtual Quaternion EndCapLocalRotation { get { return Quaternion.Euler(90f, 0f, -90f); } }
+    protected virtual Vector3 EndCapWorldScale { get { return Vector3.one * .14f; } }
 
     internal void AssignConnections(IPowerable from, IPowerable to, Transform fromT, Transform toT)
     {
