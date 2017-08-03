@@ -7,6 +7,7 @@ using RedHomestead.Environment;
 
 public delegate void HandleHourChange(int sol, float hour);
 public delegate void HandleSolChange(int sol);
+public delegate void DawnDuskHandler(bool isStart);
 
 public class SunOrbit : MonoBehaviour {
     public Material Skybox;
@@ -32,6 +33,8 @@ public class SunOrbit : MonoBehaviour {
 
     internal event HandleHourChange OnHourChange;
     internal event HandleSolChange OnSolChange;
+    internal event DawnDuskHandler OnDawn;
+    internal event DawnDuskHandler OnDusk;
 
     internal static SunOrbit Instance;
     internal static DustManager DustManager;
@@ -45,7 +48,7 @@ public class SunOrbit : MonoBehaviour {
 	void Start () {
         RefreshClockTextMeshes();
         UpdateClockSpeedArrows();
-        DustManager = new DustManager(this, Game.Current, Base.Current);
+        DustManager = new DustManager(this, Game.Current, Base.Current, SurvivalTimer.Instance);
 	}
 
     public void RefreshClockTextMeshes()
@@ -156,34 +159,24 @@ public class SunOrbit : MonoBehaviour {
     {
         if (isStart)
         {
-            if (PlayerInput.Instance.Headlamp1.enabled)
+            if (PlayerInput.Instance.IsOnFoot && PlayerInput.Instance.IsInSuit && PlayerInput.Instance.Headlamp1.enabled)
                 PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = false;
         }
 
-        ToggleDuskDawnParticleSystems(isStart);
+        if (OnDawn != null)
+            OnDawn(isStart);
     }
 
     private void Dusk(bool isStart)
     {
         if (isStart)
         {
-            if (!PlayerInput.Instance.Headlamp1.enabled)
+            if (PlayerInput.Instance.IsOnFoot && PlayerInput.Instance.IsInSuit && !PlayerInput.Instance.Headlamp1.enabled)
                 PlayerInput.Instance.Headlamp1.enabled = PlayerInput.Instance.Headlamp2.enabled = true;
         }
-        ToggleDuskDawnParticleSystems(isStart);
-    }
-    
-    private void ToggleDuskDawnParticleSystems(bool isStart)
-    {
-        foreach (Transform t in DuskAndDawnOnlyParent)
-        {
-            var ps = t.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                var emission = ps.emission;
-                emission.enabled = isStart;
-            }
-        }
+
+        if (OnDusk != null)
+            OnDusk(isStart);
     }
 
     //barry allen would be proud

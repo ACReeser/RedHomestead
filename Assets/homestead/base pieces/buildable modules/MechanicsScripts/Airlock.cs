@@ -47,7 +47,6 @@ public class Airlock : GenericBaseModule, IDoorManager {
             IsPressurized = true;
             RefreshDoorAndLightState();
             SurvivalTimer.Instance.EnterHabitat(LinkedHabitat);
-            OutsideVisuals.ToggleAllParticles(false);
             SetPlayerTerrainCollision(true);
             RefreshSealedButtons();
         }
@@ -70,7 +69,6 @@ public class Airlock : GenericBaseModule, IDoorManager {
             IsPressurized = false;
             RefreshDoorAndLightState();
             SurvivalTimer.Instance.BeginEVA();
-            OutsideVisuals.ToggleAllParticles(true);
             SetPlayerTerrainCollision(false);
             RefreshSealedButtons();
         }

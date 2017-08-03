@@ -115,6 +115,7 @@ public class SingleSurvivalResource : SurvivalResource
 }
 
 public enum Temperature { Cold, Temperate, Hot }
+public delegate void PlayerInHabitatHandler(bool isInHabitat);
 
 public class SurvivalTimer : MonoBehaviour {
     public static SurvivalTimer Instance;
@@ -148,6 +149,7 @@ public class SurvivalTimer : MonoBehaviour {
             return CurrentHabitat != null;
         }
     }
+    public event PlayerInHabitatHandler OnPlayerInHabitatChange;
 
     public Habitat CurrentHabitat { get; private set; }
 
@@ -180,6 +182,9 @@ public class SurvivalTimer : MonoBehaviour {
         Power.UpdateUI = GuiBridge.Instance.RefreshPowerBar;
         SunOrbit.Instance.OnHourChange += OnHourChange;
         OnHourChange(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour);
+
+        if (OnPlayerInHabitatChange != null)
+            OnPlayerInHabitatChange(IsInHabitat);
     }
 
     private void OnHourChange(int sol, float hour)
@@ -294,6 +299,8 @@ public class SurvivalTimer : MonoBehaviour {
         PlayerInput.Instance.SetPressure(IsInHabitat);
         this.RefreshResources(false);
         GuiBridge.Instance.RefreshSurvivalPanel(false, isInHabitat);
+        if (OnPlayerInHabitatChange != null)
+            OnPlayerInHabitatChange(IsInHabitat);
     }
 
     internal void FillWater()

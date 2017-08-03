@@ -76,17 +76,54 @@ namespace RedHomestead.Environment
 
     public class DustManager
     {
-        private EnvironmentData environment;
         private System.Random random;
+        private Transform DuskAndDawnOnlyParent;
+        private SurvivalTimer survivalTimer;
+        private EnvironmentData environment;
         private Weather yesterday, today, tomorrow;
 
-        public DustManager(SunOrbit orb, Persistence.Game game, Persistence.Base @base)
+        public DustManager(SunOrbit orb, Persistence.Game game, Persistence.Base @base, SurvivalTimer timer)
         {
+            survivalTimer = timer;
+            survivalTimer.OnPlayerInHabitatChange += _OnPlayerInHabitatChange;
             orb.OnSolChange += _OnSolChange;
+            orb.OnHourChange += _OnHourChange;
+            orb.OnDawn += _OnDawn;
+            orb.OnDusk += _OnDusk;
+            DuskAndDawnOnlyParent = orb.DuskAndDawnOnlyParent;
             environment = game.Environment;
             this.random = new System.Random(@base.WeatherSeed);
             FastForward(environment.CurrentSol);
-            SetSideEffects();
+            DoAfterSolChange();
+
+            if (environment.CurrentHour > 12)
+                AnnounceForecast();
+            else
+            {
+#if UNITY_EDITOR
+                AnnounceForecast();
+#endif
+            }
+        }
+
+        private bool playerInHabitat = false;
+        private void _OnPlayerInHabitatChange(bool isInHabitat)
+        {
+            playerInHabitat = isInHabitat;
+            RefreshDustParticleSystems();
+        }
+
+        private bool isDawnOrDusk = false;
+        private void _OnDusk(bool isStart)
+        {
+            isDawnOrDusk = isStart;
+            RefreshDustParticleSystems();
+        }
+
+        private void _OnDawn(bool isStart)
+        {
+            isDawnOrDusk = isStart;
+            RefreshDustParticleSystems();
         }
 
         private void FastForward(int gameSol)
@@ -111,15 +148,47 @@ namespace RedHomestead.Environment
         private void _OnSolChange(int sol)
         {
             IncrementWeather();
-            SetSideEffects();
+            DoAfterSolChange();
         }
 
-        private void SetSideEffects()
+        private void _OnHourChange(int sol, float hour)
+        {
+            if (hour == 12)
+                AnnounceForecast();
+        }
+
+        private void AnnounceForecast()
         {
 #if UNITY_EDITOR
             UnityEngine.Debug.Log(String.Format("Today: {0} - {1} dust", today.Narrative, today.Coverage));
             UnityEngine.Debug.Log(String.Format("Tomorrow: {0} - {1} dust", tomorrow.Narrative, tomorrow.Coverage));
 #endif
+        }
+
+        private void DoAfterSolChange()
+        {
+            RefreshDustParticleSystems();
+        }
+
+        private void RefreshDustParticleSystems()
+        {
+            foreach (Transform t in DuskAndDawnOnlyParent)
+            {
+                var ps = t.GetComponent<ParticleSystem>();
+                if (ps != null)
+                {
+                    var emission = ps.emission;
+                    emission.rateOverTime = today.Coverage.EmissionCurve();
+                    emission.enabled = !playerInHabitat && (isDawnOrDusk || today.Coverage != DustCoverage.None);
+
+                    if (emission.enabled && !ps.isPlaying)
+                        ps.Play();
+                    else if (!emission.enabled && ps.isPlaying)
+                        ps.Stop();
+                }
+            }
+
+            RenderSettings.fog = today.Coverage == DustCoverage.Stormy;
         }
     }
 
@@ -128,6 +197,24 @@ namespace RedHomestead.Environment
         public const float StormThreshold = .75f;
         public const float HeavyThreshold = .5f;
         public const float LightThreshold = .25f;
+
+        private static ParticleSystem.MinMaxCurve lightCurve = new ParticleSystem.MinMaxCurve(50);
+        private static ParticleSystem.MinMaxCurve heavyCurve = new ParticleSystem.MinMaxCurve(100);
+        private static ParticleSystem.MinMaxCurve stormyCurve = new ParticleSystem.MinMaxCurve(200);
+
+        public static ParticleSystem.MinMaxCurve EmissionCurve(this DustCoverage coverage)
+        {
+            switch (coverage)
+            {
+                default:
+                case DustCoverage.Light:
+                    return lightCurve;
+                case DustCoverage.Heavy:
+                    return heavyCurve;
+                case DustCoverage.Stormy:
+                    return stormyCurve;
+            }
+        }
 
         public static DustCoverage FromFloat(this float intensity)
         {
