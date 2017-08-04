@@ -271,7 +271,7 @@ public class Gremlin : MonoBehaviour {
         {
             effect.SetParent(victim.FailureEffectAnchors.Electrical);
             //alert the powergrid script
-            FlowManager.Instance.PowerGrids.HandleElectricalFailureChange(victim);
+            FlowManager.Instance.PowerGrids.HandleElectricalFailureChange(victim, true);
             announcementClip = this.ElectricalFailureComputerTalk;
             failClip = this.ElectricalFailureSound;
         }
@@ -357,7 +357,7 @@ public class Gremlin : MonoBehaviour {
         particleSystemPool[fixing.FailType].Add(fixing.Effect);
         if (fixing.FailType == FailureType.Electrical)
         {
-            FlowManager.Instance.PowerGrids.OnElectricalFailureChange(repaired);
+            FlowManager.Instance.PowerGrids.HandleElectricalFailureChange(repaired, false);
         }
         else if (fixing.FailType == FailureType.Pressure && repaired is GasStorage)
         {
