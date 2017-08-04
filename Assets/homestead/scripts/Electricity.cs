@@ -389,11 +389,14 @@ namespace RedHomestead.Electricity
                 OnPowerTick();
         }
 
-        internal void HandleElectricalFailure(IRepairable victim)
+        internal void HandleElectricalFailureChange(IRepairable victim, bool faulted)
         {
             if (victim is IPowerConsumer)
             {
-                (victim as IPowerConsumer).EmergencyShutdown();
+                if (faulted)
+                    (victim as IPowerConsumer).EmergencyShutdown();
+                else
+                    (victim as IPowerConsumer).TurnOnPower();
             }
 
             this.OnElectricalFailureChange(victim);

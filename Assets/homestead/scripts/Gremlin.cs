@@ -271,7 +271,7 @@ public class Gremlin : MonoBehaviour {
         {
             effect.SetParent(victim.FailureEffectAnchors.Electrical);
             //alert the powergrid script
-            FlowManager.Instance.PowerGrids.HandleElectricalFailure(victim);
+            FlowManager.Instance.PowerGrids.HandleElectricalFailureChange(victim);
             announcementClip = this.ElectricalFailureComputerTalk;
             failClip = this.ElectricalFailureSound;
         }

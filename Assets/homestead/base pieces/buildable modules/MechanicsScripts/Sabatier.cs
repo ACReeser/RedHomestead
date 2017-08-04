@@ -145,6 +145,7 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
 
 
         RefreshPowerSwitch();
+        this.RefreshVisualization();
     }
 
     private void RefreshPowerSwitch()
@@ -190,5 +191,6 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
 
     public void OnEmergencyShutdown()
     {
+        RefreshPowerSwitch();
     }
 }
