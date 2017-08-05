@@ -30,6 +30,7 @@ namespace RedHomestead.Rovers
         public float FaultedPercentage { get { return data.FaultedPercentage; } set { data.FaultedPercentage = value; } }
 
         public Transform[] umbilicalEnds = new Transform[2];
+        public Transform joystick;
 
         #region power
         public EnergyContainer EnergyContainer { get { return data.EnergyContainer; } }
@@ -193,13 +194,14 @@ namespace RedHomestead.Rovers
                 // pass the input to the car!
                 float h = CrossPlatformInputManager.GetAxis("Horizontal");
                 float v = CrossPlatformInputManager.GetAxis("Vertical");
-    #if !MOBILE_INPUT
+#if !MOBILE_INPUT
                 float brake = CrossPlatformInputManager.GetAxis("Jump");
                 m_Car.Move(h, v, v, -brake);
                 Data.EnergyContainer.Pull(RoverDrainWattsPerSecond * Time.fixedDeltaTime * Mathf.Abs(v));
-    #else
+#else
                 m_Car.Move(h, v, v, 0f);
-    #endif
+#endif
+                joystick.localRotation = Quaternion.Euler(Mathf.Lerp(-40f, 40f, (v + 1) / 2f), 0f, Mathf.Lerp(40, -40, (h + 1) / 2));
             }
         }
 
