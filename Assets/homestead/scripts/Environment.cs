@@ -104,6 +104,33 @@ namespace RedHomestead.Environment
                 AnnounceForecast();
 #endif
             }
+            refreshSolarPanels();
+        }
+
+        internal void OnSolarPanelAdded(SolarPanel s)
+        {
+            refreshSolarPanel(s);
+        }
+
+        private void refreshSolarPanel(SolarPanel s)
+        {
+            bool hasDust = s.FlexData.DustBuildup > 0;
+            s.panel1Mesh.transform.gameObject.SetActive(hasDust);
+            s.panel2Mesh.transform.gameObject.SetActive(hasDust);
+            if (hasDust)
+            {
+                float dustCutoff = Mathf.Lerp(1f, .22f, s.FlexData.DustBuildup);
+                s.panel1Mesh.material.SetFloat("_Cutoff", dustCutoff);
+                s.panel2Mesh.material.SetFloat("_Cutoff", dustCutoff);
+            }
+        }
+
+        private void refreshSolarPanels()
+        {
+            foreach(SolarPanel sp in SolarPanel.AllPanels)
+            {
+                refreshSolarPanel(sp);
+            }
         }
 
         private bool playerInHabitat = false;
@@ -155,6 +182,17 @@ namespace RedHomestead.Environment
         {
             if (hour == 12)
                 AnnounceForecast();
+
+            AddIncrementalDust();
+        }
+
+        private void AddIncrementalDust()
+        {
+            foreach(SolarPanel s in SolarPanel.AllPanels)
+            {
+                s.FlexData.DustBuildup += today.DustIntensity / 24f;
+                refreshSolarPanel(s);
+            }
         }
 
         private void AnnounceForecast()

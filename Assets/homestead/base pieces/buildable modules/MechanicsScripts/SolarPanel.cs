@@ -5,10 +5,16 @@ using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 using RedHomestead.Electricity;
 using RedHomestead.Persistence;
+using System.Collections.Generic;
 
-public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
+[Serializable]
+public class SolarPanelFlexData
 {
-    internal float Efficiency = MinimumEfficiency;
+    public float DustBuildup;
+}
+
+public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply, IFlexDataContainer<ResourcelessModuleData, SolarPanelFlexData>
+{
     public const float MinimumEfficiency = .14f;
     public const float MaximumEfficiency = .38f;
     public const float EquatorAnnualAverageInsolationPerMeter2 = 190f;
@@ -17,9 +23,18 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
     public const float SouthPoleAnnualAverageInsolationPerMeter2 = 90f;
     public const int Meter2PerModule = 16;
     public const float MaximumWattsPerModule = EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * MinimumEfficiency;
+
+    internal static List<SolarPanel> AllPanels = new List<SolarPanel>();
+
+    public SolarPanelFlexData FlexData { get; set; }
+
     public MeshFilter powerBacking { get; set; }
     public Transform powerMask { get; set; }
     public Transform[] PivotPoles = new Transform[2];
+    public MeshRenderer panel1Mesh, panel2Mesh;
+    //public BoxCollider panel1Collider, panel2Collider; 
+
+    internal float Efficiency = MinimumEfficiency;
 
     public override float WattsConsumed
     {
@@ -97,6 +112,7 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
             ModuleInstanceID = Guid.NewGuid().ToString(),
             ModuleType = GetModuleType()
         };
+        this.FlexData = new SolarPanelFlexData();
     }
 
     public override Module GetModuleType()
@@ -108,5 +124,9 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply
     {
         SunOrbit.Instance.OnHourChange += _OnHourChange;
         _OnHourChange(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour);
+        AllPanels.Add(this);
+
+        if (SunOrbit.DustManager != null)
+            SunOrbit.DustManager.OnSolarPanelAdded(this);
     }
 }
