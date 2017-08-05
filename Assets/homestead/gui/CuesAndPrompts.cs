@@ -7,6 +7,23 @@ public class News
     public float DelayMilliseconds { get; set; }
     public float DurationMilliseconds { get; set; }
     public MiscIcon Icon;
+
+    public News Clone(string headlineOverride = null)
+    {
+        return new News()
+        {
+            Text = headlineOverride == null ? this.Text : headlineOverride,
+            DurationMilliseconds = this.DurationMilliseconds,
+            Icon = this.Icon
+        };
+    }
+
+    public News CloneWithPrefix(string headlinePrefix)
+    {
+        News clone = this.Clone();
+        clone.Text = headlinePrefix + clone.Text;
+        return clone;
+    }
 }
 
 
@@ -89,6 +106,30 @@ public static class NewsSource
         Text = "Malfunction Repaired",
         DurationMilliseconds = 10000,
         Icon = MiscIcon.Information
+    };
+    internal static News WeatherClearSky = new News()
+    {
+        Text = "Clear Skies",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.ClearSky
+    };
+    internal static News WeatherLightDust = new News()
+    {
+        Text = "Light Dust",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.LightDust
+    };
+    internal static News WeatherHeavyDust = new News()
+    {
+        Text = "Heavy Dust",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.HeavyDust
+    };
+    internal static News WeatherDustStorm = new News()
+    {
+        Text = "Dust Storm",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.DustStorm
     };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)

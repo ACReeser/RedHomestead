@@ -29,7 +29,8 @@ namespace RedHomestead.Buildings
         Flywheel,
         Airlock,
         EVAStation,
-        RoverStation
+        RoverStation,
+        WeatherStation
     }
 
     /// <summary>

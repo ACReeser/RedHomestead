@@ -68,7 +68,11 @@ public enum MiscIcon {
     Plug,
     Harvest,
     Molecule,
-    Umbilical
+    Umbilical,
+    ClearSky,
+    LightDust,
+    HeavyDust,
+    DustStorm
 }
 
 [Serializable]
@@ -207,35 +211,45 @@ public class GuiBridge : MonoBehaviour {
         RefreshSprintIcon(false);
     }
 
-    private Coroutine newsTimer;
-
+    private Queue<News> newsTicker = new Queue<News>();
+    private Coroutine newsCoroutine;
     internal void ShowNews(News news)
     {
         if (news != null)
         {
-            newsTimer = StartCoroutine(StartShowNews(news));
+            newsTicker.Enqueue(news);
+            if (newsCoroutine == null)
+            {
+                newsCoroutine = StartCoroutine(StartShowNews());
+            }
         }
     }
 
-    private IEnumerator StartShowNews(News news)
+    private IEnumerator StartShowNews()
     {
-        if (news.DelayMilliseconds > 0f)
+        News currentNews = newsTicker.Dequeue();
+        do
         {
-            yield return new WaitForSeconds(news.DelayMilliseconds / 1000f);
-        }
+            print("News: " + currentNews.Text);
+            News.Panel.gameObject.SetActive(true);
+            News.Description.text = currentNews.Text;
 
-        print("News: " + news.Text);
-        News.Panel.gameObject.SetActive(true);
-        News.Description.text = news.Text;
-
-        News.Icon.sprite = this.Icons.MiscIcons[(int)news.Icon];
+            News.Icon.sprite = this.Icons.MiscIcons[(int)currentNews.Icon];
 
 #warning news progressbar unimplemented
-        News.ProgressBar.gameObject.SetActive(false);
+            News.ProgressBar.gameObject.SetActive(false);
 
-        yield return new WaitForSeconds(news.DurationMilliseconds / 1000f);
+            yield return new WaitForSeconds(currentNews.DurationMilliseconds / 1000f);
 
-        News.Panel.gameObject.SetActive(false);
+            News.Panel.gameObject.SetActive(false);
+            if (newsTicker.Count > 0)
+                currentNews = newsTicker.Dequeue();
+            else
+                currentNews = null;
+        }
+        while (currentNews != null);
+
+        newsCoroutine = null;
     }
 
     private void TogglePromptPanel(bool isActive)

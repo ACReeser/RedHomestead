@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 
 namespace RedHomestead.Environment
 {
@@ -180,7 +181,7 @@ namespace RedHomestead.Environment
 
         private void _OnHourChange(int sol, float hour)
         {
-            if (hour == 12)
+            if (hour == 6 || hour == 12 || hour == 22)
                 AnnounceForecast();
 
             AddIncrementalDust();
@@ -201,6 +202,11 @@ namespace RedHomestead.Environment
             UnityEngine.Debug.Log(String.Format("Today: {0} - {1} dust", today.Narrative, today.Coverage));
             UnityEngine.Debug.Log(String.Format("Tomorrow: {0} - {1} dust", tomorrow.Narrative, tomorrow.Coverage));
 #endif
+            if (WeatherStation.AllWeatherStations.Count > 0 && WeatherStation.AllWeatherStations.Any(w => w.IsOn))
+            {
+                GuiBridge.Instance.ShowNews(today.Coverage.News().CloneWithPrefix("Today's weather: "));
+                GuiBridge.Instance.ShowNews(tomorrow.Coverage.News().CloneWithPrefix("Tomorrow's weather: "));                
+            }
         }
 
         private void DoAfterSolChange()
@@ -251,6 +257,20 @@ namespace RedHomestead.Environment
                     return heavyCurve;
                 case DustCoverage.Stormy:
                     return stormyCurve;
+            }
+        }
+        public static News News(this DustCoverage coverage)
+        {
+            switch (coverage)
+            {
+                default:
+                    return NewsSource.WeatherClearSky;
+                case DustCoverage.Light:
+                    return NewsSource.WeatherLightDust;
+                case DustCoverage.Heavy:
+                    return NewsSource.WeatherHeavyDust;
+                case DustCoverage.Stormy:
+                    return NewsSource.WeatherDustStorm;
             }
         }
 
