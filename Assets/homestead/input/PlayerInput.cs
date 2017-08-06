@@ -57,7 +57,7 @@ public class PlayerInput : MonoBehaviour {
     /// when planning where to put them on the ground
     /// </summary>
     public Material translucentPlanningMat;
-    public ParticleSystem DrillSparks;
+    public ParticleSystem DrillSparks, Blower;
 
     public AudioSource InteractionSource;
     public InteractionClips Sfx;
@@ -1176,6 +1176,20 @@ public class PlayerInput : MonoBehaviour {
                         else
                         {
                             newPrompt = Prompts.PowerSwitchOnHint;
+                        }
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("dustable"))
+                {
+                    if (Loadout.Equipped == Equipment.Blower)
+                    {
+                        if (Blower.isStopped && Input.GetMouseButtonDown(0))
+                        {
+                            Blower.Play();
+                        }
+                        else if (Blower.isPlaying && Input.GetMouseButtonUp(0))
+                        {
+                            Blower.Stop();
                         }
                     }
                 }
