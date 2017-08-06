@@ -46,6 +46,14 @@ namespace RedHomestead.Economy{
         }
     }
 
+    public struct FinancerData
+    {
+        public BackerFinancing Type;
+        public int StartingFunds;
+        public int MinWeekly;
+        public int MaxWeekly;
+    }
+
     public static class EconomyExtensions
     {
         private const float MinimumDeliveryTimeHours = 2f;
@@ -57,10 +65,39 @@ namespace RedHomestead.Economy{
             return (value & flag) == flag;
         }
 
-        private static int[] startingFunds = new int[] { 3000000, 4000000, 4000000, 5000000 };
-        public static int StartingFunds(this BackerFinancing financing)
+        public static FinancerData[] financerData = new FinancerData[] {
+            new FinancerData()
+            {
+                Type = BackerFinancing.Government,
+                StartingFunds = 3000000,
+                MinWeekly = 350000,
+                MaxWeekly = 350000
+            },
+            new FinancerData()
+            {
+                Type = BackerFinancing.TechCorp,
+                StartingFunds = 4000000,
+                MinWeekly = 150000,
+                MaxWeekly = 500000
+            },
+            new FinancerData()
+            {
+                Type = BackerFinancing.Government,
+                StartingFunds = 4000000,
+                MinWeekly = 250000,
+                MaxWeekly = 400000
+            },
+            new FinancerData()
+            {
+                Type = BackerFinancing.Government,
+                StartingFunds = 5000000,
+                MinWeekly = 150000,
+                MaxWeekly = 150000
+            }
+        };
+        public static FinancerData Data(this BackerFinancing financing)
         {
-            return startingFunds[(int)financing];
+            return financerData[(int)financing];
         }
         
         //rover shipping type should be based on miles, not weight

@@ -22,8 +22,6 @@ public class EconomyManager : MonoBehaviour
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
     public AudioClip IncomingDelivery, BuyerFoundForGoods;
-    
-
 
     public int HoursUntilPayday
     {
@@ -41,14 +39,11 @@ public class EconomyManager : MonoBehaviour
         }
     }
 
-    public int BasePaydayAmount = 1000000;
-
     void Awake()
     {
         Instance = this;
     }
-
-    // Use this for initialization
+    
     void Start()
     {
         SunOrbit.Instance.OnHourChange += OnHourChange;
@@ -60,6 +55,9 @@ public class EconomyManager : MonoBehaviour
             Base.Current.InitialCraftablePurchase = null;
             Base.Current.InitialMatterPurchase = null;
         }
+
+        randomIncomeGenerator = new System.Random(Game.Current.Player.WeeklyIncomeSeed);
+        NextPayDayAmount = FastForward(Game.Current.Environment.CurrentSol);
     }
 
     void OnDestroy()
@@ -126,9 +124,39 @@ public class EconomyManager : MonoBehaviour
         }
     }
 
+    public int NextPayDayAmount { get; private set; }
+    private System.Random randomIncomeGenerator;
+
+    private int FastForward(int gameSol)
+    {
+        int currentSol = 0;
+        int payday = getNextPayday();
+        while(currentSol < gameSol)
+        {
+            payday = getNextPayday();
+        }
+        return payday;
+    }
+
+    private int getNextPayday()
+    {
+        FinancerData finData = Game.Current.Player.Financing.Data();
+        int round = 1000;
+        if (finData.MaxWeekly != finData.MinWeekly)
+        {
+            int rounded = randomIncomeGenerator.Next(finData.MinWeekly / round, (finData.MaxWeekly / round) + 1);
+            return rounded * round;
+        }
+        else
+        {
+            return finData.MaxWeekly;
+        }
+    }
+
     private void Payday()
     {
-        RedHomestead.Persistence.Game.Current.Player.BankAccount += BasePaydayAmount;
+        Game.Current.Player.BankAccount += NextPayDayAmount;
+        NextPayDayAmount = getNextPayday();
 
         if (this.OnBankAccountChange != null)
             this.OnBankAccountChange();

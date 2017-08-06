@@ -14,7 +14,7 @@ namespace RedHomestead.GameplayOptions
     public struct NewGameChoices
     {
         public Perk ChosenPlayerTraining;
-        public string HomesteadName;
+        public string HomesteadName, PlayerName;
         public BackerFinancing ChosenFinancing;
         public BaseLocation ChosenLocation;
         public int StartingFunds, AllocatedFunds, RemainingFunds;
@@ -32,7 +32,7 @@ namespace RedHomestead.GameplayOptions
 
         public void RecalculateFunds()
         {
-            StartingFunds = Mathf.RoundToInt(ChosenFinancing.StartingFunds() * PerkMultipliers.StartingFunds(ChosenPlayerTraining));
+            StartingFunds = Mathf.RoundToInt(ChosenFinancing.Data().StartingFunds * PerkMultipliers.StartingFunds(ChosenPlayerTraining));
             AllocatedFunds = EconomyExtensions.HabitatCost + EconomyExtensions.RoverCost;
 
             int i = 0;
@@ -76,6 +76,7 @@ namespace RedHomestead.GameplayOptions
             {
                 AddSuppliesFromModule(Module.Airlock);
                 AddSuppliesFromModule(Module.EVAStation);
+                AddSuppliesFromModule(Module.RoverStation);
             }
         }
 
@@ -129,7 +130,6 @@ namespace RedHomestead.GameplayOptions
             AddOrIncrement(BoughtMatter, Matter.RationMeal, 1);
             AddOrIncrement(BoughtMatter, Matter.Water, 2);
             AddOrIncrement(BoughtMatter, Matter.Oxygen, 2);
-            //this.AddSuppliesFromModule(Module.SolarPanelSmall);
             this.AddSuppliesFromModule(Module.SmallGasTank);
             this.AddSuppliesFromModule(Module.SabatierReactor);
 

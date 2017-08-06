@@ -308,6 +308,16 @@ namespace RedHomestead.Buildings
                     },
                     Description = "A way to transfer oxygen, water, and power to Rovers."
                 }
+            },
+            {
+                Module.WeatherStation, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.Steel),
+                    },
+                    Description = "A station that allows weather forecasts."
+                }
             }
         };
         
@@ -333,7 +343,8 @@ namespace RedHomestead.Buildings
                 new Module[]
                 {
                     Module.EVAStation,
-                    Module.RoverStation
+                    Module.RoverStation,
+                    Module.WeatherStation
                 }
             },
             {

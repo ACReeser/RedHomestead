@@ -33,8 +33,13 @@ public struct ColonyFields
 /// bindings and display logic for all the stuff under the finance app
 public struct FinanceFields
 {
-    public Text DaysUntilPaydayText, BankAccountText;
+    public Text DaysUntilPaydayText, PaydayAmountText, BankAccountText;
     public Image DaysUntilPaydayVisualization;
+
+    internal void Fill()
+    {
+        PaydayAmountText.text = EconomyManager.Instance.NextPayDayAmount.ToString("C") + " this week";
+    }
 }
 
 [Serializable]
@@ -319,8 +324,10 @@ public class Terminal : MonoBehaviour {
             SwitchMarketTab((int)MarketTab.Buy);
         else if (currentProgramPanel == ProgramPanels[(int)TerminalProgram.Colony])
             colony.FillColonyScreen();
+        else if (currentProgramPanel == ProgramPanels[(int)TerminalProgram.Finances])
+            finance.Fill();
 
-        if (currentProgramPanel != null)
+            if (currentProgramPanel != null)
             currentProgramPanel.gameObject.SetActive(true);
     }
 

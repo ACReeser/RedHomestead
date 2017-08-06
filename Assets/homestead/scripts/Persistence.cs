@@ -72,6 +72,17 @@ namespace RedHomestead.Persistence
         public bool GremlinChastised;
         public List<Order> EnRouteOrders;
         public float[] PerkProgress;
+        public BackerFinancing Financing;
+        internal int WeeklyIncomeSeed;
+
+        public PlayerData() { }
+        public PlayerData(bool generateSeeds)
+        {
+            if (generateSeeds)
+            {
+                WeeklyIncomeSeed = new System.Random().Next(int.MinValue, int.MaxValue);
+            }
+        }
 
         protected override void BeforeMarshal(Transform t = null)
         {
@@ -224,7 +235,9 @@ namespace RedHomestead.Persistence
         public Base(bool generateSeeds)
         {
             if (generateSeeds)
+            {
                 WeatherSeed = new System.Random().Next(int.MinValue, int.MaxValue);
+            }
         }
 
         public void OnAfterDeserialize()
@@ -684,6 +697,7 @@ namespace RedHomestead.Persistence
                 {
                     new Base(true)
                     {
+                        Name = choices.HomesteadName,
                         InitialMatterPurchase = choices.BoughtMatter,
                         InitialCraftablePurchase = choices.BoughtCraftables,
                         Crates = new CrateData[] { },
@@ -700,10 +714,11 @@ namespace RedHomestead.Persistence
                     CurrentMinute = 0,
                     CurrentSol = 0
                 },
-                Player = new PlayerData()
+                Player = new PlayerData(true)
                 {
-                    Name = "Ares",
+                    Name = choices.PlayerName,
                     BankAccount = choices.RemainingFunds,
+                    Financing = choices.ChosenFinancing,
                     PackData = EVA.EVA.GetDefaultPackData(),
                     EnRouteOrders = new List<Order>(),
                     PerkProgress = choices.GetPerkProgress()
