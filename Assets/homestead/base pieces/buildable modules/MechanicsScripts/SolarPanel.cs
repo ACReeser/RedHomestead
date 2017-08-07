@@ -56,7 +56,7 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply, IFlexDataC
 
     private float GetWattsAtHour()
     {
-        return MaximumWattsGenerated * Game.Current.Environment.SolarIntensity();
+        return MaximumWattsGenerated * Game.Current.Environment.SolarIntensity() * (1f - this.FlexData.DustBuildup);
     }
 
     public override void OnAdjacentChanged()
@@ -128,5 +128,18 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply, IFlexDataC
 
         if (SunOrbit.DustManager != null)
             SunOrbit.DustManager.OnSolarPanelAdded(this);
+    }
+
+    public void RefreshSolarPanelDustVisuals()
+    {
+        bool hasDust = FlexData.DustBuildup > 0;
+        panel1Mesh.transform.gameObject.SetActive(hasDust);
+        panel2Mesh.transform.gameObject.SetActive(hasDust);
+        if (hasDust)
+        {
+            float dustCutoff = Mathf.Lerp(1f, .22f, FlexData.DustBuildup);
+            panel1Mesh.material.SetFloat("_Cutoff", dustCutoff);
+            panel2Mesh.material.SetFloat("_Cutoff", dustCutoff);
+        }
     }
 }

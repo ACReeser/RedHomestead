@@ -1191,6 +1191,16 @@ public class PlayerInput : MonoBehaviour {
                         {
                             Blower.Stop();
                         }
+
+                        if (Blower.isPlaying)
+                        {
+                            var sp = hitInfo.collider.transform.root.GetComponent<SolarPanel>();
+                            if (sp != null && sp.FlexData.DustBuildup > 0f)
+                            {
+                                sp.FlexData.DustBuildup -= DustRemovalPerGameSecond * Time.deltaTime;
+                                sp.RefreshSolarPanelDustVisuals();
+                            }
+                        }
                     }
                 }
                 else if (hitInfo.collider.CompareTag("airbagpayload"))
@@ -1284,6 +1294,10 @@ public class PlayerInput : MonoBehaviour {
         {
             CurrentEVAStation.ToggleUse(false);
             CurrentEVAStation = null;
+        }
+        else if (Blower.isPlaying)
+        {
+            Blower.Stop();
         }
 
         if (!doInteract && Input.GetKeyUp(KeyCode.P))
@@ -2044,6 +2058,7 @@ public class PlayerInput : MonoBehaviour {
     internal enum WakeSignal { PlayerCancel, ResourceRequired, DayStart }
     internal WakeSignal? wakeyWakeySignal = null;
     private EVAStation CurrentEVAStation;
+    private const float DustRemovalPerGameSecond = 1 / 60f;
 
     private void HandleSleepInput(ref PromptInfo newPrompt, bool doInteract)
     {
