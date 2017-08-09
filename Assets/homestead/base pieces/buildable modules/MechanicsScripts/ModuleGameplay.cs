@@ -167,6 +167,10 @@ public abstract class ResourcelessHabitatGameplay: ResourcelessGameplay, IHabita
     public List<IHabitatModule> AdjacentModules { get; set; }
     [HideInInspector]
     public Habitat LinkedHabitat { get; set; }
+
+    public Transform[] bulkheads;
+    public Transform[] Bulkheads { get { return bulkheads; } }
+
     public override bool CanMalfunction
     {
         get

@@ -52,7 +52,10 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     public HabitatExtraData HabitatData;
     public PowerVisualization BatteryViz;
-    
+
+    public Transform[] bulkheads;
+    public Transform[] Bulkheads { get { return bulkheads; } }
+
     public bool IsHeatOn { get { return this.HabitatData.IsHeatOn; } set { HabitatData.IsHeatOn = value; RecalcPowerRequirements(); } }
     public bool IsOxygenOn { get { return HabitatData.IsOxygenOn; } set { HabitatData.IsOxygenOn = value; RecalcPowerRequirements(); } }
 
@@ -213,10 +216,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     protected override string GetModuleInstanceID()
     {
-        if (this.Data != null)
-            return this.Data.ModuleInstanceID;
-        else
-            return base.GetModuleInstanceID();
+        return this.name;
     }
 
     public override Module GetModuleType()

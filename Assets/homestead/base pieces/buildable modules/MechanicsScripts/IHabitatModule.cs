@@ -9,6 +9,7 @@ public interface IHabitatModule: IBuildable, IPowerable
 {
     Habitat LinkedHabitat { get; set; }
     List<IHabitatModule> AdjacentModules { get; set; }
+    Transform[] Bulkheads { get; }
 }
 
 public static class HabitatModuleExtensions
@@ -57,6 +58,22 @@ public static class HabitatModuleExtensions
                 }
             }
         }
+    }
+
+    public static int GetBulkheadIndex(this IHabitatModule self, Transform t)
+    {
+        if (self.Bulkheads == null)
+        {
+            UnityEngine.Debug.LogWarning("Looking for bulkhead when no bulkheads array is extant!");
+            return -1;
+        }
+
+        for (int i = 0; i < self.Bulkheads.Length; i++)
+        {
+            if (self.Bulkheads[i] == t)
+                return i;
+        }
+        return -1;
     }
 }
 

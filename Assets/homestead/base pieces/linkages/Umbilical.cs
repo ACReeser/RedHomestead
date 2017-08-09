@@ -32,6 +32,11 @@ public class Umbilical : Powerline
     private RoverStation station = null;
     private int numLinks;
 
+    protected override void OnAssign(IPowerable from, IPowerable to, Transform fromtT, Transform toT)
+    {
+        Data.Type = PowerlineType.Umbilical;
+    }
+
     protected override void ShowVisuals(IPowerable g1, IPowerable g2)
     {
         if (g1 is RoverStation && g2 is RoverInput)
@@ -44,8 +49,6 @@ public class Umbilical : Powerline
             station = g2 as RoverStation;
             station.OnRoverAttachedChange(g1 as RoverInput);
         }
-
-        Data.IsUmbilical = true;
 
         fromCap = CreateCap(Data.fromPos, Data.fromRot, Data.fromScale);
         toCap = CreateCap(Data.toPos, Data.toRot, Data.toScale);

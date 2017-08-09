@@ -142,4 +142,9 @@ public class SolarPanel : ResourcelessGameplay, IVariablePowerSupply, IFlexDataC
             panel2Mesh.material.SetFloat("_Cutoff", dustCutoff);
         }
     }
+
+    public void OnDestroy()
+    {
+        AllPanels.Remove(this);
+    }
 }

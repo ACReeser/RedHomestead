@@ -53,6 +53,8 @@ namespace RedHomestead.Agriculture{
         public FarmFlexData FlexData { get; set; }
         public Collider[] HarvestTriggers;
 
+        public Transform[] bulkheads;
+        public Transform[] Bulkheads { get { return bulkheads; } }
         protected virtual float HarvestTimeSeconds { get { return 1f; } }
 
         /// <summary>

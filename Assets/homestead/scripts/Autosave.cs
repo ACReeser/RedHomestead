@@ -16,6 +16,7 @@ public class Autosave : MonoBehaviour
         {
             print("Starting new game for editor session");
             PersistentDataManager.StartNewGame(new RedHomestead.GameplayOptions.NewGameChoices() {
+                PlayerName = "Ares",
                 ChosenFinancing = RedHomestead.Economy.BackerFinancing.Government,
                 BuyRover = true,
                 ChosenPlayerTraining = RedHomestead.Perks.Perk.Athlete,

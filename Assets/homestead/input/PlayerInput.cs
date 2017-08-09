@@ -1827,33 +1827,13 @@ public class PlayerInput : MonoBehaviour {
 
     private void PlaceTube(Collider toBulkhead)
     {
-        Transform newCorridorParent = PlaceRuntimeLinkingObject(selectedBulkhead, toBulkhead, tubePrefab, createdTubes, hideObjectEnds: true);
-        Transform newCorridor = newCorridorParent.GetChild(0);
-        MeshFilter newCorridorFilter = newCorridor.GetComponent<MeshFilter>();
+        Transform newCorridorParent = PlaceRuntimeLinkingObject(selectedBulkhead, toBulkhead, tubePrefab, createdTubes);
+        
+        IHabitatModule habMod1 = selectedBulkhead.transform.root.GetComponent<IHabitatModule>();
+        IHabitatModule habMod2 = toBulkhead.transform.root.GetComponent<IHabitatModule>();
 
-        //create the interior mesh
-        Mesh baseCorridorMesh = newCorridorFilter.sharedMesh;
-        Mesh newCorridorMesh = (Mesh)Instantiate(baseCorridorMesh);
-
-        Transform anchorT1 = selectedBulkhead.transform.parent;
-        Mesh anchorM1 = anchorT1.GetComponent<MeshFilter>().mesh;
-
-        Transform anchorT2 = toBulkhead.transform.parent;
-        Mesh anchorM2 = anchorT2.GetComponent<MeshFilter>().mesh;
-
-        //modify the ends of the mesh
-        Construction.SetCorridorVertices(newCorridor, newCorridorMesh, anchorT1, anchorM1, anchorT2, anchorM2);
-
-        //assign the programmatically created mesh to the mesh filter
-        newCorridorFilter.mesh = newCorridorMesh;
-        //and tell the mesh collider to use this new mesh as well
-        newCorridor.GetComponent<MeshCollider>().sharedMesh = newCorridorMesh;
-
-        IHabitatModule habMod1 = anchorT1.root.GetComponent<IHabitatModule>();
-        IHabitatModule habMod2 = anchorT2.root.GetComponent<IHabitatModule>();
-
-        Powerline powerline = newCorridorParent.GetComponent<Powerline>();
-        powerline.AssignConnections(habMod1, habMod2, selectedBulkhead.transform.parent, toBulkhead.transform.parent);
+        Corridor corridor = newCorridorParent.GetComponent<Corridor>();
+        corridor.AssignConnections(habMod1, habMod2, selectedBulkhead.transform.parent, toBulkhead.transform.parent);
     }
 
     private void PlaceGasPipe(Collider collider)
@@ -1894,8 +1874,8 @@ public class PlayerInput : MonoBehaviour {
     private static Transform PlaceRuntimeLinkingObject(
         Collider firstObject, 
         Collider otherObject, 
-        Transform linkingObjectPrefab, List<Transform> addToList, 
-        bool hideObjectEnds = false)
+        Transform linkingObjectPrefab, 
+        List<Transform> addToList)
     {
         Vector3 midpoint = Vector3.Lerp(firstObject.transform.position, otherObject.transform.position, 0.5f);
         Transform newObj = GameObject.Instantiate<Transform>(linkingObjectPrefab);
@@ -1904,12 +1884,6 @@ public class PlayerInput : MonoBehaviour {
         newObj.LookAt(otherObject.transform);
 
         addToList.Add(newObj);
-
-        if (hideObjectEnds)
-        {
-            firstObject.gameObject.SetActive(false);
-            otherObject.gameObject.SetActive(false);
-        }
 
         return newObj;
     }

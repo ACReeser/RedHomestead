@@ -6,11 +6,10 @@ using RedHomestead.Persistence;
 using RedHomestead.Electricity;
 
 public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
-    private PowerlineData data;
+    protected PowerlineData data;
     public Transform CapPrefab;
     public PowerlineData Data { get { return data; } set { data = value; } }
-    private Transform[] Ends = new Transform[2];
-    private bool IsCorridor = false;
+    protected Transform[] Ends = new Transform[2];
 
     protected virtual Vector3 EndCapLocalPosition { get { return Vector3.zero; } }
     protected virtual Quaternion EndCapLocalRotation { get { return Quaternion.Euler(90f, 0f, -90f); } }
@@ -22,16 +21,13 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
 
         FlowManager.Instance.PowerGrids.Attach(this, from, to);
 
-        IHabitatModule fromH = from as IHabitatModule;
-        IHabitatModule toH = to as IHabitatModule;
-
-        if (fromH != null && toH != null)
-        {
-            HabitatModuleExtensions.AssignConnections(fromH, toH);
-            IsCorridor = true;
-        }
+        OnAssign(from, to, fromT, toT);
 
         ShowVisuals(from, to);
+    }
+
+    protected virtual void OnAssign(IPowerable from, IPowerable to, Transform fromtT, Transform toT)
+    {
     }
 
     private void AddOrAugmentData(IPowerable from, IPowerable to, Transform fromT, Transform toT)
@@ -74,15 +70,6 @@ public class Powerline : MonoBehaviour, IDataContainer<PowerlineData> {
 
     private void SetEnds(bool connected)
     {
-        if (Ends[0] == null)
-        {
-            UnityEngine.Debug.LogWarning("Can't set active state of powerline end that is null!");
-        }
-        else if (this.IsCorridor)
-        {
-            Ends[0].gameObject.SetActive(!connected);
-            Ends[1].gameObject.SetActive(!connected);
-        }
     }
 
     internal void Remove()

@@ -130,6 +130,8 @@ namespace RedHomestead.Persistence
         }
     }
 
+    public enum PowerlineType { Powerline = 0, Corridor, Umbilical }
+
     [Serializable]
     public class PowerlineData: ConnectionData
     {
@@ -138,7 +140,7 @@ namespace RedHomestead.Persistence
         public Quaternion fromRot, toRot;
         public Vector3 fromScale, toScale;
         public string FromPowerableInstanceID, ToPowerableInstanceID;
-        public bool IsUmbilical = false;
+        public PowerlineType Type;
 
         protected override void BeforeMarshal(Transform t = null)
         {
@@ -274,7 +276,7 @@ namespace RedHomestead.Persistence
             _DestroyCurrent<ResourcelessGameplay>();
             _DestroyCurrent<SingleResourceModuleGameplay>();
             _DestroyCurrent<MultipleResourceModuleGameplay>(typeof(Habitat));
-            Habitat[] allHabs = Transform.FindObjectsOfType<Habitat>();
+            Habitat[] allHabs = Transform.FindObjectsOfType<Habitat>().Where(x => x.isActiveAndEnabled).ToArray();
 
             Dictionary<string, ModuleGameplay> moduleMap = new Dictionary<string, ModuleGameplay>();
 
@@ -319,7 +321,7 @@ namespace RedHomestead.Persistence
             {
                 if (data.ModuleType == Buildings.Module.Habitat)
                 {
-                    SyncToHabitat(allHabs, data, moduleMap);
+                    SyncToHabitat(allHabs, data, moduleMap, powerableMap);
                 }
                 else
                 {
@@ -349,13 +351,18 @@ namespace RedHomestead.Persistence
             foreach (PowerlineData data in PowerData)
             {
                 Transform prefab = null;
-                if (data.IsUmbilical)
+                switch (data.Type)
                 {
-                    prefab = PlayerInput.Instance.umbilicalPrefab;
-                }
-                else
-                {
-                    prefab = PlayerInput.Instance.powerlinePrefab;
+                    default:
+                    case PowerlineType.Powerline:
+                        prefab = PlayerInput.Instance.powerlinePrefab;
+                        break;
+                    case PowerlineType.Umbilical:
+                        prefab = PlayerInput.Instance.umbilicalPrefab;
+                        break;
+                    case PowerlineType.Corridor:
+                        prefab = PlayerInput.Instance.tubePrefab;
+                        break;
                 }
 
                 Transform t = GameObject.Instantiate(prefab, data.Position, data.Rotation) as Transform;
@@ -363,6 +370,7 @@ namespace RedHomestead.Persistence
 
                 Powerline r = t.GetComponent<Powerline>();
                 r.Data = data;
+                DeserializeFlexData(data, r);
                 r.AssignConnections(powerableMap[data.FromPowerableInstanceID], powerableMap[data.ToPowerableInstanceID], null, null);
             }
 #if UNITY_EDITOR
@@ -403,13 +411,13 @@ namespace RedHomestead.Persistence
             }
         }
 
-        public static void DeserializeFlexData(ModuleData data, ModuleGameplay gameplay)
+        public static void DeserializeFlexData(ModuleData data, object container)
         {
 #if UNITY_EDITOR
             reflectionRuns++;
             reflectionCheckTime.Start();
 #endif
-            Type gameplayType = gameplay.GetType();
+            Type gameplayType = container.GetType();
             if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), gameplayType))
             {
 #if UNITY_EDITOR
@@ -418,7 +426,7 @@ namespace RedHomestead.Persistence
 #endif
                 System.Reflection.PropertyInfo pi = gameplayType.GetProperty("FlexData");
                 object deserialized = JsonUtility.FromJson(data.Flex, pi.PropertyType);
-                pi.SetValue(gameplay, deserialized, null);
+                pi.SetValue(container, deserialized, null);
 #if UNITY_EDITOR
                 reflectionPropertyTime.Stop();
 #endif
@@ -438,10 +446,10 @@ namespace RedHomestead.Persistence
         /// </summary>
         /// <param name="allHabs"></param>
         /// <param name="data"></param>
-        private void SyncToHabitat(Habitat[] allHabs, MultipleResourceModuleData data, Dictionary<string, ModuleGameplay> moduleMap)
+        private void SyncToHabitat(Habitat[] allHabs, MultipleResourceModuleData data, Dictionary<string, ModuleGameplay> moduleMap, Dictionary<string, IPowerable> powerableMap)
         {
             HabitatExtraData matchingHabData = Habitats.FirstOrDefault(x => x.ModuleInstanceID == data.ModuleInstanceID);
-            Habitat matchingHab = allHabs.FirstOrDefault(x => x.Data.ModuleInstanceID == data.ModuleInstanceID);
+            Habitat matchingHab = allHabs.FirstOrDefault(x => x.name == data.ModuleInstanceID);
             matchingHab.Data = data;
             matchingHab.HabitatData = matchingHabData;
 
@@ -449,6 +457,7 @@ namespace RedHomestead.Persistence
                 matchingHab.OnResourceChange(Simulation.Matter.Biomass, Simulation.Matter.OrganicMeal, Simulation.Matter.MealShake, Simulation.Matter.RationMeal, Simulation.Matter.MealPowder);
 
             moduleMap.Add(data.ModuleInstanceID, matchingHab);
+            powerableMap.Add(data.PowerableInstanceID, matchingHab);
         }
 
         private void DeserializeCratelikes(Dictionary<string, IPowerable> powerableMap)
@@ -545,12 +554,12 @@ namespace RedHomestead.Persistence
 
         private void _MarshalHabitats()
         {
-            this.Habitats = Array.ConvertAll(Transform.FindObjectsOfType<Habitat>(), hab => (HabitatExtraData)hab.HabitatData.Marshal(hab.transform));
+            this.Habitats = Array.ConvertAll(Transform.FindObjectsOfType<Habitat>().Where(x => x.isActiveAndEnabled).ToArray(), hab => (HabitatExtraData)hab.HabitatData.Marshal(hab.transform));
         }
 
         private void _MarshalManyFromScene<C, D>(Action<D[]> setter) where C : MonoBehaviour, IDataContainer<D> where D : RedHomesteadData
         {
-            setter(Array.ConvertAll(Transform.FindObjectsOfType<C>(),
+            setter(Array.ConvertAll(Transform.FindObjectsOfType<C>().Where(x => x.isActiveAndEnabled).ToArray(),
                 container =>
                 {
                     if (container == null)

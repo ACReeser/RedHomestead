@@ -24,6 +24,7 @@ namespace RedHomestead.GameplayOptions
 
         public void Init()
         {
+            PlayerName = "Everyman";
             BoughtMatter = new Dictionary<Matter, int>();
             BoughtCraftables = new Dictionary<Craftable, int>();
             ChosenFinancing = BackerFinancing.Government;
