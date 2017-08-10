@@ -5,10 +5,10 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 401984}
-  - 82: {fileID: 8279176}
+  - component: {fileID: 401984}
+  - component: {fileID: 8279176}
   m_Layer: 0
   m_Name: Interaction Audio Source
   m_TagString: Untagged
@@ -21,14 +21,13 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 408964}
-  - 143: {fileID: 14362950}
-  - 54: {fileID: 5498730}
-  - 82: {fileID: 8292960}
-  - 114: {fileID: 11421442}
-  - 114: {fileID: 11422656}
+  - component: {fileID: 408964}
+  - component: {fileID: 14362950}
+  - component: {fileID: 5498730}
+  - component: {fileID: 8292960}
+  - component: {fileID: 11421442}
   m_Layer: 0
   m_Name: FPSController
   m_TagString: Player
@@ -41,10 +40,10 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 418034}
-  - 108: {fileID: 10888764}
+  - component: {fileID: 418034}
+  - component: {fileID: 10888764}
   m_Layer: 0
   m_Name: Spotlight
   m_TagString: Untagged
@@ -57,10 +56,10 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 476376}
-  - 108: {fileID: 10817006}
+  - component: {fileID: 476376}
+  - component: {fileID: 10817006}
   m_Layer: 0
   m_Name: Spotlight (1)
   m_TagString: Untagged
@@ -73,10 +72,10 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 474800}
-  - 20: {fileID: 2090158}
+  - component: {fileID: 474800}
+  - component: {fileID: 2090158}
   m_Layer: 0
   m_Name: AlternativeCamera
   m_TagString: Untagged
@@ -89,9 +88,9 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 429462}
+  - component: {fileID: 429462}
   m_Layer: 0
   m_Name: HeadlampHarness
   m_TagString: Untagged
@@ -104,14 +103,14 @@ GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 423614}
-  - 20: {fileID: 2016916}
-  - 81: {fileID: 8152440}
-  - 45: {fileID: 4574634}
-  - 114: {fileID: 11493248}
-  - 114: {fileID: 11499320}
+  - component: {fileID: 423614}
+  - component: {fileID: 2016916}
+  - component: {fileID: 8152440}
+  - component: {fileID: 4574634}
+  - component: {fileID: 11493248}
+  - component: {fileID: 11499320}
   m_Layer: 0
   m_Name: FirstPersonCharacter
   m_TagString: MainCamera
@@ -124,10 +123,10 @@ GameObject:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Component:
-  - 4: {fileID: 437614}
-  - 82: {fileID: 8211196}
+  - component: {fileID: 437614}
+  - component: {fileID: 8211196}
   m_Layer: 0
   m_Name: Computer Voice Audio Source
   m_TagString: Untagged
@@ -147,6 +146,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 408964}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &408964
 Transform:
   m_ObjectHideFlags: 1
@@ -161,6 +161,7 @@ Transform:
   - {fileID: 423614}
   m_Father: {fileID: 0}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &418034
 Transform:
   m_ObjectHideFlags: 1
@@ -173,6 +174,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 429462}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &423614
 Transform:
   m_ObjectHideFlags: 1
@@ -187,6 +189,7 @@ Transform:
   - {fileID: 474800}
   m_Father: {fileID: 408964}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &429462
 Transform:
   m_ObjectHideFlags: 1
@@ -202,6 +205,7 @@ Transform:
   - {fileID: 437614}
   m_Father: {fileID: 423614}
   m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &437614
 Transform:
   m_ObjectHideFlags: 1
@@ -214,6 +218,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 429462}
   m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &474800
 Transform:
   m_ObjectHideFlags: 1
@@ -226,6 +231,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 423614}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &476376
 Transform:
   m_ObjectHideFlags: 1
@@ -238,6 +244,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 429462}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &2016916
 Camera:
   m_ObjectHideFlags: 1
@@ -268,6 +275,8 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 0
+  m_AllowMSAA: 1
+  m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
@@ -302,6 +311,8 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 0
+  m_AllowMSAA: 1
+  m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
@@ -352,6 +363,7 @@ AudioSource:
   Loop: 0
   Mute: 0
   Spatialize: 0
+  SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
@@ -364,12 +376,14 @@ AudioSource:
   rolloffCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 0
       inSlope: 0
       outSlope: 0
@@ -380,7 +394,8 @@ AudioSource:
   panLevelCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -391,7 +406,8 @@ AudioSource:
   spreadCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -402,7 +418,8 @@ AudioSource:
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
@@ -426,6 +443,7 @@ AudioSource:
   Loop: 0
   Mute: 0
   Spatialize: 0
+  SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
@@ -438,12 +456,14 @@ AudioSource:
   rolloffCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 0
       inSlope: 0
       outSlope: 0
@@ -454,7 +474,8 @@ AudioSource:
   panLevelCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -465,7 +486,8 @@ AudioSource:
   spreadCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -476,7 +498,8 @@ AudioSource:
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
@@ -500,6 +523,7 @@ AudioSource:
   Loop: 0
   Mute: 0
   Spatialize: 0
+  SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
@@ -512,12 +536,14 @@ AudioSource:
   rolloffCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
-    - time: 1
+    - serializedVersion: 2
+      time: 1
       value: 0
       inSlope: 0
       outSlope: 0
@@ -528,7 +554,8 @@ AudioSource:
   panLevelCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
@@ -539,7 +566,8 @@ AudioSource:
   spreadCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 0
       inSlope: 0
       outSlope: 0
@@ -550,7 +578,8 @@ AudioSource:
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
-    - time: 0
+    - serializedVersion: 2
+      time: 0
       value: 1
       inSlope: 0
       outSlope: 0
@@ -565,7 +594,7 @@ Light:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 147050}
   m_Enabled: 1
-  serializedVersion: 6
+  serializedVersion: 8
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
@@ -575,6 +604,7 @@ Light:
   m_Shadows:
     m_Type: 0
     m_Resolution: -1
+    m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
@@ -587,10 +617,12 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_AreaSize: {x: 1, y: 1}
 --- !u!108 &10888764
 Light:
   m_ObjectHideFlags: 1
@@ -598,7 +630,7 @@ Light:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 143478}
   m_Enabled: 1
-  serializedVersion: 6
+  serializedVersion: 8
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
@@ -608,6 +640,7 @@ Light:
   m_Shadows:
     m_Type: 0
     m_Resolution: -1
+    m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
@@ -620,10 +653,12 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_AreaSize: {x: 1, y: 1}
 --- !u!114 &11421442
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -664,12 +699,14 @@ MonoBehaviour:
     IncreaseCurve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 1
         inSlope: 2
         outSlope: 2
@@ -684,27 +721,32 @@ MonoBehaviour:
     Bobcurve:
       serializedVersion: 2
       m_Curve:
-      - time: 0
+      - serializedVersion: 2
+        time: 0
         value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
-      - time: 0.5
+      - serializedVersion: 2
+        time: 0.5
         value: 1
         inSlope: 0
         outSlope: 0
         tangentMode: 0
-      - time: 1
+      - serializedVersion: 2
+        time: 1
         value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
-      - time: 1.5
+      - serializedVersion: 2
+        time: 1.5
         value: -1
         inSlope: 0
         outSlope: 0
         tangentMode: 0
-      - time: 2
+      - serializedVersion: 2
+        time: 2
         value: 0
         inSlope: 0
         outSlope: 0
@@ -726,7 +768,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7601ccf7ebb8c7c46a3fca842f2c494f, type: 3}
   m_JumpSound: {fileID: 8300000, guid: 5897aeed9b676024fbb8c694b421a861, type: 3}
   m_LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
-  SuspendInput: 0
+  FreezeMovement: 0
   FreezeLook: 0
   bootSprites:
   - {fileID: 0}
@@ -738,17 +780,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   PlaceBootprints: 1
---- !u!114 &11422656
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 125892}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &11493248
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -766,13 +797,18 @@ MonoBehaviour:
   tubePrefab: {fileID: 463720, guid: 9d86cff3e08476b4389c61101a0f06dd, type: 2}
   gasPipePrefab: {fileID: 437088, guid: db8d1bd857e5eba43920361d81b6c731, type: 2}
   powerlinePrefab: {fileID: 429478, guid: e07415a2b8c5bed4abc47aae1f8b7ffc, type: 2}
+  umbilicalPrefab: {fileID: 0}
   FPSController: {fileID: 11421442}
-  ConstructionZonePrefab: {fileID: 484780, guid: 321c08093368d234292c4d1189edd6be,
-    type: 2}
   PostItNotePrefab: {fileID: 407182, guid: b414ae3cf623a354f8b6eed66ed28175, type: 2}
   translucentPlanningMat: {fileID: 2100000, guid: 9a864124fbc06754f9c188ba55564c3d,
     type: 2}
+  DrillSparks: {fileID: 0}
+  Blower: {fileID: 0}
   InteractionSource: {fileID: 8279176}
+  Sfx:
+    Drill: {fileID: 0}
+    Construction: {fileID: 0}
+  GoodMorningHomesteader: {fileID: 0}
 --- !u!114 &11499320
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -788,27 +824,19 @@ MonoBehaviour:
     AudioClips:
       WarningClip: {fileID: 8300000, guid: 8fbfa6e469f4e7d409e960c843e69aff, type: 3}
       CriticalClip: {fileID: 8300000, guid: f3b302a297efb2d4e895e0a80e3fc640, type: 3}
-    CurrentAmount: 0.3888
-    MaximumAmount: 0.3888
   Water:
     AudioClips:
       WarningClip: {fileID: 8300000, guid: 81af3fcc0ebdfce4c8c615bfcb0d06d3, type: 3}
       CriticalClip: {fileID: 8300000, guid: 0c102ba46d5c1e84f82c4617a267e05b, type: 3}
-    CurrentAmount: 1.5
-    MaximumAmount: 1.5
   Food:
     AudioClips:
       WarningClip: {fileID: 8300000, guid: 61dc91dc20450cd44b5df5f804c87403, type: 3}
       CriticalClip: {fileID: 8300000, guid: b4af98c669ae2ab439904ecbf5806489, type: 3}
-    CurrentAmount: 2400
-    MaximumAmount: 2400
   Power:
     AudioClips:
       WarningClip: {fileID: 8300000, guid: 1ec7ae2dfe2b49f46ae70480e5611689, type: 3}
       CriticalClip: {fileID: 8300000, guid: 43f84046247053843a091da336e9c868, type: 3}
-    CurrentAmount: 6
-    MaximumAmount: 6
-    IsOnLastBar: 0
+  IncomingSolarFlare: {fileID: 0}
 --- !u!143 &14362950
 CharacterController:
   m_ObjectHideFlags: 1

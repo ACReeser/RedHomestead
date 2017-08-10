@@ -12,7 +12,7 @@ using RedHomestead.Industry;
 /// Base abstract class for all modules
 /// All modules are assumed to be powered, have a module type, and a ModuleInstanceID
 /// </summary>
-public abstract class ModuleData : FacingData
+public abstract class ModuleData : FacingData, IFlexData
 { 
     [HideInInspector]
     public LocalEnergyHistory EnergyHistory = new LocalEnergyHistory();
@@ -24,7 +24,10 @@ public abstract class ModuleData : FacingData
     /// <summary>
     /// Flex data
     /// </summary>
-    public string Flex;
+    public string F;
+
+    public string Flex { get { return F; } set { F = value; } }
+
     /// <summary>
     /// cached MB for use when serializing
     /// </summary>

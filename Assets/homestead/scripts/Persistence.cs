@@ -17,8 +17,13 @@ namespace RedHomestead.Persistence
     {
         D Data { get; set; }
     }
+
+    public interface IFlexData
+    {
+        string Flex { get; set; }
+    }
     
-    public interface IFlexDataContainer<D, F> : IDataContainer<D> where D : RedHomesteadData where F : class, new()
+    public interface IFlexDataContainer<D, F> : IDataContainer<D> where D : RedHomesteadData, IFlexData where F : class, new()
     {
         F FlexData { get; set; }
     }
@@ -133,7 +138,7 @@ namespace RedHomestead.Persistence
     public enum PowerlineType { Powerline = 0, Corridor, Umbilical }
 
     [Serializable]
-    public class PowerlineData: ConnectionData
+    public class PowerlineData: ConnectionData, IFlexData
     {
         [NonSerialized]
         public IPowerable From, To;
@@ -141,6 +146,14 @@ namespace RedHomestead.Persistence
         public Vector3 fromScale, toScale;
         public string FromPowerableInstanceID, ToPowerableInstanceID;
         public PowerlineType Type;
+        public string F;
+
+        public string Flex { get { return F; } set { F = value; } }
+
+        /// <summary>
+        /// cached powerline for use when serializing
+        /// </summary>
+        private Powerline owner;
 
         protected override void BeforeMarshal(Transform t = null)
         {
@@ -152,6 +165,12 @@ namespace RedHomestead.Persistence
                 ToPowerableInstanceID = To.PowerableInstanceID;
 
             LocalScale = t.localScale;
+
+            if (owner == null && t != null)
+                owner = t.GetComponent<Powerline>();
+
+            if (owner is Corridor)
+                Base.SerializeFlexData(this, owner as Corridor);
         }
     }
 
@@ -384,13 +403,13 @@ namespace RedHomestead.Persistence
         private static int reflectionRuns = 0;
 #endif
 
-        public static void SerializeFlexData(ModuleData data, ModuleGameplay gameplay)
+        public static void SerializeFlexData(IFlexData data, object containerScript)
         {
 #if UNITY_EDITOR
             reflectionRuns++;
             reflectionCheckTime.Start();
 #endif
-            Type gameplayType = gameplay.GetType();
+            Type gameplayType = containerScript.GetType();
             if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), gameplayType))
             {
 #if UNITY_EDITOR
@@ -398,7 +417,7 @@ namespace RedHomestead.Persistence
                 reflectionPropertyTime.Start();
 #endif
                 System.Reflection.PropertyInfo pi = gameplayType.GetProperty("FlexData");
-                data.Flex = JsonUtility.ToJson(pi.GetValue(gameplay, null));
+                data.Flex = JsonUtility.ToJson(pi.GetValue(containerScript, null));
 #if UNITY_EDITOR
                 reflectionPropertyTime.Stop();
 #endif
@@ -411,13 +430,13 @@ namespace RedHomestead.Persistence
             }
         }
 
-        public static void DeserializeFlexData(ModuleData data, object container)
+        public static void DeserializeFlexData(IFlexData data, object containerScript)
         {
 #if UNITY_EDITOR
             reflectionRuns++;
             reflectionCheckTime.Start();
 #endif
-            Type gameplayType = container.GetType();
+            Type gameplayType = containerScript.GetType();
             if (IsSubclassOfRawGeneric(typeof(IFlexDataContainer<,>), gameplayType))
             {
 #if UNITY_EDITOR
@@ -426,7 +445,7 @@ namespace RedHomestead.Persistence
 #endif
                 System.Reflection.PropertyInfo pi = gameplayType.GetProperty("FlexData");
                 object deserialized = JsonUtility.FromJson(data.Flex, pi.PropertyType);
-                pi.SetValue(container, deserialized, null);
+                pi.SetValue(containerScript, deserialized, null);
 #if UNITY_EDITOR
                 reflectionPropertyTime.Stop();
 #endif
