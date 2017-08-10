@@ -204,6 +204,9 @@ public class PlayerInput : MonoBehaviour {
                     case Equipment.Wrench:
                         HandleWrenchInput(ref newPrompt);
                         break;
+                    case Equipment.Sledge:
+                        HandleSledgeInput(ref newPrompt);
+                        break;
                 }
 
                 if (CurrentCraftablePlanner != null)
@@ -263,6 +266,37 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandleSledgeInput(ref PromptInfo newPrompt)
+    {
+        RaycastHit hitInfo;
+        if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, layerNames: "Default"))
+        {
+            if (hitInfo.collider != null)
+            {
+                ModuleGameplay module = hitInfo.collider.transform.root.GetComponent<ModuleGameplay>();
+
+                if (module != null)
+                {
+                    if (FlowManager.Instance.PowerGrids.Edges.ContainsKey(module) || (module.AdjacentPumpables != null && module.AdjacentPumpables.Count > 0))
+                    {
+                        newPrompt = Prompts.SledgehammerConnectedHint;
+                    }
+                    else
+                    {
+                        if (Input.GetKeyUp(KeyCode.X))
+                        {
+                            GameObject.Destroy(module.transform.root.gameObject);
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.SledgehammerHint;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private void HandleUmbilicalInput(ref PromptInfo newPrompt, bool doInteract)
     {

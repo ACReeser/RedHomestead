@@ -23,7 +23,7 @@ namespace RedHomestead.Equipment
         {
             { Slot.Unequipped, Equipment.EmptyHand },
             { Slot.PrimaryTool, Equipment.PowerDrill },
-            { Slot.SecondaryTool, Equipment.Blower },
+            { Slot.SecondaryTool, Equipment.Sledge },
             { Slot.PrimaryGadget, Equipment.Blueprints },
             { Slot.SecondaryGadget, Equipment.ChemicalSniffer },
             { Slot.TertiaryGadget, Equipment.Locked },

@@ -564,4 +564,13 @@ public static class Prompts {
         Description = "Toggle",
         Key = "E"
     };
+    internal static PromptInfo SledgehammerConnectedHint = new PromptInfo()
+    {
+        Description = "Cannot destroy connected Module"
+    };
+    internal static PromptInfo SledgehammerHint = new PromptInfo()
+    {
+        Description = "Destroy Module",
+        Key = "X"
+    };
 }
