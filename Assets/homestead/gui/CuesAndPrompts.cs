@@ -24,6 +24,13 @@ public class News
         clone.Text = headlinePrefix + clone.Text;
         return clone;
     }
+
+    public News CloneWithSuffix(string headlineSuffix)
+    {
+        News clone = this.Clone();
+        clone.Text = clone.Text + headlineSuffix;
+        return clone;
+    }
 }
 
 
@@ -130,6 +137,18 @@ public static class NewsSource
         Text = "Dust Storm",
         DurationMilliseconds = 10000,
         Icon = MiscIcon.DustStorm
+    };
+    internal static News CraftingConsumed = new News()
+    {
+        Text = "Consumed ",
+        DurationMilliseconds = 2500,
+        Icon = MiscIcon.HammerAndPick
+    };
+    internal static News CraftingInsufficientResources = new News()
+    {
+        Text = "Insufficient Resources",
+        DurationMilliseconds = 3000,
+        Icon = MiscIcon.HammerAndPick
     };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)

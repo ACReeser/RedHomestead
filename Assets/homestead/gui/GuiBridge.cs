@@ -72,7 +72,8 @@ public enum MiscIcon {
     ClearSky,
     LightDust,
     HeavyDust,
-    DustStorm
+    DustStorm,
+    HammerAndPick
 }
 
 [Serializable]

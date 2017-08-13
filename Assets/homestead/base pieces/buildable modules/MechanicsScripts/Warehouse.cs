@@ -113,6 +113,9 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
                         depleted.Add(list[resourceIndex]);
                     }
 
+                    if (amount <= 0f)
+                        GuiBridge.Instance.ShowNews(NewsSource.CraftingConsumed.CloneWithSuffix(String.Format("{0} {1}", re.Count, re.Type.ToString())));
+
                     resourceIndex++;
                 }
             }

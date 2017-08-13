@@ -254,6 +254,10 @@ public class FloorplanBridge : MonoBehaviour {
                 Warehouse.GlobalResourceList.Consume(prereqs);
                 SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);
             }
+            else
+            {
+                GuiBridge.Instance.ShowNews(NewsSource.CraftingInsufficientResources);
+            }
         }
         else
         {
