@@ -4,13 +4,138 @@ using RedHomestead.Simulation;
 using System;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
+using System.Linq;
 
 public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 {
+    public class WarehouseResourceList
+    {
+        private readonly List<ResourceComponent>[] lists;
+        private readonly Action<List<ResourceComponent>> onResourcesDepleted;
+
+        public WarehouseResourceList(Action<List<ResourceComponent>> OnResourcesDepleted)
+        {
+            this.onResourcesDepleted = OnResourcesDepleted;
+            this.lists = new List<ResourceComponent>[MatterExtensions.MaxMatter()];
+        }
+
+        public bool Contains(Matter type)
+        {
+            int i = Convert.ToInt32(type);
+            if (lists[i] == null)
+            {
+                return false;
+            }
+            else
+            {
+                return lists[i].Count > 0;
+            }
+        }
+
+        public void Add(ResourceComponent r)
+        {
+            int i = Convert.ToInt32(r.Data.Container.MatterType);
+            if (lists[i] == null)
+            {
+                lists[i] = new List<ResourceComponent>()
+                {
+                    r
+                };
+            }
+            else
+            {
+                lists[i].Add(r);
+            }
+        }
+
+        public void Remove(ResourceComponent r)
+        {
+            int i = Convert.ToInt32(r.Data.Container.MatterType);
+            if (lists[i] == null)
+            {
+                //noop
+            }
+            else
+            {
+                lists[i].Remove(r);
+            }
+        }
+
+        public bool CanConsume(List<ResourceEntry> resources)
+        {
+            UnityEngine.Debug.Log("Checking can consume");
+
+            foreach(ResourceEntry re in resources)
+            {
+                if (!CanConsume(re.Type, re.Count))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public bool CanConsume(Matter type, float amount)
+        {
+            List<ResourceComponent> list = lists[Convert.ToInt32(type)];
+            if (list == null)
+            {
+                return false;
+            }
+            else
+            {
+                //validate there is enough matter
+                if (list.Sum(r => r.Data.Container.CurrentAmount) < amount)
+                    return false;
+                else
+                    return true;
+            }
+        }
+
+        public void Consume(List<ResourceEntry> resources)
+        {
+            UnityEngine.Debug.Log("Consuming resources from warehouses");
+
+            //maintain a separate list of depleted containers so we don't mess up the iteration
+            List<ResourceComponent> depleted = new List<ResourceComponent>();
+
+            foreach(ResourceEntry re in resources)
+            {
+                int resourceIndex = 0;
+                float amount = re.Count;
+                List<ResourceComponent> list = lists[Convert.ToInt32(re.Type)];
+
+                while (amount > 0 && resourceIndex < list.Count)
+                {
+                    amount -= list[resourceIndex].Data.Container.Pull(amount);
+                    
+                    if (list[resourceIndex].Data.Container.CurrentAmount <= 0f)
+                    {
+                        depleted.Add(list[resourceIndex]);
+                    }
+
+                    resourceIndex++;
+                }
+            }
+
+            //call the action if there were depleted containers
+            if (depleted.Count > 0)
+                this.onResourcesDepleted(depleted);
+        }
+
+        public void Consume(Matter type, float amount)
+        {
+            Consume(new List<ResourceEntry>()
+            {
+                new ResourceEntry(amount, type)
+            });
+        }
+    }
+
     private class WarehouseRow
     {
-        public WarehouseRow(Vector3 rowCenter)
+        public WarehouseRow(Warehouse parent, Vector3 rowCenter)
         {
+            this.parent = parent;
             this.rowCenter = rowCenter;
         }
 
@@ -20,12 +145,14 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
         private ResourceComponent[] stack = new ResourceComponent[ColumnCount * RowCount];
         private Dictionary<ResourceComponent, int> IndexMap = new Dictionary<ResourceComponent, int>();
         private Vector3 rowCenter;
+        private readonly Warehouse parent;
 
         public void Capture(ICrateSnapper dad, ResourceComponent res)
         {
             if (CanSnap(res))
             {
                 res.SnapCrate(dad, this.allocateCrate(res));
+                Warehouse.GlobalResourceList.Add(res);
             }
         }
 
@@ -61,6 +188,7 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
             {
                 int index = IndexMap[res];
                 IndexMap.Remove(res);
+                Warehouse.GlobalResourceList.Remove(res);
                 stack[index] = null;
                 return true;
             }
@@ -77,6 +205,24 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
         }
     }
 
+    static Warehouse()
+    {
+        GlobalResourceList = new WarehouseResourceList(OnResourcesDepleted);
+        Warehouses = new List<Warehouse>();
+    }
+    public static readonly WarehouseResourceList GlobalResourceList;
+    public static readonly List<Warehouse> Warehouses;
+    public static void OnResourcesDepleted(List<ResourceComponent> resources)
+    {
+        foreach (ResourceComponent res in resources)
+        {
+            foreach(Warehouse w in Warehouses)
+            {
+                w.DetachCrate(res);
+            }
+            GameObject.Destroy(res.gameObject);
+        }
+    }
 
     private WarehouseRow left, middle, right;
     private Dictionary<WarehouseRow, Coroutine> CrateInterferenceTimers = new Dictionary<WarehouseRow, Coroutine>();
@@ -92,15 +238,16 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 
     // Use this for initialization
     protected override void OnStart() {
-        left = new WarehouseRow(transform.GetChild(0).position);
-        middle = new WarehouseRow(transform.GetChild(1).position);
-        right = new WarehouseRow(transform.GetChild(2).position);
+        Warehouses.Add(this);
+        left = new WarehouseRow(this, transform.GetChild(0).position);
+        middle = new WarehouseRow(this, transform.GetChild(1).position);
+        right = new WarehouseRow(this, transform.GetChild(2).position);
     }
 
-    // Update is called once per frame
-    //void Update() {
-
-    //}
+    void OnDestroy()
+    {
+        Warehouses.Remove(this);
+    }
 
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider other, IMovableSnappable res)

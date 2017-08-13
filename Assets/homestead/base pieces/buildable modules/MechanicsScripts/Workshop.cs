@@ -200,7 +200,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IFlexDataCont
     {
         bool detailState = this.FlexData.CurrentCraftable != Craftable.Unspecified;
 
-        FloorplanBridge.Instance.ToggleCraftablePanel(overallState, detailState);
+        FloorplanBridge.Instance.ToggleCraftablePanel(overallState, detailState, overallState ? this : null);
         this.CurrentlyViewingDetail = detailState;
         
         if (overallState && detailState)

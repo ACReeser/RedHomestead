@@ -40,6 +40,12 @@ public class PrefabCache<T> where T : IConvertible {
         else
         {
             result = GameObject.Instantiate<Transform>(GetPrefab(key));
+            if (typeof(T) == typeof(Module))
+            {
+                ModuleGameplay g = result.GetComponent<ModuleGameplay>();
+                if (g != null)
+                    GameObject.Destroy(g);
+            }
             RecurseDisableColliderSetTranslucentRenderer(result);
             VisualizationTransformCache[key] = result;
         }
@@ -51,29 +57,25 @@ public class PrefabCache<T> where T : IConvertible {
     {
         foreach (Transform child in parent)
         {
-            //only default layer
-            if (child.gameObject.layer == 0)
-            {
-                Collider c = child.GetComponent<Collider>();
-                if (c != null)
-                    c.enabled = false;
+            Collider c = child.GetComponent<Collider>();
+            if (c != null)
+                c.enabled = false;
 
-                Renderer r = child.GetComponent<Renderer>();
-                if (r != null)
+            Renderer r = child.GetComponent<Renderer>();
+            if (r != null)
+            {
+                if (r.materials != null && r.materials.Length > 1)
                 {
-                    if (r.materials != null && r.materials.Length > 1)
+                    var newMats = new Material[r.materials.Length];
+                    for (int i = 0; i < r.materials.Length; i++)
                     {
-                        var newMats = new Material[r.materials.Length];
-                        for (int i = 0; i < r.materials.Length; i++)
-                        {
-                            newMats[i] = TranslucentPlanningMat;
-                        }
-                        r.materials = newMats;
+                        newMats[i] = TranslucentPlanningMat;
                     }
-                    else
-                    {
-                        r.material = TranslucentPlanningMat;
-                    }
+                    r.materials = newMats;
+                }
+                else
+                {
+                    r.material = TranslucentPlanningMat;
                 }
             }
 

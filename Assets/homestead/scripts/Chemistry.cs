@@ -83,6 +83,19 @@ namespace RedHomestead.Simulation
             { Matter.Produce, 950 }, //same as beef tallow??? what am i thinking
         };
 
+        public static int MaxMatter()
+        {
+            int max = -1;
+            var values = Enum.GetValues(typeof(Matter));
+            for (int i = 0; i < values.Length; i++)
+            {
+                int v = (int)values.GetValue(i);
+                max = max > v ? max : v;
+            }
+
+            return max;
+        }
+
         public static float Kilograms(this Matter r, float? volumeCubicMeter = null)
         {
             if (volumeCubicMeter.HasValue)

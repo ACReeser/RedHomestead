@@ -699,6 +699,12 @@ public class PlayerInput : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
+            if (ModulePlan.IsActive)
+            {
+                Equip(Slot.Unequipped);
+                ToggleModuleBlueprintMode(false);
+            }
+
             GuiBridge.Instance.ToggleRadialMenu(true);
             FPSController.FreezeLook = true;
         }
@@ -1530,8 +1536,8 @@ public class PlayerInput : MonoBehaviour {
             }
             else if (Input.GetKeyDown(KeyCode.Tab))
             {
+                Equip(Slot.Unequipped);
                 ToggleModuleBlueprintMode(false);
-                ModulePlan.Reset();
             }
         }        
     }

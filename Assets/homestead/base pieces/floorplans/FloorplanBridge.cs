@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Crafting;
+using System.Linq;
 
 [Serializable]
 public abstract class InteriorFields<G, C> where C : IConvertible
@@ -172,6 +173,7 @@ public class FloorplanBridge : MonoBehaviour {
     public StuffFields StuffFields;
     public ModuleFields ModuleFields;
     public CraftableFields CraftableFields;
+    private Workshop currentWorkshop;
 
     // Use this for initialization
     void Awake () {
@@ -179,7 +181,7 @@ public class FloorplanBridge : MonoBehaviour {
         ToggleStuffPanel(false);
         ToggleFloorplanPanel(false);
         ToggleModulePanel(false);
-        ToggleCraftablePanel(false, false);
+        ToggleCraftablePanel(false, false, null);
     }
 
     internal void ToggleStuffPanel(bool state)
@@ -197,8 +199,9 @@ public class FloorplanBridge : MonoBehaviour {
         this.ModuleFields.Toggle(state);
     }
 
-    internal void ToggleCraftablePanel(bool overallState, bool detailState)
+    internal void ToggleCraftablePanel(bool overallState, bool detailState, Workshop w)
     {
+        this.currentWorkshop = w;
         this.CraftableFields.Toggle(overallState, detailState);
     }
 
@@ -239,7 +242,23 @@ public class FloorplanBridge : MonoBehaviour {
 
     public void SelectCraftableToBuild()
     {
-        SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);
+        Craftable whatToBuild = (Craftable)Enum.Parse(typeof(Craftable), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
+        List<ResourceEntry> prereqs = Crafting.CraftData[whatToBuild].Requirements;
+
+        if (currentWorkshop == null)
+            UnityEngine.Debug.LogWarning("Tried to craft something but no workshop");
+        else if (currentWorkshop.FlexData.CurrentCraftable == Craftable.Unspecified)
+        {
+            if (Warehouse.GlobalResourceList.CanConsume(prereqs))
+            {
+                Warehouse.GlobalResourceList.Consume(prereqs);
+                SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);
+            }
+        }
+        else
+        {
+            SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);
+        }
     }
 
     private void SelectThing<G, C>(InteriorFields<G, C> fields, Action<bool> toggleOff, Action<C> plan) where C : IConvertible
@@ -275,7 +294,7 @@ public class FloorplanBridge : MonoBehaviour {
 
     private static void Hover<G, C, D>(C currentChild, InteriorFields<G, C> fields, int index, Dictionary<C, D> buildData, Action<C> assignCurrentChild) where C : IConvertible where D : BlueprintData
     {
-        print(String.Format("{0} {1}", fields.CurrentGroup, index));
+        //print(String.Format("Hover over group {0} index {1}", fields.CurrentGroup, index));
         C whatToBuild = fields.Map[fields.CurrentGroup][index];
 
         Hover(currentChild, whatToBuild, fields, buildData, assignCurrentChild);
