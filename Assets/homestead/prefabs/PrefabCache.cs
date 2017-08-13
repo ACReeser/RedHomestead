@@ -62,20 +62,26 @@ public class PrefabCache<T> where T : IConvertible {
                 c.enabled = false;
 
             Renderer r = child.GetComponent<Renderer>();
+            
             if (r != null)
             {
-                if (r.materials != null && r.materials.Length > 1)
+                r.enabled = (child.gameObject.layer == 0) || (child.gameObject.layer == 8);
+
+                if (r.enabled)
                 {
-                    var newMats = new Material[r.materials.Length];
-                    for (int i = 0; i < r.materials.Length; i++)
+                    if (r.materials != null && r.materials.Length > 1)
                     {
-                        newMats[i] = TranslucentPlanningMat;
+                        var newMats = new Material[r.materials.Length];
+                        for (int i = 0; i < r.materials.Length; i++)
+                        {
+                            newMats[i] = TranslucentPlanningMat;
+                        }
+                        r.materials = newMats;
                     }
-                    r.materials = newMats;
-                }
-                else
-                {
-                    r.material = TranslucentPlanningMat;
+                    else
+                    {
+                        r.material = TranslucentPlanningMat;
+                    }
                 }
             }
 

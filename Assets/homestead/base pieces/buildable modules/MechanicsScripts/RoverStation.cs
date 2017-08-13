@@ -60,8 +60,8 @@ public class RoverStation : Converter, IPowerConsumer
         this.SyncStatusSprites();
     }
     
-    private const float WaterPerTickUnits = .002f;
-    private const float OxygenPerTickUnits = .002f;
+    private const float WaterPerTickUnits = .02f;
+    private const float OxygenPerTickUnits = .02f;
 
     public override void Convert()
     {
@@ -70,7 +70,7 @@ public class RoverStation : Converter, IPowerConsumer
             if (HasWater)
             {
 #warning needs to only push if amount < max
-                AttachedRover.Data.Oxygen.Push(WaterIn.Get(Matter.Water).Pull(WaterPerTickUnits));
+                AttachedRover.Data.Water.Push(WaterIn.Get(Matter.Water).Pull(WaterPerTickUnits));
             }
 
             if (HasOxygen)

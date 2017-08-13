@@ -55,7 +55,7 @@ namespace RedHomestead.EVA
             public const float UpgradedPackOxygenKilograms = KilogramsOxygenPerHour * 8f;
 
             public const float CaloriesPerDay = 2400;
-            public const float LitersOfWaterPerDay = 3f;
+            public const float WaterPerDayKilograms = 3f;
             public const float SuitHeatingWattsPerHour = 1000f;
             public const float SuitHeatingWattsPerSecond = SuitHeatingWattsPerHour / 60f / 60f;
 
@@ -68,7 +68,7 @@ namespace RedHomestead.EVA
             return new PackData()
             {
                 Oxygen = new PackResourceData(Constants.BasePackOxygenKilograms, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.KilogramsOxygenPerHour)),
-                Water = new PackResourceData(Constants.LitersOfWaterPerDay / 2, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.LitersOfWaterPerDay)),
+                Water = new PackResourceData(Constants.WaterPerDayKilograms / 2, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.WaterPerDayKilograms)),
                 Food = new PackResourceData(Constants.CaloriesPerDay, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.CaloriesPerDay)),
                 Power = new PackResourceData(Constants.BasePackPowerWatts, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour))
             };

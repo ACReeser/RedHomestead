@@ -23,7 +23,7 @@ namespace RedHomestead.Rovers
         internal bool AcceptInput;
         internal bool CanDrive { get { return !this.HasPowerGrid(); } }
         public bool CanMalfunction { get { return true; } }
-        public SpriteRenderer flowAmountRenderer, dashboardPowerRenderer;
+        public SpriteRenderer flowAmountRenderer, dashboardPowerRenderer, waterAmountRenderer;
 
         public FailureAnchors failureEffectAnchors;
         public FailureAnchors FailureEffectAnchors { get { return failureEffectAnchors; } }
@@ -78,7 +78,8 @@ namespace RedHomestead.Rovers
                         TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 3
                     },
                     PowerableInstanceID = Guid.NewGuid().ToString(),
-                    Oxygen = new ResourceContainer(Matter.Oxygen, .5f, ContainerSize.Full)
+                    Oxygen = new ResourceContainer(Matter.Oxygen, .5f, ContainerSize.Full),
+                    Water = new ResourceContainer(Matter.Water, .25f, ContainerSize.Full)
                 };
             }
             this.AdjacentPumpables = new List<IPumpable>();
@@ -87,7 +88,7 @@ namespace RedHomestead.Rovers
             HatchDegrees = GetRotationXFromHatchState();
             Hatch.localRotation = Quaternion.Euler(HatchDegrees, 0f, 0f);
             ToggleLights(false);
-            updateOxygen = StartCoroutine(UpdateOxygenBar());
+            updateOxygen = StartCoroutine(UpdateOxygenPowerWaterVisualization());
         }
 
         private float oxygenBuffer = 0f;
@@ -117,7 +118,7 @@ namespace RedHomestead.Rovers
                 FlowManager.Instance.OnFlowTick -= Rover_OnFlowTick_WhenHasDriver;
         }
 
-        private IEnumerator UpdateOxygenBar()
+        private IEnumerator UpdateOxygenPowerWaterVisualization()
         {
             while (isActiveAndEnabled)
             {
@@ -125,9 +126,8 @@ namespace RedHomestead.Rovers
                 
                 flowAmountRenderer.transform.localScale = new Vector3(1, this.Data.Oxygen.UtilizationPercentage, 1);
                 dashboardPowerRenderer.transform.localScale = new Vector3(1, this.Data.EnergyContainer.UtilizationPercentage * 0.7f, 1);
-
-                //can't do this anymore, can refill o2 via rover station
-                //if (AcceptInput)
+                waterAmountRenderer.transform.localScale = new Vector3(1, this.Data.Water.UtilizationPercentage, 1);
+                
                 this.RefreshVisualization();
             }
         }
@@ -327,6 +327,14 @@ namespace RedHomestead.Rovers
 
             AcceptInput = CanDrive;
             subscribedToFlowTick = hasDriver;
+        }
+
+        public void DrinkWater()
+        {
+            //survival pack water is in kilograms, so divide by kilograms to get units
+            float refillAmount = Data.Water.AvailableCapacity / Matter.Water.Kilograms();
+            float pulled = Get(Matter.Water).Pull(refillAmount);
+            SurvivalTimer.Instance.Water.Increment(pulled);
         }
     }
 }
