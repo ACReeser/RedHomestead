@@ -109,7 +109,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IFlexDataCont
         Equipment.Sledge,
         Equipment.PowerDrill,
         Equipment.Wrench,
-        Equipment.Wrench
+        Equipment.Blower
     };
 
     public override float WattsConsumed
