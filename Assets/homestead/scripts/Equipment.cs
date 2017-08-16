@@ -22,8 +22,8 @@ namespace RedHomestead.Equipment
         private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
         {
             { Slot.Unequipped, Equipment.EmptyHand },
-            { Slot.PrimaryTool, Equipment.PowerDrill },
-            { Slot.SecondaryTool, Equipment.Sledge },
+            { Slot.PrimaryTool, Equipment.EmptyHand },
+            { Slot.SecondaryTool, Equipment.Locked },
             { Slot.PrimaryGadget, Equipment.Blueprints },
             { Slot.SecondaryGadget, Equipment.ChemicalSniffer },
             { Slot.TertiaryGadget, Equipment.Locked },
@@ -137,6 +137,79 @@ namespace RedHomestead.Equipment
                 return Locked;
 
             return Sprites[(int)e];
+        }
+    }
+
+    public interface IEquipmentSwappable
+    {
+        Transform[] Tools { get; }
+        Transform[] Lockers { get; }
+        Dictionary<Transform, Equipment> EquipmentLockers { get; }
+        Equipment[] LockerEquipment { get; }
+    }
+
+    public static class EquipmentExtensions
+    {
+        public static void InitializeSwappable(this IEquipmentSwappable swapper)
+        {
+            for (int i = 0; i < swapper.Lockers.Length; i++)
+            {
+                swapper.EquipmentLockers[swapper.Lockers[i]] = swapper.LockerEquipment[i];
+            }
+        }
+
+        public static void SwapEquipment(this IEquipmentSwappable swapper, Transform lockerT)
+        {
+            Equipment fromLocker = swapper.EquipmentLockers[lockerT],
+                fromPlayer = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
+
+            int lockerIndex = Array.IndexOf(swapper.Lockers, lockerT);
+
+            PlayerInput.Instance.Loadout.PutEquipmentInSlot(Slot.PrimaryTool, fromLocker);
+            swapper.EquipmentLockers[lockerT] = fromPlayer;
+            swapper.LockerEquipment[lockerIndex] = fromPlayer;
+
+            int equipmentIndex = Convert.ToInt32(fromPlayer);
+            Transform prefab = PlayerInput.Instance.ToolPrefabs[equipmentIndex];
+
+            MeshRenderer meshR = swapper.Tools[lockerIndex].GetComponent<MeshRenderer>();
+            if (prefab == null)
+            {
+                meshR.enabled = false;
+            }
+            else
+            {
+                swapper.Tools[lockerIndex].GetComponent<MeshFilter>().mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+                meshR.enabled = true;
+                meshR.materials = prefab.GetComponent<MeshRenderer>().sharedMaterials;
+            }
+
+            GuiBridge.Instance.BuildRadialMenu(PlayerInput.Instance.Loadout);
+            GuiBridge.Instance.RefreshEquipped();
+        }
+
+        public static PromptInfo GetLockerPrompt(this IEquipmentSwappable swapper, Transform transform)
+        {
+            Equipment fromLocker = swapper.EquipmentLockers[transform],
+                current = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
+
+            if (fromLocker != current)
+            {
+                string desc = "";
+                if (current == Equipment.EmptyHand)
+                    desc = "Pick up " + fromLocker.ToString();
+                else if (fromLocker == Equipment.EmptyHand)
+                    desc = "Put away " + current.ToString();
+                else
+                    desc = String.Format("Swap {0} for {1}", current.ToString(), fromLocker.ToString());
+
+                Prompts.SwapEquipmentHint.Description = desc;
+                return Prompts.SwapEquipmentHint;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

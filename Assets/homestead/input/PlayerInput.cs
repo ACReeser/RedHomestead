@@ -52,6 +52,11 @@ public class PlayerInput : MonoBehaviour {
     /// The prefab for a construction zone
     /// </summary>
     public Transform PostItNotePrefab;
+
+    /// <summary>
+    /// Array of tool prefabs indexed on Equipment enum
+    /// </summary>
+    public Transform[] ToolPrefabs;
     /// <summary>
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
@@ -1076,16 +1081,16 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("locker"))
                 {
-                    Workshop w = hitInfo.collider.transform.root.GetComponent<Workshop>();
-                    if (w != null)
+                    IEquipmentSwappable swappable = hitInfo.collider.transform.root.GetComponent<IEquipmentSwappable>();
+                    if (swappable != null)
                     {
                         if (doInteract)
                         {
-                            w.SwapEquipment(hitInfo.collider.transform);
+                            swappable.SwapEquipment(hitInfo.collider.transform);
                         }
                         else
                         {
-                            newPrompt = w.GetLockerPrompt(hitInfo.collider.transform);
+                            newPrompt = swappable.GetLockerPrompt(hitInfo.collider.transform);
                         }
                     }
                 }

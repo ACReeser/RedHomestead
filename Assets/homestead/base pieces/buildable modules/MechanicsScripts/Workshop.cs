@@ -16,8 +16,9 @@ public class DoorRotationLerpContext
     private float Duration;
     private float Time;
     private Coroutine ticker;
+    private readonly Action onToggleComplete;
 
-    public DoorRotationLerpContext(Transform target, Quaternion from, Quaternion to, float duration = 1f)
+    public DoorRotationLerpContext(Transform target, Quaternion from, Quaternion to, float duration = 1f, Action onToggleComplete = null)
     {
         FromRotation = from;
         EffectiveFromRotation = from;
@@ -28,6 +29,7 @@ public class DoorRotationLerpContext
         this.Duration = Mathf.Max(duration, 0.00001f); //prevent divide by zero errors
         this.Done = false;
         this.ticker = null;
+        this.onToggleComplete = onToggleComplete;
     }
 
     private void Reverse(bool setEffective = true)
@@ -80,6 +82,9 @@ public class DoorRotationLerpContext
             Target.localRotation = ToRotation;
 
             Done = true;
+
+            if (this.onToggleComplete != null)
+                this.onToggleComplete();
         }
         else
         {
@@ -94,23 +99,30 @@ public class WorkshopFlexData
     public float Progress;
 }
 
-public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IFlexDataContainer<ResourcelessModuleData, WorkshopFlexData>
+public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, WorkshopFlexData>
 {
     public WorkshopFlexData FlexData { get; set; }
     public Craftable CurrentCraftable { get { return this.FlexData.CurrentCraftable; } private set { this.FlexData.CurrentCraftable = value; } }
     public float CraftableProgress { get { return this.FlexData.Progress; } private set { this.FlexData.Progress = value; } }
-    public Transform[] CraftableHolograms, ToolsInLockers, Lockers, ToolPrefabs;
+    public Transform[] CraftableHolograms, ToolsInLockers, lockers;
     public Transform SpawnPosition;
+
+    public Transform[] Tools { get { return ToolsInLockers; } }
+    public Transform[] Lockers { get { return lockers; } }
 
     private bool CurrentlyViewingDetail = false;
     private Dictionary<Transform, DoorRotationLerpContext> doorRotator = new Dictionary<Transform, DoorRotationLerpContext>();
-    private Dictionary<Transform, Equipment> EquipmentLockers = new Dictionary<Transform, Equipment>();
-    private Equipment[] LockerEquipment = new Equipment[] {
+
+    private Dictionary<Transform, Equipment> equipmentLockers = new Dictionary<Transform, Equipment>();
+    public Dictionary<Transform, Equipment> EquipmentLockers { get { return equipmentLockers; } }
+
+    private Equipment[] lockerEquipment = new Equipment[] {
         Equipment.Sledge,
         Equipment.PowerDrill,
         Equipment.Wrench,
         Equipment.Blower
     };
+    public Equipment[] LockerEquipment { get { return lockerEquipment; } }
 
     public override float WattsConsumed
     {
@@ -146,10 +158,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IFlexDataCont
     protected override void OnStart()
     {
         this.SetCurrentCraftable(this.FlexData.CurrentCraftable);
-        for (int i = 0; i < Lockers.Length; i++)
-        {
-            EquipmentLockers[Lockers[i]] = LockerEquipment[i];
-        }
+        this.InitializeSwappable();
     }
 
     public void SetCurrentCraftable(Craftable c)
@@ -218,41 +227,5 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IFlexDataCont
         }
 
         doorRotator[door].Toggle(StartCoroutine);
-    }
-
-    internal PromptInfo GetLockerPrompt(Transform transform)
-    {
-        Equipment fromLocker = EquipmentLockers[transform],
-            current = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
-
-        if (fromLocker != current)
-        {
-            Prompts.SwapEquipmentHint.Description = String.Format("Swap {0} for {1}", current.ToString(), fromLocker.ToString());
-            return Prompts.SwapEquipmentHint;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    internal void SwapEquipment(Transform transform)
-    {
-        Equipment fromLocker = EquipmentLockers[transform],
-            fromPlayer = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
-
-        int lockerIndex = Array.IndexOf(Lockers, transform);
-
-        PlayerInput.Instance.Loadout.PutEquipmentInSlot(Slot.PrimaryTool, fromLocker);
-        EquipmentLockers[transform] = fromPlayer;
-        LockerEquipment[lockerIndex] = fromPlayer;
-
-        int equipmentIndex = Convert.ToInt32(fromPlayer);
-        Transform prefab = ToolPrefabs[equipmentIndex];
-        ToolsInLockers[lockerIndex].GetComponent<MeshFilter>().mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
-        ToolsInLockers[lockerIndex].GetComponent<MeshRenderer>().materials = prefab.GetComponent<MeshRenderer>().sharedMaterials;
-
-        GuiBridge.Instance.BuildRadialMenu(PlayerInput.Instance.Loadout);
-        GuiBridge.Instance.RefreshEquipped();
     }
 }
