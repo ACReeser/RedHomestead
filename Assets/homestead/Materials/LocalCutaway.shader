@@ -1,6 +1,4 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Custom/TransparentLocalSectionPlane"
+﻿Shader "Custom/TransparentLocalSectionPlane"
 {
 	Properties
 	{
@@ -13,11 +11,11 @@ Shader "Custom/TransparentLocalSectionPlane"
 
 		SubShader
 	{
-		Tags{ "Queue"="Transparent" "RenderType" = "Fade" }
+		Tags{ "RenderType" = "Opaque" }
 		Cull Off
 
 		CGPROGRAM
-#pragma surface surf Lambert alpha:fade
+#pragma surface surf Lambert vertex:vert
 
 	struct Input
 	{
@@ -34,19 +32,18 @@ Shader "Custom/TransparentLocalSectionPlane"
 	fixed4 _cutawayColor;
 	fixed4 _tint;
 
-	void vert(float4 vertex: POSITION, out Input o) {
-		o.objY = UnityObjectToClipPos(vertex).y;
+	void vert(inout appdata_full v: POSITION, out Input o) {
 		UNITY_INITIALIZE_OUTPUT(Input, o);
+		o.objY = v.vertex.z;
 	}
 
 	void surf(Input IN, inout SurfaceOutput o)
 	{
-		//clip((IN.objY / _maxVertexY) - (_showPercentY / 100));
-		clip(IN.objY - _showPercentY / 100);
+		clip((_showPercentY / 100) - (IN.objY / _maxVertexY));
+
+		//o.Alpha = _tint.a;
+
 		float fd = dot(IN.viewDir, IN.worldNormal);
-
-		o.Alpha = _tint.a;
-
 		if (fd.x > 0)
 		{
 			o.Albedo = tex2D(_MainTex, IN.uv_MainTex).rgb * _tint.rgb;
