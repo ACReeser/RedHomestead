@@ -962,6 +962,10 @@ public class PlayerInput : MonoBehaviour {
                         {
                             SurvivalTimer.Instance.CurrentHabitat.PlayerToggleLights();
                         }
+                        else if (hitInfo.collider.name == "hydraulic_lever")
+                        {
+                            hitInfo.collider.transform.root.GetComponent<Furnace>().ToggleHydraulics();
+                        }
                     }
                     else
                     {
