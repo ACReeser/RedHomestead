@@ -966,6 +966,10 @@ public class PlayerInput : MonoBehaviour {
                         {
                             hitInfo.collider.transform.root.GetComponent<Furnace>().ToggleHydraulics();
                         }
+                        else if (hitInfo.collider.name == "printer")
+                        {
+                            hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>().ToggleArmPrint();
+                        }
                     }
                     else
                     {

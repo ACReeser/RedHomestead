@@ -510,22 +510,46 @@ public class MainMenu : MonoBehaviour {
         }
     }
 
-    private struct LerpContext
+    public struct LerpContext
     {
         public Vector3 FromPosition, ToPosition;
         public Quaternion FromRotation, ToRotation;
         public float Duration;
+        public Space Space;
+        private bool affectRotation;
+
+        public float T { get { return Time / Duration; } }
         public float Time { get; private set; }
         public bool Done { get; private set; }
 
-        public void Seed(Transform from, Transform to, float duration = 1f)
+        public void Seed(Transform from, Transform to, float duration = 1f, bool doRotate = true)
         {
-            FromPosition = from.position;
-            FromRotation = Quaternion.LookRotation(from.forward, from.up);
-            if (to != null)
+            if (doRotate)
             {
-                ToPosition = to.position;
-                ToRotation = Quaternion.LookRotation(to.forward, to.up);
+                if (to == null)
+                    this.Seed(from.position, null, duration, Quaternion.LookRotation(from.forward, from.up));
+                else
+                    this.Seed(from.position, to.position, duration, Quaternion.LookRotation(from.forward, from.up), Quaternion.LookRotation(to.forward, to.up));
+            }
+            else
+                this.Seed(from.position, to.position, duration);
+        }
+
+        public void Seed(Vector3 from, Vector3? to, float duration, Quaternion? fromRot = null, Quaternion? toRot = null)
+        {
+            affectRotation = fromRot.HasValue && toRot.HasValue;
+
+            FromPosition = from;
+
+            if (affectRotation)
+                FromRotation = fromRot.Value;
+
+            if (to.HasValue)
+            {
+                ToPosition = to.Value;
+
+                if (affectRotation)
+                    ToRotation = toRot.Value;
             }
             this.Time = 0f;
             this.Duration = Mathf.Max(duration, 0.00001f); //prevent divide by zero errors
@@ -535,11 +559,14 @@ public class MainMenu : MonoBehaviour {
         public void Reverse()
         {
             var newToPos = FromPosition;
-            var newToRot = FromRotation;
             FromPosition = ToPosition;
-            FromRotation = ToRotation;
             ToPosition = newToPos;
-            ToRotation = newToRot;
+            if (this.affectRotation)
+            {
+                var newToRot = FromRotation;
+                FromRotation = ToRotation;
+                ToRotation = newToRot;
+            }
             Done = false;
             Time = 0f;
         }
@@ -549,14 +576,25 @@ public class MainMenu : MonoBehaviour {
             this.Time += UnityEngine.Time.deltaTime;
             if (this.Time > this.Duration)
             {
-                transform.position = ToPosition; 
-                transform.rotation = ToRotation;
+                if (Space == Space.World)
+                    transform.position = ToPosition;
+                else
+                    transform.localPosition = ToPosition;
+
+                if (this.affectRotation)
+                    transform.rotation = ToRotation;
+
                 Done = true;
             }
             else
             {
-                transform.position = Vector3.Lerp(FromPosition, ToPosition, Time / Duration);
-                transform.rotation = Quaternion.Lerp(FromRotation, ToRotation, Time / Duration);
+                if (Space == Space.World)
+                    transform.position = Vector3.Lerp(FromPosition, ToPosition, T);
+                else
+                    transform.localPosition = Vector3.Lerp(FromPosition, ToPosition, T);
+
+                if (this.affectRotation)
+                    transform.rotation = Quaternion.Lerp(FromRotation, ToRotation, T);
             }
         }
     }

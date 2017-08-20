@@ -4,7 +4,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ThreeDPrinter : MonoBehaviour, IDoorManager {
+    public Transform printArm, printHead;
+
     private DoorRotationLerpContext lerp;
+    private const float maxArmZ = .96f;
+    private const float minArmZ = -.96f;
+    private const float maxArmY = 2.337844f;
+    private const float minArmY = .34f;
+    private const float maxHeadX = .824f;
+    private const float minHeadX = -.824f;
+    private Coroutine currentPrint;
+    private Vector3 resetPosition;
 
     public void ToggleDoor(Transform door)
     {
@@ -17,11 +27,66 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager {
 
     // Use this for initialization
     void Start () {
-		
+        resetPosition = printArm.localPosition;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
+
+    internal void ToggleArmPrint()
+    {
+        if (currentPrint != null)
+            StopCoroutine(currentPrint);
+
+        currentPrint = StartCoroutine(ArmPrint());
+    }
+
+    private IEnumerator ArmPrint()
+    {
+        MainMenu.LerpContext armY = new MainMenu.LerpContext()
+        {
+            Space = Space.Self
+        };
+        MainMenu.LerpContext headX = GetNextHead();
+        armY.Seed(Vector3.up * minArmY, Vector3.up * maxArmY, 60f);
+        bool back = false;
+
+        while (!armY.Done)
+        {
+            armY.Tick(printArm);
+            headX.Tick(printHead);
+            printArm.localPosition = new Vector3(printArm.localPosition.x, printArm.localPosition.y, back ? Mathf.Lerp(minArmZ, maxArmZ, headX.T) : Mathf.Lerp(maxArmZ, minArmZ, headX.T));
+
+            yield return null;
+
+            if (headX.Done)
+            {
+                headX = GetNextHead();
+                back = !back;
+            }
+        }
+
+        MainMenu.LerpContext reset = new MainMenu.LerpContext()
+        {
+            Space = Space.Self
+        };
+        reset.Seed(printArm.localPosition, resetPosition, 2f);
+        while(!reset.Done)
+        {
+            reset.Tick(printArm);
+            yield return null;
+        }
+    }
+
+    private MainMenu.LerpContext GetNextHead()
+    {
+        var lerp = new MainMenu.LerpContext()
+        {
+            Space = Space.Self
+        };
+        lerp.Seed(printHead.localPosition, new Vector3(UnityEngine.Random.Range(minHeadX, maxHeadX), 0f, 0f), 1f);
+        return lerp;
+    }
 }
