@@ -13,19 +13,42 @@ namespace RedHomestead.Simulation
     public enum Matter {
         Hydrogen = -6, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water,
         Unspecified = 0,
-        Steel = 1, SiliconWafers, Aluminium, Biomass, OrganicMeal, MealPowder, MealShake, RationMeal,
+        //ores on 0, ingots on 1, powders on 2
+        IronOre = 1,         Iron = 10,      IronPowder = 20,
+        Bauxite = 2,   Aluminium  = 11, AluminiumPowder = 21,
+        CopperOre = 3,     Copper = 12,    CopperPowder = 22,
+        NickelOre = 4,     Nickel = 13,    NickelPowder = 23,
+        SilverOre = 5,     Silver = 14,    SilverPowder = 24,
+        MagnesiumOre = 6,
+        GoldOre = 7,         Gold = 17,      GoldPowder = 27,
+        PlatinumOre = 8, Platinum = 18,
+                            Steel = 19,     SteelPowder = 29,
+        //metallic elements
+        Sulfur = 30,
         Silica,
-        Copper,
         Uranium,
-        Polyethylene,
-        Platinum,
-        Glass,
-        Gold,
-        Silver,
-        Bauxite,
-        Canvas,
-        Iron,
-        Produce
+
+        //plastic compounds
+        Polyethylene = 40,
+        
+        //manufactured goods
+        Glass = 50,
+        SiliconWafers, SolarPanels, Microchips,
+        Canvas, 
+
+        //organics
+        Biomass = 70,
+        Produce, OrganicMeals,
+        MealPowders, MealShakes,
+        Flax,
+
+        //processed
+        RationMeals,
+
+        //habitat building components
+        PressureCanvas = 80,
+        Piping, 
+        Bulkhead
     }
 
     public class ResourceEntry
@@ -49,39 +72,61 @@ namespace RedHomestead.Simulation
     {
         //http://www.engineeringtoolbox.com/density-solids-d_1265.html
         //https://www.wolframalpha.com/input/?i=density+of+hydrogen+at+0+deg+C+and+350+bar
-        private static Dictionary<Matter, float> DensityKgPerCubicMeter = new Dictionary<Matter, float>()
+        private static float DensityKgPerCubicMeter(this Matter mat)
         {
-            //gases and water
-            { Matter.Hydrogen, 24f }, // 0 deg and 350 bar
-            { Matter.Oxygen, 498f }, // 0 deg and 350 bar
-            { Matter.Methane, 258f }, // 0 deg and 350 bar
-            { Matter.Water, 1000f }, // 0.1 deg and 1 atm
-            //ores
-            { Matter.Bauxite, 1280f },
-            //metals
-            { Matter.Steel, 7850f },
-            { Matter.Iron, 7850f },
-            { Matter.Aluminium, 2800f },
-            { Matter.Copper, 8790 },
-            { Matter.Uranium, 19100 },
-            { Matter.Platinum, 21500 },
-            { Matter.Gold, 19290 },
-            { Matter.Silver, 10500 },
-            //minerals
-            { Matter.Silica, 2100 },
-            //processed
-            { Matter.SiliconWafers, 2330f },
-            { Matter.Glass, 2600 },
-            { Matter.MealShake, 1100 }, //slightly denser than water
-            ///organics
-            { Matter.Biomass, 760f }, //same as wheat
-            { Matter.Polyethylene, 960 },
-            { Matter.Canvas, 1500 }, //same as starch, artificial wool, heavy paper
-            { Matter.MealPowder, 1600 }, //same as sand??
-            { Matter.RationMeal, 870 }, //same as butter
-            { Matter.OrganicMeal, 950 }, //same as beef tallow??? what am i thinking
-            { Matter.Produce, 950 }, //same as beef tallow??? what am i thinking
-        };
+            switch(mat)
+            {
+                //gases and water
+                case Matter.Hydrogen:
+                    return 24f; // 0 deg and 350 bar
+                case Matter.Oxygen: return 498f; // 0 deg and 350 bar
+                case Matter.Methane: return 258f; // 0 deg and 350 bar
+                case Matter.Water: return 1000f; // 0.1 deg and 1 atm
+
+                //ores
+                case Matter.Bauxite: return 1280f;
+                case Matter.Aluminium: return 2800f;
+
+                // metals
+                case Matter.IronOre: 
+                case Matter.IronPowder:
+                    return 7850f;
+                case Matter.Steel:
+                case Matter.SteelPowder:
+                    return 7850f;
+                case Matter.Copper:
+                case Matter.CopperPowder:
+                    return 8790;
+
+                case Matter.Uranium: return 19100;
+                case Matter.Platinum: return 21500;
+                case Matter.Gold: return 19290;
+                case Matter.Silver: return 10500;
+
+                // minerals
+                case Matter.Silica: return 2100;
+                case Matter.Glass: return 2600;
+
+                // processed
+                case Matter.SiliconWafers:
+                case Matter.SolarPanels:
+                    return 2330f;
+
+                // organics
+                case Matter.Polyethylene: return 960;
+                case Matter.Canvas: return 1500; //same as starch: return artificial wool: return heavy paper
+                
+                // food
+                case Matter.Biomass: return 1000f; //same as wheat
+                case Matter.MealPowders: return 1600; //same as sand??
+                case Matter.MealShakes: return 1100; //slightly denser than water
+                case Matter.OrganicMeals: return 950; //same as beef tallow??? what am i thinking
+                case Matter.Produce: return 950; //same as beef tallow??? what am i thinking
+                case Matter.RationMeals: return 870; //same as butter
+
+                default: return 1000;
+            }
+        }
 
         public static int MaxMatter()
         {
@@ -100,11 +145,11 @@ namespace RedHomestead.Simulation
         {
             if (volumeCubicMeter.HasValue)
             {
-                return DensityKgPerCubicMeter[r] * volumeCubicMeter.Value;
+                return r.DensityKgPerCubicMeter() * volumeCubicMeter.Value;
             }
             else
             {
-                return DensityKgPerCubicMeter[r] * r.BaseCubicMeters();
+                return r.DensityKgPerCubicMeter() * r.BaseCubicMeters();
             }
         }
 
@@ -144,11 +189,11 @@ namespace RedHomestead.Simulation
         {
             switch (meal)
             {
-                case Matter.MealShake:
-                case Matter.MealPowder:
+                case Matter.MealShakes:
+                case Matter.MealPowders:
                     return 36f;
-                case Matter.OrganicMeal:
-                case Matter.RationMeal:
+                case Matter.OrganicMeals:
+                case Matter.RationMeals:
                 case Matter.Biomass:
                 case Matter.Produce:
                     return 18f;
@@ -175,13 +220,52 @@ namespace RedHomestead.Simulation
         {
             switch (meal)
             {
-                case Matter.MealShake:
+                case Matter.MealShakes:
                     return 600f;
-                case Matter.OrganicMeal:
-                case Matter.RationMeal:
+                case Matter.OrganicMeals:
+                case Matter.RationMeals:
                     return 1200f;
                 default:
                     return 0f;
+            }
+        }
+
+        public static bool Is3DPrinterFeedstock(this Matter matt)
+        {
+            switch (matt)
+            {
+                case Matter.Polyethylene:
+                case Matter.IronPowder:
+                case Matter.AluminiumPowder:
+                case Matter.CopperPowder:
+                case Matter.NickelPowder:
+                case Matter.SilverPowder:
+                case Matter.GoldPowder:
+                case Matter.SteelPowder:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsRawMaterial(this Matter matt)
+        {
+            switch (matt) {
+                case Matter.IronOre:
+                case Matter.Bauxite:
+                case Matter.CopperOre:
+                case Matter.NickelOre:
+                case Matter.SilverOre:
+                case Matter.MagnesiumOre:
+                case Matter.GoldOre:
+                case Matter.PlatinumOre:
+                case Matter.Steel:
+                case Matter.Sulfur:
+                case Matter.Silica:
+                case Matter.Uranium:
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -219,10 +303,10 @@ namespace RedHomestead.Simulation
         public static bool IsStoredInHabitat(this Matter r) {
             switch (r)
             {
-                case Matter.OrganicMeal:
-                case Matter.MealPowder:
-                case Matter.MealShake:
-                case Matter.RationMeal:
+                case Matter.OrganicMeals:
+                case Matter.MealPowders:
+                case Matter.MealShakes:
+                case Matter.RationMeals:
                 case Matter.Produce:
                     return true;
                 default:

@@ -473,7 +473,7 @@ namespace RedHomestead.Persistence
             matchingHab.HabitatData = matchingHabData;
 
             if (matchingHab.OnResourceChange != null)
-                matchingHab.OnResourceChange(Simulation.Matter.Biomass, Simulation.Matter.OrganicMeal, Simulation.Matter.MealShake, Simulation.Matter.RationMeal, Simulation.Matter.MealPowder);
+                matchingHab.OnResourceChange(Simulation.Matter.Biomass, Simulation.Matter.OrganicMeals, Simulation.Matter.MealShakes, Simulation.Matter.RationMeals, Simulation.Matter.MealPowders);
 
             moduleMap.Add(data.ModuleInstanceID, matchingHab);
             powerableMap.Add(data.PowerableInstanceID, matchingHab);

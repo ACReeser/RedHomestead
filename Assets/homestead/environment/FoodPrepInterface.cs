@@ -29,7 +29,7 @@ public class FoodPrepInterface : HabitatReadout
 
         BiomassVisualization.gameObject.SetActive(meals > 0f);
 
-        container = this.LinkedHab.Get(Matter.MealPowder);
+        container = this.LinkedHab.Get(Matter.MealPowders);
 
         float powders = container.CurrentAmount * container.MatterType.MealsPerCubicMeter();
         this.PowderVisualization.gameObject.SetActive(powders > 0f);

@@ -20,6 +20,8 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
 
     public Mesh[] ResourceLabelMeshes, CompoundLabelMeshes;
     public MeshFilter LabelMeshFilter;
+    public Material PrinterMaterial, RawMaterial;
+    public MeshRenderer CrateRenderer;
 
     private Collider myCollider;
     //todo: could be CurrentConstructionZone reference instead
@@ -49,6 +51,14 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
                 LabelMeshFilter.mesh = ResourceLabelMeshes[index - 1];
             else
                 LabelMeshFilter.mesh = CompoundLabelMeshes[index + 6];
+
+            if (Data.Container.MatterType.Is3DPrinterFeedstock())
+            {
+                CrateRenderer.material = PrinterMaterial;
+            }
+            else if (Data.Container.MatterType.IsRawMaterial()) {
+                CrateRenderer.material = RawMaterial;
+            }
         }
     }
 

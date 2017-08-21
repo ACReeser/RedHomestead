@@ -109,7 +109,7 @@ namespace RedHomestead.GameplayOptions
                 {
                     default:
                     case BackerFinancing.Government:
-                        AddOrIncrement(BoughtMatter, Matter.RationMeal, 1);
+                        AddOrIncrement(BoughtMatter, Matter.RationMeals, 1);
                         break;
                     case BackerFinancing.TechCorp:
                         AddOrIncrement(BoughtMatter, Matter.SiliconWafers, 8);
@@ -128,7 +128,7 @@ namespace RedHomestead.GameplayOptions
         internal void LoadQuickstart()
         {
             this.Init();
-            AddOrIncrement(BoughtMatter, Matter.RationMeal, 1);
+            AddOrIncrement(BoughtMatter, Matter.RationMeals, 1);
             AddOrIncrement(BoughtMatter, Matter.Water, 2);
             AddOrIncrement(BoughtMatter, Matter.Oxygen, 2);
             this.AddSuppliesFromModule(Module.SmallGasTank);

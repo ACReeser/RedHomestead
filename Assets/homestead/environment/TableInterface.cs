@@ -20,15 +20,15 @@ public class TableInterface : HabitatReadout {
     private void OnResourceChange(params Matter[] type)
     {
         print("showing table contents");
-        ResourceContainer cont = this.LinkedHab.Get(Matter.RationMeal);
+        ResourceContainer cont = this.LinkedHab.Get(Matter.RationMeals);
         if (cont != null)
                 RationMeal.gameObject.SetActive(cont.CurrentAmount > 0f);
 
-        cont = this.LinkedHab.Get(Matter.OrganicMeal);
+        cont = this.LinkedHab.Get(Matter.OrganicMeals);
         if (cont != null)
                 OrganicMeal.gameObject.SetActive(cont.CurrentAmount > 0f);
 
-        cont = this.LinkedHab.Get(Matter.MealShake);
+        cont = this.LinkedHab.Get(Matter.MealShakes);
         if (cont != null)
             ShakeMeal.gameObject.SetActive(cont.CurrentAmount > 0f);
     }

@@ -37,7 +37,7 @@ public static class Corporations {
                 {
                     ListPrice = 100,
                     StockAvailable = 100,
-                    Matter = Matter.RationMeal
+                    Matter = Matter.RationMeals
                 },
                 new Stock()
                 {
@@ -75,7 +75,7 @@ public static class Corporations {
                 {
                     ListPrice = 100,
                     StockAvailable = 100,
-                    Matter = Matter.RationMeal
+                    Matter = Matter.RationMeals
                 },
                 new Stock()
                 {

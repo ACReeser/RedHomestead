@@ -9,10 +9,10 @@ public class MealResourceInterface : HabitatResourceInterface {
     protected override void OnResourceChange(params Matter[] changedMatter)
     {
         print("showing pantry contents");
-        ShowPantry(RationMeals, LinkedHab.Get(Matter.RationMeal));
-        ShowPantry(OrganicMeals, LinkedHab.Get(Matter.OrganicMeal));
-        ShowPantry(ShakePowders, LinkedHab.Get(Matter.MealPowder));
-        ShowPantry(ShakeMeals, LinkedHab.Get(Matter.MealShake));
+        ShowPantry(RationMeals, LinkedHab.Get(Matter.RationMeals));
+        ShowPantry(OrganicMeals, LinkedHab.Get(Matter.OrganicMeals));
+        ShowPantry(ShakePowders, LinkedHab.Get(Matter.MealPowders));
+        ShowPantry(ShakeMeals, LinkedHab.Get(Matter.MealShakes));
         Display();
     }
 
@@ -32,19 +32,19 @@ public class MealResourceInterface : HabitatResourceInterface {
     private void Display()
     {
         ResourceContainer bioC = LinkedHab.Get(Matter.Biomass);
-        ResourceContainer organicC = LinkedHab.Get(Matter.OrganicMeal);
-        ResourceContainer rationC = LinkedHab.Get(Matter.RationMeal);
-        ResourceContainer powderC = LinkedHab.Get(Matter.MealPowder);
-        ResourceContainer shakeC = LinkedHab.Get(Matter.MealShake);
+        ResourceContainer organicC = LinkedHab.Get(Matter.OrganicMeals);
+        ResourceContainer rationC = LinkedHab.Get(Matter.RationMeals);
+        ResourceContainer powderC = LinkedHab.Get(Matter.MealPowders);
+        ResourceContainer shakeC = LinkedHab.Get(Matter.MealShakes);
 
         float days = (
             (
                 (
-                    (bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) * Matter.OrganicMeal.MealsPerCubicMeter()
+                    (bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) * Matter.OrganicMeals.MealsPerCubicMeter()
                 ) / 2f
                 +
                 (
-                    (powderC.CurrentAmount + shakeC.CurrentAmount) * Matter.MealShake.MealsPerCubicMeter()
+                    (powderC.CurrentAmount + shakeC.CurrentAmount) * Matter.MealShakes.MealsPerCubicMeter()
                 ) / 4f
             )
         );
@@ -53,15 +53,15 @@ public class MealResourceInterface : HabitatResourceInterface {
             days,    
             bioC.CurrentAmount * Matter.Biomass.MealsPerCubicMeter(),
             bioC.TotalCapacity * Matter.Biomass.MealsPerCubicMeter(),
-            organicC.CurrentAmount * Matter.OrganicMeal.MealsPerCubicMeter(),
-            organicC.TotalCapacity * Matter.OrganicMeal.MealsPerCubicMeter(),
-            powderC.CurrentAmount * Matter.MealPowder.MealsPerCubicMeter(),
-            powderC.TotalCapacity * Matter.MealPowder.MealsPerCubicMeter(),
-            shakeC.CurrentAmount * Matter.MealShake.MealsPerCubicMeter(),
-            shakeC.TotalCapacity * Matter.MealShake.MealsPerCubicMeter(),
+            organicC.CurrentAmount * Matter.OrganicMeals.MealsPerCubicMeter(),
+            organicC.TotalCapacity * Matter.OrganicMeals.MealsPerCubicMeter(),
+            powderC.CurrentAmount * Matter.MealPowders.MealsPerCubicMeter(),
+            powderC.TotalCapacity * Matter.MealPowders.MealsPerCubicMeter(),
+            shakeC.CurrentAmount * Matter.MealShakes.MealsPerCubicMeter(),
+            shakeC.TotalCapacity * Matter.MealShakes.MealsPerCubicMeter(),
             (days == 1) ? "" : "s",
-            rationC.CurrentAmount * Matter.RationMeal.MealsPerCubicMeter(),
-            rationC.TotalCapacity * Matter.RationMeal.MealsPerCubicMeter()
+            rationC.CurrentAmount * Matter.RationMeals.MealsPerCubicMeter(),
+            rationC.TotalCapacity * Matter.RationMeals.MealsPerCubicMeter()
             );
     }
 

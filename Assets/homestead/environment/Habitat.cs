@@ -123,7 +123,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
     {
         if (res != null && res.Data.Container.MatterType == Matter.Produce)
         {
-            float overage = Data.Containers[Matter.OrganicMeal].Push(res.Data.Container.Pull(res.Data.Container.CurrentAmount));
+            float overage = Data.Containers[Matter.OrganicMeals].Push(res.Data.Container.Pull(res.Data.Container.CurrentAmount));
 
             if (OnResourceChange != null)
                 OnResourceChange();
@@ -190,12 +190,12 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     public void PrepareBiomassToPreparedMeal()
     {
-        ConvertMealMatter(Matter.Biomass, Matter.OrganicMeal);
+        ConvertMealMatter(Matter.Biomass, Matter.OrganicMeals);
     }
 
     public void PreparePowderToShake()
     {
-        ConvertMealMatter(Matter.MealPowder, Matter.MealShake);
+        ConvertMealMatter(Matter.MealPowders, Matter.MealShakes);
     }
 
     private void ConvertMealMatter(Matter from, Matter to)
@@ -253,24 +253,24 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
                 MatterType = Matter.Biomass,
                 TotalCapacity = 1f
             }},
-            { Matter.OrganicMeal, new ResourceContainer(0f)
+            { Matter.OrganicMeals, new ResourceContainer(0f)
             {
-                MatterType = Matter.OrganicMeal,
+                MatterType = Matter.OrganicMeals,
                 TotalCapacity = 1f
             }},
-            { Matter.RationMeal, new ResourceContainer(Matter.RationMeal.CubicMetersPerMeal() * 6)
+            { Matter.RationMeals, new ResourceContainer(Matter.RationMeals.CubicMetersPerMeal() * 6)
             {
-                MatterType = Matter.RationMeal,
+                MatterType = Matter.RationMeals,
                 TotalCapacity = 1f
             }},
-            { Matter.MealPowder, new ResourceContainer(Matter.RationMeal.CubicMetersPerMeal() * 12)
+            { Matter.MealPowders, new ResourceContainer(Matter.RationMeals.CubicMetersPerMeal() * 12)
             {
-                MatterType = Matter.MealPowder,
+                MatterType = Matter.MealPowders,
                 TotalCapacity = 1f
             }},
-            { Matter.MealShake, new ResourceContainer(0f)
+            { Matter.MealShakes, new ResourceContainer(0f)
             {
-                MatterType = Matter.MealShake,
+                MatterType = Matter.MealShakes,
                 TotalCapacity = 1f
             }},
 
