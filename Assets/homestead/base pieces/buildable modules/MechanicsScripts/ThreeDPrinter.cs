@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThreeDPrinter : MonoBehaviour, IDoorManager {
+public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber
+{
     public Transform printArm, printHead;
 
     private DoorRotationLerpContext lerp;
@@ -88,5 +89,10 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager {
         };
         lerp.Seed(printHead.localPosition, new Vector3(UnityEngine.Random.Range(minHeadX, maxHeadX), 0f, 0f), 1f);
         return lerp;
+    }
+
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
+    {
+
     }
 }

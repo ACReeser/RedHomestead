@@ -1,9 +1,11 @@
-﻿using System;
+﻿using RedHomestead.Simulation;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Furnace : MonoBehaviour {
+public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
+{
 
     public Transform[] lifts;
     public Transform platform;
@@ -56,5 +58,40 @@ public class Furnace : MonoBehaviour {
 
             time += Time.deltaTime;
         }
+    }
+
+    private ResourceComponent capturedOre, capturedPowder;
+    private Coroutine unsnapTimer;
+
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable movesnap)
+    {
+        var res = c.GetComponent<ResourceComponent>();
+        if (res != null && res.Data.Container.MatterType.IsRawMaterial() && capturedOre == null)
+        {
+            res.SnapCrate(this, child.transform.position);
+            res.transform.SetParent(platform);
+        }
+    }
+
+    public void DetachCrate(IMovableSnappable detaching)
+    {
+        var res = detaching.transform.GetComponent<ResourceComponent>();
+        if (res == capturedOre)
+        {
+            capturedOre = null;
+            res.transform.SetParent(null);
+        }
+        unsnapTimer = StartCoroutine(UnsnapTimer());
+    }
+
+    private IEnumerator UnsnapTimer()
+    {
+        yield return new WaitForSeconds(2f);
+        unsnapTimer = null;
+    }
+
+    private bool matches(Matter ore, Matter powder)
+    {
+        return Convert.ToInt32(ore) + 9 == Convert.ToInt32(powder);
     }
 }
