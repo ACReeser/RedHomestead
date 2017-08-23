@@ -230,6 +230,11 @@ namespace RedHomestead.Simulation
             }
         }
 
+        public static bool IsFurnaceOutput(this Matter matt)
+        {
+            return matt != Matter.Polyethylene && matt.Is3DPrinterFeedstock();
+        }
+
         public static bool Is3DPrinterFeedstock(this Matter matt)
         {
             switch (matt)

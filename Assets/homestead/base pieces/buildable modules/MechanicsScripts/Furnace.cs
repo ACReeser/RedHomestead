@@ -9,6 +9,7 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
 
     public Transform[] lifts;
     public Transform platform;
+    public TriggerForwarder oreSnap, powderSnap;
 
     private float[] liftMax = new float[]
     {
@@ -66,10 +67,41 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable movesnap)
     {
         var res = c.GetComponent<ResourceComponent>();
-        if (res != null && res.Data.Container.MatterType.IsRawMaterial() && capturedOre == null)
+        if (res != null)
         {
-            res.SnapCrate(this, child.transform.position);
-            res.transform.SetParent(platform);
+            bool isOre = res.Data.Container.MatterType.IsRawMaterial();
+            bool isPowder = res.Data.Container.MatterType.IsFurnaceOutput();
+
+            if (isOre && capturedOre == null && child == oreSnap)
+            {
+                if (capturedPowder == null || matches(res.Data.Container.MatterType, capturedPowder.Data.Container.MatterType))
+                {
+                    res.SnapCrate(this, child.transform.position);
+                    res.transform.SetParent(platform);
+                }
+                else
+                {
+                    GuiBridge.Instance.ShowNews(NewsSource.InvalidSnap);
+                    return;
+                }
+            }
+            else if (isPowder && capturedPowder == null && child == powderSnap)
+            {
+                if (capturedOre == null || matches(capturedOre.Data.Container.MatterType, res.Data.Container.MatterType))
+                {
+                    res.SnapCrate(this, child.transform.position);
+                }
+                else
+                {
+                    GuiBridge.Instance.ShowNews(NewsSource.InvalidSnap);
+                    return;
+                }
+            }
+            else
+            {
+                GuiBridge.Instance.ShowNews(NewsSource.InvalidSnap);
+                return;
+            }
         }
     }
 
@@ -80,6 +112,10 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
         {
             capturedOre = null;
             res.transform.SetParent(null);
+        }
+        else if (res == capturedPowder)
+        {
+            capturedPowder = null;
         }
         unsnapTimer = StartCoroutine(UnsnapTimer());
     }

@@ -150,6 +150,12 @@ public static class NewsSource
         DurationMilliseconds = 3000,
         Icon = MiscIcon.HammerAndPick
     };
+    internal static News InvalidSnap = new News()
+    {
+        Text = "Cannot snap this here",
+        DurationMilliseconds = 3000,
+        Icon = MiscIcon.Information
+    };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {
