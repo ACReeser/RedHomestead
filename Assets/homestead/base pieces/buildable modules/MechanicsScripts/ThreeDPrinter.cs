@@ -1,9 +1,11 @@
-﻿using System;
+﻿using RedHomestead.Crafting;
+using RedHomestead.Simulation;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber
+public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, ICrateSnapper
 {
     public Transform printArm, printHead;
 
@@ -16,6 +18,8 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber
     private const float minHeadX = -.824f;
     private Coroutine currentPrint;
     private Vector3 resetPosition;
+    private static Vector3 crateStartLocalPosition = new Vector3(0f, 0.578f, 0f);
+
 
     public void ToggleDoor(Transform door)
     {
@@ -36,10 +40,21 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber
 		
 	}
 
+    public Material cutawayMaterial;
+    private MeshRenderer currentPrintRenderer;
+    public Transform InProgressPrintCrate;
     internal void ToggleArmPrint()
     {
         if (currentPrint != null)
             StopCoroutine(currentPrint);
+
+        //InProgressPrintCrate = GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
+        //InProgressPrintCrate.GetComponent<Collider>().enabled = false;
+        //InProgressPrintCrate.GetComponent<Rigidbody>().isKinematic = true;
+        currentPrintRenderer = InProgressPrintCrate.GetChild(0).GetComponent<MeshRenderer>();
+        currentPrintRenderer.enabled = true;
+        cutawayMaterial.mainTexture = currentPrintRenderer.material.mainTexture;
+        currentPrintRenderer.material = cutawayMaterial;
 
         currentPrint = StartCoroutine(ArmPrint());
     }
@@ -60,6 +75,9 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber
             headX.Tick(printHead);
             printArm.localPosition = new Vector3(printArm.localPosition.x, printArm.localPosition.y, back ? Mathf.Lerp(minArmZ, maxArmZ, headX.T) : Mathf.Lerp(maxArmZ, minArmZ, headX.T));
 
+            currentPrintRenderer.material.SetFloat("_showPercentY", armY.T * 100f);
+            print(armY.T * 100f);
+            
             yield return null;
 
             if (headX.Done)
@@ -91,8 +109,42 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber
         return lerp;
     }
 
+    public TriggerForwarder leftInputTrigger, rightInputTrigger;
+    private ResourceComponent leftInput, rightInput;
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
+        ResourceComponent resComp = res.transform.GetComponent<ResourceComponent>();
+        if (resComp != null)
+        {
+            if (resComp.Data.Container.MatterType.Is3DPrinterFeedstock())
+            {
+                if (child == leftInputTrigger && leftInput == null)
+                {
+                    leftInput = resComp;
+                    res.SnapCrate(this, c.transform.position);
+                }
+                else if (child == rightInputTrigger && rightInput == null)
+                {
+                    rightInput = resComp;
+                    res.SnapCrate(this, c.transform.position);
+                }
+            }
+            else
+            {
+                GuiBridge.Instance.ShowNews(NewsSource.InvalidSnap);
+            }
+        }
+    }
 
+    public void DetachCrate(IMovableSnappable detaching)
+    {
+        if ((object)detaching == leftInput)
+        {
+            leftInput = null;
+        }
+        else if ((object)detaching == rightInput)
+        {
+            rightInput = null;
+        }
     }
 }

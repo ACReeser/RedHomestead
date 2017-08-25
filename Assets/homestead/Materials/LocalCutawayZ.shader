@@ -1,4 +1,4 @@
-﻿Shader "Custom/TransparentLocalSectionPlane"
+﻿Shader "Custom/TransparentLocalSectionPlaneZ"
 {
 	Properties
 	{

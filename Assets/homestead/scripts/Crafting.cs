@@ -14,7 +14,8 @@ namespace RedHomestead.Crafting
         WaterCrate,
         SolarPanel,
         IceDrill,
-        Pump
+        Pump,
+        Crate
     }
 
     public enum CraftableGroup
