@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RedHomestead.Persistence;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,15 +20,7 @@ namespace RedHomestead.Equipment
             Equipment.Locked
         };
 
-        private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>()
-        {
-            { Slot.Unequipped, Equipment.EmptyHand },
-            { Slot.PrimaryTool, Equipment.EmptyHand },
-            { Slot.SecondaryTool, Equipment.Locked },
-            { Slot.PrimaryGadget, Equipment.Blueprints },
-            { Slot.SecondaryGadget, Equipment.ChemicalSniffer },
-            { Slot.TertiaryGadget, Equipment.Locked },
-        };
+        private Dictionary<Slot, Equipment> _loadout = new Dictionary<Slot, Equipment>();
 
         public Equipment this[Slot s]
         {
@@ -48,6 +41,11 @@ namespace RedHomestead.Equipment
 
         public Loadout()
         {
+            for (int i = 0; i < Game.Current.Player.Loadout.Length; i++)
+            {
+                _loadout[(Slot)i] = Game.Current.Player.Loadout[i];
+            }
+            
             this.ActiveSlot = Slot.Unequipped;
         }
 
@@ -110,6 +108,19 @@ namespace RedHomestead.Equipment
             {
                 MouseButton = (this[Slot.PrimaryTool] == e) ? 0 : 1
             };
+        }
+
+        internal Equipment[] MarshalLoadout()
+        {
+            var result = new Equipment[6];
+            //loop unrolled for performance, also no function call for performance
+            result[(int)Slot.Unequipped]      = _loadout[Slot.Unequipped];
+            result[(int)Slot.PrimaryTool]     = _loadout[Slot.PrimaryTool];
+            result[(int)Slot.SecondaryTool]   = _loadout[Slot.SecondaryTool];
+            result[(int)Slot.PrimaryGadget]   = _loadout[Slot.PrimaryGadget];
+            result[(int)Slot.SecondaryGadget] = _loadout[Slot.SecondaryGadget];
+            result[(int)Slot.TertiaryGadget]  = _loadout[Slot.TertiaryGadget]; 
+            return result;
         }
     }
 

@@ -69,7 +69,7 @@ public class PlayerInput : MonoBehaviour {
     public AudioClip GoodMorningHomesteader;
 
     internal InputMode CurrentMode = InputMode.Normal;
-    internal Loadout Loadout = new Loadout();
+    internal Loadout Loadout;
     internal bool LookForRepairs = false;
 
     internal void SetPressure(bool pressurized)
@@ -121,6 +121,7 @@ public class PlayerInput : MonoBehaviour {
 
     void Start()
     {
+        Loadout = new Loadout();
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);
         Equip(Slot.Unequipped);
         PrefabCache<Module>.TranslucentPlanningMat = translucentPlanningMat;

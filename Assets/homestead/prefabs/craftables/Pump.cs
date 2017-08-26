@@ -49,6 +49,8 @@ public class Pump : MovableSnappable, ICrateSnapper, ITriggerSubscriber, IDataCo
     void Start()
     {
         this.AdjacentPumpables = new List<IPumpable>();
+        if (this.data == null)
+            this.data = new FacingData();
         RefreshPumpState();
     }
 

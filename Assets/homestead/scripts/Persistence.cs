@@ -77,6 +77,7 @@ namespace RedHomestead.Persistence
         public bool GremlinChastised;
         public List<Order> EnRouteOrders;
         public float[] PerkProgress;
+        public Equipment.Equipment[] Loadout;
         public BackerFinancing Financing;
         internal int WeeklyIncomeSeed;
 
@@ -93,6 +94,7 @@ namespace RedHomestead.Persistence
         {
             base.BeforeMarshal(t);
             this.PackData = SurvivalTimer.Instance.Data;
+            this.Loadout = PlayerInput.Instance.Loadout.MarshalLoadout();
         }
     }
 
@@ -247,7 +249,9 @@ namespace RedHomestead.Persistence
         public PowerlineData[] PowerData;
         public IceDrillData[] IceDrillData;
         public PowerCubeData[] PowerCubeData;
+        public FacingData[] PumpData;
         public MobileSolarPanelData[] MobileSolarPanelData;
+        public ToolboxData[] ToolboxData;
         public DepositData[] Deposits;
         internal Dictionary<Simulation.Matter, int> InitialMatterPurchase;
         internal Dictionary<Crafting.Craftable, int> InitialCraftablePurchase;
@@ -495,6 +499,12 @@ namespace RedHomestead.Persistence
             _InstantiateMany<MobileSolarPanel, MobileSolarPanelData>(MobileSolarPanelData, ModuleBridge.Instance.MobileSolarPanelPrefab, (MobileSolarPanel panel, MobileSolarPanelData data) => {
                 powerableMap.Add(data.PowerableInstanceID, panel);
             });
+
+            _DestroyCurrent<Pump>();
+            _InstantiateMany<Pump, FacingData>(PumpData, ModuleBridge.Instance.PumpPrefab);
+
+            _DestroyCurrent<Toolbox>();
+            _InstantiateMany<Toolbox, ToolboxData>(ToolboxData, ModuleBridge.Instance.ToolboxPrefab);
         }
 
         private void DeserializeCrates()
@@ -558,6 +568,9 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<Powerline, PowerlineData>((powerline) => this.PowerData = powerline);
             this._MarshalManyFromScene<IceDrill, IceDrillData>((drill) => this.IceDrillData = drill);
             this._MarshalManyFromScene<PowerCube, PowerCubeData>((power) => this.PowerCubeData = power);
+            this._MarshalManyFromScene<MobileSolarPanel, MobileSolarPanelData>((panel) => this.MobileSolarPanelData = panel);
+            this._MarshalManyFromScene<Pump, FacingData>((pump) => this.PumpData = pump);
+            this._MarshalManyFromScene<Toolbox, ToolboxData>((box) => this.ToolboxData = box);
             this._MarshalManyFromScene<Deposit, DepositData>((dep) => this.Deposits = dep);
 
             this._MarshalHabitats();
@@ -749,7 +762,16 @@ namespace RedHomestead.Persistence
                     Financing = choices.ChosenFinancing,
                     PackData = EVA.EVA.GetDefaultPackData(),
                     EnRouteOrders = new List<Order>(),
-                    PerkProgress = choices.GetPerkProgress()
+                    PerkProgress = choices.GetPerkProgress(),
+                    Loadout = new Equipment.Equipment[]
+                    {
+                        Equipment.Equipment.ChemicalSniffer, //secondary gadget
+                        Equipment.Equipment.Blueprints, //primary gadget
+                        Equipment.Equipment.Locked, //tertiary gadget
+                        Equipment.Equipment.Locked, //secondary tool
+                        Equipment.Equipment.EmptyHand, //unequipped
+                        Equipment.Equipment.EmptyHand, //primary tool
+                    }
                 },
                 Score = new GameScore(),
                 History = new Simulation.GlobalHistory()
