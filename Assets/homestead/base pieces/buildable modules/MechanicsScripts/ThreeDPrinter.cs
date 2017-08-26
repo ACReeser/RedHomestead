@@ -87,6 +87,9 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, IC
             }
         }
 
+        currentPrintRenderer.enabled = false;
+        GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
+
         MainMenu.LerpContext reset = new MainMenu.LerpContext()
         {
             Space = Space.Self

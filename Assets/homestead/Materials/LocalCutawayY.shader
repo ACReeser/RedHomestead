@@ -41,7 +41,7 @@
 
 	void surf(Input IN, inout SurfaceOutput o)
 	{
-		clip((_showPercentY / 100) - (IN.objY / _maxVertexY) + (IN.objY / _minVertexY));
+		clip((_showPercentY / 100) - ((IN.objY + abs(_minVertexY)) / (abs(_maxVertexY) + abs(_minVertexY))));
 
 		//o.Alpha = _tint.a;
 
