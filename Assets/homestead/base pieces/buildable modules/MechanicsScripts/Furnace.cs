@@ -3,13 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using RedHomestead.Buildings;
 
-public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
+public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
 {
-
     public Transform[] lifts;
-    public Transform platform;
+    public Transform platform, lever;
     public TriggerForwarder oreSnap, powderSnap;
+    public ParticleSystem oreParticles;
 
     private float[] liftMax = new float[]
     {
@@ -19,6 +20,8 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
         3.349197f
     };
     private float platformMax = 3.795f;
+    private const float noTiltX = -90f, tiltX = -160f;
+    private const float leverPlatformDownY = -30f, leverPlatformUpY = -90f;
 
 	// Use this for initialization
 	void Start () {
@@ -30,8 +33,17 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
 		
 	}
 
-    private bool platformUp = true;
+    private bool platformUp = false;
     private Coroutine lerpHydro;
+
+    internal void ToggleHydraulicLiftLever()
+    {
+        if (this.capturedOre != null)
+        {
+            this.lever.localRotation = Quaternion.Euler(platformUp ? leverPlatformUpY : leverPlatformDownY, 90f, 90f);
+            this.ToggleHydraulics();
+        }
+    }
 
     internal void ToggleHydraulics()
     {
@@ -44,6 +56,11 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
 
     private IEnumerator LerpHydraulic(bool up)
     {
+        if (up)
+        {
+            yield return Tilt(up);
+        }
+
         float duration = 2f;
         float time = 0f;
 
@@ -52,17 +69,45 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
             for (int i = 0; i < lifts.Length; i++)
             {
                 Transform t = lifts[i];
-                t.position = new Vector3(t.position.x, Mathf.Lerp(up ? liftMax[i] : 0f, up ? 0f : liftMax[i], time /duration), t.position.z);
+                t.position = new Vector3(t.position.x, Mathf.Lerp(up ? liftMax[i] : 0f, up ? 0f : liftMax[i], time / duration), t.position.z);
             }
             platform.position = new Vector3(platform.position.x, Mathf.Lerp(up ? platformMax : 0.624f, up ? 0.624f : platformMax, time / duration), platform.position.z);
             yield return null;
 
             time += Time.deltaTime;
         }
+
+        if (!up)
+        {
+            yield return Tilt(up);
+
+            oreParticles.Play();
+        }
+    }
+
+    private IEnumerator Tilt(bool up)
+    {
+        float duration = .5f;
+        float time = 0f;
+
+        while (time < duration)
+        {
+            platform.localRotation = Quaternion.Euler(Mathf.Lerp(up ? tiltX : noTiltX, up ? noTiltX : tiltX, time / duration), 90f, 90f);
+            yield return null;
+            time += Time.deltaTime;
+        }
     }
 
     private ResourceComponent capturedOre, capturedPowder;
     private Coroutine unsnapTimer;
+
+    public override float WattsConsumed
+    {
+        get
+        {
+            throw new NotImplementedException();
+        }
+    }
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable movesnap)
     {
@@ -78,6 +123,7 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
                 {
                     res.SnapCrate(this, child.transform.position);
                     res.transform.SetParent(platform);
+                    capturedOre = res;
                 }
                 else
                 {
@@ -128,6 +174,32 @@ public class Furnace : MonoBehaviour, ITriggerSubscriber, ICrateSnapper
 
     private bool matches(Matter ore, Matter powder)
     {
-        return Convert.ToInt32(ore) + 9 == Convert.ToInt32(powder);
+        return System.Convert.ToInt32(ore) + 9 == System.Convert.ToInt32(powder);
+    }
+
+    public override void Convert()
+    {
+    }
+
+    public override void ClearHooks()
+    {
+        capturedOre = null;
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary()
+        {
+            { Matter.IronOre, new ResourceContainer(Matter.IronOre, 0f) }
+        };
+    }
+
+    public override void Report()
+    {
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.Furnace;
     }
 }

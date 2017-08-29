@@ -965,7 +965,7 @@ public class PlayerInput : MonoBehaviour {
                         }
                         else if (hitInfo.collider.name == "hydraulic_lever")
                         {
-                            hitInfo.collider.transform.root.GetComponent<Furnace>().ToggleHydraulics();
+                            hitInfo.collider.transform.root.GetComponent<Furnace>().ToggleHydraulicLiftLever();
                         }
                         else if (hitInfo.collider.name == "printer")
                         {

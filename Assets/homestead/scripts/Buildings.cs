@@ -30,7 +30,9 @@ namespace RedHomestead.Buildings
         Airlock,
         EVAStation,
         RoverStation,
-        WeatherStation
+        WeatherStation,
+        Furnace,
+        ThreeDPrinter
     }
 
     /// <summary>
