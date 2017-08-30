@@ -25,7 +25,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
 
 	// Use this for initialization
 	void Start () {
-        this.ToggleHydraulics();
+        this.ToggleHydraulics(false);
 	}
 	
 	// Update is called once per frame
@@ -33,32 +33,40 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
 		
 	}
 
-    private bool platformUp = false;
+    private bool isPlatformUp = false;
+    private bool isRaisingAndDumping = false;
+    private bool isTiltingAndLowering = false;
+
     private Coroutine lerpHydro;
 
     internal void ToggleHydraulicLiftLever()
     {
-        if (this.capturedOre != null)
+        if (this.capturedOre != null && !isRaisingAndDumping && !isTiltingAndLowering)
         {
-            this.lever.localRotation = Quaternion.Euler(platformUp ? leverPlatformUpY : leverPlatformDownY, 90f, 90f);
+            this.lever.localRotation = Quaternion.Euler(isPlatformUp ? leverPlatformUpY : leverPlatformDownY, 90f, 90f);
             this.ToggleHydraulics();
         }
     }
 
-    internal void ToggleHydraulics()
+    internal void ToggleHydraulics(bool? newPlatformUp = null)
     {
-        this.platformUp = !this.platformUp;
+        if (!newPlatformUp.HasValue)
+            newPlatformUp = !this.isPlatformUp;
+
+        this.isRaisingAndDumping = newPlatformUp.Value; //old down, new up
+        this.isTiltingAndLowering = !newPlatformUp.Value; //old up, new down
+
         if (this.lerpHydro != null)
             StopCoroutine(this.lerpHydro);
 
-        this.lerpHydro = StartCoroutine(LerpHydraulic(this.platformUp));
+        this.lerpHydro = StartCoroutine(LerpHydraulic());
     }
 
-    private IEnumerator LerpHydraulic(bool up)
+    private IEnumerator LerpHydraulic()
     {
-        if (up)
+        if (this.isTiltingAndLowering)
         {
-            yield return Tilt(up);
+            yield return Tilt(true);
         }
 
         float duration = 2f;
@@ -69,30 +77,42 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
             for (int i = 0; i < lifts.Length; i++)
             {
                 Transform t = lifts[i];
-                t.position = new Vector3(t.position.x, Mathf.Lerp(up ? liftMax[i] : 0f, up ? 0f : liftMax[i], time / duration), t.position.z);
+                t.position = new Vector3(
+                    t.position.x, 
+                    Mathf.Lerp(isTiltingAndLowering ? liftMax[i] : 0f, isTiltingAndLowering ? 0f : liftMax[i], time / duration), 
+                    t.position.z);
             }
-            platform.position = new Vector3(platform.position.x, Mathf.Lerp(up ? platformMax : 0.624f, up ? 0.624f : platformMax, time / duration), platform.position.z);
+            platform.position = new Vector3(
+                platform.position.x, 
+                Mathf.Lerp(isTiltingAndLowering ? platformMax : 0.624f, isTiltingAndLowering ? 0.624f : platformMax, time / duration), 
+                platform.position.z);
             yield return null;
 
             time += Time.deltaTime;
         }
 
-        if (!up)
+        if (this.isRaisingAndDumping)
         {
-            yield return Tilt(up);
+            yield return Tilt(false);
 
             oreParticles.Play();
+
+            yield return new WaitForSeconds(oreParticles.main.duration);
         }
+        
+        this.isPlatformUp = this.isRaisingAndDumping;
+        this.isRaisingAndDumping = false;
+        this.isTiltingAndLowering = false;
     }
 
-    private IEnumerator Tilt(bool up)
+    private IEnumerator Tilt(bool isTiltToStraight)
     {
         float duration = .5f;
         float time = 0f;
 
         while (time < duration)
         {
-            platform.localRotation = Quaternion.Euler(Mathf.Lerp(up ? tiltX : noTiltX, up ? noTiltX : tiltX, time / duration), 90f, 90f);
+            platform.localRotation = Quaternion.Euler(Mathf.Lerp(isTiltToStraight ? tiltX : noTiltX, isTiltToStraight ? noTiltX : tiltX, time / duration), 90f, 90f);
             yield return null;
             time += Time.deltaTime;
         }
