@@ -47,7 +47,7 @@ public class EVAStation : Converter, IPowerConsumer
         this.SyncStatusSprites();
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         OxygenIn = null;
         this.SyncStatusSprites();

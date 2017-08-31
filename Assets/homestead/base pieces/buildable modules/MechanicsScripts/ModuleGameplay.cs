@@ -286,7 +286,7 @@ public abstract class Converter : MultipleResourceModuleGameplay
 
     public override void OnAdjacentChanged()
     {
-        ClearHooks();
+        ClearSinks();
 
         foreach(IPumpable m in Adjacent)
         {
@@ -297,7 +297,7 @@ public abstract class Converter : MultipleResourceModuleGameplay
         }
     }
 
-    public abstract void ClearHooks();
+    public abstract void ClearSinks();
     public virtual void OnSinkConnected(ISink s) { }
 }
 

@@ -4,8 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using RedHomestead.Buildings;
+using RedHomestead.Electricity;
+using RedHomestead.Persistence;
+using RedHomestead.Industry;
 
-public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
+[Serializable]
+public class FurnaceFlexData
+{
+    public EnergyContainer Heat;
+}
+
+public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsumer, IFlexDataContainer<MultipleResourceModuleData, FurnaceFlexData>
 {
     public Transform[] lifts;
     public Transform platform, lever;
@@ -22,22 +31,30 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
     private float platformMax = 3.795f;
     private const float noTiltX = -90f, tiltX = -160f;
     private const float leverPlatformDownY = -30f, leverPlatformUpY = -90f;
-
-	// Use this for initialization
-	void Start () {
-        this.ToggleHydraulics(false);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
+    
     private bool isPlatformUp = false;
     private bool isRaisingAndDumping = false;
     private bool isTiltingAndLowering = false;
 
     private Coroutine lerpHydro;
+
+    private Formula formula;
+    
+    protected override void OnStart () {
+        this.ToggleHydraulics(false);
+        
+        formula = new Formula(Data.Containers, new FormulaComponent()
+        {
+            Matter = Matter.CarbonDioxide,
+            ReactionRate = .001f
+        }, new FormulaComponent()
+        {
+            Matter = Matter.Hydrogen,
+            ReactionRate = .001f
+        });
+
+        base.OnStart();
+	}
 
     internal void ToggleHydraulicLiftLever()
     {
@@ -97,6 +114,8 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
 
             oreParticles.Play();
 
+            this.Data.Containers[Matter.IronOre].Push(capturedOre.Data.Container.Pull(1f));
+
             yield return new WaitForSeconds(oreParticles.main.duration);
         }
         
@@ -120,14 +139,22 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
 
     private ResourceComponent capturedOre, capturedPowder;
     private Coroutine unsnapTimer;
+    private float orePerTickUnits;
+    private const float minimumHeat = .5f;
+    private const float heatLossPerTickUnits = .05f;
+    private const float heatProductionPerTickUnits = .1f;
 
     public override float WattsConsumed
     {
         get
         {
-            throw new NotImplementedException();
+            return ElectricityConstants.WattsPerBlock * 3f;
         }
     }
+
+    public bool IsOn { get; set; }
+
+    public FurnaceFlexData FlexData { get; set; }
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable movesnap)
     {
@@ -199,18 +226,50 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
 
     public override void Convert()
     {
+        if (HasPower && IsOn && formula.TryCombine())
+        {
+            FlexData.Heat.Push(heatProductionPerTickUnits);
+        }
+
+        if (FlexData.Heat.CurrentAmount >= minimumHeat &&
+            Data.Containers[Matter.IronOre].CurrentAmount >= orePerTickUnits)
+        {
+            Data.Containers[Matter.IronOre].Pull(orePerTickUnits);
+
+            if (capturedPowder == null)
+            {
+#warning furnace does not create powder crate yet if none assigned
+            }
+            else
+            {
+                capturedPowder.Data.Container.Push(orePerTickUnits);
+            }
+        }
+
+        if (FlexData.Heat.CurrentAmount > 0)
+            FlexData.Heat.Pull(heatLossPerTickUnits);
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
-        capturedOre = null;
+        formula.ClearContainers();
     }
 
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
+        this.FlexData = new FurnaceFlexData()
+        {
+            Heat = new EnergyContainer(0f)
+            {
+                EnergyType = Energy.Thermal
+            }
+        };
+
         return new ResourceContainerDictionary()
         {
-            { Matter.IronOre, new ResourceContainer(Matter.IronOre, 0f) }
+            { Matter.IronOre, new ResourceContainer(Matter.IronOre, 0f) },
+            { Matter.CarbonDioxide, new ResourceContainer(Matter.CarbonDioxide, 0f) },
+            { Matter.Hydrogen, new ResourceContainer(Matter.Hydrogen, 0f) }
         };
     }
 
@@ -221,5 +280,14 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper
     public override Module GetModuleType()
     {
         return Module.Furnace;
+    }
+
+    public void OnEmergencyShutdown()
+    {
+    }
+
+    public override void OnSinkConnected(ISink s) {
+        formula.AddSink(s, Matter.CarbonDioxide);
+        formula.AddSink(s, Matter.Hydrogen);
     }
 }

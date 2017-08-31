@@ -90,7 +90,7 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     //GuiBridge.Instance.ShowNews(NewsSource.AlgaeHarvestable);
     
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         WaterIn = null;
 

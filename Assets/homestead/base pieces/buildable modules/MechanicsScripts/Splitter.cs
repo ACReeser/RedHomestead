@@ -129,7 +129,7 @@ public class Splitter : Converter, ISink
             OutputTwo.Get(m).Push(FlowPerSecond * Time.fixedDeltaTime);
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         OutputOne = OutputTwo = null;
     }

@@ -75,7 +75,7 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
         }
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
     }
 

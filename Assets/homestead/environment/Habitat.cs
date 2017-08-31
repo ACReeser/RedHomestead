@@ -113,7 +113,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
         FlowManager.Instance.PowerGrids.Add(this);
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         WaterSinks.Clear();
         OxygenSinks.Clear();

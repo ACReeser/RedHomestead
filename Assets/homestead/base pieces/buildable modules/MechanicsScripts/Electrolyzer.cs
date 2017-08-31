@@ -81,7 +81,7 @@ public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
         return false;
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         HydrogenOut = OxygenOut = WaterIn = null;
     }

@@ -210,7 +210,7 @@ namespace RedHomestead.Agriculture{
             this.RefreshIconsAndHandles();
         }
 
-        public override void ClearHooks()
+        public override void ClearSinks()
         {
             this.WaterIn = null;
             this.RefreshIconsAndHandles();

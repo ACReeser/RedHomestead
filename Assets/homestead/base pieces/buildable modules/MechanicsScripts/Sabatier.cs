@@ -85,7 +85,7 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
         return false;
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         HydrogenSource = MethaneOut = WaterOut = null;
     }

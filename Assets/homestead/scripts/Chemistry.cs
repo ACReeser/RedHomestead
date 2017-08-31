@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using RedHomestead.Industry;
 
 namespace RedHomestead.Simulation
 {
@@ -343,6 +344,90 @@ namespace RedHomestead.Simulation
                     return false;
             }
         }
+        
+    }
+
+    public class FormulaComponent
+    {
+        public ResourceContainer Container;
+        public float ReactionRate;
+        public Matter Matter;
+    }
+
+    public class Formula
+    {
+        private readonly ResourceContainerDictionary buffer;
+        private readonly FormulaComponent[] combinators;
+
+        public Formula(ResourceContainerDictionary buffer, params FormulaComponent[] inputs)
+        {
+            this.buffer = buffer;
+            this.combinators = inputs;
+        }
+        public void AddSink(ISink sink, Matter type)
+        {
+            if (sink.HasContainerFor(type))
+            {
+                AddContainer(sink.Get(type));
+            }
+        }
+        public void AddContainer(ResourceContainer container)
+        {
+            foreach (FormulaComponent component in combinators)
+            {
+                if (component.Matter == container.MatterType && component.Container == null)
+                {
+                    component.Container = container;
+                    break;
+                }
+            }
+        }
+
+        public void RemoveContainer(ResourceContainer container)
+        {
+            foreach (FormulaComponent component in combinators)
+            {
+                if (component.Container == container)
+                {
+                    component.Container = null;
+                    break;
+                }
+            }
+        }
+
+        public bool TryCombine()
+        {
+            foreach(FormulaComponent component in combinators)
+            {
+                if (component.Container == null)
+                    return false;
+                //already have it in buffer (from previous ticks)
+                else if (buffer[component.Container.MatterType].CurrentAmount >= component.ReactionRate)
+                    continue;
+                //can't get enough to react from buffer+container
+                else if (buffer[component.Container.MatterType].CurrentAmount + component.Container.CurrentAmount <= component.ReactionRate)
+                    return false;
+                //need a lil more
+                else
+                    buffer[component.Container.MatterType].FillFrom(component.Container, component.ReactionRate);
+            }
+            //if we got this far we have enough to react
+            foreach(FormulaComponent component in combinators)
+            {
+                //so pull from all buffers
+                buffer[component.Container.MatterType].Pull(component.ReactionRate);
+            }
+
+            return true;
+        }
+
+        internal void ClearContainers()
+        {
+            foreach (FormulaComponent component in combinators)
+            {
+                component.Container = null;
+            }
+        }
     }
 
     [Serializable]
@@ -551,8 +636,11 @@ namespace RedHomestead.Simulation
                 }
             }
         }
-
-#warning add Container.FillFrom
+        
+        public void FillFrom(ResourceContainer source, float transferAmount)
+        {
+            this.Push(source.Pull(transferAmount));
+        }
     }
 
     [Serializable]

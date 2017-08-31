@@ -53,7 +53,7 @@ public class RoverStation : Converter, IPowerConsumer
         this.SyncStatusSprites();
     }
 
-    public override void ClearHooks()
+    public override void ClearSinks()
     {
         OxygenIn = null;
         WaterIn = null;
