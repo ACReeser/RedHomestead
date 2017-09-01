@@ -76,7 +76,6 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, IC
             printArm.localPosition = new Vector3(printArm.localPosition.x, printArm.localPosition.y, back ? Mathf.Lerp(minArmZ, maxArmZ, headX.T) : Mathf.Lerp(maxArmZ, minArmZ, headX.T));
 
             currentPrintRenderer.material.SetFloat("_showPercentY", armY.T * 100f);
-            print(armY.T * 100f);
             
             yield return null;
 

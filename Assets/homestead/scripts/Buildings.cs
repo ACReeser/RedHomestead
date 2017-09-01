@@ -32,7 +32,8 @@ namespace RedHomestead.Buildings
         RoverStation,
         WeatherStation,
         Furnace,
-        ThreeDPrinter
+        ThreeDPrinter,
+        AirMiner
     }
 
     /// <summary>
