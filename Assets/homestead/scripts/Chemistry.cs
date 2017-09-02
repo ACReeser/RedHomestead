@@ -46,10 +46,13 @@ namespace RedHomestead.Simulation
         //processed
         RationMeals,
 
-        //habitat building components
+        //building components
         PressureCanvas = 80,
         Piping, 
-        Bulkhead
+        Bulkhead,
+        IronSheeting,
+        IronBeams,
+        ElectricMotor
     }
 
     public class ResourceEntry
