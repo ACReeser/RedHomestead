@@ -1,11 +1,13 @@
-﻿using RedHomestead.Crafting;
+﻿using RedHomestead.Buildings;
+using RedHomestead.Crafting;
+using RedHomestead.Electricity;
 using RedHomestead.Simulation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, ICrateSnapper
+public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper
 {
     public Transform printArm, printHead;
 
@@ -87,7 +89,7 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, IC
         }
 
         currentPrintRenderer.enabled = false;
-        GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
+        GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[System.Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
 
         MainMenu.LerpContext reset = new MainMenu.LerpContext()
         {
@@ -113,6 +115,15 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, IC
 
     public TriggerForwarder leftInputTrigger, rightInputTrigger;
     private ResourceComponent leftInput, rightInput;
+
+    public override float WattsConsumed
+    {
+        get
+        {
+            return ElectricityConstants.WattsPerBlock * 5f;
+        }
+    }
+
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
         ResourceComponent resComp = res.transform.GetComponent<ResourceComponent>();
@@ -148,5 +159,27 @@ public class ThreeDPrinter : MonoBehaviour, IDoorManager, ITriggerSubscriber, IC
         {
             rightInput = null;
         }
+    }
+
+    public override void Convert()
+    {
+    }
+
+    public override void ClearSinks()
+    {
+    }
+
+    public override ResourceContainerDictionary GetStartingDataContainers()
+    {
+        return new ResourceContainerDictionary();
+    }
+
+    public override void Report()
+    {
+    }
+
+    public override Module GetModuleType()
+    {
+        return Module.ThreeDPrinter;
     }
 }

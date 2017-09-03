@@ -16,7 +16,7 @@ namespace RedHomestead.Buildings
         Warehouse,
         Habitat,
         OreExtractor,
-        Smelter,
+        Furnace,
         SmallWaterTank,
         Splitter,
         WaterElectrolyzer,
@@ -31,7 +31,7 @@ namespace RedHomestead.Buildings
         EVAStation,
         RoverStation,
         WeatherStation,
-        Furnace,
+        GlassFurnace,
         ThreeDPrinter,
         AirMiner
     }
@@ -321,6 +321,36 @@ namespace RedHomestead.Buildings
                     },
                     Description = "A station that allows weather forecasts."
                 }
+            },
+            {
+                Module.Furnace, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.Steel),
+                    },
+                    Description = "A smelting furnace for metal ore."
+                }
+            },
+            {
+                Module.ThreeDPrinter, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.Steel),
+                    },
+                    Description = "A printer for advanced components."
+                }
+            },
+            {
+                Module.AirMiner, new BuildingData() {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.5f, Matter.Copper),
+                        new ResourceEntry(.5f, Matter.Steel),
+                    },
+                    Description = "An air pump that mines carbon dioxide."
+                }
             }
         };
         
@@ -363,15 +393,18 @@ namespace RedHomestead.Buildings
                 new Module[]
                 {
                     Module.SabatierReactor,
-                    Module.AlgaeTank
-                    //Module.OreExtractor,
+                    Module.AlgaeTank,
+                    Module.OreExtractor,
+                    Module.AirMiner
                 }
             },
             {
                 ConstructionGroup.Refinement,
                 new Module[]
                 {
-                    Module.WaterElectrolyzer
+                    Module.WaterElectrolyzer,
+                    Module.Furnace,
+                    Module.ThreeDPrinter
                 }
             },
             {
