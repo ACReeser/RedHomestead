@@ -90,9 +90,9 @@
         <key>maxTextureSize</key>
         <QSize>
             <key>width</key>
-            <int>2048</int>
+            <int>4096</int>
             <key>height</key>
-            <int>2048</int>
+            <int>4096</int>
         </QSize>
         <key>fixedTextureSize</key>
         <QSize>
@@ -193,18 +193,41 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../recycle.png</key>
+            <key type="filename">../battery-pack.png</key>
+            <key type="filename">../modes/plug.png</key>
+            <key type="filename">../modules/pipes.png</key>
             <key type="filename">../resources/acid-blob.png</key>
+            <key type="filename">../resources/anvil.png</key>
             <key type="filename">../resources/camping-tent.png</key>
+            <key type="filename">../resources/circuitry.png</key>
+            <key type="filename">../resources/crown-coin.png</key>
             <key type="filename">../resources/fizzing-flask.png</key>
             <key type="filename">../resources/glass.png</key>
+            <key type="filename">../resources/glider.png</key>
+            <key type="filename">../resources/gold-bar.png</key>
             <key type="filename">../resources/ground-sprout.png</key>
+            <key type="filename">../resources/i-beam.png</key>
+            <key type="filename">../resources/induction.png</key>
+            <key type="filename">../resources/jet-fighter.png</key>
+            <key type="filename">../resources/laser-warning.png</key>
+            <key type="filename">../resources/layered-armor.png</key>
             <key type="filename">../resources/mass-driver.png</key>
             <key type="filename">../resources/meal.png</key>
             <key type="filename">../resources/metal-bar.png</key>
+            <key type="filename">../resources/metal-disc.png</key>
+            <key type="filename">../resources/microchip.png</key>
+            <key type="filename">../resources/molecule.png</key>
+            <key type="filename">../resources/overdrive.png</key>
+            <key type="filename">../resources/potato.png</key>
             <key type="filename">../resources/powder.png</key>
+            <key type="filename">../resources/processor.png</key>
+            <key type="filename">../resources/recycle.png</key>
             <key type="filename">../resources/salt-shaker.png</key>
             <key type="filename">../resources/solar-power.png</key>
+            <key type="filename">../resources/stack.png</key>
+            <key type="filename">../resources/steel-claws.png</key>
+            <key type="filename">../resources/sugar-cane.png</key>
+            <key type="filename">../resources/unlit-candelabra.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -233,19 +256,42 @@
         </map>
         <key>fileList</key>
         <array>
-            <filename>../resources/metal-bar.png</filename>
-            <filename>../resources/acid-blob.png</filename>
-            <filename>../resources/camping-tent.png</filename>
-            <filename>../resources/fizzing-flask.png</filename>
-            <filename>../resources/glass.png</filename>
             <filename>../resources/ground-sprout.png</filename>
+            <filename>../resources/i-beam.png</filename>
+            <filename>../resources/induction.png</filename>
+            <filename>../resources/jet-fighter.png</filename>
+            <filename>../resources/laser-warning.png</filename>
+            <filename>../resources/layered-armor.png</filename>
             <filename>../resources/mass-driver.png</filename>
             <filename>../resources/meal.png</filename>
+            <filename>../resources/metal-bar.png</filename>
+            <filename>../resources/metal-disc.png</filename>
+            <filename>../resources/microchip.png</filename>
+            <filename>../resources/molecule.png</filename>
+            <filename>../resources/overdrive.png</filename>
+            <filename>../resources/potato.png</filename>
             <filename>../resources/powder.png</filename>
+            <filename>../resources/processor.png</filename>
+            <filename>../resources/recycle.png</filename>
             <filename>../resources/salt-shaker.png</filename>
             <filename>../resources/solar-power.png</filename>
+            <filename>../resources/stack.png</filename>
+            <filename>../resources/steel-claws.png</filename>
             <filename>../resources/steel-symbol.png</filename>
-            <filename>../recycle.png</filename>
+            <filename>../resources/sugar-cane.png</filename>
+            <filename>../resources/unlit-candelabra.png</filename>
+            <filename>../resources/acid-blob.png</filename>
+            <filename>../resources/anvil.png</filename>
+            <filename>../resources/camping-tent.png</filename>
+            <filename>../resources/circuitry.png</filename>
+            <filename>../resources/crown-coin.png</filename>
+            <filename>../resources/fizzing-flask.png</filename>
+            <filename>../resources/glass.png</filename>
+            <filename>../resources/glider.png</filename>
+            <filename>../resources/gold-bar.png</filename>
+            <filename>../modes/plug.png</filename>
+            <filename>../battery-pack.png</filename>
+            <filename>../modules/pipes.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>
