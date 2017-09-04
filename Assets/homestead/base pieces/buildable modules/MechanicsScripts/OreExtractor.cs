@@ -5,8 +5,15 @@ using RedHomestead.Buildings;
 using UnityEngine;
 using RedHomestead.Simulation;
 using RedHomestead.Electricity;
+using RedHomestead.Persistence;
 
-public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPowerToggleable, IPowerConsumer {
+[Serializable]
+public class OreExtractorFlexData
+{
+    public string DepositInstanceID;
+}
+
+public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPowerToggleable, IPowerConsumer, IFlexDataContainer<MultipleResourceModuleData, OreExtractorFlexData> {
     public bool IsOn { get; set; }
 
     public override float WattsConsumed
@@ -16,6 +23,8 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
             return 0f;
         }
     }
+
+    public OreExtractorFlexData FlexData { get; set; }
 
     public void DetachCrate(IMovableSnappable detaching)
     {
@@ -32,17 +41,23 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
 
     public override void OnAdjacentChanged()
     {
+
     }
 
+    private Deposit attachedDeposit;
     private const float OrePerTick = .0001f;
     private Deposit deposit;
     private ResourceComponent oreOut;
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
-        ResourceComponent ore = res.transform.GetComponent<ResourceComponent>();
-        if (ore != null && oreOut == null && ore.Data.Container.MatterType.IsRawMaterial() && matches(ore.Data.Container.MatterType, Matter.IronOre))
+        ResourceComponent oreBucket = res.transform.GetComponent<ResourceComponent>();
+        if (oreBucket != null && 
+            oreOut == null && 
+            attachedDeposit != null &&
+            oreBucket.Data.Container.MatterType.IsRawMaterial() && 
+            matches(oreBucket.Data.Container.MatterType, attachedDeposit.Data.Extractable.MatterType))
         {
-            oreOut = ore;
+            oreOut = oreBucket;
             res.SnapCrate(this, child.transform.position);
         }
     }
@@ -66,11 +81,20 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
 
     public override void Convert()
     {
-        if ((HasPower && IsOn) || true)
+        if (attachedDeposit == null && 
+            FlexData != null && 
+            !String.IsNullOrEmpty(FlexData.DepositInstanceID) && 
+            FlowManager.Instance.DepositMap.ContainsKey(FlexData.DepositInstanceID))
         {
-            if (oreOut != null)
+            attachedDeposit = FlowManager.Instance.DepositMap[FlexData.DepositInstanceID];
+        }
+
+        //if ((HasPower && IsOn))
+        if (attachedDeposit != null)
+        {
+            if (oreOut != null && attachedDeposit.Data.Extractable.CurrentAmount > 0)
             {
-                oreOut.Data.Container.Push(OrePerTick);
+                oreOut.Data.Container.Push(attachedDeposit.Data.Extractable.Pull(OrePerTick));
             }
         }
     }
@@ -81,6 +105,7 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
 
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
+        FlexData = new OreExtractorFlexData();
         return new ResourceContainerDictionary();
     }
 }

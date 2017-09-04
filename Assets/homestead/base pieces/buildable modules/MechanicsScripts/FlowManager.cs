@@ -22,6 +22,8 @@ public class FlowManager : MonoBehaviour
     public List<SingleResourceModuleGameplay> Sinks = new List<SingleResourceModuleGameplay>();
     [HideInInspector]
     public List<Converter> Converters = new List<Converter>();
+    [HideInInspector]
+    public Dictionary<string, Deposit> DepositMap = new Dictionary<string, Deposit>();
 
     void Awake() {
         Instance = this;

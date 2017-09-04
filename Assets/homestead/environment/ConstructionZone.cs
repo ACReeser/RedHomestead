@@ -14,6 +14,7 @@ public class ResourceCountDictionary: SerializableDictionary<Matter, float> { }
 public class ConstructionData: FacingData
 {
     public Module ModuleTypeUnderConstruction;
+    public string DepositInstanceID;
     public Dictionary<Matter, float> ResourceCount;
     public float CurrentProgressSeconds = 0;
 }
@@ -44,9 +45,10 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         InitializeRequirements();
 	}
 
-    public void Initialize(Module toBuild)
+    public void Initialize(Module toBuild, string depositID = null)
     {
         Data.ModuleTypeUnderConstruction = toBuild;
+        Data.DepositInstanceID = depositID;
         ModulePrefab = PrefabCache<Module>.Cache.GetPrefab(toBuild);
 
         InitializeRequirements();
@@ -170,12 +172,24 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
 
     public void Complete()
     {
+#warning band-aid fix to stop InitializeStartingData from being called twice
+        Game.Current.IsNewGame = false;
         //todo: move player out of the way
         //actually, we _should_ only be able to complete construction when the player
         //is outside the zone looking in, so maybe not
-        
+
         Transform newT = (Transform)GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
         newT.GetComponent<IBuildable>().InitializeStartingData();
+
+        //link ore extractor to deposit
+        if (!String.IsNullOrEmpty(Data.DepositInstanceID))
+        {
+            OreExtractor drill = newT.GetComponent<OreExtractor>();
+            if (drill != null)
+            {
+                drill.FlexData.DepositInstanceID = Data.DepositInstanceID;
+            }
+        }
 
         if (ZoneThatPlayerIsStandingIn == this)
         {

@@ -8,6 +8,7 @@ using RedHomestead.Persistence;
 [Serializable]
 public class DepositData : FacingData
 {
+    public string DepositInstanceID;
     public ResourceContainer Extractable;
     internal string ExtractableHint { get { return Extractable.UtilizationPercentageString() + " " + Extractable.MatterType;  } }
 }
@@ -20,6 +21,16 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
     private const float VerticalDrillOffset = 1.11f;
     private IceDrill snappedDrill;
     private Coroutine unsnapTimer;
+
+    void Start()
+    {
+        if (String.IsNullOrEmpty(data.DepositInstanceID))
+        {
+            data.DepositInstanceID = System.Guid.NewGuid().ToString();
+        }
+
+        FlowManager.Instance.DepositMap.Add(data.DepositInstanceID, this);
+    }
 
     public void DetachCrate(IMovableSnappable detaching)
     {

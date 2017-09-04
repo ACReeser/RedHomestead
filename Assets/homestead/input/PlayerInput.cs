@@ -1296,6 +1296,7 @@ public class PlayerInput : MonoBehaviour {
                     newPrompt = Prompts.DepositHint;
                     newPrompt.Progress = deposit.Data.Extractable.UtilizationPercentage;
                     newPrompt.Description = deposit.Data.ExtractableHint;
+                    //todo: assign sprite based off of deposit.Data.Container.MatterType
                 }
                 else if (hitInfo.collider.CompareTag("corridor") && SurvivalTimer.Instance.IsNotInHabitat)
                 {
@@ -1541,7 +1542,8 @@ public class PlayerInput : MonoBehaviour {
 
                         if (doInteract)
                         {
-                            PlaceConstructionHere(hitInfo.point);
+                            string depositID = depositSnap ? hitInfo.collider.GetComponent<Deposit>().Data.DepositInstanceID : null;
+                            PlaceConstructionHere(hitInfo.point, depositID);
                         }
                         else
                         {
@@ -1754,13 +1756,13 @@ public class PlayerInput : MonoBehaviour {
         return newPrompt;
     }
 
-    private void PlaceConstructionHere(Vector3 point)
+    private void PlaceConstructionHere(Vector3 point, string depositID = null)
     {
         Transform zoneT = (Transform)GameObject.Instantiate(ModuleBridge.Instance.ConstructionZonePrefab, ModulePlan.Visualization.position, ModulePlan.Visualization.rotation);
 
         ConstructionZone zone = zoneT.GetComponent<ConstructionZone>();
 
-        zone.Initialize(ModulePlan.Type);
+        zone.Initialize(ModulePlan.Type, depositID);
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
             zone.Complete();
