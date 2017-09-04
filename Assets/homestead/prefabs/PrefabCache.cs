@@ -6,10 +6,49 @@ using RedHomestead.Interiors;
 using System;
 using RedHomestead.Geography;
 
+public static class PrefabCacheUtils
+{
+    public static Material TranslucentValidPlanningMaterial;
+    public static Material TranslucentInvalidPlanningMaterial;
+
+    public static void RecurseDisableColliderSetTranslucentRenderer(Transform parent, Material translucent)
+    {
+        foreach (Transform child in parent)
+        {
+            Collider c = child.GetComponent<Collider>();
+            if (c != null)
+                c.enabled = false;
+
+            Renderer r = child.GetComponent<Renderer>();
+
+            if (r != null)
+            {
+                r.enabled = (child.gameObject.layer == 0) || (child.gameObject.layer == 8);
+
+                if (r.enabled)
+                {
+                    if (r.materials != null && r.materials.Length > 1)
+                    {
+                        var newMats = new Material[r.materials.Length];
+                        for (int i = 0; i < r.materials.Length; i++)
+                        {
+                            newMats[i] = translucent;
+                        }
+                        r.materials = newMats;
+                    }
+                    else
+                    {
+                        r.material = translucent;
+                    }
+                }
+            }
+
+            RecurseDisableColliderSetTranslucentRenderer(child, translucent);
+        }
+    }
+}
+
 public class PrefabCache<T> where T : IConvertible {
-
-    public static Material TranslucentPlanningMat;
-
     private static PrefabCache<T> _cache;
     public static PrefabCache<T> Cache
     {
@@ -46,48 +85,13 @@ public class PrefabCache<T> where T : IConvertible {
                 if (g != null)
                     GameObject.Destroy(g);
             }
-            RecurseDisableColliderSetTranslucentRenderer(result);
+            PrefabCacheUtils.RecurseDisableColliderSetTranslucentRenderer(result, PrefabCacheUtils.TranslucentValidPlanningMaterial);
             VisualizationTransformCache[key] = result;
         }
 
         return result;
     }
     
-    private void RecurseDisableColliderSetTranslucentRenderer(Transform parent)
-    {
-        foreach (Transform child in parent)
-        {
-            Collider c = child.GetComponent<Collider>();
-            if (c != null)
-                c.enabled = false;
-
-            Renderer r = child.GetComponent<Renderer>();
-            
-            if (r != null)
-            {
-                r.enabled = (child.gameObject.layer == 0) || (child.gameObject.layer == 8);
-
-                if (r.enabled)
-                {
-                    if (r.materials != null && r.materials.Length > 1)
-                    {
-                        var newMats = new Material[r.materials.Length];
-                        for (int i = 0; i < r.materials.Length; i++)
-                        {
-                            newMats[i] = TranslucentPlanningMat;
-                        }
-                        r.materials = newMats;
-                    }
-                    else
-                    {
-                        r.material = TranslucentPlanningMat;
-                    }
-                }
-            }
-
-            RecurseDisableColliderSetTranslucentRenderer(child);
-        }
-    }
     
     public Transform GetPrefab(T key)
     {
@@ -118,7 +122,19 @@ public class Planning<T> where T : IConvertible
 {
     public Transform Visualization { get; private set; }
     public T Type { get; private set; }
-
+    private bool _isValid = true;
+    public bool IsValid
+    {
+        get { return _isValid; }
+        set
+        {
+            if (_isValid != value)
+            {
+                SetValidMaterialOnVisualization(value);
+            }
+            _isValid = value;
+        }
+    }
     public bool IsActive
     {
         get
@@ -150,5 +166,10 @@ public class Planning<T> where T : IConvertible
             Visualization.gameObject.SetActive(false);
             Visualization = null;
         }
+    }
+
+    private void SetValidMaterialOnVisualization(bool isValid)
+    {
+        PrefabCacheUtils.RecurseDisableColliderSetTranslucentRenderer(Visualization, isValid ? PrefabCacheUtils.TranslucentValidPlanningMaterial : PrefabCacheUtils.TranslucentInvalidPlanningMaterial);
     }
 }

@@ -61,7 +61,7 @@ public class PlayerInput : MonoBehaviour {
     /// the material to put on module prefabs
     /// when planning where to put them on the ground
     /// </summary>
-    public Material translucentPlanningMat;
+    public Material translucentPlanningMat, translucentInvalidPlanningMat;
     public ParticleSystem DrillSparks, Blower;
 
     public AudioSource InteractionSource;
@@ -124,9 +124,8 @@ public class PlayerInput : MonoBehaviour {
         Loadout = new Loadout();
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);
         Equip(Slot.Unequipped);
-        PrefabCache<Module>.TranslucentPlanningMat = translucentPlanningMat;
-        PrefabCache<Stuff>.TranslucentPlanningMat = translucentPlanningMat;
-        PrefabCache<Floorplan>.TranslucentPlanningMat = translucentPlanningMat;
+        PrefabCacheUtils.TranslucentValidPlanningMaterial = translucentPlanningMat;
+        PrefabCacheUtils.TranslucentInvalidPlanningMaterial = translucentInvalidPlanningMat;
         Autosave.Instance.AutosaveEnabled = true;
         DrillSparks.transform.SetParent(null);
         GuiBridge.Instance.RefreshSurvivalPanel(false, false);
@@ -1516,28 +1515,47 @@ public class PlayerInput : MonoBehaviour {
             }
 
             RaycastHit hitInfo;
-            if (CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default"))
+            bool hit;
+            bool depositSnap = false;
+            if (ModulePlan.Type == Module.OreExtractor)
+            {
+                hit = CastRay(out hitInfo, QueryTriggerInteraction.Collide, "Default", "interaction");
+                depositSnap = true;
+            }
+            else
+            {
+                hit = CastRay(out hitInfo, QueryTriggerInteraction.Ignore, "Default");
+            }
+
+            if (hit)
             {
                 if (hitInfo.collider != null)
                 {
-                    if (hitInfo.collider.CompareTag("terrain"))
+                    if ((!depositSnap && hitInfo.collider.CompareTag("terrain")) || (depositSnap && hitInfo.collider.CompareTag("deposit")))
                     {
-                        if (Loadout.Equipped == Equipment.Blueprints && ModulePlan.IsActive)
-                        {
-                            //TODO: raycast 3 more times (other 3 corners)
-                            //then take the average height between them
-                            //and invalidate the placement if it passes some threshold
-                            ModulePlan.Visualization.position = hitInfo.point;
+                        ModulePlan.IsValid = true;
+                        //TODO: raycast 3 more times (other 3 corners)
+                        //then take the average height between them
+                        //and invalidate the placement if it passes some threshold
+                        ModulePlan.Visualization.position = hitInfo.point;
 
-                            if (doInteract)
-                            {
-                                PlaceConstructionHere(hitInfo.point);
-                            }
-                            else
-                            {
-                                newPrompt = Prompts.PlanConstructionZoneHint;
-                            }
+                        if (doInteract)
+                        {
+                            PlaceConstructionHere(hitInfo.point);
                         }
+                        else
+                        {
+                            newPrompt = Prompts.PlanConstructionZoneHint;
+                        }
+                    }
+                    else if (depositSnap && hitInfo.collider.CompareTag("terrain"))
+                    {
+                        ModulePlan.IsValid = false;
+                        ModulePlan.Visualization.position = hitInfo.point;
+                    }
+                    else
+                    {
+                        ModulePlan.IsValid = false;
                     }
                 }
             }
