@@ -6,7 +6,7 @@ using RedHomestead.Buildings;
 using RedHomestead.Electricity;
 using RedHomestead.Industry;
 
-public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
+public class Sabatier : Converter, IPowerConsumerToggleable, IPowerConsumer
 {
     public AudioClip HandleChangeClip;
 
@@ -18,9 +18,8 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
     public Transform powerMask { get; set; }
     public Transform powerActive { get; set; }
 
-    public MeshFilter PowerCabinet;
-    public Mesh OnMesh, OffMesh;
-
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet { get { return powerCabinet; } }
     public override float WattsConsumed
     {
         get
@@ -53,7 +52,7 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
     protected override void OnStart()
     {
         base.OnStart();
-        RefreshPowerSwitch();
+        this.RefreshPowerSwitch();
     }
 
     private void PushMethaneAndWater()
@@ -130,35 +129,6 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
             );
     }
 
-    public void TogglePower()
-    {
-        //only allow power to turn on when power is connected
-        bool newPowerState = !IsOn;
-        if (newPowerState && HasPower)
-        {
-            IsOn = newPowerState;
-        }
-        else
-        {
-            IsOn = false;
-        }
-
-
-        RefreshPowerSwitch();
-        this.RefreshVisualization();
-    }
-
-    private void RefreshPowerSwitch()
-    {
-        PowerCabinet.mesh = IsOn ? OnMesh : OffMesh;
-        PowerCabinet.transform.GetChild(0).name = IsOn ? "on" : "off";
-
-        if (IsOn)
-            SoundSource.Play();
-        else
-            SoundSource.Stop();
-    }
-
     public override Module GetModuleType()
     {
         return Module.SabatierReactor;
@@ -191,6 +161,6 @@ public class Sabatier : Converter, IPowerToggleable, IPowerConsumer
 
     public void OnEmergencyShutdown()
     {
-        RefreshPowerSwitch();
+        this.RefreshPowerSwitch();
     }
 }

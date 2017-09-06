@@ -7,10 +7,13 @@ using System;
 using RedHomestead.Industry;
 using RedHomestead.Simulation;
 
-public class AirMiner : Converter, IPowerToggleable, IPowerConsumer
+public class AirMiner : Converter, IPowerConsumerToggleable
 {
     private ResourceContainer co2Out;
     private const float co2PerTickUnits = 0.01f;
+
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet { get { return powerCabinet; } }
 
     public bool IsOn
     {
@@ -56,10 +59,6 @@ public class AirMiner : Converter, IPowerToggleable, IPowerConsumer
     }
 
     public override void Report()
-    {
-    }
-
-    public void TogglePower()
     {
     }
 

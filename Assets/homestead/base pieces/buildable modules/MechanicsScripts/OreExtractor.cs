@@ -13,7 +13,7 @@ public class OreExtractorFlexData
     public string DepositInstanceID;
 }
 
-public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPowerToggleable, IPowerConsumer, IFlexDataContainer<MultipleResourceModuleData, OreExtractorFlexData> {
+public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPowerConsumerToggleable, IPowerConsumer, IFlexDataContainer<MultipleResourceModuleData, OreExtractorFlexData> {
     public bool IsOn { get; set; }
 
     public override float WattsConsumed
@@ -25,6 +25,9 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     }
 
     public OreExtractorFlexData FlexData { get; set; }
+
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet { get { return powerCabinet; } }
 
     public void DetachCrate(IMovableSnappable detaching)
     {
@@ -72,10 +75,6 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     }
 
     public override void Report()
-    {
-    }
-
-    public void TogglePower()
     {
     }
 

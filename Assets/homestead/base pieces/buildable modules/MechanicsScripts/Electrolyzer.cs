@@ -6,7 +6,7 @@ using System;
 using RedHomestead.Electricity;
 using RedHomestead.Industry;
 
-public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
+public class Electrolyzer : Converter, IPowerConsumerToggleable, IPowerConsumer
 {
     internal float OxygenPerSecond = .03f;
     internal float HydrogenPerSecond = .06f;
@@ -14,8 +14,8 @@ public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
 
     public bool IsOn { get; set; }
 
-    public MeshFilter PowerCabinet;
-    public Mesh OnMesh, OffMesh;
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet { get { return powerCabinet; } }
 
     public override float WattsConsumed
     {
@@ -48,7 +48,7 @@ public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
     protected override void OnStart()
     {
         base.OnStart();
-        RefreshPowerSwitch();
+        this.RefreshPowerSwitch();
     }
 
     private void PushOxygenAndHydrogen()
@@ -123,28 +123,6 @@ public class Electrolyzer : Converter, IPowerToggleable, IPowerConsumer
                 new ReportIOData() { Name = "Hydrogen", Flow = ".6kg kg/d", Amount = Data.MatterHistory[Matter.Hydrogen].Produced + " kg", Connected = HydrogenOut != null }
             }
             );
-    }
-
-    public void TogglePower()
-    {
-        //only allow power to turn on when power is connected
-        bool newPowerState = !IsOn;
-        if (newPowerState && HasPower)
-        {
-            IsOn = newPowerState;
-        }
-        else
-        {
-            IsOn = false;
-        }
-
-        RefreshPowerSwitch();
-    }
-
-    private void RefreshPowerSwitch()
-    {
-        PowerCabinet.mesh = IsOn ? OnMesh : OffMesh;
-        PowerCabinet.transform.GetChild(0).name = IsOn ? "on" : "off";
     }
 
     public override Module GetModuleType()

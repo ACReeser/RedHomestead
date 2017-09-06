@@ -70,7 +70,7 @@ public class SingleResourceModuleData : ResourcefullModuleData
 
 public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuildable, IPumpable
 {
-    protected AudioSource SoundSource;
+    public AudioSource SoundSource { get; private set; }
     
     public bool HasPower { get; set; }
     
@@ -301,8 +301,7 @@ public abstract class Converter : MultipleResourceModuleGameplay
     public virtual void OnSinkConnected(ISink s) { }
 }
 
-public interface IPowerToggleable
+public interface IPowerConsumerToggleable: IPowerConsumer
 {
-    bool IsOn { get; }
-    void TogglePower();
+    MeshFilter PowerCabinet { get; }
 }

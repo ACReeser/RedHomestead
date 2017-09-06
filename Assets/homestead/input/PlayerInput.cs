@@ -1218,7 +1218,8 @@ public class PlayerInput : MonoBehaviour {
                     if (doInteract)
                     {
                         //PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
-                        hitInfo.collider.transform.root.GetComponent<IPowerToggleable>().TogglePower();
+                        IPowerConsumerToggleable toggle = hitInfo.collider.transform.root.GetComponent<IPowerConsumerToggleable>();
+                        toggle.TogglePower();
                     }
                     else
                     {
@@ -1560,6 +1561,14 @@ public class PlayerInput : MonoBehaviour {
                         ModulePlan.IsValid = false;
                     }
                 }
+                else
+                {
+                    ModulePlan.IsValid = false;
+                }
+            }
+            else
+            {
+                ModulePlan.IsValid = false;
             }
         }
         else

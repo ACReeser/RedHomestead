@@ -235,6 +235,42 @@ namespace RedHomestead.Electricity
         {
             return Math.Max(1, Mathf.RoundToInt(c.MaximumWattsConsumed / ElectricityConstants.WattsPerBlock));
         }
+        
+        public static void RefreshPowerSwitch(this IPowerConsumerToggleable module)
+        {
+            if (module.PowerCabinet == null)
+                Debug.LogWarning("No power cabinet on "+module.ToString());
+            else
+            {
+                module.PowerCabinet.mesh = module.IsOn ? ModuleBridge.Instance.CabinetOn : ModuleBridge.Instance.CabinetOff;
+                module.PowerCabinet.transform.GetChild(0).name = module.IsOn ? "on" : "off";
+
+                var gameplay = (module as ModuleGameplay);
+                if (gameplay != null && gameplay.SoundSource != null)
+                {
+                    if (module.IsOn)
+                        gameplay.SoundSource.Play();
+                    else
+                        gameplay.SoundSource.Stop();
+                }
+            }
+        }
+
+        public static void TogglePower(this IPowerConsumerToggleable consumer)
+        {
+            //only allow power to turn on when power is connected
+            bool newPowerState = !consumer.IsOn;
+            if (newPowerState && consumer.HasPower)
+            {
+                consumer.IsOn = newPowerState;
+            }
+            else
+            {
+                consumer.IsOn = false;
+            }
+            consumer.RefreshPowerSwitch();
+            consumer.RefreshVisualization();
+        }
     }
 
     public class PowerGrids

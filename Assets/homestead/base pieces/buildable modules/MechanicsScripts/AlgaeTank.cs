@@ -7,7 +7,7 @@ using RedHomestead.Electricity;
 using RedHomestead.Industry;
 using RedHomestead.Agriculture;
 
-public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, ICrateSnapper
+public class AlgaeTank : FarmConverter, IPowerConsumerToggleable, ITriggerSubscriber, ICrateSnapper
 {
     public AudioClip HandleChangeClip;
 
@@ -16,10 +16,11 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     // least harvest kg per five days per seconds per day
     internal const float BiomassPerSecond = LeastBiomassHarvestKilograms / 5f / SunOrbit.MartianSecondsPerDay;
     internal const float MaximumBiomass = 760f;
-    
 
-    public MeshFilter PowerCabinet;
-    public Mesh OnMesh, OffMesh;
+
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet { get { return powerCabinet; } }
+
     public MeshRenderer algaeRenderer;
     public AnimatedTexture animatedTexture;
     public Transform CratePrefab, CrateAnchor;
@@ -84,7 +85,7 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
     protected override void OnStart()
     {
         base.OnStart();
-        RefreshPowerSwitch();
+        this.RefreshPowerSwitch();
         RefreshAlgaeBubbleSpeed();
     }
     //GuiBridge.Instance.ShowNews(NewsSource.AlgaeHarvestable);
@@ -125,34 +126,6 @@ public class AlgaeTank : FarmConverter, IPowerToggleable, ITriggerSubscriber, IC
                 new ReportIOData() { Name = "Biomass", Flow = "1 kg/d", Amount = Data.MatterHistory[Matter.Biomass].Produced + " kg", Connected = true },
             }
             );
-    }
-
-    public void TogglePower()
-    {
-        //only allow power to turn on when power is connected
-        bool newPowerState = !IsOn;
-        if (newPowerState && HasPower)
-        {
-            IsOn = newPowerState;
-        }
-        else
-        {
-            IsOn = false;
-        }
-
-        RefreshPowerSwitch();
-        RefreshPowerSwitch();
-    }
-
-    private void RefreshPowerSwitch()
-    {
-        PowerCabinet.mesh = IsOn ? OnMesh : OffMesh;
-        PowerCabinet.transform.GetChild(0).name = IsOn ? "on" : "off";
-
-        if (IsOn)
-            SoundSource.Play();
-        else
-            SoundSource.Stop();
     }
 
     protected override void OnHarvestComplete(float harvestAmountUnits)

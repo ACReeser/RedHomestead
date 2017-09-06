@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper
+public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable
 {
     public Transform printArm, printHead;
 
@@ -124,6 +124,17 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         }
     }
 
+    public bool IsOn { get; set; }
+
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet
+    {
+        get
+        {
+            return powerCabinet;
+        }
+    }
+
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
         ResourceComponent resComp = res.transform.GetComponent<ResourceComponent>();
@@ -181,5 +192,9 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public override Module GetModuleType()
     {
         return Module.ThreeDPrinter;
+    }
+
+    public void OnEmergencyShutdown()
+    {
     }
 }
