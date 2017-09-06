@@ -12,8 +12,6 @@ public class Electrolyzer : Converter, IPowerConsumerToggleable, IPowerConsumer
     internal float HydrogenPerSecond = .06f;
     internal float WaterPerSecond = .1f;
 
-    public bool IsOn { get; set; }
-
     public MeshFilter powerCabinet;
     public MeshFilter PowerCabinet { get { return powerCabinet; } }
 

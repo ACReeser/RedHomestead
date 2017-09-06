@@ -32,13 +32,15 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         lerp.Toggle(StartCoroutine);
     }
 
-    // Use this for initialization
-    void Start () {
+    protected override void OnStart()
+    {
+        base.OnStart();
+        this.RefreshPowerSwitch();
         resetPosition = printArm.localPosition;
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update () {
 		
 	}
 
@@ -123,8 +125,6 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             return ElectricityConstants.WattsPerBlock * 5f;
         }
     }
-
-    public bool IsOn { get; set; }
 
     public MeshFilter powerCabinet;
     public MeshFilter PowerCabinet

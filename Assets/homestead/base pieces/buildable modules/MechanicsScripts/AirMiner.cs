@@ -15,10 +15,6 @@ public class AirMiner : Converter, IPowerConsumerToggleable
     public MeshFilter powerCabinet;
     public MeshFilter PowerCabinet { get { return powerCabinet; } }
 
-    public bool IsOn
-    {
-        get; set;
-    }
 
     public override float WattsConsumed
     {
@@ -68,5 +64,11 @@ public class AirMiner : Converter, IPowerConsumerToggleable
         {
             co2Out = s.Get(RedHomestead.Simulation.Matter.CarbonDioxide);
         }
+    }
+
+    protected override void OnStart()
+    {
+        base.OnStart();
+        this.RefreshPowerSwitch();
     }
 }

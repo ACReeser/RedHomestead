@@ -67,7 +67,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
         (this as IPowerConsumer).RefreshVisualization();
     }
 
-    public bool IsOn { get { return this.HasPower; } set { } }
+    new public bool IsOn { get { return this.HasPower; } set { } }
 
     public EnergyContainer EnergyContainer { get { return HabitatData.EnergyContainer; } }
 

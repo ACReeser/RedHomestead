@@ -288,11 +288,11 @@ namespace RedHomestead.Simulation
             int i = (int)r;
             if (i < 0)
             {
-                return GuiBridge.Instance.Icons.CompoundIcons[i + 6]; //6 "compounds" are negative
+                return IconAtlas.Instance.CompoundIcons[i + 6]; //6 "compounds" are negative
             }
             else
             {
-                return GuiBridge.Instance.Icons.ResourceIcons[i - 1]; // 1 unspecified
+                return IconAtlas.Instance.ResourceIcons[i]; // 1 unspecified
             }
         }
 

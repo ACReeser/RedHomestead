@@ -21,9 +21,13 @@ public abstract class ModuleData : FacingData, IFlexData
     public float FaultedPercentage;
     public string PowerableInstanceID { get { return ModuleInstanceID; } }
 
+    [HideInInspector]
+    public bool IsOn;
+
     /// <summary>
     /// Flex data
     /// </summary>
+    [HideInInspector]
     public string F;
 
     public string Flex { get { return F; } set { F = value; } }
@@ -272,6 +276,8 @@ public abstract class SingleResourceModuleGameplay : ModuleGameplay, IDataContai
 
 public abstract class Converter : MultipleResourceModuleGameplay
 {
+    public bool IsOn { get { return Data.IsOn; } set { Data.IsOn = value; } }
+
     protected override void OnStart()
     {
         FlowManager.Instance.Converters.Add(this);

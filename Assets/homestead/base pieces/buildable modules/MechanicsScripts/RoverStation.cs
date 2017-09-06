@@ -36,8 +36,6 @@ public class RoverStation : Converter, IPowerConsumer
             return EVA.PowerResupplyWattsPerSecond;
         }
     }
-    
-    public bool IsOn { get; set; }
 
     private void SyncStatusSprites()
     {

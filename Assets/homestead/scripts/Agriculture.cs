@@ -41,7 +41,7 @@ namespace RedHomestead.Agriculture{
 
     public abstract class FarmConverter : Converter, IFarm, IPowerConsumer, IToggleReceiver, IFlexDataContainer<MultipleResourceModuleData, FarmFlexData>
     {
-        public bool IsOn { get { return FlexData.IsHeatOn; } set { FlexData.IsHeatOn = value; } }
+        new public bool IsOn { get { return FlexData.IsHeatOn; } set { FlexData.IsHeatOn = value; } }
         public float HarvestProgress { get { return FlexData.HarvestProgress; } }
         public abstract float WaterConsumptionPerTickInUnits { get; }
         public abstract float BiomassProductionPerTickInUnits { get; }
