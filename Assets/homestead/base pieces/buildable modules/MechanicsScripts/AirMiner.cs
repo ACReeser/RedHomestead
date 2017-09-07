@@ -65,7 +65,7 @@ public class AirMiner : Converter, IPowerConsumerToggleable
             co2Out = s.Get(RedHomestead.Simulation.Matter.CarbonDioxide);
         }
     }
-
+    
     protected override void OnStart()
     {
         base.OnStart();
