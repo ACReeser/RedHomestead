@@ -346,6 +346,12 @@ public static class Prompts {
         Key = "E",
         UsesProgress = true
     };
+    internal static PromptInfo MineHint = new PromptInfo()
+    {
+        Description = "Mine",
+        Key = "E",
+        UsesProgress = true
+    };
     internal static LinkablePrompts BulkheadBridgePrompts = new LinkablePrompts()
     {
         HoverWhenNoneSelected = StartBulkheadBridgeHint,

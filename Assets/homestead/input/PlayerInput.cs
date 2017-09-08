@@ -88,6 +88,7 @@ public class PlayerInput : MonoBehaviour {
     internal bool IsOnFoot { get; private set; }
     internal bool IsInSuit { get; private set; }
     private bool reportMenuOpen = false;
+    internal ParticleSystem DrillingParticles;
 
     internal bool IsInVehicle
     {
@@ -109,8 +110,9 @@ public class PlayerInput : MonoBehaviour {
     private Planning<Stuff> StuffPlan = new Planning<Stuff>();
     private Planning<Floorplan> FloorPlan = new Planning<Floorplan>();
 
-    private Transform lastHobbitHoleTransform;
+    private Transform lastHobbitHoleT, lastDepositT;
     private HobbitHole lastHobbitHole;
+    private Deposit lastDeposit;
 
     void Awake()
     {
@@ -897,7 +899,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (Loadout.Equipped == Equipment.PowerDrill)
                     {
-                        if (hitInfo.collider.transform.parent != lastHobbitHoleTransform)
+                        if (hitInfo.collider.transform.parent != lastHobbitHoleT)
                         {
                             lastHobbitHole = hitInfo.collider.transform.parent.GetComponent<HobbitHole>();
                         }
@@ -940,6 +942,64 @@ public class PlayerInput : MonoBehaviour {
                     else
                     {
                         newPrompt = Prompts.DrillHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("deposit"))
+                {
+                    if (hitInfo.collider.transform != lastDepositT)
+                    {
+                        lastDeposit = hitInfo.collider.transform.GetComponent<Deposit>();
+                    }
+
+                    if (lastDeposit != null)
+                    {
+                        if (Loadout.Equipped == Equipment.RockDrill)
+                        {
+                            if (Input.GetMouseButtonDown(0))
+                            {
+                                lastDeposit.ToggleMining(true);
+                                PlayInteractionClip(hitInfo.collider.transform.position, Sfx.Drill, false);
+                                DrillSparks.Play();
+                            }
+
+                            if (Input.GetMouseButton(0))
+                            {
+                                newPrompt = Prompts.MineHint;
+                                newPrompt.Progress = lastDeposit.Mine(Time.deltaTime * PerkMultipliers.ExcavationSpeed);
+
+                                if (Prompts.MineHint.Progress >= 1f)
+                                {
+                                    DrillSparks.Stop();
+                                    InteractionSource.Stop();
+                                }
+                                else
+                                {
+                                    DrillSparks.transform.position = hitInfo.point + hitInfo.normal.normalized * .02f;
+                                }
+                            }
+                            else
+                            {
+                                DrillSparks.Stop();
+                                InteractionSource.Stop();
+                                lastDeposit.ToggleMining(false);
+
+                                newPrompt = Prompts.MineHint;
+                                newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
+                                newPrompt.Description = lastDeposit.Data.ExtractableHint;
+                            }
+                        }
+                        else
+                        {
+                            newPrompt = Prompts.DepositHint;
+                            newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
+                            newPrompt.Description = lastDeposit.Data.ExtractableHint;
+                        }
+                    }
+                    else
+                    {
+                        newPrompt = Prompts.DepositHint;
+                        newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
+                        newPrompt.Description = lastDeposit.Data.ExtractableHint;
                     }
                 }
                 else if (hitInfo.collider.CompareTag("button"))
@@ -1290,7 +1350,7 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.HarvestHint;
                     }
                 }
-                else if (hitInfo.collider.CompareTag("deposit"))
+                /*else if (hitInfo.collider.CompareTag("deposit"))
                 {
                     Deposit deposit = hitInfo.collider.GetComponent<Deposit>();
 
@@ -1298,7 +1358,7 @@ public class PlayerInput : MonoBehaviour {
                     newPrompt.Progress = deposit.Data.Extractable.UtilizationPercentage;
                     newPrompt.Description = deposit.Data.ExtractableHint;
                     //todo: assign sprite based off of deposit.Data.Container.MatterType
-                }
+                }*/
                 else if (hitInfo.collider.CompareTag("corridor") && SurvivalTimer.Instance.IsNotInHabitat)
                 {
                     Powerline powerline = hitInfo.collider.transform.parent.GetComponent<Powerline>();

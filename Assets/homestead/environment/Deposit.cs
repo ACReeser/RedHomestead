@@ -18,12 +18,17 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
     [SerializeField]
     private DepositData data;
     public DepositData Data { get { return data; } set { data = value; } }
+    public Transform DrillingParticlesPrefab;
+
     private const float VerticalDrillOffset = 1.11f;
     private IceDrill snappedDrill;
     private Coroutine unsnapTimer;
+    private Material typeMat;
 
     void Start()
     {
+        typeMat = transform.GetChild(1).GetComponent<MeshRenderer>().material;
+
         if (String.IsNullOrEmpty(data.DepositInstanceID))
         {
             data.DepositInstanceID = System.Guid.NewGuid().ToString();
@@ -53,5 +58,30 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
             iceDrill.SnapCrate(this, this.transform.position + Vector3.up * VerticalDrillOffset);
             snappedDrill = iceDrill;
         }
+    }
+
+    internal void ToggleMining(bool state)
+    {
+        if (PlayerInput.Instance.DrillingParticles == null)
+        {
+            ParticleSystem newSys = GameObject.Instantiate(DrillingParticlesPrefab, transform.position, Quaternion.Euler(90, 0, 0)).GetComponent<ParticleSystem>();
+            PlayerInput.Instance.DrillingParticles = newSys;
+        }
+
+        if (state)
+        {
+            PlayerInput.Instance.DrillingParticles.transform.position = transform.position;
+            PlayerInput.Instance.DrillingParticles.GetComponent<ParticleSystemRenderer>().material = this.typeMat;
+            PlayerInput.Instance.DrillingParticles.Play();
+        }
+        else
+        {
+            PlayerInput.Instance.DrillingParticles.Stop();
+        }
+    }
+
+    internal float Mine(float v)
+    {
+        return .75f;
     }
 }
