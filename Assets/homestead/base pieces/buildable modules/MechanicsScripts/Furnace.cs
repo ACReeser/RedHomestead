@@ -14,7 +14,7 @@ public class FurnaceFlexData
     public EnergyContainer Heat;
 }
 
-public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsumer, IFlexDataContainer<MultipleResourceModuleData, FurnaceFlexData>
+public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable, IFlexDataContainer<MultipleResourceModuleData, FurnaceFlexData>
 {
     public Transform[] lifts;
     public Transform platform, lever;
@@ -94,15 +94,15 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
             for (int i = 0; i < lifts.Length; i++)
             {
                 Transform t = lifts[i];
-                t.position = new Vector3(
-                    t.position.x, 
+                t.localPosition = new Vector3(
+                    t.localPosition.x, 
                     Mathf.Lerp(isTiltingAndLowering ? liftMax[i] : 0f, isTiltingAndLowering ? 0f : liftMax[i], time / duration), 
-                    t.position.z);
+                    t.localPosition.z);
             }
-            platform.position = new Vector3(
-                platform.position.x, 
+            platform.localPosition = new Vector3(
+                platform.localPosition.x, 
                 Mathf.Lerp(isTiltingAndLowering ? platformMax : 0.624f, isTiltingAndLowering ? 0.624f : platformMax, time / duration), 
-                platform.position.z);
+                platform.localPosition.z);
             yield return null;
 
             time += Time.deltaTime;
@@ -139,7 +139,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
     private ResourceComponent capturedOre, capturedPowder;
     private Coroutine unsnapTimer;
-    private float orePerTickUnits;
+    private float oreMeltPerTickUnits = .01f;
     private const float minimumHeat = .5f;
     private const float heatLossPerTickUnits = .05f;
     private const float heatProductionPerTickUnits = .1f;
@@ -152,9 +152,15 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         }
     }
 
-    public bool IsOn { get; set; }
-
     public FurnaceFlexData FlexData { get; set; }
+    public MeshFilter powerCabinet;
+    public MeshFilter PowerCabinet
+    {
+        get
+        {
+            return powerCabinet;
+        }
+    }
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable movesnap)
     {
@@ -183,6 +189,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
                 if (capturedOre == null || matches(capturedOre.Data.Container.MatterType, res.Data.Container.MatterType))
                 {
                     res.SnapCrate(this, child.transform.position);
+                    capturedPowder = res;
                 }
                 else
                 {
@@ -221,7 +228,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
     private bool matches(Matter ore, Matter powder)
     {
-        return System.Convert.ToInt32(ore) + 9 == System.Convert.ToInt32(powder);
+        return System.Convert.ToInt32(ore) + 19 == System.Convert.ToInt32(powder);
     }
 
     public override void Convert()
@@ -232,9 +239,9 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         }
 
         if (FlexData.Heat.CurrentAmount >= minimumHeat &&
-            Data.Containers[Matter.IronOre].CurrentAmount >= orePerTickUnits)
+            Data.Containers[Matter.IronOre].CurrentAmount >= oreMeltPerTickUnits)
         {
-            Data.Containers[Matter.IronOre].Pull(orePerTickUnits);
+            Data.Containers[Matter.IronOre].Pull(oreMeltPerTickUnits);
 
             if (capturedPowder == null)
             {
@@ -242,7 +249,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
             }
             else
             {
-                capturedPowder.Data.Container.Push(orePerTickUnits);
+                capturedPowder.Data.Container.Push(oreMeltPerTickUnits);
             }
         }
 

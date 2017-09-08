@@ -31,9 +31,16 @@ public class AirMiner : Converter, IPowerConsumerToggleable
 
     public override void Convert()
     {
-        if (co2Out != null && HasPower && IsOn)
+        if (HasPower && IsOn)
         {
-            co2Out.Push(co2PerTickUnits);
+            if (co2Out != null)
+            {
+                co2Out.Push(co2PerTickUnits);
+            }
+            else if (Data.Containers[Matter.CarbonDioxide].AvailableCapacity > 0f)
+            {
+                Data.Containers[Matter.CarbonDioxide].Push(co2PerTickUnits);
+            }
         }
     }
 
@@ -46,7 +53,7 @@ public class AirMiner : Converter, IPowerConsumerToggleable
     {
         return new ResourceContainerDictionary()
         {
-
+            { Matter.CarbonDioxide, new ResourceContainer(Matter.CarbonDioxide, 0f) }
         };
     }
 

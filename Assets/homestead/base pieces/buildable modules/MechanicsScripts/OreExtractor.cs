@@ -53,7 +53,7 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     }
 
     private Deposit attachedDeposit;
-    private const float OrePerTick = .0001f;
+    private const float OrePerTick = .01f;
     private Deposit deposit;
     private ResourceComponent oreOut;
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
