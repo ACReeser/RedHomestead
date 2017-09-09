@@ -32,6 +32,28 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     {
         base.OnStart();
         this.RefreshPowerSwitch();
+        this.RefreshSpinAndParticles();
+    }
+
+    public new bool IsOn { get { return Data.IsOn; } set { Data.IsOn = value; RefreshSpinAndParticles(); } }
+
+    public Spin wheel;
+    public ParticleSystem ore1, ore2;
+    private void RefreshSpinAndParticles()
+    {
+        if (Data.IsOn)
+        {
+            wheel.transform.localRotation = Quaternion.Euler(0, -90f, 90f);
+            wheel.enabled = true;
+            ore1.Play();
+            ore2.Play();
+        }
+        else
+        {
+            wheel.enabled = false;
+            ore1.Stop();
+            ore2.Stop();
+        }
     }
 
     public void DetachCrate(IMovableSnappable detaching)
@@ -93,8 +115,7 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
             attachedDeposit = FlowManager.Instance.DepositMap[FlexData.DepositInstanceID];
         }
 
-        //if ((HasPower && IsOn))
-        if (attachedDeposit != null)
+        if (HasPower && IsOn && attachedDeposit != null)
         {
             if (oreOut != null && attachedDeposit.Data.Extractable.CurrentAmount > 0)
             {
