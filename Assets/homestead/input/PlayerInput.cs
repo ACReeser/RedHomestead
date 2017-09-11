@@ -1275,21 +1275,29 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("powerSwitch"))
                 {
+                    IPowerConsumerToggleable toggle = hitInfo.collider.transform.root.GetComponent<IPowerConsumerToggleable>();
+
                     if (doInteract)
                     {
                         //PlayInteractionClip(hitInfo.point, storage.HandleChangeClip);
-                        IPowerConsumerToggleable toggle = hitInfo.collider.transform.root.GetComponent<IPowerConsumerToggleable>();
                         toggle.TogglePower();
                     }
-                    else
+                    else if (toggle != null)
                     {
-                        if (hitInfo.collider.name == "on")
+                        if (toggle.HasPower)
                         {
-                            newPrompt = Prompts.PowerSwitchOffHint;
+                            if (hitInfo.collider.name == "on")
+                            {
+                                newPrompt = Prompts.PowerSwitchOffHint;
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.PowerSwitchOnHint;
+                            }
                         }
                         else
                         {
-                            newPrompt = Prompts.PowerSwitchOnHint;
+                            newPrompt = Prompts.NoPowerHint;
                         }
                     }
                 }

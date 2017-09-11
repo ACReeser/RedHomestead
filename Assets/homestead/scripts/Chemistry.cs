@@ -355,44 +355,96 @@ namespace RedHomestead.Simulation
         public ResourceContainer Container;
         public float ReactionRate;
         public Matter Matter;
+        public bool Required;
+        public bool Optional { get { return !Required; } }
     }
 
     public class Formula
     {
         private readonly ResourceContainerDictionary buffer;
-        private readonly FormulaComponent[] combinators;
+        private readonly FormulaComponent[] inputs;
+        private readonly FormulaComponent[] outputs;
+        private int RequiredOutputMinimum = 0;
+        private int RequiredOutputCount = 0;
 
-        public Formula(ResourceContainerDictionary buffer, params FormulaComponent[] inputs)
+        public Formula(ResourceContainerDictionary buffer, FormulaComponent output, params FormulaComponent[] inputs)
         {
             this.buffer = buffer;
-            this.combinators = inputs;
+            this.inputs = inputs;
+            this.outputs = new FormulaComponent[] { output };
+
+            foreach(FormulaComponent component in outputs)
+            {
+                if (component.Required)
+                    RequiredOutputMinimum++;
+            }
         }
+
         public void AddSink(ISink sink, Matter type)
         {
             if (sink.HasContainerFor(type))
             {
-                AddContainer(sink.Get(type));
+                AddInput(sink.Get(type));
             }
         }
-        public void AddContainer(ResourceContainer container)
+
+        public void AddInput(ResourceContainer container)
         {
-            foreach (FormulaComponent component in combinators)
+            _MatchOnEmptyOfType(inputs, container.MatterType, (component) => component.Container = container);
+        }
+
+        public void RemoveInput(ResourceContainer container)
+        {
+            _MatchExisting(inputs, container, (component) => {
+                component.Container = null;
+            });
+        }
+
+        public void AddOutput(ResourceContainer container)
+        {
+            _MatchOnEmptyOfType(outputs, container.MatterType, (component) =>
             {
-                if (component.Matter == container.MatterType && component.Container == null)
+                component.Container = container;
+
+                if (component.Required)
+                    RequiredOutputCount++;
+            });
+        }
+
+        public void RemoveOutput(ResourceContainer container)
+        {
+            _MatchExisting(outputs, container, (component) => {
+                RemoveOutput(component);
+            });
+        }
+
+        private void RemoveOutput(FormulaComponent component)
+        {
+            component.Container = null;
+
+            if (component.Required)
+                RequiredOutputCount--;
+        }
+
+        public void _MatchOnEmptyOfType(FormulaComponent[] collection, Matter matterType, Action<FormulaComponent> onMatch)
+        {
+            foreach (FormulaComponent component in inputs)
+            {
+                if (component.Matter == matterType && component.Container == null)
                 {
-                    component.Container = container;
+                    onMatch(component);
                     break;
                 }
             }
         }
 
-        public void RemoveContainer(ResourceContainer container)
+        public void _MatchExisting(FormulaComponent[] collection, ResourceContainer toMatch, Action<FormulaComponent> onMatch)
         {
-            foreach (FormulaComponent component in combinators)
+            foreach (FormulaComponent component in inputs)
             {
-                if (component.Container == container)
+                if (component.Container == toMatch)
                 {
-                    component.Container = null;
+                    onMatch(component);
                     break;
                 }
             }
@@ -400,7 +452,10 @@ namespace RedHomestead.Simulation
 
         public bool TryCombine()
         {
-            foreach(FormulaComponent component in combinators)
+            if (RequiredOutputCount < RequiredOutputMinimum)
+                return false;
+
+            foreach(FormulaComponent component in inputs)
             {
                 if (component.Container == null)
                     return false;
@@ -414,11 +469,21 @@ namespace RedHomestead.Simulation
                 else
                     buffer[component.Container.MatterType].FillFrom(component.Container, component.ReactionRate);
             }
+
             //if we got this far we have enough to react
-            foreach(FormulaComponent component in combinators)
+            foreach(FormulaComponent component in inputs)
             {
                 //so pull from all buffers
                 buffer[component.Container.MatterType].Pull(component.ReactionRate);
+            }
+
+            //if we got this far we have enough to react
+            foreach (FormulaComponent component in outputs)
+            {
+                if (component.Container != null)
+                {
+                    component.Container.Push(component.ReactionRate);
+                }
             }
 
             return true;
@@ -426,9 +491,13 @@ namespace RedHomestead.Simulation
 
         internal void ClearContainers()
         {
-            foreach (FormulaComponent component in combinators)
+            foreach (FormulaComponent component in inputs)
             {
                 component.Container = null;
+            }
+            foreach (FormulaComponent component in outputs)
+            {
+                RemoveOutput(component);
             }
         }
     }

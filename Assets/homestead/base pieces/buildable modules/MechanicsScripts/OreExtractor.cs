@@ -19,7 +19,7 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     {
         get
         {
-            return 0f;
+            return ElectricityConstants.WattsPerBlock * 4f;
         }
     }
 

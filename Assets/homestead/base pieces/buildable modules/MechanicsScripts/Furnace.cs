@@ -42,8 +42,13 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
     
     protected override void OnStart () {
         this.ToggleHydraulics(false);
-        
+
         formula = new Formula(Data.Containers, new FormulaComponent()
+        {
+            Matter = Matter.Water,
+            ReactionRate = .001f,
+            Required = false
+        }, new FormulaComponent()
         {
             Matter = Matter.CarbonDioxide,
             ReactionRate = .001f
@@ -148,7 +153,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
     {
         get
         {
-            return ElectricityConstants.WattsPerBlock * 3f;
+            return ElectricityConstants.WattsPerBlock * 4f;
         }
     }
 
@@ -296,5 +301,6 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
     public override void OnSinkConnected(ISink s) {
         formula.AddSink(s, Matter.CarbonDioxide);
         formula.AddSink(s, Matter.Hydrogen);
+        formula.AddSink(s, Matter.Water);
     }
 }
