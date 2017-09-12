@@ -48,7 +48,7 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
             int index = (int)Data.Container.MatterType;
 
             if (index > 0)
-                LabelMeshFilter.mesh = ResourceLabelMeshes[index - 1];
+                LabelMeshFilter.mesh = ResourceLabelMeshes[index];
             else
                 LabelMeshFilter.mesh = CompoundLabelMeshes[index + 6];
 
