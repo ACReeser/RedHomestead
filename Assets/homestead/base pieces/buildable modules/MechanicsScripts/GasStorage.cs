@@ -6,9 +6,10 @@ using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
 public class GasStorage : SingleResourceModuleGameplay {
-    public MeshFilter MeshFilter;
+    public MeshFilter MeshFilter, CapMeshFilter;
     public Mesh[] CompoundUVSet = new Mesh[6];
-    public Mesh UnspecifiedUV;
+    public Mesh[] CompoundCapUVSet = new Mesh[6];
+    public Mesh UnspecifiedUV, CapUnspecifiedUV;
     public Color[] CompoundColors = new Color[6];
 
     public override bool CanMalfunction
@@ -66,6 +67,7 @@ public class GasStorage : SingleResourceModuleGameplay {
         if (this.ResourceType == Matter.Unspecified)
         {
             this.MeshFilter.mesh = UnspecifiedUV;
+            this.CapMeshFilter.mesh = CapUnspecifiedUV;
             flowAmountRenderer.color = CompoundColors[0];
         }
         else
@@ -74,6 +76,7 @@ public class GasStorage : SingleResourceModuleGameplay {
             if (index < CompoundUVSet.Length && CompoundUVSet[index] != null)
             {
                 this.MeshFilter.mesh = CompoundUVSet[index];
+                this.CapMeshFilter.mesh = CompoundCapUVSet[index];
             }
             flowAmountRenderer.color = CompoundColors[index];
         }
