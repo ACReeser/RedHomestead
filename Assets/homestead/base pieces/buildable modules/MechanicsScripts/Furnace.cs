@@ -20,6 +20,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
     public Transform platform, lever;
     public TriggerForwarder oreSnap, powderSnap;
     public ParticleSystem oreParticles;
+    public MeshRenderer glowRenderer;
 
     private float[] liftMax = new float[]
     {
@@ -39,9 +40,15 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
     private Coroutine lerpHydro;
 
     private Formula formula;
-    
-    protected override void OnStart () {
+    private Color glowEmissionColor;
+
+    protected override void OnStart ()
+    {
         this.ToggleHydraulics(false);
+
+        glowEmissionColor = glowRenderer.material.GetColor("_EmissionColor");
+
+        RefreshFurnaceGlow();
 
         formula = new Formula(Data.Containers, new FormulaComponent()
         {
@@ -59,7 +66,15 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         });
 
         base.OnStart();
-	}
+    }
+
+    private void RefreshFurnaceGlow()
+    {
+        //DynamicGI.SetEmissive(glowRenderer, glowEmissionColor * FlexData.Heat.CurrentAmount);
+        //DynamicGI.SetEmissive(glowRenderer, new Color(glowEmissionColor.r, glowEmissionColor.g, glowEmissionColor.b, FlexData.Heat.CurrentAmount));
+        //glowRenderer.UpdateGIMaterials();
+        glowRenderer.material.SetColor("_EmissionColor", glowEmissionColor * Mathf.LinearToGammaSpace(FlexData.Heat.CurrentAmount));
+    }
 
     internal void ToggleHydraulicLiftLever()
     {
@@ -242,6 +257,8 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         {
             FlexData.Heat.Push(heatProductionPerTickUnits);
         }
+
+        RefreshFurnaceGlow();
 
         if (FlexData.Heat.CurrentAmount >= minimumHeat &&
             Data.Containers[Matter.IronOre].CurrentAmount >= oreMeltPerTickUnits)
