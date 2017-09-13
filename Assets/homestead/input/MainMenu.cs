@@ -535,7 +535,7 @@ public class MainMenu : MonoBehaviour {
                 this.Seed(from.position, to.position, duration);
         }
 
-        public void Seed(Vector3 from, Vector3? to, float duration, Quaternion? fromRot = null, Quaternion? toRot = null)
+        public void Seed(Vector3 from, Vector3? to, float duration, Quaternion? fromRot = null, Quaternion? toRot = null, float _time = 0f)
         {
             affectRotation = fromRot.HasValue && toRot.HasValue;
 
@@ -551,7 +551,7 @@ public class MainMenu : MonoBehaviour {
                 if (affectRotation)
                     ToRotation = toRot.Value;
             }
-            this.Time = 0f;
+            this.Time = _time;
             this.Duration = Mathf.Max(duration, 0.00001f); //prevent divide by zero errors
             this.Done = false;
         }

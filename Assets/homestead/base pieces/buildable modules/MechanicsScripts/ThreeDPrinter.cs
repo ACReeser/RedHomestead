@@ -1,13 +1,22 @@
 ﻿using RedHomestead.Buildings;
 using RedHomestead.Crafting;
 using RedHomestead.Electricity;
+using RedHomestead.Persistence;
 using RedHomestead.Simulation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable
+[Serializable]
+public class ThreeDPrinterFlexData
+{
+    public float Progress;
+    public Matter Printing;
+    public float Duration;
+}
+
+public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable, IFlexDataContainer<MultipleResourceModuleData, ThreeDPrinterFlexData>
 {
     public Transform printArm, printHead, printArmHarness, laserAnchor, laserMidpoint;
     public LineRenderer laser;
@@ -23,6 +32,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     private Vector3 resetPosition;
     private static Vector3 crateStartLocalPosition = new Vector3(0f, 0.578f, 0f);
 
+    public ThreeDPrinterFlexData FlexData { get; set; }
 
     public void ToggleDoor(Transform door)
     {
@@ -38,6 +48,9 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         base.OnStart();
         this.RefreshPowerSwitch();
         resetPosition = printArm.localPosition;
+
+        if (FlexData != null && FlexData.Printing != Matter.Unspecified)
+            StartPrint();
     }
 
     public Material cutawayMaterial;
@@ -45,9 +58,18 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public Transform InProgressPrintCrate;
     internal void ToggleArmPrint()
     {
+        FlexData.Printing = Matter.ElectricMotor;
+        FlexData.Progress = 0f;
+        FlexData.Duration = 60f;
+
+        StartPrint();
+    }
+
+    internal void StartPrint()
+    {
         if (currentPrint != null)
             StopCoroutine(currentPrint);
-        
+
         currentPrintRenderer = InProgressPrintCrate.GetChild(0).GetComponent<MeshRenderer>();
         currentPrintRenderer.enabled = true;
         cutawayMaterial.mainTexture = currentPrintRenderer.material.mainTexture;
@@ -63,12 +85,15 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             Space = Space.Self
         };
         MainMenu.LerpContext headX = GetNextHead();
-        armY.Seed(Vector3.up * minArmY, Vector3.up * maxArmY, 60f);
+        float alreadyPassed = FlexData.Progress * FlexData.Duration;
+        armY.Seed(Vector3.up * minArmY, Vector3.up * maxArmY, FlexData.Duration - alreadyPassed, _time: alreadyPassed);
         bool back = false;
         laser.enabled = true;
 
         while (!armY.Done)
         {
+            FlexData.Progress = armY.T;
+
             armY.Tick(printArm);
             headX.Tick(printHead);
             printArm.localPosition = new Vector3(printArm.localPosition.x, printArm.localPosition.y, back ? Mathf.Lerp(minArmZ, maxArmZ, headX.T) : Mathf.Lerp(maxArmZ, minArmZ, headX.T));
@@ -87,7 +112,11 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
 
         laser.enabled = false;
         currentPrintRenderer.enabled = false;
-        GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[System.Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
+
+        FlexData.Printing = Matter.ElectricMotor;
+        BounceLander.CreateCratelike(FlexData.Printing, 1f, this.transform.TransformPoint(crateStartLocalPosition));
+        FlexData.Printing = Matter.Unspecified;
+        FlexData.Progress = 0f;
 
         MainMenu.LerpContext reset = new MainMenu.LerpContext()
         {
@@ -140,7 +169,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             return powerCabinet;
         }
     }
-
+    
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
         ResourceComponent resComp = res.transform.GetComponent<ResourceComponent>();
@@ -188,6 +217,10 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
 
     public override ResourceContainerDictionary GetStartingDataContainers()
     {
+        FlexData = new ThreeDPrinterFlexData()
+        {
+            Printing = Matter.Unspecified
+        };
         return new ResourceContainerDictionary();
     }
 
