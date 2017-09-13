@@ -9,7 +9,8 @@ using UnityEngine;
 
 public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable
 {
-    public Transform printArm, printHead;
+    public Transform printArm, printHead, printArmHarness, laserAnchor, laserMidpoint;
+    public LineRenderer laser;
 
     private DoorRotationLerpContext lerp;
     private const float maxArmZ = .96f;
@@ -39,11 +40,6 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         resetPosition = printArm.localPosition;
     }
 
-    // Update is called once per frame
-    void Update () {
-		
-	}
-
     public Material cutawayMaterial;
     private MeshRenderer currentPrintRenderer;
     public Transform InProgressPrintCrate;
@@ -51,10 +47,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     {
         if (currentPrint != null)
             StopCoroutine(currentPrint);
-
-        //InProgressPrintCrate = GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
-        //InProgressPrintCrate.GetComponent<Collider>().enabled = false;
-        //InProgressPrintCrate.GetComponent<Rigidbody>().isKinematic = true;
+        
         currentPrintRenderer = InProgressPrintCrate.GetChild(0).GetComponent<MeshRenderer>();
         currentPrintRenderer.enabled = true;
         cutawayMaterial.mainTexture = currentPrintRenderer.material.mainTexture;
@@ -72,13 +65,15 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         MainMenu.LerpContext headX = GetNextHead();
         armY.Seed(Vector3.up * minArmY, Vector3.up * maxArmY, 60f);
         bool back = false;
+        laser.enabled = true;
 
         while (!armY.Done)
         {
             armY.Tick(printArm);
             headX.Tick(printHead);
             printArm.localPosition = new Vector3(printArm.localPosition.x, printArm.localPosition.y, back ? Mathf.Lerp(minArmZ, maxArmZ, headX.T) : Mathf.Lerp(maxArmZ, minArmZ, headX.T));
-
+            printArmHarness.localPosition = new Vector3(0f, 0f, printArm.localPosition.z);
+            UpdateLaser();
             currentPrintRenderer.material.SetFloat("_showPercentY", armY.T * 100f);
             
             yield return null;
@@ -90,6 +85,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             }
         }
 
+        laser.enabled = false;
         currentPrintRenderer.enabled = false;
         GameObject.Instantiate(FloorplanBridge.Instance.CraftableFields.Prefabs[System.Convert.ToInt32(Craftable.Crate)], this.transform.TransformPoint(crateStartLocalPosition), Quaternion.identity);
 
@@ -101,8 +97,18 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         while(!reset.Done)
         {
             reset.Tick(printArm);
+            printArmHarness.localPosition = new Vector3(0f, 0f, printArm.localPosition.z);
             yield return null;
         }
+    }
+
+    private void UpdateLaser()
+    {
+        laser.SetPosition(0, laserAnchor.position);
+        laser.SetPosition(1, new Vector3(laserAnchor.position.x, laserAnchor.position.y, laserMidpoint.position.z));
+        laser.SetPosition(2, laserMidpoint.position);
+        laser.SetPosition(3, new Vector3(printHead.position.x, laserMidpoint.position.y, laserMidpoint.position.z));
+        laser.SetPosition(4, new Vector3(printHead.position.x, transform.position.y, printHead.position.z));
     }
 
     private MainMenu.LerpContext GetNextHead()
