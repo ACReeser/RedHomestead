@@ -134,6 +134,24 @@ public struct SurvivalBarsUI
     public SurvivalBar HabitatOxygen;
 }
 
+[Serializable]
+public struct PrinterUI
+{
+    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab;
+
+    private bool showingAll;
+    public void ToggleAvailable(bool? showAvailable = null)
+    {
+        if (!showAvailable.HasValue)
+            showAvailable = showingAll;
+
+        AvailablePanel.gameObject.SetActive(showAvailable.Value);
+        AllPanel.gameObject.SetActive(!showAvailable.Value);
+
+        showingAll = !showAvailable.Value;
+    }
+}
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -159,6 +177,7 @@ public class GuiBridge : MonoBehaviour {
     public Icons Icons;
     public NewsUI News;
     public PostProcessingProfile PostProfile;
+    public PrinterUI Printer;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -188,6 +207,7 @@ public class GuiBridge : MonoBehaviour {
         ToggleReportMenu(false);
         ToggleRadialMenu(false);
         ToggleAutosave(false);
+        TogglePrinter(false);
         //same as ToggleEscapeMenu(false) basically
         this.EscapeMenuPanel.gameObject.SetActive(false);
         News.Panel.gameObject.SetActive(false);
@@ -633,5 +653,14 @@ public class GuiBridge : MonoBehaviour {
     void OnDestroy()
     {
         PostProfile.motionBlur.enabled = false;
+    }
+
+    internal void TogglePrinter(bool show)
+    {
+        Printer.Panel.gameObject.SetActive(show);
+        if (show)
+        {
+            Printer.ToggleAvailable(true);
+        }
     }
 }

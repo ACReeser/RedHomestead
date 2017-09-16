@@ -27,7 +27,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Umbilical, Crafting }
+    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Umbilical, Crafting, Printing }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -237,6 +237,9 @@ public class PlayerInput : MonoBehaviour {
             case InputMode.Crafting:
                 HandleCraftingInput(ref newPrompt, doInteract);
                 break;
+            case InputMode.Printing:
+                HandlePrintingInput(ref newPrompt, doInteract);
+                break;
             case InputMode.Terminal:
                 HandleTerminalInput(ref newPrompt, doInteract);
                 break;
@@ -273,6 +276,19 @@ public class PlayerInput : MonoBehaviour {
             GuiBridge.Instance.ShowPrompt(newPrompt);
         }
 	}
+
+    private void HandlePrintingInput(ref PromptInfo newPrompt, bool doInteract)
+    {
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            CurrentMode = InputMode.Normal;
+            TogglePrintableBlueprintMode(false);
+        }
+        else if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            GuiBridge.Instance.Printer.ToggleAvailable();
+        }
+    }
 
     private void HandleSledgeInput(ref PromptInfo newPrompt)
     {
@@ -1026,14 +1042,19 @@ public class PlayerInput : MonoBehaviour {
                         {
                             hitInfo.collider.transform.root.GetComponent<Furnace>().ToggleHydraulicLiftLever();
                         }
-                        else if (hitInfo.collider.name == "printer")
-                        {
-                            hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>().ToggleArmPrint();
-                        }
                     }
                     else
                     {
                         newPrompt = Prompts.GenericButtonHint;
+                    }
+                }
+                else if (hitInfo.collider.CompareTag("3dprinter"))
+                {
+                    if (doInteract)
+                    {
+                        CurrentMode = InputMode.Printing;
+                        TogglePrintableBlueprintMode(true);
+                        hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>().ToggleArmPrint();
                     }
                 }
                 else if (hitInfo.collider.CompareTag("water"))
@@ -1663,6 +1684,12 @@ public class PlayerInput : MonoBehaviour {
     {
         FPSController.FreezeLook = showBlueprint;
         CurrentCraftablePlanner.ToggleCraftableView(showBlueprint);
+    }
+
+    private void TogglePrintableBlueprintMode(bool showPrinter)
+    {
+        FPSController.FreezeLook = showPrinter;
+        GuiBridge.Instance.TogglePrinter(showPrinter);
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)
