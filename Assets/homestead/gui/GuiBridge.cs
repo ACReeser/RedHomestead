@@ -8,6 +8,7 @@ using RedHomestead.Simulation;
 using RedHomestead.Interiors;
 using RedHomestead.Persistence;
 using UnityEngine.PostProcessing;
+using RedHomestead.Crafting;
 
 [Serializable]
 public struct ReportIORow
@@ -149,6 +150,30 @@ public struct PrinterUI
         AllPanel.gameObject.SetActive(!showAvailable.Value);
 
         showingAll = !showAvailable.Value;
+
+        if (showingAll)
+            FillAllList();
+        else
+            FillAvailableList();
+    }
+
+    public void FillAllList()
+    {
+        foreach(Transform child in AllList.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+        foreach(var kvp in Crafting.PrinterData)
+        {
+            var newGuy = GameObject.Instantiate<RectTransform>(AllListButtonPrefab, AllList.transform);
+            newGuy.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
+            newGuy.GetChild(2).GetComponent<Text>().text = kvp.Value.BuildTime + "<size=10>hrs</size>";
+        }
+    }
+
+    public void FillAvailableList()
+    {
+
     }
 }
 
@@ -658,9 +683,12 @@ public class GuiBridge : MonoBehaviour {
     internal void TogglePrinter(bool show)
     {
         Printer.Panel.gameObject.SetActive(show);
+
+        Cursor.visible = show;
+        Cursor.lockState = show ? CursorLockMode.None : CursorLockMode.Confined;
         if (show)
         {
-            Printer.ToggleAvailable(true);
+            Printer.ToggleAvailable(false);
         }
     }
 }

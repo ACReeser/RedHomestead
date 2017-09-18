@@ -1056,6 +1056,10 @@ public class PlayerInput : MonoBehaviour {
                         TogglePrintableBlueprintMode(true);
                         hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>().ToggleArmPrint();
                     }
+                    else
+                    {
+                        newPrompt = Prompts.ThreeDPrinterHint;
+                    }
                 }
                 else if (hitInfo.collider.CompareTag("water"))
                 {

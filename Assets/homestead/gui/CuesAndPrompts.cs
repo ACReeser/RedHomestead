@@ -609,4 +609,9 @@ public static class Prompts {
         Description = "Destroy Module",
         Key = "X"
     };
+    internal static PromptInfo ThreeDPrinterHint = new PromptInfo()
+    {
+        Description = "View Printer",
+        Key = "E"
+    };
 }

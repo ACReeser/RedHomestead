@@ -169,6 +169,51 @@ namespace RedHomestead.Crafting
             },
         };
 
+        public static Dictionary<Matter, CraftingData> PrinterData = new Dictionary<Matter, CraftingData>()
+        {
+            {
+                Matter.CopperWire, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.CopperPowder)
+                    },
+                    Description = "Copper wires.",
+                }
+            },
+            {
+                Matter.IronSheeting, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.IronPowder),
+                    },
+                    Description = "Thin sheets of iron.",
+                }
+            },
+            {
+                Matter.IronBeams, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.IronPowder),
+                    },
+                    Description = "Solid reinforced structural iron.",
+                }
+            },
+            {
+                Matter.ElectricMotor, new CraftingData()
+                {
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.IronPowder),
+                        new ResourceEntry(.25f, Matter.CopperPowder)
+                    },
+                    Description = "A brushless electric motor.",
+                }
+            }
+        };
+
         public static Sprite AtlasSprite(this Craftable craft)
         {
             return IconAtlas.Instance.CraftableIcons[Convert.ToInt32(craft)];

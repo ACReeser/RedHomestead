@@ -35,7 +35,7 @@ namespace RedHomestead.Simulation
         //manufactured goods
         Glass = 50,
         SiliconWafers, SolarPanels, Microchips,
-        Canvas, 
+        Canvas, CopperWire,
 
         //organics
         Biomass = 70,
