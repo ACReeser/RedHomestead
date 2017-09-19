@@ -1052,9 +1052,14 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
-                        CurrentMode = InputMode.Printing;
-                        TogglePrintableBlueprintMode(true);
-                        hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>().ToggleArmPrint();
+                        var printer = hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>();
+                        if (printer != null)
+                        {
+                            CurrentMode = InputMode.Printing;
+                            TogglePrintableBlueprintMode(true, printer);
+                            printer.ToggleArmPrint();
+
+                        }
                     }
                     else
                     {
@@ -1690,10 +1695,10 @@ public class PlayerInput : MonoBehaviour {
         CurrentCraftablePlanner.ToggleCraftableView(showBlueprint);
     }
 
-    private void TogglePrintableBlueprintMode(bool showPrinter)
+    private void TogglePrintableBlueprintMode(bool showPrinter, ThreeDPrinter printer = null)
     {
         FPSController.FreezeLook = showPrinter;
-        GuiBridge.Instance.TogglePrinter(showPrinter);
+        GuiBridge.Instance.TogglePrinter(showPrinter, printer);
     }
 
     private bool CastRay(out RaycastHit hitInfo, QueryTriggerInteraction triggerInteraction, params string[] layerNames)

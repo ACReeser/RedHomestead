@@ -138,13 +138,18 @@ public struct SurvivalBarsUI
 [Serializable]
 public struct PrinterUI
 {
-    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab;
-
+    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab, AvailableList, NoneAvailableFlag;
+    private ThreeDPrinter currentPrinter;
     private bool showingAll;
-    public void ToggleAvailable(bool? showAvailable = null)
+    public void ToggleAvailable(bool? showAvailable = null, ThreeDPrinter printer = null)
     {
         if (!showAvailable.HasValue)
             showAvailable = showingAll;
+
+        if (printer)
+        {
+            currentPrinter = printer;
+        }
 
         AvailablePanel.gameObject.SetActive(showAvailable.Value);
         AllPanel.gameObject.SetActive(!showAvailable.Value);
@@ -153,17 +158,17 @@ public struct PrinterUI
 
         if (showingAll)
             FillAllList();
-        else
-            FillAvailableList();
+        else if (currentPrinter != null)
+            FillAvailableList(currentPrinter);
     }
 
     public void FillAllList()
     {
-        foreach(Transform child in AllList.transform)
+        foreach (Transform child in AllList.transform)
         {
             GameObject.Destroy(child.gameObject);
         }
-        foreach(var kvp in Crafting.PrinterData)
+        foreach (var kvp in Crafting.PrinterData)
         {
             var newGuy = GameObject.Instantiate<RectTransform>(AllListButtonPrefab, AllList.transform);
             newGuy.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
@@ -171,9 +176,51 @@ public struct PrinterUI
         }
     }
 
-    public void FillAvailableList()
+    public void FillAvailableList(ThreeDPrinter printer)
     {
+        List<KeyValuePair<Matter, CraftingData>> available = new List<KeyValuePair<Matter, CraftingData>>();
+        foreach (var kvp in Crafting.PrinterData)
+        {
+            bool canPrint = false;
+            foreach (var req in kvp.Value.Requirements)
+            {
+                bool has = printer.Has(req);
+                if (!has)
+                {
+                    canPrint = false;
+                    break;
+                }
+                else
+                {
+                    canPrint = canPrint && true;
+                }
+            }
 
+            if (canPrint)
+            {
+                available.Add(kvp);
+            }
+        }
+        int i = 0;
+        foreach (Transform child in AvailableList.transform)
+        {
+            if (child == NoneAvailableFlag)
+                continue;
+
+            if (i < available.Count)
+            {
+                var kvp = available[i];
+                child.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
+                child.GetChild(1).GetComponent<Image>().sprite = kvp.Key.Sprite();
+                child.gameObject.SetActive(true);
+            } 
+            else
+            {
+                child.gameObject.SetActive(false);
+            }
+            i++;
+        }
+        NoneAvailableFlag.gameObject.SetActive(available.Count == 0);
     }
 }
 
@@ -680,15 +727,16 @@ public class GuiBridge : MonoBehaviour {
         PostProfile.motionBlur.enabled = false;
     }
 
-    internal void TogglePrinter(bool show)
+    internal void TogglePrinter(bool show, ThreeDPrinter printer = null)
     {
         Printer.Panel.gameObject.SetActive(show);
 
         Cursor.visible = show;
         Cursor.lockState = show ? CursorLockMode.None : CursorLockMode.Confined;
-        if (show)
+
+        if (show && printer)
         {
-            Printer.ToggleAvailable(false);
+            Printer.ToggleAvailable(false, printer);
         }
     }
 }

@@ -140,6 +140,12 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         laser.SetPosition(4, new Vector3(printHead.position.x, transform.position.y, printHead.position.z));
     }
 
+    internal bool Has(ResourceEntry req)
+    {
+        return (LeftInput != null && LeftInput.Data.Container.MatterType == req.Type && LeftInput.Data.Container.CurrentAmount >= req.Count) ||
+               (RightInput != null && RightInput.Data.Container.MatterType == req.Type && RightInput.Data.Container.CurrentAmount >= req.Count);
+    }
+
     private MainMenu.LerpContext GetNextHead()
     {
         var lerp = new MainMenu.LerpContext()
@@ -151,7 +157,8 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     }
 
     public TriggerForwarder leftInputTrigger, rightInputTrigger;
-    private ResourceComponent leftInput, rightInput;
+    public ResourceComponent LeftInput { get; private set; }
+    public ResourceComponent RightInput { get; private set; }
 
     public override float WattsConsumed
     {
@@ -177,14 +184,14 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         {
             if (resComp.Data.Container.MatterType.Is3DPrinterFeedstock())
             {
-                if (child == leftInputTrigger && leftInput == null)
+                if (child == leftInputTrigger && LeftInput == null)
                 {
-                    leftInput = resComp;
+                    LeftInput = resComp;
                     res.SnapCrate(this, c.transform.position);
                 }
-                else if (child == rightInputTrigger && rightInput == null)
+                else if (child == rightInputTrigger && RightInput == null)
                 {
-                    rightInput = resComp;
+                    RightInput = resComp;
                     res.SnapCrate(this, c.transform.position);
                 }
             }
@@ -197,13 +204,13 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
 
     public void DetachCrate(IMovableSnappable detaching)
     {
-        if ((object)detaching == leftInput)
+        if ((object)detaching == LeftInput)
         {
-            leftInput = null;
+            LeftInput = null;
         }
-        else if ((object)detaching == rightInput)
+        else if ((object)detaching == RightInput)
         {
-            rightInput = null;
+            RightInput = null;
         }
     }
 
