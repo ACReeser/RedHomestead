@@ -49,6 +49,7 @@ public class Airlock : GenericBaseModule, IDoorManager {
             SurvivalTimer.Instance.EnterHabitat(LinkedHabitat);
             SetPlayerTerrainCollision(true);
             RefreshSealedButtons();
+            PlayerInput.Instance.FPSController.ToggleDustFootsteps(false);
         }
     }
 
@@ -71,6 +72,7 @@ public class Airlock : GenericBaseModule, IDoorManager {
             SurvivalTimer.Instance.BeginEVA();
             SetPlayerTerrainCollision(false);
             RefreshSealedButtons();
+            PlayerInput.Instance.FPSController.ToggleDustFootsteps(true);
         }
     }
 

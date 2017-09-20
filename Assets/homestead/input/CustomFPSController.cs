@@ -42,11 +42,15 @@ public class CustomFPSController : MonoBehaviour
     [SerializeField]
     private float m_StepInterval;
     [SerializeField]
-    private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
+    private AudioClip[] footstepsDust;
+    [SerializeField]
+    private AudioClip[] footstepsInterior;
     [SerializeField]
     private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
     [SerializeField]
     private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+
+    private AudioClip[] activeFootsteps;
 
     private Camera m_Camera;
     private bool m_Jump;
@@ -86,6 +90,7 @@ public class CustomFPSController : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
         m_RunSpeed *= PerkMultipliers.RunSpeed;
         //alex
+        activeFootsteps = footstepsDust;
         this.InitializeMouseLook();        
     }
 
@@ -239,12 +244,12 @@ public class CustomFPSController : MonoBehaviour
         }
         // pick & play a random footstep sound from the array,
         // excluding sound at index 0
-        int n = Random.Range(1, m_FootstepSounds.Length);
-        m_AudioSource.clip = m_FootstepSounds[n];
+        int n = Random.Range(1, activeFootsteps.Length);
+        m_AudioSource.clip = activeFootsteps[n];
         m_AudioSource.PlayOneShot(m_AudioSource.clip);
         // move picked sound to index 0 so it's not picked next time
-        m_FootstepSounds[n] = m_FootstepSounds[0];
-        m_FootstepSounds[0] = m_AudioSource.clip;
+        activeFootsteps[n] = activeFootsteps[0];
+        activeFootsteps[0] = m_AudioSource.clip;
 
         PlaceBootprint();
     }
@@ -404,6 +409,11 @@ public class CustomFPSController : MonoBehaviour
         MouseLook.Init(transform, m_Camera.transform);
 
         MouseLook.UpdateCursorLock();
+    }
+
+    internal void ToggleDustFootsteps(bool useDust)
+    {
+        activeFootsteps = useDust ? footstepsDust : footstepsInterior;
     }
 }
 
