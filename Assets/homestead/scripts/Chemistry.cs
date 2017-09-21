@@ -650,7 +650,7 @@ namespace RedHomestead.Simulation
         }
 
         /// <summary>
-        /// tries to push an amount into the container
+        /// tries to push an amount into the container, returns leftovers
         /// </summary>
         /// <param name="pushAmount"></param>
         /// <returns>the amount unable to be stored in the container</returns>
@@ -680,7 +680,7 @@ namespace RedHomestead.Simulation
         }
 
         /// <summary>
-        /// tries to pull an amount from the container
+        /// tries to pull an amount from the container, return amount actually pulled
         /// </summary>
         /// <param name="pullAmount"></param>
         /// <returns>the amount actually pulled</returns>
@@ -732,6 +732,19 @@ namespace RedHomestead.Simulation
 
         //Serializable
         public Matter MatterType;
+        public float AvgPurity = 0f;
+
+        public float Push(float pushAmount, float newPurity)
+        {
+            float initial = CurrentAmount;
+            float leftover = this.Push(pushAmount);
+            float newlyAdded = pushAmount - leftover;
+
+            float numer = (initial * AvgPurity) + (newlyAdded * newPurity);
+            AvgPurity = numer / CurrentAmount;
+            
+            return leftover;
+        }
     }
 
     [Serializable]

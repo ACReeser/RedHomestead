@@ -168,10 +168,15 @@ MonoBehaviour:
   data:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
+    DepositInstanceID: 
     Extractable:
       TotalCapacity: 10
       Amount: 10
       MatterType: 1
+      AvgPurity: 0
+    Purity: 0.25
+  DrillingParticlesPrefab: {fileID: 4782280865185016, guid: 8f6908c1200264b47ba7769e3a6f68cb,
+    type: 2}
 --- !u!198 &198631430686955942
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -217,7 +222,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -640112183
+  randomSeed: 1073405890
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -1203,7 +1208,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     tilesX: 1
-    tilesY: 6
+    tilesY: 12
     animationType: 1
     rowIndex: 1
     cycles: 1

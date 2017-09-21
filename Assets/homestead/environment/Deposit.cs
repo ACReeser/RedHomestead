@@ -10,6 +10,7 @@ public class DepositData : FacingData
 {
     public string DepositInstanceID;
     public ResourceContainer Extractable;
+    public float Purity = .25f;
     internal string ExtractableHint { get { return Extractable.UtilizationPercentageString() + " " + Extractable.MatterType;  } }
 }
 

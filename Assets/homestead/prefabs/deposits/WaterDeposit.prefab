@@ -95,7 +95,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1741652543971060}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 709.76, y: 0, z: 1041.24}
+  m_LocalPosition: {x: 733.63513, y: 0, z: 1002.1564}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4454833894238616}
@@ -168,10 +168,14 @@ MonoBehaviour:
   data:
     Position: {x: 0, y: 0, z: 0}
     Rotation: {x: 0, y: 0, z: 0, w: 0}
+    DepositInstanceID: 
     Extractable:
       TotalCapacity: 10
       Amount: 10
       MatterType: -1
+      AvgPurity: 0
+    Purity: 0.25
+  DrillingParticlesPrefab: {fileID: 0}
 --- !u!198 &198128832180968810
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -1203,7 +1207,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     tilesX: 1
-    tilesY: 6
+    tilesY: 12
     animationType: 1
     rowIndex: 3
     cycles: 1
