@@ -348,6 +348,27 @@ namespace RedHomestead.Simulation
             }
         }
         
+        public static float RandomPurity(this Matter ore)
+        {
+            switch (ore)
+            {
+                case Matter.IronOre:
+                    return UnityEngine.Random.Range(.25f, .45f);
+                case Matter.Bauxite:
+                    return UnityEngine.Random.Range(.25f, .45f);
+                case Matter.NickelOre:
+                    return UnityEngine.Random.Range(.1f, .25f);
+                case Matter.CopperOre:
+                    return UnityEngine.Random.Range(.1f, .2f);
+
+                case Matter.Silica:
+                    return UnityEngine.Random.Range(.15f, .35f);
+                case Matter.Sulfur:
+                    return UnityEngine.Random.Range(.15f, .35f);
+                default:
+                    return 1f;
+            }
+        }
     }
 
     public class FormulaComponent
@@ -734,13 +755,13 @@ namespace RedHomestead.Simulation
         public Matter MatterType;
         public float AvgPurity = 0f;
 
-        public float Push(float pushAmount, float newPurity)
+        public float Push(float pushAmount, float purityOfBatch)
         {
             float initial = CurrentAmount;
             float leftover = this.Push(pushAmount);
             float newlyAdded = pushAmount - leftover;
 
-            float numer = (initial * AvgPurity) + (newlyAdded * newPurity);
+            float numer = (initial * AvgPurity) + (newlyAdded * purityOfBatch);
             AvgPurity = numer / CurrentAmount;
             
             return leftover;

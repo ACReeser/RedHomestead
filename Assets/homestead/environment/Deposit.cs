@@ -10,7 +10,7 @@ public class DepositData : FacingData
 {
     public string DepositInstanceID;
     public ResourceContainer Extractable;
-    public float Purity = .25f;
+    public float Purity = -1f;
     internal string ExtractableHint { get { return Extractable.UtilizationPercentageString() + " " + Extractable.MatterType;  } }
 }
 
@@ -36,6 +36,9 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
         }
 
         FlowManager.Instance.DepositMap.Add(data.DepositInstanceID, this);
+
+        if (this.data.Purity < 0f)
+            this.data.Purity = this.data.Extractable.MatterType.RandomPurity();
     }
 
     public void DetachCrate(IMovableSnappable detaching)

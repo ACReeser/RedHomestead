@@ -119,7 +119,7 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
         {
             if (oreOut != null && attachedDeposit.Data.Extractable.CurrentAmount > 0)
             {
-                oreOut.Data.Container.Push(attachedDeposit.Data.Extractable.Pull(OrePerTick));
+                oreOut.Data.Container.Push(attachedDeposit.Data.Extractable.Pull(OrePerTick), attachedDeposit.Data.Purity);
             }
         }
     }

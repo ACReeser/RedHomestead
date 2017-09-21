@@ -786,7 +786,12 @@ public class PlayerInput : MonoBehaviour {
                         else
                         {
                             newPrompt = Prompts.PickupHint;
-                            newPrompt.ItalicizedText = res.GetText();
+                            if (res != null)
+                            {
+                                newPrompt.ItalicizedText = res.GetText();
+                                newPrompt.UsesProgress = !(res.Progress < 0f);
+                                newPrompt.Progress = res.Progress;
+                            }
                         }
                     }
                     else
@@ -799,7 +804,11 @@ public class PlayerInput : MonoBehaviour {
                         {
                             newPrompt = Prompts.DropHint;
                             if (res != null)
+                            {
                                 newPrompt.ItalicizedText = res.GetText();
+                                newPrompt.UsesProgress = !(res.Progress < 0f);
+                                newPrompt.Progress = res.Progress;
+                            }
                         }
                     }
                 }
@@ -1002,6 +1011,7 @@ public class PlayerInput : MonoBehaviour {
                                 newPrompt = Prompts.MineHint;
                                 newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
                                 newPrompt.Description = lastDeposit.Data.ExtractableHint;
+                                newPrompt.ItalicizedText = String.Format("{0:0}% Pure", lastDeposit.Data.Purity * 100f);
                             }
                         }
                         else
@@ -1009,6 +1019,7 @@ public class PlayerInput : MonoBehaviour {
                             newPrompt = Prompts.DepositHint;
                             newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
                             newPrompt.Description = lastDeposit.Data.ExtractableHint;
+                            newPrompt.ItalicizedText = String.Format("{0:0}% Pure", lastDeposit.Data.Purity * 100f);
                         }
                     }
                     else
@@ -1016,6 +1027,7 @@ public class PlayerInput : MonoBehaviour {
                         newPrompt = Prompts.DepositHint;
                         newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
                         newPrompt.Description = lastDeposit.Data.ExtractableHint;
+                        newPrompt.ItalicizedText = String.Format("{0:0}% Pure", lastDeposit.Data.Purity * 100f);
                     }
                 }
                 else if (hitInfo.collider.CompareTag("button"))

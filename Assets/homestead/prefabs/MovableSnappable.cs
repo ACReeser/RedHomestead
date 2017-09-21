@@ -15,6 +15,7 @@ public interface IMovableSnappable
     void UnsnapCrate();
     void OnPickedUp();
     string GetText();
+    float Progress { get; }
 }
 
 public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
@@ -36,6 +37,11 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
     /// Joint that was created for this snap. Optional. May be null.
     /// </summary>
     public FixedJoint snapJoint { get; protected set; }
+
+    public virtual float Progress
+    {
+        get { return -1f; }
+    }
     
     void Awake()
     {

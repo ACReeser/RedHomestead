@@ -134,7 +134,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
             oreParticles.Play();
 
-            this.Data.Containers[Matter.IronOre].Push(capturedOre.Data.Container.Pull(1f));
+            this.Data.Containers[Matter.IronOre].Push(capturedOre.Data.Container.Pull(1f), capturedOre.Data.Container.AvgPurity);
 
             yield return new WaitForSeconds(oreParticles.main.duration);
         }
@@ -263,6 +263,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         if (FlexData.Heat.CurrentAmount >= minimumHeat &&
             Data.Containers[Matter.IronOre].CurrentAmount >= oreMeltPerTickUnits)
         {
+            float purity = Data.Containers[Matter.IronOre].AvgPurity;
             Data.Containers[Matter.IronOre].Pull(oreMeltPerTickUnits);
 
             if (capturedPowder == null)
@@ -271,7 +272,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
             }
             else
             {
-                capturedPowder.Data.Container.Push(oreMeltPerTickUnits);
+                capturedPowder.Data.Container.Push(oreMeltPerTickUnits * purity);
             }
         }
 

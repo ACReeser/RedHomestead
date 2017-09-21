@@ -22,6 +22,13 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
     public MeshFilter LabelMeshFilter;
     public Material PrinterMaterial, RawMaterial;
     public MeshRenderer CrateRenderer;
+    public override float Progress
+    {
+        get
+        {
+            return Data.Container.CurrentAmount;
+        }
+    }
 
     private Collider myCollider;
     //todo: could be CurrentConstructionZone reference instead
