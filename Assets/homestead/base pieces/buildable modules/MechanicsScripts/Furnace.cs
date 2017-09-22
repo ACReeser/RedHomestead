@@ -12,6 +12,7 @@ using RedHomestead.Industry;
 public class FurnaceFlexData
 {
     public EnergyContainer Heat;
+    public Matter CurrentOre;
 }
 
 public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable, IFlexDataContainer<MultipleResourceModuleData, FurnaceFlexData>
@@ -39,7 +40,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
     private Coroutine lerpHydro;
 
-    private Formula formula;
+    private Formula furnaceHeatingFormula;
     private Color glowEmissionColor;
 
     protected override void OnStart ()
@@ -50,7 +51,7 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
         RefreshFurnaceGlow();
 
-        formula = new Formula(Data.Containers, new FormulaComponent()
+        furnaceHeatingFormula = new Formula(Data.Containers, new FormulaComponent()
         {
             Matter = Matter.Water,
             ReactionRate = .001f,
@@ -132,9 +133,11 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         {
             yield return Tilt(false);
 
-            oreParticles.Play();
+            float amountDumped = capturedOre.Data.Container.Pull(1f);
+            this.Data.Containers[FlexData.CurrentOre].Push(amountDumped, capturedOre.Data.Container.AvgPurity);
 
-            this.Data.Containers[Matter.IronOre].Push(capturedOre.Data.Container.Pull(1f), capturedOre.Data.Container.AvgPurity);
+            if (amountDumped > 0f)
+                oreParticles.Play();
 
             yield return new WaitForSeconds(oreParticles.main.duration);
         }
@@ -192,11 +195,19 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
             if (isOre && capturedOre == null && child == oreSnap)
             {
-                if (capturedPowder == null || matches(res.Data.Container.MatterType, capturedPowder.Data.Container.MatterType))
+                //if powder is empty or ore matches powder
+                //and
+                //we can make this into powder
+                //and
+                //not currently smelting anything or matches current smelt
+                if ((capturedPowder == null || matches(res.Data.Container.MatterType, capturedPowder.Data.Container.MatterType)) &&
+                    (res.Data.Container.MatterType.MatchingPowder() != Matter.Unspecified) &&
+                    (FlexData.CurrentOre == Matter.Unspecified || res.Data.Container.MatterType == FlexData.CurrentOre))
                 {
                     res.SnapCrate(this, child.transform.position);
                     res.transform.SetParent(platform);
                     capturedOre = res;
+                    FlexData.CurrentOre = res.Data.Container.MatterType;
                 }
                 else
                 {
@@ -206,10 +217,18 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
             }
             else if (isPowder && capturedPowder == null && child == powderSnap)
             {
-                if (capturedOre == null || matches(capturedOre.Data.Container.MatterType, res.Data.Container.MatterType))
+                //if ore is empty or powder matches ore
+                //and
+                //we can make this powder
+                //and
+                //not currently smelting anything or matching ore is what we're smelting
+                if (capturedOre == null || matches(capturedOre.Data.Container.MatterType, res.Data.Container.MatterType) &&
+                    (res.Data.Container.MatterType.MatchingOre().MatchingPowder() != Matter.Unspecified) &&
+                    (FlexData.CurrentOre == Matter.Unspecified || res.Data.Container.MatterType.MatchingOre() == FlexData.CurrentOre))
                 {
                     res.SnapCrate(this, child.transform.position);
                     capturedPowder = res;
+                    FlexData.CurrentOre = res.Data.Container.MatterType.MatchingOre();
                 }
                 else
                 {
@@ -232,10 +251,16 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         {
             capturedOre = null;
             res.transform.SetParent(null);
+
+            if (capturedPowder == null)
+                FlexData.CurrentOre = Matter.Unspecified;
         }
         else if (res == capturedPowder)
         {
             capturedPowder = null;
+
+            if (capturedOre == null)
+                FlexData.CurrentOre = Matter.Unspecified;
         }
         unsnapTimer = StartCoroutine(UnsnapTimer());
     }
@@ -248,12 +273,12 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
 
     private bool matches(Matter ore, Matter powder)
     {
-        return System.Convert.ToInt32(ore) + 19 == System.Convert.ToInt32(powder);
+        return ore.MatchingPowder() == powder;
     }
 
     public override void Convert()
     {
-        if (HasPower && IsOn && formula.TryCombine())
+        if (HasPower && IsOn && furnaceHeatingFormula.TryCombine())
         {
             FlexData.Heat.Push(heatProductionPerTickUnits);
         }
@@ -261,10 +286,11 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         RefreshFurnaceGlow();
 
         if (FlexData.Heat.CurrentAmount >= minimumHeat &&
-            Data.Containers[Matter.IronOre].CurrentAmount >= oreMeltPerTickUnits)
+            FlexData.CurrentOre != Matter.Unspecified &&
+            Data.Containers[FlexData.CurrentOre].CurrentAmount >= oreMeltPerTickUnits)
         {
-            float purity = Data.Containers[Matter.IronOre].AvgPurity;
-            Data.Containers[Matter.IronOre].Pull(oreMeltPerTickUnits);
+            float purity = Data.Containers[FlexData.CurrentOre].AvgPurity;
+            Data.Containers[FlexData.CurrentOre].Pull(oreMeltPerTickUnits);
 
             if (capturedPowder == null)
             {
@@ -276,13 +302,14 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
             }
         }
 
+        //thermal loss every tick
         if (FlexData.Heat.CurrentAmount > 0)
             FlexData.Heat.Pull(heatLossPerTickUnits);
     }
 
     public override void ClearSinks()
     {
-        formula.ClearContainers();
+        furnaceHeatingFormula.ClearContainers();
     }
 
     public override ResourceContainerDictionary GetStartingDataContainers()
@@ -298,6 +325,11 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         return new ResourceContainerDictionary()
         {
             { Matter.IronOre, new ResourceContainer(Matter.IronOre, 0f) },
+            { Matter.CopperOre, new ResourceContainer(Matter.CopperOre, 0f) },
+            { Matter.Bauxite, new ResourceContainer(Matter.Bauxite, 0f) },
+            { Matter.NickelOre, new ResourceContainer(Matter.NickelOre, 0f) },
+            { Matter.SilverOre, new ResourceContainer(Matter.SilverOre, 0f) },
+            { Matter.GoldOre, new ResourceContainer(Matter.GoldOre, 0f) },
             { Matter.CarbonDioxide, new ResourceContainer(Matter.CarbonDioxide, 0f) },
             { Matter.Hydrogen, new ResourceContainer(Matter.Hydrogen, 0f) }
         };
@@ -317,8 +349,8 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
     }
 
     public override void OnSinkConnected(ISink s) {
-        formula.AddSink(s, Matter.CarbonDioxide);
-        formula.AddSink(s, Matter.Hydrogen);
-        formula.AddSink(s, Matter.Water);
+        furnaceHeatingFormula.AddSink(s, Matter.CarbonDioxide);
+        furnaceHeatingFormula.AddSink(s, Matter.Hydrogen);
+        furnaceHeatingFormula.AddSink(s, Matter.Water);
     }
 }

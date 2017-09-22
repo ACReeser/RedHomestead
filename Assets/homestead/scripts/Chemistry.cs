@@ -278,6 +278,60 @@ namespace RedHomestead.Simulation
             }
         }
 
+        public static Matter MatchingPowder(this Matter ore)
+        {
+            switch (ore)
+            {
+                case Matter.IronOre:
+                    return Matter.IronPowder;
+                case Matter.Bauxite:
+                    return Matter.AluminiumPowder;
+                case Matter.CopperOre:
+                    return Matter.CopperPowder;
+                case Matter.NickelOre:
+                    return Matter.NickelPowder;
+                case Matter.SilverOre:
+                    return Matter.SilverPowder;
+                //case Matter.MagnesiumOre:
+                //    return Matter.;
+                case Matter.GoldOre:
+                    return Matter.GoldPowder;
+                //case Matter.PlatinumOre:
+                //    return Matter.;
+                default:
+                    return Matter.Unspecified;
+            }
+        }
+
+        public static Matter MatchingOre(this Matter refined)
+        {
+            switch (refined)
+            {
+                case Matter.Iron:
+                case Matter.IronPowder:
+                    return Matter.IronOre;
+                case Matter.Aluminium:
+                case Matter.AluminiumPowder:
+                    return Matter.Bauxite;
+                case Matter.Copper:
+                case Matter.CopperPowder:
+                    return Matter.CopperOre;
+                case Matter.Nickel:
+                case Matter.NickelPowder:
+                    return Matter.NickelOre;
+                case Matter.Silver:
+                case Matter.SilverPowder:
+                    return Matter.SilverOre;
+                case Matter.Gold:
+                case Matter.GoldPowder:
+                    return Matter.GoldOre;
+                case Matter.Platinum:
+                    return Matter.PlatinumOre;
+                default:
+                    return Matter.Unspecified;
+            }
+        }
+
         public static float BaseCubicMeters(this Matter r)
         {
             return 1f;
