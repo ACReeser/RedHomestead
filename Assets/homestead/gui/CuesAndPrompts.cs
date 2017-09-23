@@ -156,6 +156,12 @@ public static class NewsSource
         DurationMilliseconds = 3000,
         Icon = MiscIcon.Information
     };
+    internal static News PrintingComplete = new News()
+    {
+        Text = "3D Print Complete",
+        DurationMilliseconds = 3000,
+        Icon = MiscIcon.Information
+    };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {

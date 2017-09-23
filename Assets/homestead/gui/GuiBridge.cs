@@ -138,13 +138,26 @@ public struct SurvivalBarsUI
 [Serializable]
 public struct PrinterUI
 {
-    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab, AvailableList, NoneAvailableFlag, CurrentPrintButtonHintsPanel, AvailableDetailPanel;
-    public Text AvailableMaterialsHeader, AvailablePrintTime, TabSwitchText;
+    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab, AvailableList, NoneAvailableFlag, CurrentPrintButtonHintsPanel, AvailableDetailPanel, AvailableDetailMaterialsListParent;
+    public Text AvailableMaterialsHeader, AvailablePrintTime, TabSwitchText, DetailName, DetailDescription;
     public Image TimeFill;
 
     private ThreeDPrinter currentPrinter;
     private bool showingAll;
-    private Matter detailComponent;
+    private Matter hoverComponent;
+    private bool showing;
+    public bool Showing { get; private set; }
+
+    public void SetShowing(bool showing, ThreeDPrinter printer = null)
+    {
+        Showing = showing;
+        Panel.gameObject.SetActive(showing);
+
+        if (showing && printer)
+        {
+            ToggleAvailable(true, printer);
+        }
+    }
 
     public void ToggleAvailable(bool? showAvailable = null, ThreeDPrinter printer = null)
     {
@@ -196,52 +209,112 @@ public struct PrinterUI
         }
     }
 
-    private string GetTimeText(int hours, bool hover)
+    private string GetTimeText(float hours)
     {
-        return String.Format("{0}<size=22>hrs</size>\n<size=18>{1}</size>", hours, hover ? "required" : "remaining");
+        return String.Format("{0:0.#}<size=22>hrs</size>\n<size=18>{1}</size>", hours, IsCurrentlyPrinting ? "remaining" : "required");
     }
 
-    internal void SetDetail(Matter detail)
+    internal void SetHover(Matter hoverMatter)
     {
-        detailComponent = detail;
+        hoverComponent = hoverMatter;
+
         RefreshDetail();
     }
 
+    private Matter lastEffectiveDetail;
     internal void RefreshDetail()
     {
-        if (detailComponent == Matter.Unspecified)
-        {
-            AvailablePrintTime.text = "";
-        }
+        Matter newEffectiveDetail;
+        if (IsCurrentlyPrinting)
+            newEffectiveDetail = currentPrinter.FlexData.Printing;
         else
+            newEffectiveDetail = hoverComponent;
+
+        //things you do regardless of detail changing
+        if (IsCurrentlyPrinting)
         {
-            AvailablePrintTime.text = GetTimeText(1, true);
+            AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTime * (1f - currentPrinter.FlexData.Progress));
+            TimeFill.fillAmount = currentPrinter.FlexData.Progress;
         }
+
+        //things you only do if things change
+        if (newEffectiveDetail != lastEffectiveDetail)
+        {
+            bool isBlank = newEffectiveDetail == Matter.Unspecified;
+
+            //AvailableDetailMaterialsListParent.gameObject.SetActive(!isBlank);
+            AvailableDetailPanel.gameObject.SetActive(!isBlank);
+
+            if (isBlank)
+            {
+                DetailName.text = DetailDescription.text = AvailablePrintTime.text = "";
+                TimeFill.fillAmount = 0f;
+            }
+            else
+            {
+                DetailName.text = newEffectiveDetail.ToString();
+                DetailDescription.text = Crafting.PrinterData[newEffectiveDetail].Description;
+
+                if (IsCurrentlyPrinting)
+                {
+                    AvailableMaterialsHeader.text = "MATERIALS\nCONSUMED";
+                }
+                else
+                {
+                    AvailableMaterialsHeader.text = "MATERIALS\nREQUIRED";
+                    AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTime);
+                    TimeFill.fillAmount = 0f;
+                }
+
+                FillMaterials(newEffectiveDetail);
+            }
+        }
+        lastEffectiveDetail = newEffectiveDetail;
+    }
+
+    private void FillMaterials(Matter component)
+    {
+        var reqs = Crafting.PrinterData[component].Requirements;
+        for (int i = 1; i < AvailableDetailMaterialsListParent.childCount; i++)
+        {
+            var t = AvailableDetailMaterialsListParent.GetChild(i);
+            int reqI = i - 1;
+            bool show =  reqI < reqs.Count;
+            t.gameObject.SetActive(show);
+            if (show)
+            {
+                t.GetComponent<Text>().text = reqs[reqI].Type.ToString() + " x" + reqs[reqI].Count;
+                t.GetChild(0).GetComponent<Image>().sprite = reqs[reqI].Type.Sprite();
+            }
+        }        
+    }
+
+    private bool IsCurrentlyPrinting
+    {
+        get { return currentPrinter != null && currentPrinter.FlexData.Printing != Matter.Unspecified; }
+    }
+    private bool HasDetail
+    {
+        get { return IsCurrentlyPrinting || hoverComponent != Matter.Unspecified; }
     }
 
     public void FillFirstScreen(ThreeDPrinter printer)
     {
         TabSwitchText.text = "All Prints";
+        CurrentPrintButtonHintsPanel.gameObject.SetActive(IsCurrentlyPrinting);
+        AvailableList.gameObject.SetActive(!IsCurrentlyPrinting);
 
-        if (printer.FlexData.Printing == Matter.Unspecified)
+        if (!IsCurrentlyPrinting)
         {
-            //not printing
-            TimeFill.fillAmount = 0f;
-            AvailableMaterialsHeader.text = "MATERIALS\nREQUIRED";
-            CurrentPrintButtonHintsPanel.gameObject.SetActive(false);
-            AvailableList.gameObject.SetActive(true);
             FillAvailableList(printer);
-            RefreshDetail();
         }
-        else
-        {
-            //is printing
-            AvailableMaterialsHeader.text = "MATERIALS\nCONSUMED";
-            TimeFill.fillAmount = printer.FlexData.Progress;
-            CurrentPrintButtonHintsPanel.gameObject.SetActive(true);
-            AvailableList.gameObject.SetActive(false);
-            AvailableDetailPanel.gameObject.SetActive(true);
-        }
+
+        //this is...complicated
+        //technically you should never be able to detail CO
+        //so this is to allow Detail to populate when we change to Unspecified
+        //blow out the cache on the last effective detail
+        lastEffectiveDetail = Matter.CarbonMonoxide;
+        RefreshDetail();
     }
 
     public void FillAvailableList(ThreeDPrinter printer)
@@ -249,7 +322,7 @@ public struct PrinterUI
         List<KeyValuePair<Matter, CraftingData>> available = new List<KeyValuePair<Matter, CraftingData>>();
         foreach (var kvp in Crafting.PrinterData)
         {
-            bool canPrint = false;
+            bool canPrint = true;
             foreach (var req in kvp.Value.Requirements)
             {
                 bool has = printer.Has(req);
@@ -275,20 +348,31 @@ public struct PrinterUI
             if (child == NoneAvailableFlag)
                 continue;
 
-            if (i < available.Count)
+            bool show = i < available.Count;
+            child.gameObject.SetActive(show);
+
+            if (show)
             {
                 KeyValuePair<Matter, CraftingData> kvp = available[i];
+                child.name = Convert.ToInt32(kvp.Key).ToString();
                 child.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
                 child.GetChild(1).GetComponent<Image>().sprite = kvp.Key.Sprite();
-            } 
-            else
-            {
-                child.gameObject.SetActive(false);
             }
             i++;
         }
         AvailableDetailPanel.gameObject.SetActive(available.Count > 0);
         NoneAvailableFlag.gameObject.SetActive(available.Count == 0);
+    }
+
+    internal void Hover(int number)
+    {
+        SetHover((Matter)int.Parse(AvailableList.GetChild(number).name));
+    }
+
+    internal void Select(int number)
+    {
+        currentPrinter.BeginPrinting((Matter)int.Parse(AvailableList.GetChild(number).name));
+        FillFirstScreen(currentPrinter);
     }
 }
 
@@ -797,23 +881,18 @@ public class GuiBridge : MonoBehaviour {
 
     internal void TogglePrinter(bool show, ThreeDPrinter printer = null)
     {
-        Printer.Panel.gameObject.SetActive(show);
+        Printer.SetShowing(show, printer);
 
         Cursor.visible = show;
         Cursor.lockState = show ? CursorLockMode.None : CursorLockMode.Confined;
-
-        if (show && printer)
-        {
-            Printer.ToggleAvailable(true, printer);
-        }
     }
 
     public void HoverPrintable(int number)
     {
-
+        Printer.Hover(number);
     }
     public void SelectPrintable(int number)
     {
-
+        Printer.Select(number);
     }
 }

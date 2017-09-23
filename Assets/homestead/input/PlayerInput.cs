@@ -283,10 +283,22 @@ public class PlayerInput : MonoBehaviour {
         {
             CurrentMode = InputMode.Normal;
             TogglePrintableBlueprintMode(false);
+            SunOrbit.Instance.ResetToNormalTime();
         }
-        else if (Input.GetKeyUp(KeyCode.Tab))
+        else
         {
-            GuiBridge.Instance.Printer.ToggleAvailable();
+            if (Input.GetKeyUp(KeyCode.Tab))
+                GuiBridge.Instance.Printer.ToggleAvailable();
+            else if (Input.GetKeyUp(KeyCode.Comma))
+            {
+                SunOrbit.Instance.SlowDown();
+            }
+            else if (Input.GetKeyUp(KeyCode.Period))
+            {
+                SunOrbit.Instance.SpeedUp();
+            }
+
+            GuiBridge.Instance.Printer.RefreshDetail();
         }
     }
 
@@ -1069,8 +1081,6 @@ public class PlayerInput : MonoBehaviour {
                         {
                             CurrentMode = InputMode.Printing;
                             TogglePrintableBlueprintMode(true, printer);
-                            printer.ToggleArmPrint();
-
                         }
                     }
                     else
@@ -2242,7 +2252,8 @@ public class PlayerInput : MonoBehaviour {
         else if (Input.GetKeyUp(KeyCode.Period))
         {
             SunOrbit.Instance.SpeedUp();
-        } else if (doInteract)
+        }
+        else if (doInteract)
         {
             if (SunOrbit.Instance.RunTilMorning)
             {

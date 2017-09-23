@@ -56,16 +56,16 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public Material cutawayMaterial;
     private MeshRenderer currentPrintRenderer;
     public Transform InProgressPrintCrate;
-    internal void ToggleArmPrint()
+    internal void BeginPrinting(Matter component)
     {
-        //FlexData.Printing = Matter.ElectricMotor;
+        FlexData.Printing = component;
         FlexData.Progress = 0f;
-        FlexData.Duration = 60f;
+        FlexData.Duration = Crafting.PrinterData[component].BuildTime * SunOrbit.GameSecondsPerMartianMinute * 60f;
 
         StartPrint();
     }
 
-    internal void StartPrint()
+    private void StartPrint()
     {
         if (currentPrint != null)
             StopCoroutine(currentPrint);
@@ -100,7 +100,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             printArmHarness.localPosition = new Vector3(0f, 0f, printArm.localPosition.z);
             UpdateLaser();
             currentPrintRenderer.material.SetFloat("_showPercentY", armY.T * 100f);
-            
+
             yield return null;
 
             if (headX.Done)
@@ -113,22 +113,32 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         laser.enabled = false;
         currentPrintRenderer.enabled = false;
 
-        FlexData.Printing = Matter.ElectricMotor;
-        BounceLander.CreateCratelike(FlexData.Printing, 1f, this.transform.TransformPoint(crateStartLocalPosition));
-        FlexData.Printing = Matter.Unspecified;
-        FlexData.Progress = 0f;
+        FinishPrinting();
 
         MainMenu.LerpContext reset = new MainMenu.LerpContext()
         {
             Space = Space.Self
         };
         reset.Seed(printArm.localPosition, resetPosition, 2f);
-        while(!reset.Done)
+        while (!reset.Done)
         {
             reset.Tick(printArm);
             printArmHarness.localPosition = new Vector3(0f, 0f, printArm.localPosition.z);
             yield return null;
         }
+    }
+
+    private void FinishPrinting()
+    {
+        BounceLander.CreateCratelike(FlexData.Printing, 1f, this.transform.TransformPoint(crateStartLocalPosition));
+        FlexData.Printing = Matter.Unspecified;
+        FlexData.Progress = 0f;
+
+        if (GuiBridge.Instance.Printer.Showing)
+            GuiBridge.Instance.Printer.SetShowing(true, this);
+
+        GuiBridge.Instance.ShowNews(NewsSource.PrintingComplete);
+        SunOrbit.Instance.ResetToNormalTime();
     }
 
     private void UpdateLaser()
@@ -187,12 +197,12 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
                 if (child == leftInputTrigger && LeftInput == null)
                 {
                     LeftInput = resComp;
-                    res.SnapCrate(this, c.transform.position);
+                    res.SnapCrate(this, child.transform.position, globalRotation: child.transform.rotation);
                 }
                 else if (child == rightInputTrigger && RightInput == null)
                 {
                     RightInput = resComp;
-                    res.SnapCrate(this, c.transform.position);
+                    res.SnapCrate(this, child.transform.position, globalRotation: child.transform.rotation);
                 }
             }
             else

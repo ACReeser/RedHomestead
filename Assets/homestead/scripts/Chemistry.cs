@@ -243,7 +243,6 @@ namespace RedHomestead.Simulation
         {
             switch (matt)
             {
-                case Matter.Polyethylene:
                 case Matter.IronPowder:
                 case Matter.AluminiumPowder:
                 case Matter.CopperPowder:
@@ -251,6 +250,11 @@ namespace RedHomestead.Simulation
                 case Matter.SilverPowder:
                 case Matter.GoldPowder:
                 case Matter.SteelPowder:
+
+                case Matter.Canvas:
+                case Matter.Polyethylene:
+
+                case Matter.CopperWire:
                     return true;
                 default:
                     return false;

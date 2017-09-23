@@ -11,7 +11,7 @@ public interface IMovableSnappable
     Transform transform { get; }
     Rigidbody movableRigidbody { get; }
     FixedJoint snapJoint { get; }
-    void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null);
+    void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null, Quaternion? globalRotation = null);
     void UnsnapCrate();
     void OnPickedUp();
     string GetText();
@@ -48,19 +48,18 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
         movableRigidbody = GetComponent<Rigidbody>();
     }
 
-    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null)
+    public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null, Quaternion? globalRotation = null)
     {
         this.SnappedTo = snapParent;
-        this.SnapCrate(snapParent.transform, snapPosition, jointRigid);
+        this.SnapCrate(snapParent.transform, snapPosition, jointRigid, globalRotation);
     }
 
-    public void SnapCrate(Transform parent, Vector3 snapPosition, Rigidbody jointRigid = null)
+    public void SnapCrate(Transform parent, Vector3 snapPosition, Rigidbody jointRigid = null, Quaternion? globalRotation = null)
     {
         this.IsSnapped = true;
         PlayerInput.Instance.DropObject();
         transform.position = snapPosition;
-#warning snap crate rotation does not inherit from trigger forwarder
-        transform.rotation = parent.rotation;
+        transform.rotation = globalRotation ?? parent.rotation;
 
         if (jointRigid != null)
         {
