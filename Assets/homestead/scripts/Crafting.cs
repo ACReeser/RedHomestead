@@ -174,6 +174,7 @@ namespace RedHomestead.Crafting
             {
                 Matter.CopperWire, new CraftingData()
                 {
+                    BuildTime = 1,
                     Requirements = new List<ResourceEntry>()
                     {
                         new ResourceEntry(.25f, Matter.CopperPowder)
@@ -184,6 +185,7 @@ namespace RedHomestead.Crafting
             {
                 Matter.IronSheeting, new CraftingData()
                 {
+                    BuildTime = 2,
                     Requirements = new List<ResourceEntry>()
                     {
                         new ResourceEntry(.25f, Matter.IronPowder),
@@ -194,6 +196,7 @@ namespace RedHomestead.Crafting
             {
                 Matter.IronBeams, new CraftingData()
                 {
+                    BuildTime = 3,
                     Requirements = new List<ResourceEntry>()
                     {
                         new ResourceEntry(.25f, Matter.IronPowder),
@@ -204,14 +207,38 @@ namespace RedHomestead.Crafting
             {
                 Matter.ElectricMotor, new CraftingData()
                 {
+                    BuildTime = 10,
                     Requirements = new List<ResourceEntry>()
                     {
                         new ResourceEntry(.25f, Matter.IronPowder),
-                        new ResourceEntry(.25f, Matter.CopperPowder)
+                        new ResourceEntry(.25f, Matter.CopperWire)
                     },
                     Description = "A brushless electric motor.",
                 }
-            }
+            },
+            {
+                Matter.Piping, new CraftingData()
+                {
+                    BuildTime = 5,
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.IronPowder),
+                    },
+                    Description = "Pipes and valves for transporting fluids.",
+                }
+            },
+            {
+                Matter.PressureCanvas, new CraftingData()
+                {
+                    BuildTime = 1,
+                    Requirements = new List<ResourceEntry>()
+                    {
+                        new ResourceEntry(.25f, Matter.Canvas),
+                        new ResourceEntry(.25f, Matter.Polyethylene),
+                    },
+                    Description = "Plastic-covered canvas for inflatable habitats.",
+                }
+            },
         };
 
         public static Sprite AtlasSprite(this Craftable craft)

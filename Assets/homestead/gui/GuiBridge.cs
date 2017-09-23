@@ -178,7 +178,21 @@ public struct PrinterUI
         {
             var newGuy = GameObject.Instantiate<RectTransform>(AllListButtonPrefab, AllList.transform);
             newGuy.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
+            newGuy.GetChild(1).GetComponent<Image>().sprite = kvp.Key.Sprite();
             newGuy.GetChild(2).GetComponent<Text>().text = kvp.Value.BuildTime + "<size=10>hrs</size>";
+
+            var requires = newGuy.GetChild(3);
+            for (int j = 1; j < 5; j++)
+            {
+                int craftI = j - 1;
+                bool hasRequirement = craftI < kvp.Value.Requirements.Count;
+                requires.GetChild(j).gameObject.SetActive(hasRequirement);
+
+                if (hasRequirement)
+                {
+                    requires.GetChild(j).GetComponent<Image>().sprite = kvp.Value.Requirements[craftI].Type.Sprite();
+                }
+            }
         }
     }
 
@@ -263,10 +277,9 @@ public struct PrinterUI
 
             if (i < available.Count)
             {
-                var kvp = available[i];
+                KeyValuePair<Matter, CraftingData> kvp = available[i];
                 child.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
                 child.GetChild(1).GetComponent<Image>().sprite = kvp.Key.Sprite();
-                child.gameObject.SetActive(true);
             } 
             else
             {
@@ -791,7 +804,7 @@ public class GuiBridge : MonoBehaviour {
 
         if (show && printer)
         {
-            Printer.ToggleAvailable(false, printer);
+            Printer.ToggleAvailable(true, printer);
         }
     }
 
