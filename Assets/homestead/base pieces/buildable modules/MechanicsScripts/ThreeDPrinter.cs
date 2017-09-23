@@ -58,7 +58,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public Transform InProgressPrintCrate;
     internal void ToggleArmPrint()
     {
-        FlexData.Printing = Matter.ElectricMotor;
+        //FlexData.Printing = Matter.ElectricMotor;
         FlexData.Progress = 0f;
         FlexData.Duration = 60f;
 

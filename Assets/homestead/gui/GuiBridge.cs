@@ -138,9 +138,14 @@ public struct SurvivalBarsUI
 [Serializable]
 public struct PrinterUI
 {
-    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab, AvailableList, NoneAvailableFlag;
+    public RectTransform Panel, AvailablePanel, AllPanel, AllList, AllListButtonPrefab, AvailableList, NoneAvailableFlag, CurrentPrintButtonHintsPanel, AvailableDetailPanel;
+    public Text AvailableMaterialsHeader, AvailablePrintTime, TabSwitchText;
+    public Image TimeFill;
+
     private ThreeDPrinter currentPrinter;
     private bool showingAll;
+    private Matter detailComponent;
+
     public void ToggleAvailable(bool? showAvailable = null, ThreeDPrinter printer = null)
     {
         if (!showAvailable.HasValue)
@@ -159,11 +164,12 @@ public struct PrinterUI
         if (showingAll)
             FillAllList();
         else if (currentPrinter != null)
-            FillAvailableList(currentPrinter);
+            FillFirstScreen(currentPrinter);
     }
 
     public void FillAllList()
     {
+        TabSwitchText.text = "Available Prints";
         foreach (Transform child in AllList.transform)
         {
             GameObject.Destroy(child.gameObject);
@@ -173,6 +179,54 @@ public struct PrinterUI
             var newGuy = GameObject.Instantiate<RectTransform>(AllListButtonPrefab, AllList.transform);
             newGuy.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
             newGuy.GetChild(2).GetComponent<Text>().text = kvp.Value.BuildTime + "<size=10>hrs</size>";
+        }
+    }
+
+    private string GetTimeText(int hours, bool hover)
+    {
+        return String.Format("{0}<size=22>hrs</size>\n<size=18>{1}</size>", hours, hover ? "required" : "remaining");
+    }
+
+    internal void SetDetail(Matter detail)
+    {
+        detailComponent = detail;
+        RefreshDetail();
+    }
+
+    internal void RefreshDetail()
+    {
+        if (detailComponent == Matter.Unspecified)
+        {
+            AvailablePrintTime.text = "";
+        }
+        else
+        {
+            AvailablePrintTime.text = GetTimeText(1, true);
+        }
+    }
+
+    public void FillFirstScreen(ThreeDPrinter printer)
+    {
+        TabSwitchText.text = "All Prints";
+
+        if (printer.FlexData.Printing == Matter.Unspecified)
+        {
+            //not printing
+            TimeFill.fillAmount = 0f;
+            AvailableMaterialsHeader.text = "MATERIALS\nREQUIRED";
+            CurrentPrintButtonHintsPanel.gameObject.SetActive(false);
+            AvailableList.gameObject.SetActive(true);
+            FillAvailableList(printer);
+            RefreshDetail();
+        }
+        else
+        {
+            //is printing
+            AvailableMaterialsHeader.text = "MATERIALS\nCONSUMED";
+            TimeFill.fillAmount = printer.FlexData.Progress;
+            CurrentPrintButtonHintsPanel.gameObject.SetActive(true);
+            AvailableList.gameObject.SetActive(false);
+            AvailableDetailPanel.gameObject.SetActive(true);
         }
     }
 
@@ -220,6 +274,7 @@ public struct PrinterUI
             }
             i++;
         }
+        AvailableDetailPanel.gameObject.SetActive(available.Count > 0);
         NoneAvailableFlag.gameObject.SetActive(available.Count == 0);
     }
 }
@@ -738,5 +793,14 @@ public class GuiBridge : MonoBehaviour {
         {
             Printer.ToggleAvailable(false, printer);
         }
+    }
+
+    public void HoverPrintable(int number)
+    {
+
+    }
+    public void SelectPrintable(int number)
+    {
+
     }
 }
