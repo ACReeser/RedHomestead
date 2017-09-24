@@ -106,6 +106,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         }
     }
 
+    private bool scrapFlag;
     private IEnumerator ArmPrint()
     {
         MainMenu.LerpContext armY = new MainMenu.LerpContext()
@@ -121,6 +122,13 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
 
         while (!armY.Done)
         {
+            if (scrapFlag)
+            {
+                scrapFlag = false;
+                yield return FinishPrinting(false);
+                yield break;
+            }
+
             FlexData.Progress = armY.T;
             
             while(!HasPower || !IsOn)
@@ -195,6 +203,11 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         laser.SetPosition(4, new Vector3(printHead.position.x, transform.position.y - 1f, printHead.position.z));
     }
 
+    internal void Scrap()
+    {
+        scrapFlag = true;
+    }
+
     internal bool Has(ResourceEntry req)
     {
         return (LeftInput != null && LeftInput.Data.Container.MatterType == req.Type && LeftInput.Data.Container.CurrentAmount >= req.Count) ||
@@ -215,6 +228,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public ResourceComponent LeftInput { get; private set; }
     public ResourceComponent RightInput { get; private set; }
 
+    #region electricity
     public override float WattsConsumed
     {
         get
@@ -239,6 +253,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             return ElectricityConstants.WattsPerBlock * 5f;
         }
     }
+    #endregion
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {

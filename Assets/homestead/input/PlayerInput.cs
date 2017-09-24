@@ -113,6 +113,7 @@ public class PlayerInput : MonoBehaviour {
     private Transform lastHobbitHoleT, lastDepositT;
     private HobbitHole lastHobbitHole;
     private Deposit lastDeposit;
+    private ThreeDPrinter lastPrinter;
 
     void Awake()
     {
@@ -296,6 +297,13 @@ public class PlayerInput : MonoBehaviour {
             else if (Input.GetKeyUp(KeyCode.Period))
             {
                 SunOrbit.Instance.SpeedUp();
+            }
+            else if (Input.GetKeyUp(KeyCode.X))
+            {
+                lastPrinter.Scrap();
+                CurrentMode = InputMode.Normal;
+                TogglePrintableBlueprintMode(false);
+                SunOrbit.Instance.ResetToNormalTime();
             }
 
             GuiBridge.Instance.Printer.RefreshDetail();
@@ -1086,6 +1094,7 @@ public class PlayerInput : MonoBehaviour {
                             else
                             {
                                 CurrentMode = InputMode.Printing;
+                                lastPrinter = printer;
                                 TogglePrintableBlueprintMode(true, printer);
                             }
                         }

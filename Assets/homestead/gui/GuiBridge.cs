@@ -241,8 +241,7 @@ public struct PrinterUI
         if (newEffectiveDetail != lastEffectiveDetail)
         {
             bool isBlank = newEffectiveDetail == Matter.Unspecified;
-
-            //AvailableDetailMaterialsListParent.gameObject.SetActive(!isBlank);
+            
             AvailableDetailPanel.gameObject.SetActive(!isBlank);
 
             if (isBlank)
@@ -258,11 +257,16 @@ public struct PrinterUI
                 if (IsCurrentlyPrinting)
                 {
                     AvailableMaterialsHeader.text = "MATERIALS\nCONSUMED";
+                    //set detail to use whole width
+                    AvailableDetailPanel.offsetMin = new Vector2(0, 0);
                 }
                 else
                 {
                     AvailableMaterialsHeader.text = "MATERIALS\nREQUIRED";
                     AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTime);
+                    //set detail to give 200px to list of available
+                    AvailableDetailPanel.offsetMin = new Vector2(200, 0);
+
                     TimeFill.fillAmount = 0f;
                 }
 
