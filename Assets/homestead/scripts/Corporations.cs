@@ -6,12 +6,48 @@ using RedHomestead.Geography;
 using RedHomestead.Simulation;
 
 public static class Corporations {
+    private static List<Stock> BasicCommodity(List<Stock> list = null)
+    {
+        var results = list ?? new List<Stock>();
 
+        results.Add(new Stock()
+        {
+            ListPrice = 500,
+            StockAvailable = 100,
+            Matter = Matter.Hydrogen
+        });
+        results.Add(new Stock()
+        {
+            ListPrice = 500,
+            StockAvailable = 100,
+            Matter = Matter.Oxygen
+        });
+        results.Add(new Stock()
+        {
+            ListPrice = 800,
+            StockAvailable = 100,
+            Matter = Matter.CopperPowder
+        });
+        results.Add(new Stock()
+        {
+            ListPrice = 500,
+            StockAvailable = 100,
+            Matter = Matter.IronPowder
+        });
+        results.Add(new Stock()
+        {
+            ListPrice = 100,
+            StockAvailable = 100,
+            Matter = Matter.RationMeals
+        });
+
+        return results;
+    }
     public static List<Vendor> Wholesalers = new List<Vendor>()
     {
         new Vendor()
         {
-            //Specializes in: commodity
+            //Specializes in: commodity, manufactured
             Name = "MonsMart",
             AvailableDelivery = DeliveryType.Drop | DeliveryType.Lander | DeliveryType.Rover,
             Location = new LatLong()
@@ -19,7 +55,7 @@ public static class Corporations {
                 LatitudeDegrees = 18.65f,
                 LongitudeDegrees = 226.2f
             },
-            Stock = new List<Stock>()
+            Stock = BasicCommodity(new List<Stock>()
             {
                 new Stock()
                 {
@@ -29,29 +65,35 @@ public static class Corporations {
                 },
                 new Stock()
                 {
-                    ListPrice = 800,
-                    StockAvailable = 100,
-                    Matter = Matter.Copper
-                },
-                new Stock()
-                {
-                    ListPrice = 100,
-                    StockAvailable = 100,
-                    Matter = Matter.RationMeals
-                },
-                new Stock()
-                {
-                    ListPrice = 500,
-                    StockAvailable = 100,
-                    Matter = Matter.Hydrogen
-                },
-                new Stock()
-                {
                     ListPrice = 2000,
                     StockAvailable = 50,
-                    Matter = Matter.SiliconWafers
-                }
-            }
+                    Matter = Matter.SolarPanels
+                },
+                new Stock()
+                {
+                    ListPrice = 800,
+                    StockAvailable = 100,
+                    Matter = Matter.IronSheeting
+                },
+                new Stock()
+                {
+                    ListPrice = 800,
+                    StockAvailable = 100,
+                    Matter = Matter.Piping
+                },
+                new Stock()
+                {
+                    ListPrice = 800,
+                    StockAvailable = 100,
+                    Matter = Matter.ElectricMotor
+                },
+                new Stock()
+                {
+                    ListPrice = 800,
+                    StockAvailable = 100,
+                    Matter = Matter.IronBeams
+                },
+            })
         },
         new Vendor()
         {
@@ -63,7 +105,7 @@ public static class Corporations {
                 LatitudeDegrees = -4.59f,
                 LongitudeDegrees = 137.44f
             },
-            Stock = new List<Stock>()
+            Stock = BasicCommodity(new List<Stock>()
             {
                 new Stock()
                 {
@@ -73,21 +115,9 @@ public static class Corporations {
                 },
                 new Stock()
                 {
-                    ListPrice = 100,
-                    StockAvailable = 100,
-                    Matter = Matter.RationMeals
-                },
-                new Stock()
-                {
-                    ListPrice = 100,
-                    StockAvailable = 100,
-                    Matter = Matter.Hydrogen
-                },
-                new Stock()
-                {
                     ListPrice = 2000,
                     StockAvailable = 100,
-                    Matter = Matter.SiliconWafers
+                    Matter = Matter.SolarPanels
                 },
                 new Stock()
                 {
@@ -101,7 +131,7 @@ public static class Corporations {
                     StockAvailable = 100,
                     Matter = Matter.Canvas
                 }
-            }
+            })
         },
         new Vendor()
         {
@@ -131,7 +161,7 @@ public static class Corporations {
                 {
                     ListPrice = 500,
                     StockAvailable = 100,
-                    Matter = Matter.Biomass
+                    Matter = Matter.Polyethylene
                 }
             }
         }
