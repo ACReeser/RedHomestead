@@ -16,7 +16,7 @@ public class ThreeDPrinterFlexData
     public float Duration;
 }
 
-public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable, IFlexDataContainer<MultipleResourceModuleData, ThreeDPrinterFlexData>
+public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable, IFlexDataContainer<MultipleResourceModuleData, ThreeDPrinterFlexData>, IVariablePowerConsumer
 {
     public Transform printArm, printHead, printArmHarness, laserAnchor, laserMidpoint;
     public LineRenderer laser;
@@ -47,6 +47,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     {
         base.OnStart();
         this.RefreshPowerSwitch();
+        this.RefreshVisualization();
         resetPosition = printArm.localPosition;
 
         if (FlexData != null && FlexData.Printing != Matter.Unspecified)
@@ -56,26 +57,35 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public Material cutawayMaterial;
     private MeshRenderer currentPrintRenderer;
     public Transform InProgressPrintCrate;
-    internal void BeginPrinting(Matter component)
+    internal bool BeginPrinting(Matter component)
     {
         FlexData.Printing = component;
         FlexData.Progress = 0f;
         FlexData.Duration = Crafting.PrinterData[component].BuildTime * SunOrbit.GameSecondsPerMartianMinute * 60f;
 
-        StartPrint();
+        return StartPrint();
     }
 
-    private void StartPrint()
+    private bool StartPrint()
     {
-        if (currentPrint != null)
-            StopCoroutine(currentPrint);
+        if (HasPower && IsOn)
+        {
+            if (currentPrint != null)
+                StopCoroutine(currentPrint);
 
-        currentPrintRenderer = InProgressPrintCrate.GetChild(0).GetComponent<MeshRenderer>();
-        currentPrintRenderer.enabled = true;
-        cutawayMaterial.mainTexture = currentPrintRenderer.material.mainTexture;
-        currentPrintRenderer.material = cutawayMaterial;
+            currentPrintRenderer = InProgressPrintCrate.GetChild(0).GetComponent<MeshRenderer>();
+            currentPrintRenderer.enabled = true;
+            cutawayMaterial.mainTexture = currentPrintRenderer.material.mainTexture;
+            currentPrintRenderer.material = cutawayMaterial;
 
-        currentPrint = StartCoroutine(ArmPrint());
+            this.RefreshVisualization();
+            currentPrint = StartCoroutine(ArmPrint());
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private IEnumerator ArmPrint()
@@ -89,10 +99,23 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         armY.Seed(Vector3.up * minArmY, Vector3.up * maxArmY, FlexData.Duration - alreadyPassed, _time: alreadyPassed);
         bool back = false;
         laser.enabled = true;
+        int skipCounter = 0;
 
         while (!armY.Done)
         {
             FlexData.Progress = armY.T;
+            
+            while(!HasPower || !IsOn)
+            {
+                skipCounter++;
+                yield return new WaitForSeconds(1f);
+                if (skipCounter > 60 * 4)
+                {
+                    GuiBridge.Instance.ShowNews(NewsSource.PrintingStallCancel);
+                    yield return FinishPrinting(false);
+                    yield break;
+                }
+            }
 
             armY.Tick(printArm);
             headX.Tick(printHead);
@@ -109,11 +132,28 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
                 back = !back;
             }
         }
+        
+        yield return FinishPrinting(true);
+    }
 
+    private IEnumerator FinishPrinting(bool success)
+    {
         laser.enabled = false;
         currentPrintRenderer.enabled = false;
 
-        FinishPrinting();
+        if (success)
+        {
+            BounceLander.CreateCratelike(FlexData.Printing, 1f, this.transform.TransformPoint(crateStartLocalPosition));
+            GuiBridge.Instance.ShowNews(NewsSource.PrintingComplete);
+        }
+
+        FlexData.Printing = Matter.Unspecified;
+        FlexData.Progress = 0f;
+
+        if (GuiBridge.Instance.Printer.Showing)
+            GuiBridge.Instance.Printer.SetShowing(true, this);
+
+        SunOrbit.Instance.ResetToNormalTime();
 
         MainMenu.LerpContext reset = new MainMenu.LerpContext()
         {
@@ -128,26 +168,13 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         }
     }
 
-    private void FinishPrinting()
-    {
-        BounceLander.CreateCratelike(FlexData.Printing, 1f, this.transform.TransformPoint(crateStartLocalPosition));
-        FlexData.Printing = Matter.Unspecified;
-        FlexData.Progress = 0f;
-
-        if (GuiBridge.Instance.Printer.Showing)
-            GuiBridge.Instance.Printer.SetShowing(true, this);
-
-        GuiBridge.Instance.ShowNews(NewsSource.PrintingComplete);
-        SunOrbit.Instance.ResetToNormalTime();
-    }
-
     private void UpdateLaser()
     {
         laser.SetPosition(0, laserAnchor.position);
         laser.SetPosition(1, new Vector3(laserAnchor.position.x, laserAnchor.position.y, laserMidpoint.position.z));
         laser.SetPosition(2, laserMidpoint.position);
         laser.SetPosition(3, new Vector3(printHead.position.x, laserMidpoint.position.y, laserMidpoint.position.z));
-        laser.SetPosition(4, new Vector3(printHead.position.x, transform.position.y, printHead.position.z));
+        laser.SetPosition(4, new Vector3(printHead.position.x, transform.position.y - 1f, printHead.position.z));
     }
 
     internal bool Has(ResourceEntry req)
@@ -174,7 +201,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     {
         get
         {
-            return ElectricityConstants.WattsPerBlock * 5f;
+            return FlexData.Printing != Matter.Unspecified ? ElectricityConstants.WattsPerBlock * 5f : 0f;
         }
     }
 
@@ -186,7 +213,15 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             return powerCabinet;
         }
     }
-    
+
+    public float MaximumWattsConsumed
+    {
+        get
+        {
+            return ElectricityConstants.WattsPerBlock * 5f;
+        }
+    }
+
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
     {
         ResourceComponent resComp = res.transform.GetComponent<ResourceComponent>();

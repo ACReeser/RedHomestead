@@ -162,6 +162,18 @@ public static class NewsSource
         DurationMilliseconds = 3000,
         Icon = MiscIcon.Information
     };
+    internal static News PrintingStallCancel = new News()
+    {
+        Text = "Print scrapped due to power loss",
+        DurationMilliseconds = 3000,
+        Icon = MiscIcon.Information
+    };
+    internal static News PrinterUnpowered = new News()
+    {
+        Text = "Printer power off",
+        DurationMilliseconds = 3000,
+        Icon = MiscIcon.Information
+    };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {

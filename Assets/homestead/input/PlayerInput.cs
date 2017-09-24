@@ -1079,8 +1079,15 @@ public class PlayerInput : MonoBehaviour {
                         var printer = hitInfo.collider.transform.root.GetComponent<ThreeDPrinter>();
                         if (printer != null)
                         {
-                            CurrentMode = InputMode.Printing;
-                            TogglePrintableBlueprintMode(true, printer);
+                            if (!printer.HasPower || !printer.IsOn)
+                            {
+                                GuiBridge.Instance.ShowNews(NewsSource.PrinterUnpowered);
+                            }
+                            else
+                            {
+                                CurrentMode = InputMode.Printing;
+                                TogglePrintableBlueprintMode(true, printer);
+                            }
                         }
                     }
                     else
