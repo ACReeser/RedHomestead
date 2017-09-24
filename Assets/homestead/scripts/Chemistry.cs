@@ -788,6 +788,21 @@ namespace RedHomestead.Simulation
             }
         }
         
+        /// <summary>
+        /// Tries to pull an amount, returns whether pull succeeded within bounds (due to float inaccuracy)
+        /// </summary>
+        /// <param name="pullAmount"></param>
+        /// <returns></returns>
+        public bool TryConsume(float pullAmount)
+        {
+            float pulled = this.Pull(pullAmount);
+            bool pullSuccess = (Math.Abs(pullAmount - pulled) <= 0.000001f);
+            if (!pullSuccess)
+                this.Push(pulled);
+
+            return pullSuccess;
+        }
+
         public void FillFrom(ResourceContainer source, float transferAmount)
         {
             this.Push(source.Pull(transferAmount));

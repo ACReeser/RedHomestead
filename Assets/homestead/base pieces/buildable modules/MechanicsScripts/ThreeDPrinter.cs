@@ -59,6 +59,24 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     public Transform InProgressPrintCrate;
     internal bool BeginPrinting(Matter component)
     {
+        foreach(var req in Crafting.PrinterData[component].Requirements)
+        {
+            if (LeftInput != null && LeftInput.Data.Container.MatterType == req.Type)
+            {
+                if (!LeftInput.Data.Container.TryConsume(req.Count))
+                {
+                    return false;
+                }
+            }
+            else if (RightInput != null && RightInput.Data.Container.MatterType == req.Type)
+            {
+                if (!RightInput.Data.Container.TryConsume(req.Count))
+                {
+                    return false;
+                }
+            }
+        }
+
         FlexData.Printing = component;
         FlexData.Progress = 0f;
         FlexData.Duration = Crafting.PrinterData[component].BuildTime * SunOrbit.GameSecondsPerMartianMinute * 60f;
