@@ -1643,11 +1643,11 @@ public class PlayerInput : MonoBehaviour {
     {
         if (ModulePlan.IsActive)
         {
-            if (Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0) && ModulePlan.Type != Module.SolarPanelSmall)
             {
                 ModulePlan.Rotate(true);
             }
-            else if (Input.GetMouseButton(1))
+            else if (Input.GetMouseButton(1) && ModulePlan.Type != Module.SolarPanelSmall)
             {
                 ModulePlan.Rotate(false);
             }
