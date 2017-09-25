@@ -25,12 +25,17 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
 
     public OreExtractorFlexData FlexData { get; set; }
 
+    public Transform CrateSnapAnchor;
     public MeshFilter powerCabinet;
     public MeshFilter PowerCabinet { get { return powerCabinet; } }
     
     protected override void OnStart()
     {
         base.OnStart();
+
+        if (FlexData != null && attachedDeposit == null)
+            InitializeDeposit(FlexData.DepositInstanceID);
+
         this.RefreshPowerSwitch();
         this.RefreshSpinAndParticles();
     }
@@ -88,6 +93,10 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
             matches(oreBucket.Data.Container.MatterType, attachedDeposit.Data.Extractable.MatterType))
         {
             oreOut = oreBucket;
+
+            if (oreBucket.Data.Container.MatterType == Matter.Unspecified)
+                oreBucket.Data.Container.MatterType = attachedDeposit.Data.Extractable.MatterType;
+
             res.SnapCrate(this, child.transform.position);
         }
     }
@@ -107,14 +116,6 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
 
     public override void Convert()
     {
-        if (attachedDeposit == null && 
-            FlexData != null && 
-            !String.IsNullOrEmpty(FlexData.DepositInstanceID) && 
-            FlowManager.Instance.DepositMap.ContainsKey(FlexData.DepositInstanceID))
-        {
-            attachedDeposit = FlowManager.Instance.DepositMap[FlexData.DepositInstanceID];
-        }
-
         if (HasPower && IsOn && attachedDeposit != null)
         {
             if (oreOut != null && attachedDeposit.Data.Extractable.CurrentAmount > 0)
@@ -132,5 +133,23 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     {
         FlexData = new OreExtractorFlexData();
         return new ResourceContainerDictionary();
+    }
+
+    public override void InitializeStartingData()
+    {
+        base.InitializeStartingData();
+
+        if (attachedDeposit == null)
+            UnityEngine.Debug.LogWarning("Ore extractor started with no attached deposit!");
+        else
+        {
+            FlexData.DepositInstanceID = attachedDeposit.Data.DepositInstanceID;
+            BounceLander.CreateCratelike(attachedDeposit.Data.Extractable.MatterType, 0f, this.CrateSnapAnchor.position);
+        }
+    }
+
+    internal void InitializeDeposit(string depositInstanceID)
+    {
+        attachedDeposit = FlowManager.Instance.DepositMap[depositInstanceID];
     }
 }

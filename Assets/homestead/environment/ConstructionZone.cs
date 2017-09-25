@@ -179,7 +179,6 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         //is outside the zone looking in, so maybe not
 
         Transform newT = (Transform)GameObject.Instantiate(ModulePrefab, this.transform.position, this.transform.rotation);
-        newT.GetComponent<IBuildable>().InitializeStartingData();
 
         //link ore extractor to deposit
         if (!String.IsNullOrEmpty(Data.DepositInstanceID))
@@ -187,9 +186,11 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             OreExtractor drill = newT.GetComponent<OreExtractor>();
             if (drill != null)
             {
-                drill.FlexData.DepositInstanceID = Data.DepositInstanceID;
+                drill.InitializeDeposit(Data.DepositInstanceID);
             }
         }
+
+        newT.GetComponent<IBuildable>().InitializeStartingData();
 
         if (ZoneThatPlayerIsStandingIn == this)
         {
