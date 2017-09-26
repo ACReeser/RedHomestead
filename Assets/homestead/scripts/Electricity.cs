@@ -338,10 +338,13 @@ namespace RedHomestead.Electricity
 
         internal void Detach(IPowerable node)
         {
-            Powerline[] lines = Edges[node].ToArray();
-            foreach (Powerline p in lines)
+            if (Edges.ContainsKey(node))
             {
-                p.Remove();
+                Powerline[] lines = Edges[node].ToArray();
+                foreach (Powerline p in lines)
+                {
+                    p.Remove();
+                }
             }
         }
 

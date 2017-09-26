@@ -19,6 +19,7 @@ public interface IMovableSnappable
 }
 
 public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
+    private const float LerpTime = 0.15f;
     public AudioClip BangSoundClip;
 
     /// <summary>
@@ -54,12 +55,41 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
         this.SnapCrate(snapParent.transform, snapPosition, jointRigid, globalRotation);
     }
 
+    private Coroutine snapping;
     public void SnapCrate(Transform parent, Vector3 snapPosition, Rigidbody jointRigid = null, Quaternion? globalRotation = null)
     {
         this.IsSnapped = true;
         PlayerInput.Instance.DropObject();
-        transform.position = snapPosition;
-        transform.rotation = globalRotation ?? parent.rotation;
+        snapping = StartCoroutine(LerpToSnap(parent, snapPosition, jointRigid, globalRotation));
+    }
+
+    private IEnumerator LerpToSnap(Transform parent, Vector3 toPosition, Rigidbody jointRigid, Quaternion? globalRotation)
+    {
+        if (jointRigid != null)
+        {
+            movableRigidbody.velocity = Vector3.zero;
+        }
+        else
+        {
+            movableRigidbody.useGravity = false;
+            movableRigidbody.isKinematic = true;
+        }
+
+        Vector3 fromPosition = transform.position;
+        Quaternion fromRotation = transform.rotation;
+        Quaternion toRotation = globalRotation ?? parent.rotation;
+
+        float time = 0f;
+        while (time < LerpTime)
+        {
+            transform.position = Vector3.Lerp(fromPosition, toPosition, time/LerpTime);
+            transform.rotation = Quaternion.Lerp(fromRotation, toRotation, time/LerpTime);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        transform.position = toPosition;
+        transform.rotation = toRotation;
 
         if (jointRigid != null)
         {
@@ -70,15 +100,11 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
             snapJoint.breakTorque = Mathf.Infinity;
             snapJoint.enableCollision = false;
         }
-        else
-        {
-            movableRigidbody.useGravity = false;
-            movableRigidbody.isKinematic = true;
-        }
-
-
-        PlayerInput.Instance.PlayInteractionClip(snapPosition, BangSoundClip);
+        
+        PlayerInput.Instance.PlayInteractionClip(toPosition, BangSoundClip);
         OnSnap();
+        snapping = null;
+        print("I'm done moving to snap");
     }
 
     protected virtual void OnSnap()

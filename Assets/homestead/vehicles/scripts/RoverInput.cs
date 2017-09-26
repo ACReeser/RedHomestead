@@ -250,6 +250,7 @@ namespace RedHomestead.Rovers
         {
             if (detachTimer == null && res != null)
             {
+                print("you can totally attach again");
                 if (child.name == "LeftLatch")
                 {
                     int index = 1;
