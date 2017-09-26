@@ -128,9 +128,10 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
         {
             GameObject.Destroy(snapJoint);
         }
-
         movableRigidbody.isKinematic = false;
         movableRigidbody.useGravity = true;
+        IsSnapped = false;
+
         PlayerInput.Instance.PlayInteractionClip(transform.position, BangSoundClip);
         OnDetach();
     }

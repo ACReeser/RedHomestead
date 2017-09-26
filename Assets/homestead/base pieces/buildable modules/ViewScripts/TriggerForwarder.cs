@@ -17,14 +17,23 @@ public class TriggerForwarder : MonoBehaviour {
 
         if (this.dad == null)
             this.dad = this.transform.root.GetComponent<ITriggerSubscriber>();
+
+        if (!OnlyMovableSnappables)
+        {
+            Debug.LogWarningFormat("{0} with dad {1} is using !OnlyMovableSnappables", this.transform.name, this.dad.ToString());
+        }
     }
 
     void OnTriggerEnter(Collider other)
     {
         IMovableSnappable res = other.GetComponent<IMovableSnappable>();
 
-        if (res != null || !OnlyMovableSnappables)
+        bool hasMovableSnappable = res != null;
+        if (hasMovableSnappable || !OnlyMovableSnappables)
         {
+            if (hasMovableSnappable && res.IsSnapped)
+                return;
+
             this.dad.OnChildTriggerEnter(this, other, res);
         }
     }

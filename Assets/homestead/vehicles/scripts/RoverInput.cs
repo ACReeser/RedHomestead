@@ -232,25 +232,25 @@ namespace RedHomestead.Rovers
                     break;
                 }
             }
-            detachTimer = StartCoroutine(DetachTimer());
+
+            detachTimers[detaching] = StartCoroutine(DetachTimer(detaching));
         }
 
-        private IEnumerator DetachTimer()
+        private Dictionary<IMovableSnappable,Coroutine> detachTimers = new Dictionary<IMovableSnappable, Coroutine>();
+        private IEnumerator DetachTimer(IMovableSnappable detaching)
         {
             yield return new WaitForSeconds(1f);
-            detachTimer = null;
+            detachTimers.Remove(detaching);
         }
 
         private IMovableSnappable[] attachedCrates = new IMovableSnappable[4];
 
-        private Coroutine detachTimer;
         private Coroutine updateOxygen;
 
         public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
         {
-            if (detachTimer == null && res != null)
+            if (!detachTimers.ContainsKey(res) && res != null)
             {
-                print("you can totally attach again");
                 if (child.name == "LeftLatch")
                 {
                     int index = 1;
