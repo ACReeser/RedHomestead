@@ -200,10 +200,10 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     private void ConvertMealMatter(Matter from, Matter to)
     {
-        if (Data.Containers[from].CurrentAmount >= from.CubicMetersPerMeal()  && Data.Containers[to].AvailableCapacity >= to.CubicMetersPerMeal())
+        if (Data.Containers[from].CurrentAmount >= from.CubicMetersPerUnit()  && Data.Containers[to].AvailableCapacity >= to.CubicMetersPerUnit())
         {
-            Data.MatterHistory.Consume(from, Data.Containers[from].Pull(from.CubicMetersPerMeal()));
-            Data.MatterHistory.Produce(to, Data.Containers[to].Push(to.CubicMetersPerMeal()));
+            Data.MatterHistory.Consume(from, Data.Containers[from].Pull(from.CubicMetersPerUnit()));
+            Data.MatterHistory.Produce(to, Data.Containers[to].Push(to.CubicMetersPerUnit()));
 
             OnResourceChange(from, to);
         }
@@ -258,12 +258,12 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
                 MatterType = Matter.OrganicMeals,
                 TotalCapacity = 1f
             }},
-            { Matter.RationMeals, new ResourceContainer(Matter.RationMeals.CubicMetersPerMeal() * 6)
+            { Matter.RationMeals, new ResourceContainer(Matter.RationMeals.CubicMetersPerUnit() * 6)
             {
                 MatterType = Matter.RationMeals,
                 TotalCapacity = 1f
             }},
-            { Matter.MealPowders, new ResourceContainer(Matter.RationMeals.CubicMetersPerMeal() * 12)
+            { Matter.MealPowders, new ResourceContainer(Matter.RationMeals.CubicMetersPerUnit() * 12)
             {
                 MatterType = Matter.MealPowders,
                 TotalCapacity = 1f
@@ -279,7 +279,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     internal void Eat(Matter mealType)
     {
-        Data.MatterHistory.Consume(mealType,  Get(mealType).Pull(mealType.CubicMetersPerMeal()));
+        Data.MatterHistory.Consume(mealType,  Get(mealType).Pull(mealType.CubicMetersPerUnit()));
         SurvivalTimer.Instance.EatFood(mealType);
         OnResourceChange(mealType);
     }

@@ -29,6 +29,20 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
             return Data.Container.CurrentAmount;
         }
     }
+    public float CurrentUnits
+    {
+        get
+        {
+            return Data.Container.CurrentAmount * Data.Container.MatterType.UnitsPerCubicMeter(Data.Container.TotalCapacity);
+        }
+    }
+    public float UnitCapacity
+    {
+        get
+        {
+            return Data.Container.MatterType.UnitsPerCubicMeter(Data.Container.TotalCapacity);
+        }
+    }
 
     private Collider myCollider;
     //todo: could be CurrentConstructionZone reference instead
@@ -71,6 +85,10 @@ public class ResourceComponent : MovableSnappable, IDataContainer<CrateData> {
 
     public override string GetText()
     {
-        return this.Data.Container.MatterType.ToString() + String.Format(" {0:0.##}kg", this.Data.Container.CurrentAmount * this.Data.Container.MatterType.Kilograms());
+        float matterTypeUnitCapacity = UnitCapacity;
+        if (matterTypeUnitCapacity > 1f)
+            return String.Format("{0} {1:0}/{2:0} units", Data.Container.MatterType, CurrentUnits, matterTypeUnitCapacity);
+        else 
+            return String.Format("{0} {1:0.##}kg", Data.Container.MatterType, Data.Container.CurrentAmount * Data.Container.MatterType.Kilograms());
     }
 }

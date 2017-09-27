@@ -58,6 +58,7 @@ namespace RedHomestead.Simulation
     public class ResourceEntry
     {
         public Matter Type { get; set; }
+        //resource in Units
         public float Count { get; set; }
 
         public ResourceEntry(float count, Matter type)
@@ -145,15 +146,15 @@ namespace RedHomestead.Simulation
             return max;
         }
 
-        public static float Kilograms(this Matter r, float? volumeCubicMeter = null)
+        public static float Kilograms(this Matter matter, float? volumeCubicMeter = null)
         {
             if (volumeCubicMeter.HasValue)
             {
-                return r.DensityKgPerCubicMeter() * volumeCubicMeter.Value;
+                return matter.DensityKgPerCubicMeter() * volumeCubicMeter.Value;
             }
             else
             {
-                return r.DensityKgPerCubicMeter() * r.BaseCubicMeters();
+                return matter.DensityKgPerCubicMeter() * matter.BaseCubicMeters();
             }
         }
 
@@ -175,13 +176,13 @@ namespace RedHomestead.Simulation
             return Matter.Unspecified;
         }
 
-        public static float KgPerMeal(this Matter meal)
+        public static float KgPerUnit(this Matter unit)
         {
-            float denominator = meal.MealsPerCubicMeter();
+            float denominator = unit.UnitsPerCubicMeter();
 
             if (denominator != 0)
             {
-                return meal.Kilograms() / denominator;
+                return unit.Kilograms() / denominator;
             }
             else
             {
@@ -189,26 +190,31 @@ namespace RedHomestead.Simulation
             }
         }
 
-        public static float MealsPerCubicMeter(this Matter meal, float cubicMeters = 1f)
+        public static float UnitsPerCubicMeter(this Matter matter, float cubicMeters = 1f)
         {
-            switch (meal)
+            switch (matter)
             {
                 case Matter.MealShakes:
                 case Matter.MealPowders:
-                    return 36f;
+                    return 36f / cubicMeters;
                 case Matter.OrganicMeals:
                 case Matter.RationMeals:
                 case Matter.Biomass:
                 case Matter.Produce:
-                    return 18f;
+                    return 18f / cubicMeters;
+                case Matter.IronSheeting:
+                case Matter.Canvas:
+                case Matter.PressureCanvas:
+                case Matter.Glass:
+                    return 2f / cubicMeters;
                 default:
-                    return 0;
+                    return 1f / cubicMeters;
             }
         }
 
-        public static float CubicMetersPerMeal(this Matter meal)
+        public static float CubicMetersPerUnit(this Matter matter)
         {
-            float denominator = meal.MealsPerCubicMeter();
+            float denominator = matter.UnitsPerCubicMeter();
 
             if (denominator != 0)
             {
