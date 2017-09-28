@@ -166,7 +166,7 @@ namespace RedHomestead.Economy{
                 case DeliveryType.Drop:
                     return 8;
                 case DeliveryType.Lander:
-                    return 10;
+                    return 16;
                 default:
                 case DeliveryType.Rover:
                     return 12;
