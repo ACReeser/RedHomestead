@@ -179,6 +179,11 @@ public class PlayerInput : MonoBehaviour {
         {
             Gremlin.Instance.TriggerRepair();
         }
+
+        if (Input.GetKeyUp(KeyCode.Keypad0) && Input.GetKey(KeyCode.RightControl) && CargoLander.Instance != null)
+        {
+            CargoLander.Instance.Land();
+        }
 #endif
 
         if (Input.GetKeyUp(KeyCode.F1))

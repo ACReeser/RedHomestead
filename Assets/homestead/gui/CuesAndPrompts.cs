@@ -79,6 +79,12 @@ public static class NewsSource
         DurationMilliseconds = 10000,
         Icon = MiscIcon.Rocket
     };
+    public static News IncomingCargo = new News()
+    {
+        Text = "Incoming Cargo Lander",
+        DurationMilliseconds = 10000,
+        Icon = MiscIcon.Rocket
+    };
     public static News AlgaeHarvestable = new News()
     {
         Text = "Algae Harvest Ready",
