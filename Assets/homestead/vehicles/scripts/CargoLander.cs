@@ -10,6 +10,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     private const float LandingAltitudeAboveLandingZone = 2.25f;
     private const float LandingTimeSeconds = 20f;
     private const float LandingStageTimeSeconds = LandingTimeSeconds / 2f;
+    private const float DoorMoveDuration = 2f;
 
     public enum FlightState { Landing = -1, Landed, TakingOff = 1, Disabled = 9 }
 
@@ -19,6 +20,8 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     public LandingZone LZ;
     public ParticleSystem RocketFire, RocketSmoke;
     public Transform[] Ramps;
+    public AudioClip rocket, electric;
+    public AudioSource rocketSource, doorSource;
 
     internal FlightState State { get; private set; }
 
@@ -33,7 +36,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         int i = 0;
         foreach(Transform t in Ramps)
         {
-            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f), 2f);
+            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f), DoorMoveDuration);
             i++;
         }
 
@@ -41,6 +44,9 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         {
             Bays.Add(t, null);
         }
+
+        rocketSource.clip = rocket;
+        doorSource.clip = electric;
 
         State = FlightState.Disabled;
         Lander.gameObject.SetActive(false);
@@ -108,11 +114,18 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
         RocketFire.Play();
         RocketSmoke.Play();
+        rocketSource.Play();
+        
         if (easeOut)
         {
+            //ease-out
+            //landing
             //copied and pasted by below
             while (time < LandingStageTimeSeconds)
             {
+                rocketSource.volume = Mathf.Min(1f, LandingStageTimeSeconds - time);
+                print(rocketSource.volume);
+
                 LanderHinge.localRotation = Quaternion.Euler(
                     Mathfx.Sinerp(startHinge, endHinge, time / LandingStageTimeSeconds)
                     );
@@ -122,9 +135,14 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         }
         else
         {
+            //ease-in
+            //take-off
             //copied and pasted from above, just using coserp
             while (time < LandingStageTimeSeconds)
             {
+                rocketSource.volume = Mathf.Max(0f, time);
+                print(rocketSource.volume);
+
                 LanderHinge.localRotation = Quaternion.Euler(
                     Mathfx.Coserp(startHinge, endHinge, time / LandingStageTimeSeconds)
                     );
@@ -135,14 +153,17 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         LanderHinge.localRotation = Quaternion.Euler(endHinge);
         RocketFire.Stop();
         RocketSmoke.Stop();
+        rocketSource.Stop();
     }
 
     private IEnumerator DoTakeOff()
     {
         yield return new WaitForSeconds(1f);
 
+        doorSource.Play();
         ToggleAllRamps();
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(DoorMoveDuration);
+        doorSource.Stop();
         foreach (var kvp in Bays)
         {
             if (kvp.Value != null)
@@ -173,9 +194,11 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
         yield return new WaitForSeconds(3f);
 
+        doorSource.Play();
         ToggleAllRamps();
 
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(DoorMoveDuration);
+        doorSource.Stop();
 
         movement = null;
 
