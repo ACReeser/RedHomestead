@@ -10,72 +10,174 @@ public class CargoLander : MonoBehaviour {
     private const float LandingTimeSeconds = 20f;
     private const float LandingStageTimeSeconds = LandingTimeSeconds / 2f;
 
+    public enum FlightState { Landing = -1, Landed, TakingOff = 1, Disabled = 9 }
+
+    public static CargoLander Instance;
+    
     public Transform LanderPivot, LanderHinge, Lander;
     public LandingZone LZ;
     public ParticleSystem RocketFire, RocketSmoke;
+    public Transform[] Ramps;
 
+    internal FlightState State { get; private set; }
 
-    public static CargoLander Instance;
+    private DoorRotationLerpContext[] ramps;
+
 
 	// Use this for initialization
 	void Start () {
         Instance = this;
+
+        ramps = new DoorRotationLerpContext[Ramps.Length];
+        int i = 0;
+        foreach(Transform t in Ramps)
+        {
+            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f));
+            i++;
+        }
+
+
+        State = FlightState.Disabled;
         Lander.gameObject.SetActive(false);
 	}
 
-    // Update is called once per frame
-    //void Update () {
-
-    //}
-    private Coroutine landing;
+    private Vector3 airborneLanderPosition, landedLanderPosition;
+    private Vector3 airborneLanderHinge = Vector3.zero;
+    private Vector3 landedLanderHinge = new Vector3(0, 0, 90f);
+    private Coroutine movement;
     public void Land()
     {
-        if (landing != null)
-            StopCoroutine(landing);
+        if (movement != null)
+            StopCoroutine(movement);
 
         GuiBridge.Instance.ShowNews(NewsSource.IncomingCargo);
-        Lander.gameObject.SetActive(true);
-        float minAltitude = LZ.transform.position.y + MinimumAltitude;
-        float startAltitude = UnityEngine.Random.Range(minAltitude, minAltitude+ AltitudeRangeAboveMinimum);
-        float randomAngle = UnityEngine.Random.Range(0, 360);
-        LanderHinge.localPosition = new Vector3(startAltitude, 0, 0);
         LanderHinge.localRotation = Quaternion.identity;
-        LanderPivot.localRotation = Quaternion.Euler(0f, randomAngle, 0f);
-        Lander.localPosition = startLander = new Vector3((float)(startAltitude * Math.Sqrt(2f)), startAltitude, 0);
-        endLander = new Vector3(0, startAltitude, 0f);
-        
-        landing = StartCoroutine(DoLand());
+        CalculateAndPositionFlightArc();
+        Lander.localPosition = airborneLanderPosition;
+
+        State = FlightState.Landing;
+        movement = StartCoroutine(DoLand());
     }
 
-    private Vector3 startLander, endLander;
-    private Vector3 startHinge = Vector3.zero;
-    private Vector3 endHinge = new Vector3(0, 0, 90f);
+    private void CalculateAndPositionFlightArc()
+    {
+        float minAltitude = LZ.transform.position.y + MinimumAltitude;
+        float startAltitude = UnityEngine.Random.Range(minAltitude, minAltitude + AltitudeRangeAboveMinimum);
+        float randomAngle = UnityEngine.Random.Range(0, 360);
+        LanderHinge.localPosition = new Vector3(startAltitude, 0, 0);
+        LanderPivot.localRotation = Quaternion.Euler(0f, randomAngle, 0f);
+        airborneLanderPosition = new Vector3((float)(startAltitude * Math.Sqrt(2f)), startAltitude, 0);
+        landedLanderPosition = new Vector3(0, startAltitude, 0f);
+    }
 
-    private IEnumerator DoLand()
+    public void TakeOff()
+    {
+        if (movement != null)
+            StopCoroutine(movement);
+
+        //GuiBridge.Instance.ShowNews(NewsSource.IncomingCargo);
+        CalculateAndPositionFlightArc();
+        Lander.localPosition = landedLanderPosition;
+
+        State = FlightState.TakingOff;
+        movement = StartCoroutine(DoTakeOff());
+    }
+
+
+    private IEnumerator DoFly(Vector3 startPos, Vector3 endPos)
     {
         float time = 0f;
 
         while (time < LandingStageTimeSeconds)
         {
-            Lander.localPosition = Vector3.Lerp(startLander, endLander, time / LandingStageTimeSeconds);
+            Lander.localPosition = Vector3.Lerp(startPos, endPos, time / LandingStageTimeSeconds);
             yield return null;
             time += Time.deltaTime;
         }
-        time = 0f;
+        Lander.localPosition = endPos;
+    }
+
+    private IEnumerator DoFireRockets(Vector3 startHinge, Vector3 endHinge, bool easeOut = true)
+    {
+        float time = 0f;
 
         RocketFire.Play();
         RocketSmoke.Play();
-        while (time < LandingStageTimeSeconds)
+        if (easeOut)
         {
-            LanderHinge.localRotation = Quaternion.Euler(
-                Mathfx.Sinerp(startHinge, endHinge, time / LandingStageTimeSeconds)
-                //Vector3.Lerp(startHinge, endHinge, time / LandingTimeSeconds)
-                );
-            yield return null;
-            time += Time.deltaTime;
+            //copied and pasted by below
+            while (time < LandingStageTimeSeconds)
+            {
+                LanderHinge.localRotation = Quaternion.Euler(
+                    Mathfx.Sinerp(startHinge, endHinge, time / LandingStageTimeSeconds)
+                    );
+                yield return null;
+                time += Time.deltaTime;
+            }
+        }
+        else
+        {
+            //copied and pasted from above, just using coserp
+            while (time < LandingStageTimeSeconds)
+            {
+                LanderHinge.localRotation = Quaternion.Euler(
+                    Mathfx.Coserp(startHinge, endHinge, time / LandingStageTimeSeconds)
+                    );
+                yield return null;
+                time += Time.deltaTime;
+            }
         }
         LanderHinge.localRotation = Quaternion.Euler(endHinge);
         RocketFire.Stop();
         RocketSmoke.Stop();
+    }
+
+    private IEnumerator DoTakeOff()
+    {
+        yield return new WaitForSeconds(1f);
+
+        ToggleAllRamps();
+
+        yield return new WaitForSeconds(3f);
+
+        yield return DoFireRockets(landedLanderHinge, airborneLanderHinge, false);
+
+        yield return DoFly(landedLanderPosition, airborneLanderPosition);
+
+        movement = null;
+
+        State = FlightState.Disabled;
+        Lander.gameObject.SetActive(false);
+    }
+
+    private IEnumerator DoLand()
+    {
+        Lander.gameObject.SetActive(true);
+
+        yield return DoFly(airborneLanderPosition, landedLanderPosition);
+
+        yield return DoFireRockets(airborneLanderHinge, landedLanderHinge);
+
+        yield return new WaitForSeconds(3f);
+
+        ToggleAllRamps();
+
+        yield return new WaitForSeconds(1f);
+
+        movement = null;
+
+        State = FlightState.Landed;
+    }
+
+    private void ToggleAllRamps()
+    {
+        ramps[0].Toggle(StartCoroutine);
+        ramps[1].Toggle(StartCoroutine);
+        ramps[2].Toggle(StartCoroutine);
+        ramps[3].Toggle(StartCoroutine);
+        ramps[4].Toggle(StartCoroutine);
+        ramps[5].Toggle(StartCoroutine);
+        ramps[6].Toggle(StartCoroutine);
+        ramps[7].Toggle(StartCoroutine);
     }
 }
