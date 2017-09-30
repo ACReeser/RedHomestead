@@ -1,9 +1,10 @@
-﻿using System;
+﻿using RedHomestead.Simulation;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CargoLander : MonoBehaviour {
+public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     private const int MinimumAltitude = 300;
     private const float AltitudeRangeAboveMinimum = 100f;
     private const float LandingAltitudeAboveLandingZone = 2.25f;
@@ -22,7 +23,7 @@ public class CargoLander : MonoBehaviour {
     internal FlightState State { get; private set; }
 
     private DoorRotationLerpContext[] ramps;
-
+    private Dictionary<TriggerForwarder, ResourceComponent> Bays = new Dictionary<TriggerForwarder, ResourceComponent>();
 
 	// Use this for initialization
 	void Start () {
@@ -32,10 +33,14 @@ public class CargoLander : MonoBehaviour {
         int i = 0;
         foreach(Transform t in Ramps)
         {
-            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f));
+            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f), 2f);
             i++;
         }
 
+        foreach(TriggerForwarder t in GetComponentsInChildren<TriggerForwarder>())
+        {
+            Bays.Add(t, null);
+        }
 
         State = FlightState.Disabled;
         Lander.gameObject.SetActive(false);
@@ -137,6 +142,14 @@ public class CargoLander : MonoBehaviour {
         yield return new WaitForSeconds(1f);
 
         ToggleAllRamps();
+        yield return new WaitForSeconds(2f);
+        foreach (var kvp in Bays)
+        {
+            if (kvp.Value != null)
+            {
+                GameObject.Destroy(kvp.Value.transform.root.gameObject);
+            }
+        }
 
         yield return new WaitForSeconds(3f);
 
@@ -162,7 +175,7 @@ public class CargoLander : MonoBehaviour {
 
         ToggleAllRamps();
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2f);
 
         movement = null;
 
@@ -179,5 +192,26 @@ public class CargoLander : MonoBehaviour {
         ramps[5].Toggle(StartCoroutine);
         ramps[6].Toggle(StartCoroutine);
         ramps[7].Toggle(StartCoroutine);
+    }
+
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable mov)
+    {
+        ResourceComponent res = mov as ResourceComponent;
+        if (Bays.ContainsKey(child) && Bays[child] == null && res != null)
+        {
+            res.SnapCrate(this, child.transform.position, globalRotation: child.transform.rotation);
+            Bays[child] = res;
+        }
+    }
+
+    public void DetachCrate(IMovableSnappable detaching)
+    {
+        foreach(var kvp in Bays)
+        {
+            if (kvp.Value == (object)detaching)
+            {
+                Bays[kvp.Key] = null;
+            }
+        }
     }
 }
