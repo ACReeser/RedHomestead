@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using RedHomestead.Economy;
 
 public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     private const int MinimumAltitude = 300;
@@ -12,12 +13,11 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     private const float LandingStageTimeSeconds = LandingTimeSeconds / 2f;
     private const float DoorMoveDuration = 2f;
 
-    public enum FlightState { Landing = -1, Landed, TakingOff = 1, Disabled = 9 }
+    public enum FlightState { Landing = -1, Disabled, TakingOff = 1, Landed = 9 }
 
     public static CargoLander Instance;
     
     public Transform LanderPivot, LanderHinge, Lander;
-    public LandingZone LZ;
     public ParticleSystem RocketFire, RocketSmoke;
     public Transform[] Ramps;
     public AudioClip rocket, electric;
@@ -25,11 +25,50 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
     internal FlightState State { get; private set; }
 
+    internal LandingZone LZ { get; private set; }
     private DoorRotationLerpContext[] ramps;
-    private Dictionary<TriggerForwarder, ResourceComponent> Bays = new Dictionary<TriggerForwarder, ResourceComponent>();
+    private Dictionary<TriggerForwarder, ResourceComponent> Bays;
 
-	// Use this for initialization
-	void Start () {
+    internal void Deliver(Order o, LandingZone z)
+    {
+        this.LZ = z;
+        InitBays();
+
+        int i = 0;
+        TriggerForwarder[] slots = new TriggerForwarder[Bays.Keys.Count];
+        Bays.Keys.CopyTo(slots, 0);
+
+        foreach (KeyValuePair<Matter, float> kvp in o.LineItemUnits)
+        {
+            for (int vol = 0; vol < kvp.Value; vol++)
+            {
+                TriggerForwarder child = slots[i];
+
+                var t = BounceLander.CreateCratelike(kvp.Key, kvp.Value, Vector3.zero, this.Lander);
+
+                Bays[child] = t.GetComponent<ResourceComponent>();
+
+                i++;
+            }
+        }
+
+        Land();
+    }
+
+    private void InitBays()
+    {
+        if (Bays == null)
+        {
+             Bays = new Dictionary<TriggerForwarder, ResourceComponent>();
+            foreach (TriggerForwarder t in GetComponentsInChildren<TriggerForwarder>())
+            {
+                Bays.Add(t, null);
+            }
+        }
+    }
+
+    // Use this for initialization
+    void Start () {
         Instance = this;
 
         ramps = new DoorRotationLerpContext[Ramps.Length];
@@ -40,16 +79,13 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
             i++;
         }
 
-        foreach(TriggerForwarder t in GetComponentsInChildren<TriggerForwarder>())
-        {
-            Bays.Add(t, null);
-        }
+        InitBays();
 
         rocketSource.clip = rocket;
         doorSource.clip = electric;
 
-        State = FlightState.Disabled;
-        Lander.gameObject.SetActive(false);
+        if (State == FlightState.Disabled)
+            Lander.gameObject.SetActive(false);
 	}
 
     private Vector3 airborneLanderPosition, landedLanderPosition;
@@ -61,7 +97,8 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         if (movement != null)
             StopCoroutine(movement);
 
-        GuiBridge.Instance.ShowNews(NewsSource.IncomingCargo);
+        SunOrbit.Instance.ResetToNormalTime();
+        GuiBridge.Instance.ShowNews(NewsSource.IncomingLander);
         LanderHinge.localRotation = Quaternion.identity;
         CalculateAndPositionFlightArc();
         Lander.localPosition = airborneLanderPosition;
@@ -72,6 +109,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
     private void CalculateAndPositionFlightArc()
     {
+        this.transform.position = LZ.transform.position+Vector3.up*2.25f;
         float minAltitude = LZ.transform.position.y + MinimumAltitude;
         float startAltitude = UnityEngine.Random.Range(minAltitude, minAltitude + AltitudeRangeAboveMinimum);
         float randomAngle = UnityEngine.Random.Range(0, 360);
@@ -124,7 +162,6 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
             while (time < LandingStageTimeSeconds)
             {
                 rocketSource.volume = Mathf.Min(1f, LandingStageTimeSeconds - time);
-                print(rocketSource.volume);
 
                 LanderHinge.localRotation = Quaternion.Euler(
                     Mathfx.Sinerp(startHinge, endHinge, time / LandingStageTimeSeconds)
@@ -192,6 +229,16 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
         yield return DoFireRockets(airborneLanderHinge, landedLanderHinge);
 
+        foreach(var kvp in Bays)
+        {
+            if (kvp.Value != null)
+            {
+                kvp.Value.transform.SetParent(null);
+                kvp.Value.SnapCrate(this, kvp.Key.transform.position, globalRotation: kvp.Key.transform.rotation);
+                kvp.Value.GetComponent<Collider>().enabled = true;
+            }
+        }
+
         yield return new WaitForSeconds(3f);
 
         doorSource.Play();
@@ -223,7 +270,6 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         if (Bays.ContainsKey(child) && Bays[child] == null && res != null)
         {
             res.SnapCrate(this, child.transform.position, globalRotation: child.transform.rotation);
-            Bays[child] = res;
         }
     }
 

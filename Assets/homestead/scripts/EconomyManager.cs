@@ -118,7 +118,6 @@ public class EconomyManager : MonoBehaviour
         switch (order.Via)
         {
             default:
-                GuiBridge.Instance.ShowNews(NewsSource.DroppodHere);
                 LandingZone.Deliver(order);
                 break;
         }

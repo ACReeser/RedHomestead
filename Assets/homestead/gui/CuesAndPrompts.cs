@@ -73,13 +73,13 @@ public struct LinkablePrompts
 
 public static class NewsSource
 {
-    public static News DroppodHere = new News()
+    public static News IncomingBounce = new News()
     {
         Text = "Incoming Drop Pod",
         DurationMilliseconds = 10000,
         Icon = MiscIcon.Rocket
     };
-    public static News IncomingCargo = new News()
+    public static News IncomingLander = new News()
     {
         Text = "Incoming Cargo Lander",
         DurationMilliseconds = 10000,

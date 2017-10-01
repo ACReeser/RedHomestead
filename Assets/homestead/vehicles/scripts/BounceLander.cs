@@ -83,7 +83,6 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     {
         if (state)
         {
-            print("firing rockets!");
             haveRocketsFired = true;
             this.cf = this.gameObject.AddComponent<ConstantForce>();
             this.cf.relativeForce = Vector3.up * 45f * rigid.mass;
@@ -91,7 +90,6 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         }
         else
         {
-            print("rockets done!");
             this.cf.enabled = false;
             rocketsFiring = false;
         }
