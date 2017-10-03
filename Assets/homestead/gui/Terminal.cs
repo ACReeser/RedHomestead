@@ -94,6 +94,7 @@ public struct EnRouteFields
     }
 }
 
+
 [Serializable]
 /// bindings and display logic for all the stuff under the Market > Buy tabs
 public struct BuyFields
@@ -102,10 +103,13 @@ public struct BuyFields
     public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, BySuppliersSelectSupplierButton, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton;
     public Text CheckoutVendorName, CheckoutWeight, CheckoutVolume, CheckoutAccount, CheckoutGoods, CheckoutShippingCost, CheckoutTotal;
     public Text[] DeliveryTimeLabels;
-    
+
+    internal BuyTab Tab;
+
     internal void FillCheckout(Vendor v)
     {
-        RefreshBuyTabsTabs(true);
+        SetTab(BuyTab.Checkout);
+
         CheckoutVendorName.text = v.Name;
         CheckoutAccount.text = String.Format("${0:n0}", RedHomestead.Persistence.Game.Current.Player.BankAccount);
         foreach(DeliveryType delivery in Enum.GetValues(typeof(DeliveryType)))
@@ -114,10 +118,15 @@ public struct BuyFields
         }
         FillCheckoutStock(v);
     }
-    internal void RefreshBuyTabsTabs(bool isCheckingOut)
+    internal void SetTab(BuyTab tab)
     {
-        BySupplierButton.gameObject.SetActive(!isCheckingOut);
-        ByResourceButton.gameObject.SetActive(!isCheckingOut);
+        Tab = tab;
+        RefreshBuyTabsTabs();
+    }
+    internal void RefreshBuyTabsTabs()
+    {
+        BySupplierButton.gameObject.SetActive(Tab != BuyTab.Checkout);
+        ByResourceButton.gameObject.SetActive(Tab != BuyTab.Checkout);
     }
     internal void RefreshMassVolumeMoney(Order o)
     {
@@ -205,7 +214,7 @@ public struct BuyFields
             i++;
         }
     }
-    internal void SetBySuppliers(List<Vendor> vendors)
+    internal void FillBySuppliers(List<Vendor> vendors)
     {
         int i = 0;
         foreach (Transform t in BySupplierSuppliersTemplate.parent)
@@ -228,11 +237,16 @@ public struct BuyFields
             i++;
         }
     }
+
+    internal void FillByResource()
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class Terminal : MonoBehaviour {
     
-    public RectTransform[] ProgramPanels, MarketTabs, BuyTabs;
+    public RectTransform[] ProgramPanels, MarketTabs;
     public RectTransform HomePanel;
     public ColonyFields colony;
     public FinanceFields finance;
@@ -248,7 +262,7 @@ public class Terminal : MonoBehaviour {
     {
         HideAll(ProgramPanels);
         HideAll(MarketTabs);
-        HideAll(BuyTabs);
+        HideAll(buys.BuyTabs);
         canvasParentRect = transform.parent.GetComponent<Transform>();
         canvasParentRect.localScale = new Vector3(1, 0f, 1f);
         canvas = GetComponent<Canvas>();
@@ -341,7 +355,6 @@ public class Terminal : MonoBehaviour {
         
         if (currentMarketTab == MarketTabs[(int)MarketTab.Buy])
         {
-            buys.RefreshBuyTabsTabs(false);
             SwitchBuyTab((int)BuyTab.BySupplier);
         }
         else if (currentMarketTab == MarketTabs[(int)MarketTab.EnRoute])
@@ -357,14 +370,22 @@ public class Terminal : MonoBehaviour {
         if (currentBuyTab != null)
             currentBuyTab.gameObject.SetActive(false);
 
-        currentBuyTab = BuyTabs[t];
+        currentBuyTab = buys.BuyTabs[t];
 
         currentBuyTab.gameObject.SetActive(true);
 
-        if (currentBuyTab == BuyTabs[(int)BuyTab.BySupplier])
+        BuyTab newTab = (BuyTab)t;
+
+        buys.SetTab(newTab);
+
+        if (newTab == BuyTab.BySupplier)
         {
-            buys.SetBySuppliers(Corporations.Wholesalers);
+            buys.FillBySuppliers(Corporations.Wholesalers);
             buys.SetBySuppliersStock(null);
+        }
+        else if (newTab == BuyTab.ByResource)
+        {
+            buys.FillByResource();
         }
     }
 
@@ -438,7 +459,6 @@ public class Terminal : MonoBehaviour {
         {
             LineItemUnits = new ResourceCountDictionary()
         };
-        buys.RefreshBuyTabsTabs(false);
         SwitchBuyTab((int)BuyTab.BySupplier);
     }
 
