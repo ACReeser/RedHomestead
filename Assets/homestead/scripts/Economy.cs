@@ -230,7 +230,9 @@ namespace RedHomestead.Economy{
         }
 
         public DeliveryType AvailableDelivery;
-        public List<Stock> Stock;
+        public Dictionary<Matter, Stock> Shelves { get; private set; }
+        private List<Stock> _stock;
+        public List<Stock> Stock { get { return _stock; } set { _stock = value; Shelves = value.ToDictionary(x => x.Matter); } }
         public int TotalUnits
         {
             get

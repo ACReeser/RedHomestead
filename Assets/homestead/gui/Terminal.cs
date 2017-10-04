@@ -6,6 +6,7 @@ using RedHomestead.Economy;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
+using System.Linq;
 
 public enum TerminalProgram { Finances, Colony, News, Market }
 public enum MarketTab { Buy, EnRoute, Sell }
@@ -100,7 +101,7 @@ public struct EnRouteFields
 public struct BuyFields
 {
     public RectTransform[] BuyTabs;
-    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, BySuppliersSelectSupplierButton, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton;
+    public RectTransform BySupplierSuppliersTemplate, BySuppliersStockTemplate, BySuppliersSelectSupplierButton, CheckoutStockParent, CheckoutDeliveryButtonParent, BySupplierButton, ByResourceButton, ByResourceResourceListParent, ByResourceVendorListParent;
     public Text CheckoutVendorName, CheckoutWeight, CheckoutVolume, CheckoutAccount, CheckoutGoods, CheckoutShippingCost, CheckoutTotal;
     public Text[] DeliveryTimeLabels;
 
@@ -240,7 +241,69 @@ public struct BuyFields
 
     internal void FillByResource()
     {
-        throw new NotImplementedException();
+        HashSet<Matter> matterOnSale = new HashSet<Matter>();
+        foreach(Vendor v in Corporations.Wholesalers)
+        {
+            foreach(var stock in v.Stock)
+            {
+                matterOnSale.Add(stock.Matter);
+            }
+        }
+
+        Matter[] matters = matterOnSale.ToArray();
+        int i = 1;
+        foreach (RectTransform button in ByResourceResourceListParent)
+        {
+            if (i < matters.Length)
+            {
+                button.GetChild(0).GetComponent<Image>().sprite = matters[i].Sprite();
+                button.GetChild(1).GetComponent<Text>().text = matters[i].ToString();
+                button.name = Convert.ToInt32(matters[i]).ToString();
+                button.gameObject.SetActive(true);
+            }
+            else
+            {
+                button.gameObject.SetActive(false);
+            }
+
+            i++;
+        }
+    }
+
+    internal void FillByResourceVendors(Matter selected)
+    {
+        int i = 0;
+        foreach(RectTransform button in ByResourceVendorListParent)
+        {
+            if (i < Corporations.Wholesalers.Count)
+            {
+                Vendor v = Corporations.Wholesalers[i];
+                if (v.Shelves.ContainsKey(selected))
+                {
+                    Stock stock = v.Shelves[selected];
+                    var rightText = button.GetChild(0).GetComponent<Text>();
+                    rightText.text = v.Name;
+                    rightText.transform.GetChild(0).gameObject.SetActive((v.AvailableDelivery & DeliveryType.Rover) == DeliveryType.Rover);
+                    rightText.transform.GetChild(1).gameObject.SetActive((v.AvailableDelivery & DeliveryType.Lander) == DeliveryType.Lander);
+                    rightText.transform.GetChild(2).gameObject.SetActive((v.AvailableDelivery & DeliveryType.Drop) == DeliveryType.Drop);
+                    rightText.transform.GetChild(3).GetComponent<Text>().text = String.Format("{0} <size=6>km</size> Away", v.DistanceFromPlayerKilometersRounded);
+                    button.GetChild(1).GetComponent<Text>().text = String.Format(@"${0} / unit
+      {1} in stock", stock.ListPrice, stock.StockAvailable);
+
+                    button.name = i.ToString();
+                    button.gameObject.SetActive(true);
+                }
+                else
+                {
+                    button.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                button.gameObject.SetActive(false);
+            }
+            i++;
+        }
     }
 }
 
@@ -386,6 +449,7 @@ public class Terminal : MonoBehaviour {
         else if (newTab == BuyTab.ByResource)
         {
             buys.FillByResource();
+            buys.FillByResourceVendors(Matter.Unspecified);
         }
     }
 
@@ -411,7 +475,23 @@ public class Terminal : MonoBehaviour {
     {
         Checkout(BySupplierVendorIndex);
     }
+
     
+    public void ByResourceVendorClick()
+    {
+        var vendorIndex = int.Parse(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.name);
+
+        Checkout(vendorIndex);
+    }
+
+    public void ByResourceMatterClick()
+    {
+        var selected = (Matter)Enum.Parse(typeof(Matter), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.transform.name);
+
+        buys.FillByResourceVendors(selected);
+    }
+
+
     //todo: bug - selecting delivery will get around limits
     public void SelectDeliveryType(int type)
     {
