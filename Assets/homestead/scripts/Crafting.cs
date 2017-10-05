@@ -27,8 +27,8 @@ namespace RedHomestead.Crafting
     public interface IBlueprintDetailable
     {
         string Description { get; }
-        int BuildTime { get; }
-        List<ResourceEntry> Requirements { get; }
+        int BuildTimeHours { get; }
+        List<IResourceEntry> Requirements { get; }
         int? PowerSteady { get; }
         int? PowerMin { get; }
         int? PowerMax{ get; }
@@ -39,8 +39,8 @@ namespace RedHomestead.Crafting
     public abstract class BlueprintData : IBlueprintDetailable
     {
         public string Description { get; set; }
-        public int BuildTime { get; set; }
-        public List<ResourceEntry> Requirements { get; set; }
+        public int BuildTimeHours { get; set; }
+        public List<IResourceEntry> Requirements { get; set; }
         public int? PowerSteady { get; set; }
         public int? PowerMin { get; set; }
         public int? PowerMax { get; set; }
@@ -54,7 +54,16 @@ namespace RedHomestead.Crafting
     {
         public CraftingData()
         {
-            BuildTime = Crafting.DefaultCraftTimeSeconds;
+            BuildTimeHours = Crafting.DefaultCraftTimeSeconds;
+        }
+    }
+    public class PrinterData : BlueprintData
+    {
+        private const int DefaultPrintTimeHours = 5;
+
+        public PrinterData()
+        {
+            BuildTimeHours = DefaultPrintTimeHours;
         }
     }
 
@@ -67,11 +76,11 @@ namespace RedHomestead.Crafting
             {
                 Craftable.SolarPanel, new CraftingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.Steel),
-                        new ResourceEntry(.25f, Matter.Copper),
-                        new ResourceEntry(.5f, Matter.SiliconWafers)
+                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceVolumeEntry(.25f, Matter.Copper),
+                        new ResourceVolumeEntry(.5f, Matter.SiliconWafers)
                     },
                     Description = "A portable solar panel that generates free energy, but only when the sun is shining and the sky is clear.",
                     PowerMin = 0,
@@ -81,11 +90,11 @@ namespace RedHomestead.Crafting
             {
                 Craftable.PowerCube, new CraftingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.Steel),
-                        new ResourceEntry(.5f, Matter.Aluminium),
-                        new ResourceEntry(.5f, Matter.Glass)
+                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceVolumeEntry(.5f, Matter.Aluminium),
+                        new ResourceVolumeEntry(.5f, Matter.Glass)
                     },
                     Description = "A portable battery pack that stores energy.",
                     EnergyStorage = 1
@@ -94,10 +103,10 @@ namespace RedHomestead.Crafting
             {
                 Craftable.WaterCrate, new CraftingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.Steel),
-                        new ResourceEntry(.25f, Matter.Polyethylene)
+                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceVolumeEntry(.25f, Matter.Polyethylene)
                     },
                     Description = "A portable water vessel.",
                     Storage = 1,
@@ -107,9 +116,9 @@ namespace RedHomestead.Crafting
             {
                 Craftable.GasCrate, new CraftingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.Steel)
+                        new ResourceVolumeEntry(.5f, Matter.Steel)
                     },
                     Description = "A portable vessel for all types of gasses.",
                     Storage = 1,
@@ -119,10 +128,10 @@ namespace RedHomestead.Crafting
             {
                 Craftable.Pump, new CraftingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.Steel),
-                        new ResourceEntry(.25f, Matter.Copper)
+                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceVolumeEntry(.25f, Matter.Copper)
                     },
                     Description = "A portable pump to fill and drain gas and water vessels.",
                 }
@@ -130,10 +139,10 @@ namespace RedHomestead.Crafting
             {
                 Craftable.IceDrill, new CraftingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.Steel),
-                        new ResourceEntry(.25f, Matter.Copper)
+                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceVolumeEntry(.25f, Matter.Copper)
                     },
                     Description = "A portable drill to mine water ice from deposits.",
                     PowerSteady = 1
@@ -169,72 +178,72 @@ namespace RedHomestead.Crafting
             },
         };
 
-        public static Dictionary<Matter, CraftingData> PrinterData = new Dictionary<Matter, CraftingData>()
+        public static Dictionary<Matter, PrinterData> PrinterData = new Dictionary<Matter, PrinterData>()
         {
             {
-                Matter.CopperWire, new CraftingData()
+                Matter.CopperWire, new PrinterData()
                 {
-                    BuildTime = 1,
-                    Requirements = new List<ResourceEntry>()
+                    BuildTimeHours = 1,
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.CopperPowder)
+                        new ResourceVolumeEntry(.25f, Matter.CopperPowder)
                     },
                     Description = "Copper wires.",
                 }
             },
             {
-                Matter.IronSheeting, new CraftingData()
+                Matter.IronSheeting, new PrinterData()
                 {
-                    BuildTime = 2,
-                    Requirements = new List<ResourceEntry>()
+                    BuildTimeHours = 2,
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.IronPowder),
+                        new ResourceVolumeEntry(.25f, Matter.IronPowder),
                     },
                     Description = "Thin sheets of iron.",
                 }
             },
             {
-                Matter.IronBeams, new CraftingData()
+                Matter.IronBeams, new PrinterData()
                 {
-                    BuildTime = 3,
-                    Requirements = new List<ResourceEntry>()
+                    BuildTimeHours = 3,
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.IronPowder),
+                        new ResourceVolumeEntry(.25f, Matter.IronPowder),
                     },
                     Description = "Solid reinforced structural iron.",
                 }
             },
             {
-                Matter.ElectricMotor, new CraftingData()
+                Matter.ElectricMotor, new PrinterData()
                 {
-                    BuildTime = 10,
-                    Requirements = new List<ResourceEntry>()
+                    BuildTimeHours = 10,
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.IronPowder),
-                        new ResourceEntry(.25f, Matter.CopperWire)
+                        new ResourceVolumeEntry(.25f, Matter.IronPowder),
+                        new ResourceVolumeEntry(.25f, Matter.CopperWire)
                     },
                     Description = "A brushless electric motor.",
                 }
             },
             {
-                Matter.Piping, new CraftingData()
+                Matter.Piping, new PrinterData()
                 {
-                    BuildTime = 5,
-                    Requirements = new List<ResourceEntry>()
+                    BuildTimeHours = 5,
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.IronPowder),
+                        new ResourceVolumeEntry(.25f, Matter.IronPowder),
                     },
                     Description = "Pipes and valves for transporting fluids.",
                 }
             },
             {
-                Matter.PressureCanvas, new CraftingData()
+                Matter.PressureCanvas, new PrinterData()
                 {
-                    BuildTime = 1,
-                    Requirements = new List<ResourceEntry>()
+                    BuildTimeHours = 1,
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.Canvas),
-                        new ResourceEntry(.25f, Matter.Polyethylene),
+                        new ResourceVolumeEntry(.25f, Matter.Canvas),
+                        new ResourceVolumeEntry(.25f, Matter.Polyethylene),
                     },
                     Description = "Plastic-covered canvas for inflatable habitats.",
                 }

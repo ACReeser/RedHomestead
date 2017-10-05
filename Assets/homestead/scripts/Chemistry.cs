@@ -54,22 +54,61 @@ namespace RedHomestead.Simulation
         IronBeams,
         ElectricMotor
     }
+    
+    public interface IResourceEntry
+    {
+        Matter Type { get; set; }
+        
+        float AmountByVolume { get; }
+        int AmountByUnits { get; }
 
-    public class ResourceEntry
+        string ToString();
+        string ToStringWithAvailableVolume(float availableVolume);
+    }
+
+    public class ResourceVolumeEntry: IResourceEntry
     {
         public Matter Type { get; set; }
-        //resource in Units
-        public float Count { get; set; }
+        //resource in Units volume
+        public float AmountByVolume { get; private set; }
+        public int AmountByUnits { get { return Mathf.RoundToInt(AmountByVolume * Type.UnitsPerCubicMeter()); } }
 
-        public ResourceEntry(float count, Matter type)
+        public ResourceVolumeEntry(float volume, Matter type)
         {
             this.Type = type;
-            this.Count = count;
+            this.AmountByVolume = volume;
         }
 
         public override string ToString()
         {
-            return String.Format("{0} x{1:0.##}", this.Type, this.Count);
+            return String.Format("{0} x{1:0.##}", this.Type, this.AmountByVolume);
+        }
+        public string ToStringWithAvailableVolume(float availableVolume)
+        {
+            return String.Format("{0} {2:0}/{1:0.##}", this.Type, this.AmountByVolume, availableVolume);
+        }
+    }
+
+    public class ResourceUnitEntry: IResourceEntry
+    {
+        public Matter Type { get; set; }
+        //resource in subUnits
+        public int AmountByUnits { get; private set; }
+        public float AmountByVolume { get { return Mathf.RoundToInt(AmountByUnits / Type.UnitsPerCubicMeter()); } }
+
+        public ResourceUnitEntry(int count, Matter type)
+        {
+            this.Type = type;
+            this.AmountByUnits = count;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0} x{1:0}", this.Type, this.AmountByUnits);
+        }
+        public string ToStringWithAvailableVolume(float availableVolume)
+        {
+            return String.Format("{0} {2:0}/{1:0}", this.Type, this.AmountByVolume, availableVolume * Type.UnitsPerCubicMeter());
         }
     }
 
@@ -202,6 +241,9 @@ namespace RedHomestead.Simulation
                 case Matter.Biomass:
                 case Matter.Produce:
                     return 18f / cubicMeters;
+                case Matter.SolarPanels:
+                case Matter.Piping:
+                    return 4f / cubicMeters;
                 case Matter.IronSheeting:
                 case Matter.Canvas:
                 case Matter.PressureCanvas:
@@ -799,7 +841,7 @@ namespace RedHomestead.Simulation
         /// </summary>
         /// <param name="pullAmount"></param>
         /// <returns></returns>
-        public bool TryConsume(float pullAmount)
+        public bool TryConsumeVolume(float pullAmount)
         {
             float pulled = this.Pull(pullAmount);
             bool pullSuccess = (Math.Abs(pullAmount - pulled) <= 0.000001f);

@@ -47,13 +47,13 @@ namespace RedHomestead.Buildings
     {
         public BuildingData()
         {
-            this.BuildTime = Construction.DefaultBuildTimeSeconds;
+            this.BuildTimeHours = Construction.DefaultBuildTimeHours;
         }
     }
 
     public static class Construction
     {
-        public const int DefaultBuildTimeSeconds = 10;
+        public const int DefaultBuildTimeHours = 1;
 
         public static int BuildRadius(Module module)
         {
@@ -87,9 +87,9 @@ namespace RedHomestead.Buildings
             {
                 Module.JunctionBox, new BuildingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.25f, Matter.CopperWire)
+                        new ResourceVolumeEntry(.25f, Matter.CopperWire)
                     },
                     Description = "A small box to split powerlines."
                 }
@@ -97,10 +97,10 @@ namespace RedHomestead.Buildings
             {
                 Module.SolarPanelSmall, new BuildingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(2, Matter.SolarPanels)
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(2, Matter.SolarPanels)
                     },
                     Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear.",
                     PowerMin = 0,
@@ -110,10 +110,10 @@ namespace RedHomestead.Buildings
             {
                 Module.Flywheel, new BuildingData()
                 {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(2, Matter.IronSheeting),
-                        new ResourceEntry(2, Matter.CopperWire)
+                        new ResourceVolumeEntry(2, Matter.IronSheeting),
+                        new ResourceVolumeEntry(2, Matter.CopperWire)
                     },
                     Description = "A spinning cylinder that stores rotational energy.",
                     EnergyStorage = 10
@@ -122,10 +122,10 @@ namespace RedHomestead.Buildings
             //storage
             { 
                 Module.Warehouse, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(2, Matter.IronBeams),
-                        new ResourceEntry(2, Matter.Canvas)
+                        new ResourceVolumeEntry(2, Matter.IronBeams),
+                        new ResourceVolumeEntry(2, Matter.Canvas)
                     },
                     Description = "A canvas storage area to stash materials.",
                     Storage = 10
@@ -133,10 +133,10 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.SmallGasTank, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(1, Matter.Piping),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.Piping),
                     },
                     Description = "A small pressure vessel to store gasses.",
                     Storage = 10,
@@ -145,10 +145,10 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.LargeGasTank, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(1, Matter.Piping),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.Piping),
                     },
                     Description = "A large pressure vessel to store gasses.",
                     Storage = 50,
@@ -157,10 +157,10 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.SmallWaterTank, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(1, Matter.Piping),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.Piping),
                     },
                     Description = "A small vessel to store water.",
                     Storage = 10,
@@ -169,9 +169,9 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.Splitter, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.Steel),
+                        new ResourceVolumeEntry(1, Matter.Steel),
                     },
                     Description = "A fluid splitter to split pipelines."
                 }
@@ -179,10 +179,10 @@ namespace RedHomestead.Buildings
             //extraction
             {
                 Module.SabatierReactor, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(1, Matter.Piping),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.Piping),
                     },
                     Description = "An atmosphere miner that uses hydrogen to create water and methane.",
                     PowerSteady = -3,
@@ -196,10 +196,10 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.OreExtractor, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.ElectricMotor),
-                        new ResourceEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.ElectricMotor),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
                     },
                     Description = "An ore miner that scoops up regolith.",
                     PowerSteady = -3,
@@ -214,11 +214,11 @@ namespace RedHomestead.Buildings
             //refining
             {
                 Module.WaterElectrolyzer, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(2, Matter.Polyethylene),
-                        new ResourceEntry(.5f, Matter.CopperWire),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(2, Matter.Polyethylene),
+                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
                     },
                     Description = "An tank that converts water to oxygen and hydrogen.",
                     PowerSteady = -3,
@@ -232,11 +232,11 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.AlgaeTank, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(1, Matter.Glass),
-                        new ResourceEntry(.5f, Matter.Biomass),
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.Glass),
+                        new ResourceVolumeEntry(.5f, Matter.Biomass),
                     },
                     Description = "A transparent tower for growing edible algae.",
                     PowerSteady = -1,
@@ -251,21 +251,21 @@ namespace RedHomestead.Buildings
             //hab/life support
             {
                 Module.Airlock, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronSheeting),
-                        new ResourceEntry(2, Matter.Piping)
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(2, Matter.Piping)
                     },
                     Description = "A door for entering and exiting a pressurized habitat."
                 }
             },
             {
                 Module.GreenhouseHall, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(1, Matter.IronBeams),
-                        new ResourceEntry(2, Matter.Polyethylene),
-                        new ResourceEntry(.5f, Matter.Biomass),
+                        new ResourceVolumeEntry(1, Matter.IronBeams),
+                        new ResourceVolumeEntry(2, Matter.Polyethylene),
+                        new ResourceVolumeEntry(.5f, Matter.Biomass),
                     },
                     Description = "A transparent hallway for growing crops.",
                     PowerSteady = -2,
@@ -279,70 +279,70 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.Workshop, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(3, Matter.IronSheeting),
-                        new ResourceEntry(1, Matter.PressureCanvas),
+                        new ResourceVolumeEntry(3, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.PressureCanvas),
                     },
                     Description = "A large workspace for crafting and EVA suit upgrades."
                 }
             },
             {
                 Module.HallwayNode, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(2, Matter.IronSheeting),
-                        new ResourceEntry(.5f, Matter.Glass),
+                        new ResourceVolumeEntry(2, Matter.IronSheeting),
+                        new ResourceVolumeEntry(.5f, Matter.Glass),
                     },
                     Description = "A 4-way node for expanding the habitat."
                 }
             },
             {
                 Module.EVAStation, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.CopperWire),
-                        new ResourceEntry(.5f, Matter.IronSheeting),
+                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
+                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
                     },
                     Description = "A way to recharge oxygen and power during an EVA."
                 }
             },
             {
                 Module.RoverStation, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.CopperWire),
-                        new ResourceEntry(.5f, Matter.Piping),
+                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
+                        new ResourceVolumeEntry(.5f, Matter.Piping),
                     },
                     Description = "A way to transfer oxygen, water, and power to Rovers."
                 }
             },
             {
                 Module.WeatherStation, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.CopperWire),
-                        new ResourceEntry(.5f, Matter.IronSheeting),
+                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
+                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
                     },
                     Description = "A station that allows weather forecasts."
                 }
             },
             {
                 Module.Furnace, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.IronBeams),
-                        new ResourceEntry(.5f, Matter.IronSheeting),
-                        new ResourceEntry(.5f, Matter.Piping),
+                        new ResourceVolumeEntry(.5f, Matter.IronBeams),
+                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
+                        new ResourceVolumeEntry(.5f, Matter.Piping),
                     },
                     Description = "A smelting furnace for metal ore."
                 }
             },
             {
                 Module.ThreeDPrinter, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.IronSheeting),
+                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
                         //new ResourceEntry(1f, Matter.Laser),
                     },
                     Description = "A printer for advanced components."
@@ -350,10 +350,10 @@ namespace RedHomestead.Buildings
             },
             {
                 Module.AirMiner, new BuildingData() {
-                    Requirements = new List<ResourceEntry>()
+                    Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceEntry(.5f, Matter.ElectricMotor),
-                        new ResourceEntry(.5f, Matter.IronSheeting),
+                        new ResourceVolumeEntry(.5f, Matter.ElectricMotor),
+                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
                     },
                     Description = "An air pump that mines carbon dioxide."
                 }

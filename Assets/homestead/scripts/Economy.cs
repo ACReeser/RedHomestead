@@ -180,7 +180,8 @@ namespace RedHomestead.Economy{
             { Matter.Oxygen, new StartingSupplyData("Oxygen", 100000, Matter.Oxygen) },
             { Matter.SiliconWafers, new StartingSupplyData("Solar Panels", 100000, Matter.SiliconWafers) },
             { Matter.Canvas, new StartingSupplyData("Canvas", 100000, Matter.Canvas) },
-            { Matter.Steel, new StartingSupplyData("Steel", 200000, Matter.Steel) },
+            { Matter.IronPowder, new StartingSupplyData("Iron Powder", 200000, Matter.IronPowder) },
+            { Matter.CopperPowder, new StartingSupplyData("Copper Powder", 200000, Matter.CopperPowder) },
             { Matter.Polyethylene, new StartingSupplyData("Polyethylene", 100000, Matter.Polyethylene) },
             { Matter.Glass, new StartingSupplyData("Glass", 200000, Matter.Glass) },
         };

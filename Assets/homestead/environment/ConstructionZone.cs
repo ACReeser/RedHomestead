@@ -59,12 +59,14 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         if (Data.ModuleTypeUnderConstruction != Module.Unspecified)
         {
             Data.ResourceCount = new Dictionary<Matter, float>();
+            BuildingData buildingData = Construction.BuildData[Data.ModuleTypeUnderConstruction];
+            RequiredProgressSeconds = buildingData.BuildTimeHours * SunOrbit.GameSecondsPerMartianMinute * 60f;
             ResourceList = new List<ResourceComponent>();
             //todo: change to Construction.Requirements[underconstruction].keys when that's a dict of <resource, entry> and not a list
-            RequiredResourceMask = new Matter[Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.Count];
+            RequiredResourceMask = new Matter[buildingData.Requirements.Count];
 
             int i = 0;
-            foreach(ResourceEntry required in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
+            foreach(ResourceVolumeEntry required in buildingData.Requirements)
             {
                 Data.ResourceCount[required.Type] = 0;
                 RequiredResourceMask[i] = required.Type;
@@ -146,11 +148,11 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
     {
         CanConstruct = true;
 
-        foreach(ResourceEntry resourceEntry in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
+        foreach(ResourceVolumeEntry resourceEntry in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
         {
-            if (Data.ResourceCount[resourceEntry.Type] < resourceEntry.Count)
+            if (Data.ResourceCount[resourceEntry.Type] < resourceEntry.AmountByVolume)
             {
-                print("missing " + (resourceEntry.Count - Data.ResourceCount[resourceEntry.Type]) + " " + resourceEntry.Type.ToString());
+                print("missing " + (resourceEntry.AmountByVolume - Data.ResourceCount[resourceEntry.Type]) + " " + resourceEntry.Type.ToString());
                 CanConstruct = false;
                 break;
             }

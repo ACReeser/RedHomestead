@@ -23,7 +23,7 @@ namespace RedHomestead.Interiors
 
     public struct StuffInformation{
         public string Description { get; set; }
-        public List<ResourceEntry> Requirements { get; set; }
+        public List<ResourceVolumeEntry> Requirements { get; set; }
     }
 
 
