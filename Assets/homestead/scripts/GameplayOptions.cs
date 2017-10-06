@@ -83,7 +83,7 @@ namespace RedHomestead.GameplayOptions
 
         private void AddSuppliesFromModule(Module module)
         {
-            foreach(ResourceVolumeEntry entry in Construction.BuildData[module].Requirements)
+            foreach(IResourceEntry entry in Construction.BuildData[module].Requirements)
             {
                 AddOrIncrement(BoughtMatter, entry.Type, Mathf.CeilToInt(entry.AmountByVolume));
             }

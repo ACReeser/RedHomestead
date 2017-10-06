@@ -89,7 +89,7 @@ namespace RedHomestead.Buildings
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.25f, Matter.CopperWire)
+                        new ResourceUnitEntry(1, Matter.CopperWire)
                     },
                     Description = "A small box to split powerlines."
                 }
@@ -99,8 +99,8 @@ namespace RedHomestead.Buildings
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(1, Matter.IronSheeting),
-                        new ResourceVolumeEntry(2, Matter.SolarPanels)
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
+                        new ResourceUnitEntry(2, Matter.SolarPanels)
                     },
                     Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear.",
                     PowerMin = 0,
@@ -254,7 +254,7 @@ namespace RedHomestead.Buildings
                     Requirements = new List<IResourceEntry>()
                     {
                         new ResourceVolumeEntry(1, Matter.IronSheeting),
-                        new ResourceVolumeEntry(2, Matter.Piping)
+                        new ResourceUnitEntry(2, Matter.Piping)
                     },
                     Description = "A door for entering and exiting a pressurized habitat."
                 }
@@ -265,7 +265,7 @@ namespace RedHomestead.Buildings
                     {
                         new ResourceVolumeEntry(1, Matter.IronBeams),
                         new ResourceVolumeEntry(2, Matter.Polyethylene),
-                        new ResourceVolumeEntry(.5f, Matter.Biomass),
+                        new ResourceUnitEntry(1, Matter.Biomass),
                     },
                     Description = "A transparent hallway for growing crops.",
                     PowerSteady = -2,
@@ -281,8 +281,8 @@ namespace RedHomestead.Buildings
                 Module.Workshop, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(3, Matter.IronSheeting),
-                        new ResourceVolumeEntry(1, Matter.PressureCanvas),
+                        new ResourceUnitEntry(3, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.PressureCanvas),
                     },
                     Description = "A large workspace for crafting and EVA suit upgrades."
                 }
@@ -291,8 +291,8 @@ namespace RedHomestead.Buildings
                 Module.HallwayNode, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(2, Matter.IronSheeting),
-                        new ResourceVolumeEntry(.5f, Matter.Glass),
+                        new ResourceUnitEntry(2, Matter.IronSheeting),
+                        new ResourceUnitEntry(2, Matter.Glass),
                     },
                     Description = "A 4-way node for expanding the habitat."
                 }
@@ -301,8 +301,8 @@ namespace RedHomestead.Buildings
                 Module.EVAStation, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
-                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.CopperWire),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
                     },
                     Description = "A way to recharge oxygen and power during an EVA."
                 }
@@ -311,8 +311,8 @@ namespace RedHomestead.Buildings
                 Module.RoverStation, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
-                        new ResourceVolumeEntry(.5f, Matter.Piping),
+                        new ResourceUnitEntry(1, Matter.CopperWire),
+                        new ResourceUnitEntry(1, Matter.Piping),
                     },
                     Description = "A way to transfer oxygen, water, and power to Rovers."
                 }
@@ -321,8 +321,8 @@ namespace RedHomestead.Buildings
                 Module.WeatherStation, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.CopperWire),
-                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.CopperWire),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
                     },
                     Description = "A station that allows weather forecasts."
                 }
@@ -331,9 +331,9 @@ namespace RedHomestead.Buildings
                 Module.Furnace, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.IronBeams),
-                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
-                        new ResourceVolumeEntry(.5f, Matter.Piping),
+                        new ResourceUnitEntry(4, Matter.IronBeams),
+                        new ResourceUnitEntry(2, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.Piping),
                     },
                     Description = "A smelting furnace for metal ore."
                 }
@@ -342,7 +342,7 @@ namespace RedHomestead.Buildings
                 Module.ThreeDPrinter, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
                         //new ResourceEntry(1f, Matter.Laser),
                     },
                     Description = "A printer for advanced components."
@@ -352,8 +352,8 @@ namespace RedHomestead.Buildings
                 Module.AirMiner, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.ElectricMotor),
-                        new ResourceVolumeEntry(.5f, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.ElectricMotor),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
                     },
                     Description = "An air pump that mines carbon dioxide."
                 }

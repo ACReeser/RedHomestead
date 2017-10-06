@@ -78,9 +78,9 @@ namespace RedHomestead.Crafting
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.25f, Matter.Steel),
-                        new ResourceVolumeEntry(.25f, Matter.Copper),
-                        new ResourceVolumeEntry(.5f, Matter.SiliconWafers)
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.CopperWire),
+                        new ResourceUnitEntry(1, Matter.SolarPanels)
                     },
                     Description = "A portable solar panel that generates free energy, but only when the sun is shining and the sky is clear.",
                     PowerMin = 0,
@@ -94,7 +94,7 @@ namespace RedHomestead.Crafting
                     {
                         new ResourceVolumeEntry(.25f, Matter.Steel),
                         new ResourceVolumeEntry(.5f, Matter.Aluminium),
-                        new ResourceVolumeEntry(.5f, Matter.Glass)
+                        new ResourceUnitEntry(1, Matter.Glass)
                     },
                     Description = "A portable battery pack that stores energy.",
                     EnergyStorage = 1
@@ -118,7 +118,7 @@ namespace RedHomestead.Crafting
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.5f, Matter.Steel)
+                        new ResourceUnitEntry(1, Matter.IronSheeting)
                     },
                     Description = "A portable vessel for all types of gasses.",
                     Storage = 1,
@@ -130,8 +130,9 @@ namespace RedHomestead.Crafting
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.25f, Matter.Steel),
-                        new ResourceVolumeEntry(.25f, Matter.Copper)
+                        new ResourceUnitEntry(1, Matter.ElectricMotor),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.Piping)
                     },
                     Description = "A portable pump to fill and drain gas and water vessels.",
                 }
@@ -141,8 +142,9 @@ namespace RedHomestead.Crafting
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.25f, Matter.Steel),
-                        new ResourceVolumeEntry(.25f, Matter.Copper)
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.ElectricMotor),
+                        new ResourceUnitEntry(1, Matter.CopperWire)
                     },
                     Description = "A portable drill to mine water ice from deposits.",
                     PowerSteady = 1

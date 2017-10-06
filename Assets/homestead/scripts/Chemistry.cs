@@ -243,6 +243,7 @@ namespace RedHomestead.Simulation
                     return 18f / cubicMeters;
                 case Matter.SolarPanels:
                 case Matter.Piping:
+                case Matter.ElectricMotor:
                     return 4f / cubicMeters;
                 case Matter.IronSheeting:
                 case Matter.Canvas:
