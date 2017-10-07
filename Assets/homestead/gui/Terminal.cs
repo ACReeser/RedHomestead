@@ -71,7 +71,7 @@ public struct EnRouteFields
                     {
                         li.GetComponent<Text>().text = orderedMatter[j].ToString();
                         li.GetChild(0).GetComponent<Image>().sprite = orderedMatter[j].Sprite();
-                        li.GetChild(1).GetComponent<Text>().text = String.Format("{0} <size=6>m3</size>", o.LineItemUnits[orderedMatter[j]] * orderedMatter[j].BaseCubicMeters());
+                        li.GetChild(1).GetComponent<Text>().text = String.Format("{0} <size=6>m3</size>", o.LineItemUnits[orderedMatter[j]] * orderedMatter[j].CubicMetersPerUnit());
 
                         li.gameObject.SetActive(true);
                     }
@@ -180,7 +180,7 @@ public struct BuyFields
             group.GetChild(0).GetComponent<Image>().sprite = v.Stock[i].Matter.Sprite();
             group.GetChild(1).GetComponent<Text>().text = v.Stock[i].Name;
             group.GetChild(2).GetComponent<Text>().text = string.Format(
-                "{0} @ ${1}  {2}<size=6>kg</size> {3}<size=6>m3</size>", v.Stock[i].StockAvailable, v.Stock[i].ListPrice, v.Stock[i].Matter.Kilograms(), 1);
+                "{0} @ ${1}  {2}<size=6>kg</size> {3}<size=6>m3</size>", v.Stock[i].StockAvailable, v.Stock[i].ListPrice, v.Stock[i].Matter.KgPerUnit(), v.Stock[i].Matter.CubicMetersPerUnit());
             group.GetChild(5).GetComponent<Text>().text = "0";
         });
 

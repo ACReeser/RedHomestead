@@ -770,7 +770,7 @@ namespace RedHomestead.Persistence
                         Equipment.Equipment.Locked, //tertiary gadget
                         Equipment.Equipment.Locked, //secondary tool
                         Equipment.Equipment.EmptyHand, //unequipped
-                        Equipment.Equipment.RockDrill, //primary tool
+                        Equipment.Equipment.PowerDrill, //primary tool
                     }
                 },
                 Score = new GameScore(),

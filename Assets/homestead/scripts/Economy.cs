@@ -450,8 +450,8 @@ namespace RedHomestead.Economy{
 
         private void RecalcVolumeMassShipping()
         {
-            TotalVolume = LineItemUnits.Sum(x => x.Key.BaseCubicMeters() * x.Value);
-            TotalMass = LineItemUnits.Sum(x => x.Value * x.Key.Kilograms());
+            TotalVolume = LineItemUnits.Sum(x => Mathf.Max(1f, x.Key.CubicMetersPerUnit() * x.Value));
+            TotalMass = LineItemUnits.Sum(x => x.Value * x.Key.KgPerUnit());
             ShippingCost = Via.DollarsPerKilogramPerKilometer(TotalMass, this.Vendor.DistanceFromPlayerKilometersRounded);
         }
 

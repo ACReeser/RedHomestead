@@ -40,10 +40,13 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
         foreach (KeyValuePair<Matter, float> kvp in o.LineItemUnits)
         {
-            for (int vol = 0; vol < kvp.Value; vol++)
+            var crateEnumerator = o.LineItemUnits.SquareMeters(kvp.Key);
+            while (crateEnumerator.MoveNext())
             {
-                TriggerForwarder child = slots[i];
+                float volume = crateEnumerator.Current;
 
+                TriggerForwarder child = slots[i];
+                
                 var t = BounceLander.CreateCratelike(kvp.Key, kvp.Value, Vector3.zero, this.Lander);
 
                 Bays[child] = t.GetComponent<ResourceComponent>();

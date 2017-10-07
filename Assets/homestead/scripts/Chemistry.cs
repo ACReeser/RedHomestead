@@ -94,7 +94,7 @@ namespace RedHomestead.Simulation
         public Matter Type { get; set; }
         //resource in subUnits
         public int AmountByUnits { get; private set; }
-        public float AmountByVolume { get { return Mathf.RoundToInt(AmountByUnits / Type.UnitsPerCubicMeter()); } }
+        public float AmountByVolume { get { return AmountByUnits / Type.UnitsPerCubicMeter(); } }
 
         public ResourceUnitEntry(int count, Matter type)
         {
@@ -108,7 +108,7 @@ namespace RedHomestead.Simulation
         }
         public string ToStringWithAvailableVolume(float availableVolume)
         {
-            return String.Format("{0} {2:0}/{1:0}", this.Type, this.AmountByVolume, availableVolume * Type.UnitsPerCubicMeter());
+            return String.Format("{0} {2:0}/{1:0}", this.Type, this.AmountByUnits, availableVolume * Type.UnitsPerCubicMeter());
         }
     }
 

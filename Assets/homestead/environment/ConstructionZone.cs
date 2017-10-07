@@ -8,7 +8,25 @@ using RedHomestead.Buildings;
 using RedHomestead.Persistence;
 
 [Serializable]
-public class ResourceCountDictionary: SerializableDictionary<Matter, float> { }
+public class ResourceCountDictionary: SerializableDictionary<Matter, float>
+{
+    public IEnumerator<float> SquareMeters(Matter m)
+    {
+        float amountInUnits;
+        if (this.TryGetValue(m, out amountInUnits))
+        {
+            float volume = amountInUnits * m.CubicMetersPerUnit();
+            do
+            {
+
+                float thisCrateAmount = Mathf.Min(1f, volume); ;
+                volume -= thisCrateAmount;
+                yield return thisCrateAmount;
+            }
+            while (volume > 0f);
+        }
+    }
+}
 
 [Serializable]
 public class ConstructionData: FacingData
@@ -66,7 +84,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             RequiredResourceMask = new Matter[buildingData.Requirements.Count];
 
             int i = 0;
-            foreach(ResourceVolumeEntry required in buildingData.Requirements)
+            foreach(IResourceEntry required in buildingData.Requirements)
             {
                 Data.ResourceCount[required.Type] = 0;
                 RequiredResourceMask[i] = required.Type;
@@ -104,11 +122,10 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             else if (other.CompareTag("movable"))
             {
                 ResourceComponent addedResources = other.GetComponent<ResourceComponent>();
-                //todo: bug: adds surplus resources
+                
                 if (addedResources != null && !addedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(addedResources.data.Container.MatterType))
                 {
-#warning rounding error
-                    Data.ResourceCount[addedResources.Data.Container.MatterType] += (int)addedResources.Data.Container.CurrentAmount;
+                    Data.ResourceCount[addedResources.Data.Container.MatterType] += addedResources.Data.Container.CurrentAmount;
                     ResourceList.Add(addedResources);
                     addedResources.IsInConstructionZone = true;
                     RefreshCanConstruct();
@@ -133,8 +150,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
                 //todo: bug: removes surplus resources
                 if (removedResources != null && removedResources.IsInConstructionZone && Data.ResourceCount.ContainsKey(removedResources.data.Container.MatterType))
                 {
-#warning rounding error
-                    Data.ResourceCount[removedResources.Data.Container.MatterType] -= (int)removedResources.Data.Container.CurrentAmount;
+                    Data.ResourceCount[removedResources.Data.Container.MatterType] -= removedResources.Data.Container.CurrentAmount;
                     ResourceList.Remove(removedResources);
                     removedResources.IsInConstructionZone = false;
                     RefreshCanConstruct();
@@ -148,7 +164,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
     {
         CanConstruct = true;
 
-        foreach(ResourceVolumeEntry resourceEntry in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
+        foreach(IResourceEntry resourceEntry in Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements)
         {
             if (Data.ResourceCount[resourceEntry.Type] < resourceEntry.AmountByVolume)
             {
@@ -202,35 +218,42 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
 
         Game.Current.Score.ModulesBuilt++;
 
-        //todo: make this more efficient
-        //what this code is doing:
-        //only destroying those entries in the ResourceList that are required to build the Module
-        //so you can't put in 100 steel to something that requires 10 and lose 90 excess steel
-        Dictionary<Matter, int> deletedCount = new Dictionary<Matter, int>();
-        for(int i = this.ResourceList.Count - 1; i >= 0; i--)
-        {
-            ResourceComponent component = this.ResourceList[i];
-            //tell the component it isn't in a construction zone
-            //just in case it will live through the rest of this method
-            //(this frees it for use in another zone)
-            component.IsInConstructionZone = false;
+        //copy the requirements by adding them to a dictionary
+        Dictionary<Matter, float> matterToVolumeMap = Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.ToDictionary(x => x.Type, y => y.AmountByVolume);
+        //copy the resource list by toArray it
+        ResourceComponent[] components = ResourceList.ToArray();
 
-            if (RequiredResourceMask.Contains(component.Data.Container.MatterType))
+        //go backwards through the components
+        for (int i = components.Length - 1; i > -1; i--)
+        {
+            ResourceComponent component = components[i];
+            float volumeToPull = 0f;
+            //if the component is used in the requirements
+            if (matterToVolumeMap.TryGetValue(component.Data.Container.MatterType, out volumeToPull) && volumeToPull > 0f)
             {
-                int numDeleted = 0;
-                if (deletedCount.ContainsKey(component.Data.Container.MatterType))
+                //decrease the matterToVolumeMap by as much pull as possible
+                matterToVolumeMap[component.Data.Container.MatterType] -= component.Data.Container.Pull(volumeToPull);
+
+                //then if the crate is spent
+                if (component.Data.Container.CurrentAmount <= 0f)
                 {
-                    numDeleted = deletedCount[component.Data.Container.MatterType];
-                    deletedCount[component.Data.Container.MatterType] = 0;
+                    //delete it
+                    Destroy(component.gameObject);
                 }
 
-                if (numDeleted < Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.Where(r => r.Type == component.Data.Container.MatterType).Count())
+                //if the requirement is met
+                if (matterToVolumeMap[component.Data.Container.MatterType] <= 0f)
                 {
-                    this.ResourceList.Remove(component);
-                    Destroy(component.gameObject);
+                    //remove the requirement (to stop the next component from depleting any)
+                    matterToVolumeMap.Remove(component.Data.Container.MatterType);
                 }
             }
         }
+        if (matterToVolumeMap.Keys.Count > 0)
+        {
+            Debug.LogError("Construction zone built something but had requirements left over!");
+        }
+        this.ResourceList = null;
 
         Destroy(this.gameObject);
     }

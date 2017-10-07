@@ -211,15 +211,18 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         int i = 0;
         foreach(KeyValuePair<Matter, float> kvp in lineItemUnits)
         {
-            for (int vol = 0; vol < kvp.Value; vol++)
+            var crateEnumerator = lineItemUnits.SquareMeters(kvp.Key);
+            while(crateEnumerator.MoveNext())
             {
+                float volume = crateEnumerator.Current;
+
                 Vector3 localPos = new Vector3(
                     (i % 4) > 1 ? .8f : -.8f,
                     i > 3 ? 1f : -1f,
                     (i % 2) == 0 ? .8f : -.8f
                     );
 
-                CreateCratelike(kvp.Key, kvp.Value, localPos, payloadRoot);
+                CreateCratelike(kvp.Key, volume, localPos, payloadRoot);
 
                 i++;
             }
