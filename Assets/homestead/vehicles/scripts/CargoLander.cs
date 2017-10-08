@@ -4,8 +4,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using RedHomestead.Economy;
+using RedHomestead.Persistence;
+using System.Linq;
 
-public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
+[Serializable]
+public class CargoLanderData: FacingData
+{
+    public string LZInstanceID;
+    public ResourceUnitCountDictionary Delivery;
+    public CargoLander.FlightState State;
+    public int BallisticAngle = -1;
+    [NonSerialized]
+    public bool FromSave = true;
+}
+
+public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDataContainer<CargoLanderData> {
     private const int MinimumAltitude = 300;
     private const float AltitudeRangeAboveMinimum = 100f;
     private const float LandingAltitudeAboveLandingZone = 2.25f;
@@ -15,6 +28,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
     public enum FlightState { Landing = -1, Disabled, TakingOff = 1, Landed = 9 }
 
+
     public static CargoLander Instance;
     
     public Transform LanderPivot, LanderHinge, Lander;
@@ -23,38 +37,28 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     public AudioClip rocket, electric;
     public AudioSource rocketSource, doorSource;
 
-    internal FlightState State { get; private set; }
-
     internal LandingZone LZ { get; private set; }
+
+    public CargoLanderData Data { get; set; }
+
     private DoorRotationLerpContext[] ramps;
     private Dictionary<TriggerForwarder, ResourceComponent> Bays;
+    private bool rampsDown = false;
 
     internal void Deliver(Order o, LandingZone z)
     {
         this.LZ = z;
+        this.transform.position = LZ.transform.position + Vector3.up * 2.25f;
         InitBays();
 
-        int i = 0;
-        TriggerForwarder[] slots = new TriggerForwarder[Bays.Keys.Count];
-        Bays.Keys.CopyTo(slots, 0);
-
-        foreach (KeyValuePair<Matter, float> kvp in o.LineItemUnits)
+        this.Data = new CargoLanderData()
         {
-            var crateEnumerator = o.LineItemUnits.SquareMeters(kvp.Key);
-            while (crateEnumerator.MoveNext())
-            {
-                float volume = crateEnumerator.Current;
-
-                TriggerForwarder child = slots[i];
-                
-                var t = BounceLander.CreateCratelike(kvp.Key, kvp.Value, Vector3.zero, this.Lander);
-
-                Bays[child] = t.GetComponent<ResourceComponent>();
-
-                i++;
-            }
-        }
-
+            LZInstanceID = this.LZ.Data.LZInstanceID,
+            Transform = this.transform,
+            Delivery = o.LineItemUnits,
+            FromSave = false //this gets called before Start, so this is a way to signal Start not to re-call Land()
+        };
+        
         Land();
     }
 
@@ -87,14 +91,46 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         rocketSource.clip = rocket;
         doorSource.clip = electric;
 
-        if (State == FlightState.Disabled)
+        if (Data == null)
+        {
             Lander.gameObject.SetActive(false);
+        }
+        //only do stuff if we're starting from a loaded game
+        else if (Data.FromSave)
+        {
+            LZ = FindObjectsOfType<LandingZone>().Where(x => x.Data.LZInstanceID == this.Data.LZInstanceID).FirstOrDefault();
+
+            if (Data.State == FlightState.Disabled)
+                Lander.gameObject.SetActive(false);
+            else
+            {
+                this.Lander.gameObject.SetActive(true);
+                this.transform.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
+            }
+
+            if (Data.State == FlightState.Landing)
+                Land();
+            else if (Data.State == FlightState.Landed)
+            {
+                this.Lander.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
+                if (!rampsDown)
+                    ToggleAllRamps();
+            }
+            else if (Data.State == FlightState.TakingOff)
+            {
+                this.Lander.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
+                TakeOff();
+            }
+        }
 	}
 
-    private Vector3 airborneLanderPosition, landedLanderPosition;
+    private Vector3 airborneLanderPosition, landedLanderLocalPosition;
     private Vector3 airborneLanderHinge = Vector3.zero;
     private Vector3 landedLanderHinge = new Vector3(0, 0, 90f);
     private Coroutine movement;
+    private Coroutine countdownCoroutine;
+    private Coroutine unsnapTimer;
+
     public void Land()
     {
         if (movement != null)
@@ -102,36 +138,34 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
 
         SunOrbit.Instance.ResetToNormalTime();
         GuiBridge.Instance.ShowNews(NewsSource.IncomingLander);
-        LanderHinge.localRotation = Quaternion.identity;
-        CalculateAndPositionFlightArc();
-        Lander.localPosition = airborneLanderPosition;
 
-        State = FlightState.Landing;
+        SetState(FlightState.Landing);
+
         movement = StartCoroutine(DoLand());
     }
 
     private void CalculateAndPositionFlightArc()
     {
-        this.transform.position = LZ.transform.position+Vector3.up*2.25f;
+        if (Data.BallisticAngle < 0)
+            Data.BallisticAngle = UnityEngine.Random.Range(0, 360);
+
         float minAltitude = LZ.transform.position.y + MinimumAltitude;
         float startAltitude = UnityEngine.Random.Range(minAltitude, minAltitude + AltitudeRangeAboveMinimum);
-        float randomAngle = UnityEngine.Random.Range(0, 360);
         LanderHinge.localPosition = new Vector3(startAltitude, 0, 0);
-        LanderPivot.localRotation = Quaternion.Euler(0f, randomAngle, 0f);
+        LanderPivot.localRotation = Quaternion.Euler(0f, Data.BallisticAngle, 0f);
         airborneLanderPosition = new Vector3((float)(startAltitude * Math.Sqrt(2f)), startAltitude, 0);
-        landedLanderPosition = new Vector3(0, startAltitude, 0f);
+        landedLanderLocalPosition = new Vector3(0, startAltitude, 0f);
     }
 
     public void TakeOff()
     {
         if (movement != null)
             StopCoroutine(movement);
-
-        //GuiBridge.Instance.ShowNews(NewsSource.IncomingCargo);
+        
         CalculateAndPositionFlightArc();
-        Lander.localPosition = landedLanderPosition;
 
-        State = FlightState.TakingOff;
+        SetState(FlightState.TakingOff);
+
         movement = StartCoroutine(DoTakeOff());
     }
 
@@ -181,8 +215,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
             while (time < LandingStageTimeSeconds)
             {
                 rocketSource.volume = Mathf.Max(0f, time);
-                print(rocketSource.volume);
-
+                
                 LanderHinge.localRotation = Quaternion.Euler(
                     Mathfx.Coserp(startHinge, endHinge, time / LandingStageTimeSeconds)
                     );
@@ -201,7 +234,8 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
         yield return new WaitForSeconds(1f);
 
         doorSource.Play();
-        ToggleAllRamps();
+        if (rampsDown)
+            ToggleAllRamps();
         yield return new WaitForSeconds(DoorMoveDuration);
         doorSource.Stop();
         foreach (var kvp in Bays)
@@ -212,15 +246,22 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
             }
         }
 
-        yield return new WaitForSeconds(3f);
+        for (int i = 0; i < 10; i++)
+        {
+            GuiBridge.Instance.ShowNews(NewsSource.LanderCountdown.CloneWithSuffix(": " + (10 - i) + "s"));
+            yield return new WaitForSeconds(1f);
+        }
+        var liftoffNews = NewsSource.LanderCountdown.CloneWithSuffix(": Liftoff");
+        liftoffNews.DurationMilliseconds = 3000f;
+        GuiBridge.Instance.ShowNews(liftoffNews);
 
         yield return DoFireRockets(landedLanderHinge, airborneLanderHinge, false);
 
-        yield return DoFly(landedLanderPosition, airborneLanderPosition);
+        yield return DoFly(landedLanderLocalPosition, airborneLanderPosition);
 
         movement = null;
 
-        State = FlightState.Disabled;
+        Data.State = FlightState.Disabled;
         Lander.gameObject.SetActive(false);
     }
 
@@ -228,11 +269,32 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     {
         Lander.gameObject.SetActive(true);
 
-        yield return DoFly(airborneLanderPosition, landedLanderPosition);
+        yield return DoFly(airborneLanderPosition, landedLanderLocalPosition);
 
         yield return DoFireRockets(airborneLanderHinge, landedLanderHinge);
 
-        foreach(var kvp in Bays)
+        int i = 0;
+        TriggerForwarder[] slots = new TriggerForwarder[Bays.Keys.Count];
+        Bays.Keys.CopyTo(slots, 0);
+        foreach (Matter key in this.Data.Delivery.Keys)
+        {
+            var crateEnumerator = this.Data.Delivery.SquareMeters(key);
+            while (crateEnumerator.MoveNext())
+            {
+                float volume = crateEnumerator.Current;
+
+                TriggerForwarder child = slots[i];
+
+                var t = BounceLander.CreateCratelike(key, volume, Vector3.zero, this.Lander);
+
+                Bays[child] = t.GetComponent<ResourceComponent>();
+
+                i++;
+            }
+        }
+        this.Data.Delivery = null;
+
+        foreach (var kvp in Bays)
         {
             if (kvp.Value != null)
             {
@@ -242,21 +304,44 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
             }
         }
 
+        SetState(FlightState.Landed);
+
         yield return new WaitForSeconds(3f);
 
         doorSource.Play();
-        ToggleAllRamps();
+        if (!rampsDown)
+            ToggleAllRamps();
 
         yield return new WaitForSeconds(DoorMoveDuration);
         doorSource.Stop();
 
         movement = null;
 
-        State = FlightState.Landed;
+    }
+
+    private void SetState(FlightState state)
+    {
+        Data.State = state;
+        switch (state)
+        {
+            case FlightState.Landing:
+                LanderHinge.localRotation = Quaternion.identity;
+                CalculateAndPositionFlightArc();
+                Lander.localPosition = airborneLanderPosition;
+                Data.State = FlightState.Landing;
+                break;
+            case FlightState.Landed:
+                Lander.localPosition = landedLanderLocalPosition;
+                break;
+            case FlightState.TakingOff:
+                Lander.localPosition = landedLanderLocalPosition;
+                break;
+        }
     }
 
     private void ToggleAllRamps()
     {
+        rampsDown = !rampsDown;
         ramps[0].Toggle(StartCoroutine);
         ramps[1].Toggle(StartCoroutine);
         ramps[2].Toggle(StartCoroutine);
@@ -270,7 +355,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable mov)
     {
         ResourceComponent res = mov as ResourceComponent;
-        if (Bays.ContainsKey(child) && Bays[child] == null && res != null)
+        if (unsnapTimer == null && Bays.ContainsKey(child) && Bays[child] == null && res != null)
         {
             res.SnapCrate(this, child.transform.position, globalRotation: child.transform.rotation);
         }
@@ -285,5 +370,30 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber {
                 Bays[kvp.Key] = null;
             }
         }
+
+        if (Data.State == FlightState.Landed)
+        {
+            if (Bays.Values.All(x => x == null))
+            {
+                countdownCoroutine = StartCoroutine(BeginCountdown());
+            }
+        }
+
+        unsnapTimer = StartCoroutine(detachTimer());
+    }
+
+    private IEnumerator detachTimer()
+    {
+        yield return new WaitForSeconds(1f);
+        unsnapTimer = null;
+    }
+
+    private IEnumerator BeginCountdown()
+    {
+        var oneHour = NewsSource.LanderCountdown.CloneWithSuffix(": 1hr");
+        oneHour.DurationMilliseconds = 3000f;
+        GuiBridge.Instance.ShowNews(oneHour);
+        yield return new WaitForSeconds(60f);
+        TakeOff();
     }
 }

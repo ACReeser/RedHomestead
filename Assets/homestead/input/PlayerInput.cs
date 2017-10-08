@@ -182,9 +182,9 @@ public class PlayerInput : MonoBehaviour {
 
         if (Input.GetKeyUp(KeyCode.Keypad0) && Input.GetKey(KeyCode.RightControl) && CargoLander.Instance != null)
         {
-            if (CargoLander.Instance.State == CargoLander.FlightState.Disabled)
+            if (CargoLander.Instance.Data.State == CargoLander.FlightState.Disabled)
                 CargoLander.Instance.Land();
-            else if (CargoLander.Instance.State == CargoLander.FlightState.Landed)
+            else if (CargoLander.Instance.Data.State == CargoLander.FlightState.Landed)
                 CargoLander.Instance.TakeOff();
         }
 #endif

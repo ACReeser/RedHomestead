@@ -85,6 +85,12 @@ public static class NewsSource
         DurationMilliseconds = 10000,
         Icon = MiscIcon.Rocket
     };
+    public static News LanderCountdown = new News()
+    {
+        Text = "Cargo Lander Countdown",
+        DurationMilliseconds = 500,
+        Icon = MiscIcon.Rocket
+    };
     public static News AlgaeHarvestable = new News()
     {
         Text = "Algae Harvest Ready",

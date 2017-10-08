@@ -8,7 +8,7 @@ using RedHomestead.Buildings;
 using RedHomestead.Persistence;
 
 [Serializable]
-public class ResourceCountDictionary: SerializableDictionary<Matter, float>
+public class ResourceUnitCountDictionary: SerializableDictionary<Matter, float>
 {
     public IEnumerator<float> SquareMeters(Matter m)
     {

@@ -17823,6 +17823,7 @@ MonoBehaviour:
     type: 2}
   CabinetOn: {fileID: 4300004, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
   CabinetOff: {fileID: 4300002, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  LandingZonePrefab: {fileID: 466780, guid: 6fdaf5480e623724a9120ff3ad3af313, type: 2}
 --- !u!114 &297514241
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50124,15 +50125,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 16
       objectReference: {fileID: 0}
-    - target: {fileID: 11436720, guid: 6fdaf5480e623724a9120ff3ad3af313, type: 2}
-      propertyPath: bouncePrefab
-      value: 
-      objectReference: {fileID: 420468, guid: c821326b7029fc8438bdd083911b8871, type: 2}
-    - target: {fileID: 11436720, guid: 6fdaf5480e623724a9120ff3ad3af313, type: 2}
-      propertyPath: landerPrefab
-      value: 
-      objectReference: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788,
-        type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 6fdaf5480e623724a9120ff3ad3af313, type: 2}
   m_IsPrefabParent: 0
@@ -70898,7 +70890,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1288991419}
-  m_LocalRotation: {x: 0.078361556, y: 0.7027514, z: 0.7027513, w: -0.07836157}
+  m_LocalRotation: {x: 0.07836156, y: 0.70275146, z: 0.70275134, w: -0.07836158}
   m_LocalPosition: {x: -0.984, y: 0.523, z: -0.517}
   m_LocalScale: {x: 0.125, y: 0.124999985, z: 0.12499999}
   m_Children:
@@ -77339,10 +77331,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1401361459}
---- !u!4 &1404415140 stripped
-Transform:
-  m_PrefabParentObject: {fileID: 466780, guid: 6fdaf5480e623724a9120ff3ad3af313, type: 2}
-  m_PrefabInternal: {fileID: 904974998}
 --- !u!1 &1405348525
 GameObject:
   m_ObjectHideFlags: 0
@@ -111189,52 +111177,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1989458350}
---- !u!1001 &1990530310
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 1404415140}
-    m_Modifications:
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 2.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0.38268343
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 0.92387956
-      objectReference: {fileID: 0}
-    - target: {fileID: 4915752730325132, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_RootOrder
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 1987480652377726, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: ce96259c986fdcc4c9bf86ae9bddd788, type: 2}
-  m_IsPrefabParent: 0
 --- !u!114 &1990805843 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 11436720, guid: 6fdaf5480e623724a9120ff3ad3af313,

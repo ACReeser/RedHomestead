@@ -386,7 +386,7 @@ namespace RedHomestead.Economy{
     [Serializable]
     public class Order
     {
-        public ResourceCountDictionary LineItemUnits;
+        public ResourceUnitCountDictionary LineItemUnits;
         public SolHourStamp ETA, Ordered;
         [SerializeField]
         private DeliveryType via;

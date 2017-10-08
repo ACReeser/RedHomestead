@@ -5,22 +5,39 @@ using RedHomestead.Economy;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Crafting;
+using RedHomestead.Persistence;
 
-public class LandingZone : MonoBehaviour, IDeliveryScript {
+[Serializable]
+public class LandingZoneData: FacingData
+{
+    public string LZInstanceID;
+}
+
+public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<LandingZoneData> {
+    public static LandingZone Instance;
     public Transform bouncePrefab, landerPrefab;
 
     private Transform currentLander;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {    
-	
+    public LandingZoneData Data { get; set; }
+    internal CargoLander Cargo { get; private set; }
+
+    void Awake () {
+        Instance = this;
 	}
 
+    void Start()
+    {
+        if (Data == null)
+        {
+            this.Data = new LandingZoneData()
+            {
+                Transform = this.transform,
+                LZInstanceID = Guid.NewGuid().ToString()
+            };
+        }
+    }
+	
     public void Deliver(Order o)
     {
         switch (o.Via)
@@ -34,9 +51,13 @@ public class LandingZone : MonoBehaviour, IDeliveryScript {
                 break;
             case DeliveryType.Lander:
             case DeliveryType.Rover:
-                Transform lander = GameObject.Instantiate<Transform>(landerPrefab);
-                lander.position = this.transform.position;
-                lander.GetComponent<CargoLander>().Deliver(o, this);
+                if (this.Cargo == null)
+                {
+                    Transform lander = GameObject.Instantiate<Transform>(landerPrefab);
+                    lander.position = this.transform.position;
+                    this.Cargo = lander.GetComponent<CargoLander>();
+                }
+                Cargo.Deliver(o, this);
                 break;
         }
     }

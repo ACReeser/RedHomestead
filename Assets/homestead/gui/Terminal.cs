@@ -339,7 +339,7 @@ public class Terminal : MonoBehaviour {
 
         CurrentOrder = new Order()
         {
-            LineItemUnits = new ResourceCountDictionary()
+            LineItemUnits = new ResourceUnitCountDictionary()
         };
     }
 
@@ -527,7 +527,7 @@ public class Terminal : MonoBehaviour {
             RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.Add(CurrentOrder);
             CurrentOrder = new Order()
             {
-                LineItemUnits = new ResourceCountDictionary()
+                LineItemUnits = new ResourceUnitCountDictionary()
             };
             SwitchMarketTab((int)MarketTab.EnRoute);
         }
@@ -537,7 +537,7 @@ public class Terminal : MonoBehaviour {
     {
         CurrentOrder = new Order()
         {
-            LineItemUnits = new ResourceCountDictionary()
+            LineItemUnits = new ResourceUnitCountDictionary()
         };
         SwitchBuyTab((int)BuyTab.BySupplier);
     }
