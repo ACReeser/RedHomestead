@@ -1406,7 +1406,7 @@ public class PlayerInput : MonoBehaviour {
                     if (doInteract)
                     {
                         //bouncelander is on parent of interaction cube
-                        BounceLander landerScript = hitInfo.collider.transform.parent.GetComponent<BounceLander>();
+                        BounceLander landerScript = hitInfo.collider.transform.root.GetComponent<BounceLander>();
 
                         if (landerScript != null)
                         {

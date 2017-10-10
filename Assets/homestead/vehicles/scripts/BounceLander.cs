@@ -138,6 +138,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     }
 
     private const float deflateDuration = 2f;
+    private const float packOffset = .6f;
     private float deflateTime = 0f;
     private SphereCollider sphereCollider;
 
@@ -149,7 +150,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         {
             foreach (Transform t in airbagRoot)
             {
-                t.localScale = Vector3.one * Mathf.Lerp(1f, .25f, deflateTime / deflateDuration);
+                t.localScale = Vector3.one * Mathf.Lerp(.5f, .1f, deflateTime / deflateDuration);
             }
             deflateTime += Time.deltaTime;
 
@@ -217,9 +218,9 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
                 float volume = crateEnumerator.Current;
 
                 Vector3 localPos = new Vector3(
-                    (i % 4) > 1 ? .8f : -.8f,
-                    i > 3 ? 1f : -1f,
-                    (i % 2) == 0 ? .8f : -.8f
+                    (i % 4) > 1 ? packOffset : -packOffset,
+                    i > 3 ? packOffset : -packOffset,
+                    (i % 2) == 0 ? packOffset : -packOffset
                     );
 
                 CreateCratelike(kvp.Key, volume, localPos, payloadRoot);
