@@ -278,11 +278,12 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         #endregion
 
         //destroy any crates attached, POOF!
-        foreach (var kvp in Bays)
+        var resources = Bays.Values.ToArray();
+        for (int i = resources.Length - 1; i > -1; i--)
         {
-            if (kvp.Value != null)
+            if (resources[i] != null)
             {
-                GameObject.Destroy(kvp.Value.transform.root.gameObject);
+                GameObject.Destroy(resources[i].transform.root.gameObject);
             }
         }
 
@@ -431,6 +432,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
             if (kvp.Value == (object)detaching)
             {
                 Bays[kvp.Key] = null;
+                break;
             }
         }
 

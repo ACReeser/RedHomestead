@@ -92,7 +92,7 @@ public class EconomyManager : MonoBehaviour
         {
             SolsAndHours future = now.SolHoursIntoFuture(candidate.ETA);
 
-            if (future.Sol <= 1 && future.Hour <= 1)
+            if (future.Sol == 0 && future.Hour < 1)
             {
                 ToBeDelivered.Add(candidate);
                 RedHomestead.Persistence.Game.Current.Player.EnRouteOrders.Remove(candidate);
