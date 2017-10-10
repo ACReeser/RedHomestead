@@ -61,13 +61,13 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
             }
         }
 
-        public bool CanConsume(List<ResourceEntry> resources)
+        public bool CanConsume(List<IResourceEntry> resources)
         {
             UnityEngine.Debug.Log("Checking can consume");
 
-            foreach(ResourceEntry re in resources)
+            foreach(IResourceEntry re in resources)
             {
-                if (!CanConsume(re.Type, re.Count))
+                if (!CanConsume(re.Type, re.AmountByVolume))
                     return false;
             }
 
@@ -91,17 +91,17 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
             }
         }
 
-        public void Consume(List<ResourceEntry> resources)
+        public void Consume(List<IResourceEntry> resources)
         {
             UnityEngine.Debug.Log("Consuming resources from warehouses");
 
             //maintain a separate list of depleted containers so we don't mess up the iteration
             List<ResourceComponent> depleted = new List<ResourceComponent>();
 
-            foreach(ResourceEntry re in resources)
+            foreach(IResourceEntry re in resources)
             {
                 int resourceIndex = 0;
-                float amount = re.Count;
+                float amount = re.AmountByVolume;
                 List<ResourceComponent> list = lists[Convert.ToInt32(re.Type)];
 
                 while (amount > 0 && resourceIndex < list.Count)
@@ -114,7 +114,7 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
                     }
 
                     if (amount <= 0f)
-                        GuiBridge.Instance.ShowNews(NewsSource.CraftingConsumed.CloneWithSuffix(String.Format("{0} {1}", re.Count, re.Type.ToString())));
+                        GuiBridge.Instance.ShowNews(NewsSource.CraftingConsumed.CloneWithSuffix(String.Format("{0} {1}", re.AmountByVolume, re.Type.ToString())));
 
                     resourceIndex++;
                 }
@@ -127,9 +127,9 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
 
         public void Consume(Matter type, float amount)
         {
-            Consume(new List<ResourceEntry>()
+            Consume(new List<IResourceEntry>()
             {
-                new ResourceEntry(amount, type)
+                new ResourceVolumeEntry(amount, type)
             });
         }
     }

@@ -63,14 +63,14 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         {
             if (LeftInput != null && LeftInput.Data.Container.MatterType == req.Type)
             {
-                if (!LeftInput.Data.Container.TryConsume(req.Count))
+                if (!LeftInput.Data.Container.TryConsumeVolume(req.AmountByVolume))
                 {
                     return false;
                 }
             }
             else if (RightInput != null && RightInput.Data.Container.MatterType == req.Type)
             {
-                if (!RightInput.Data.Container.TryConsume(req.Count))
+                if (!RightInput.Data.Container.TryConsumeVolume(req.AmountByVolume))
                 {
                     return false;
                 }
@@ -79,7 +79,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
 
         FlexData.Printing = component;
         FlexData.Progress = 0f;
-        FlexData.Duration = Crafting.PrinterData[component].BuildTime * SunOrbit.GameSecondsPerMartianMinute * 60f;
+        FlexData.Duration = Crafting.PrinterData[component].BuildTimeHours * SunOrbit.GameSecondsPerMartianMinute * 60f;
 
         return StartPrint();
     }
@@ -208,10 +208,10 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         scrapFlag = true;
     }
 
-    internal bool Has(ResourceEntry req)
+    internal bool Has(IResourceEntry req)
     {
-        return (LeftInput != null && LeftInput.Data.Container.MatterType == req.Type && LeftInput.Data.Container.CurrentAmount >= req.Count) ||
-               (RightInput != null && RightInput.Data.Container.MatterType == req.Type && RightInput.Data.Container.CurrentAmount >= req.Count);
+        return (LeftInput != null && LeftInput.Data.Container.MatterType == req.Type && LeftInput.Data.Container.CurrentAmount >= req.AmountByVolume) ||
+               (RightInput != null && RightInput.Data.Container.MatterType == req.Type && RightInput.Data.Container.CurrentAmount >= req.AmountByVolume);
     }
 
     private MainMenu.LerpContext GetNextHead()

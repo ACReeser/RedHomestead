@@ -29,7 +29,7 @@ public class TriggerForwarder : MonoBehaviour {
         IMovableSnappable res = other.GetComponent<IMovableSnappable>();
 
         bool hasMovableSnappable = res != null;
-        if (hasMovableSnappable || !OnlyMovableSnappables)
+        if (dad != null && (hasMovableSnappable || !OnlyMovableSnappables))
         {
             if (hasMovableSnappable && res.IsSnapped)
                 return;

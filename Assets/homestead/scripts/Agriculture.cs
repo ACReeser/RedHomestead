@@ -285,7 +285,7 @@ namespace RedHomestead.Agriculture{
 
         public static string YieldMeals(this IFarm farm)
         {
-            return String.Format("{0:0.#}", Matter.Biomass.MealsPerCubicMeter() * farm.Get(Matter.Biomass).CurrentAmount);
+            return String.Format("{0:0.#}", Matter.Biomass.UnitsPerCubicMeter() * farm.Get(Matter.Biomass).CurrentAmount);
         }
 
         public static string OxygenADayKgs(this IFarm farm)

@@ -166,7 +166,7 @@ namespace RedHomestead.Economy{
                 case DeliveryType.Drop:
                     return 8;
                 case DeliveryType.Lander:
-                    return 10;
+                    return 16;
                 default:
                 case DeliveryType.Rover:
                     return 12;
@@ -180,7 +180,8 @@ namespace RedHomestead.Economy{
             { Matter.Oxygen, new StartingSupplyData("Oxygen", 100000, Matter.Oxygen) },
             { Matter.SiliconWafers, new StartingSupplyData("Solar Panels", 100000, Matter.SiliconWafers) },
             { Matter.Canvas, new StartingSupplyData("Canvas", 100000, Matter.Canvas) },
-            { Matter.Steel, new StartingSupplyData("Steel", 200000, Matter.Steel) },
+            { Matter.IronPowder, new StartingSupplyData("Iron Powder", 200000, Matter.IronPowder) },
+            { Matter.CopperPowder, new StartingSupplyData("Copper Powder", 200000, Matter.CopperPowder) },
             { Matter.Polyethylene, new StartingSupplyData("Polyethylene", 100000, Matter.Polyethylene) },
             { Matter.Glass, new StartingSupplyData("Glass", 200000, Matter.Glass) },
         };
@@ -230,7 +231,9 @@ namespace RedHomestead.Economy{
         }
 
         public DeliveryType AvailableDelivery;
-        public List<Stock> Stock;
+        public Dictionary<Matter, Stock> Shelves { get; private set; }
+        private List<Stock> _stock;
+        public List<Stock> Stock { get { return _stock; } set { _stock = value; Shelves = value.ToDictionary(x => x.Matter); } }
         public int TotalUnits
         {
             get
@@ -383,7 +386,7 @@ namespace RedHomestead.Economy{
     [Serializable]
     public class Order
     {
-        public ResourceCountDictionary LineItemUnits;
+        public ResourceUnitCountDictionary LineItemUnits;
         public SolHourStamp ETA, Ordered;
         [SerializeField]
         private DeliveryType via;
@@ -447,8 +450,8 @@ namespace RedHomestead.Economy{
 
         private void RecalcVolumeMassShipping()
         {
-            TotalVolume = LineItemUnits.Sum(x => x.Key.BaseCubicMeters() * x.Value);
-            TotalMass = LineItemUnits.Sum(x => x.Value * x.Key.Kilograms());
+            TotalVolume = LineItemUnits.Sum(x => Mathf.Max(1f, x.Key.CubicMetersPerUnit() * x.Value));
+            TotalMass = LineItemUnits.Sum(x => x.Value * x.Key.KgPerUnit());
             ShippingCost = Via.DollarsPerKilogramPerKilometer(TotalMass, this.Vendor.DistanceFromPlayerKilometersRounded);
         }
 

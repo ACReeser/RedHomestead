@@ -6,7 +6,7 @@ using RedHomestead.Industry;
 
 namespace RedHomestead.Simulation
 {
-    public enum ContainerSize { Quarter = 1, Full = 4 } //, Quadratic = 16 }
+    public enum ContainerSize { Custom = -1, Quarter = 1, Full = 4 } //, Quadratic = 16 }
 
     public enum Energy { Electrical, Thermal }
     
@@ -54,21 +54,61 @@ namespace RedHomestead.Simulation
         IronBeams,
         ElectricMotor
     }
+    
+    public interface IResourceEntry
+    {
+        Matter Type { get; set; }
+        
+        float AmountByVolume { get; }
+        int AmountByUnits { get; }
 
-    public class ResourceEntry
+        string ToString();
+        string ToStringWithAvailableVolume(float availableVolume);
+    }
+
+    public class ResourceVolumeEntry: IResourceEntry
     {
         public Matter Type { get; set; }
-        public float Count { get; set; }
+        //resource in Units volume
+        public float AmountByVolume { get; private set; }
+        public int AmountByUnits { get { return Mathf.RoundToInt(AmountByVolume * Type.UnitsPerCubicMeter()); } }
 
-        public ResourceEntry(float count, Matter type)
+        public ResourceVolumeEntry(float volume, Matter type)
         {
             this.Type = type;
-            this.Count = count;
+            this.AmountByVolume = volume;
         }
 
         public override string ToString()
         {
-            return String.Format("{0} x{1:0.##}", this.Type, this.Count);
+            return String.Format("{0} x{1:0.##}", this.Type, this.AmountByVolume);
+        }
+        public string ToStringWithAvailableVolume(float availableVolume)
+        {
+            return String.Format("{0} {2:0}/{1:0.##}", this.Type, this.AmountByVolume, availableVolume);
+        }
+    }
+
+    public class ResourceUnitEntry: IResourceEntry
+    {
+        public Matter Type { get; set; }
+        //resource in subUnits
+        public int AmountByUnits { get; private set; }
+        public float AmountByVolume { get { return AmountByUnits / Type.UnitsPerCubicMeter(); } }
+
+        public ResourceUnitEntry(int count, Matter type)
+        {
+            this.Type = type;
+            this.AmountByUnits = count;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0} x{1:0}", this.Type, this.AmountByUnits);
+        }
+        public string ToStringWithAvailableVolume(float availableVolume)
+        {
+            return String.Format("{0} {2:0}/{1:0}", this.Type, this.AmountByUnits, availableVolume * Type.UnitsPerCubicMeter());
         }
     }
 
@@ -145,15 +185,15 @@ namespace RedHomestead.Simulation
             return max;
         }
 
-        public static float Kilograms(this Matter r, float? volumeCubicMeter = null)
+        public static float Kilograms(this Matter matter, float? volumeCubicMeter = null)
         {
             if (volumeCubicMeter.HasValue)
             {
-                return r.DensityKgPerCubicMeter() * volumeCubicMeter.Value;
+                return matter.DensityKgPerCubicMeter() * volumeCubicMeter.Value;
             }
             else
             {
-                return r.DensityKgPerCubicMeter() * r.BaseCubicMeters();
+                return matter.DensityKgPerCubicMeter() * matter.BaseCubicMeters();
             }
         }
 
@@ -175,13 +215,13 @@ namespace RedHomestead.Simulation
             return Matter.Unspecified;
         }
 
-        public static float KgPerMeal(this Matter meal)
+        public static float KgPerUnit(this Matter unit)
         {
-            float denominator = meal.MealsPerCubicMeter();
+            float denominator = unit.UnitsPerCubicMeter();
 
             if (denominator != 0)
             {
-                return meal.Kilograms() / denominator;
+                return unit.Kilograms() / denominator;
             }
             else
             {
@@ -189,26 +229,35 @@ namespace RedHomestead.Simulation
             }
         }
 
-        public static float MealsPerCubicMeter(this Matter meal, float cubicMeters = 1f)
+        public static float UnitsPerCubicMeter(this Matter matter, float cubicMeters = 1f)
         {
-            switch (meal)
+            switch (matter)
             {
                 case Matter.MealShakes:
                 case Matter.MealPowders:
-                    return 36f;
+                    return 36f / cubicMeters;
                 case Matter.OrganicMeals:
                 case Matter.RationMeals:
                 case Matter.Biomass:
                 case Matter.Produce:
-                    return 18f;
+                    return 18f / cubicMeters;
+                case Matter.SolarPanels:
+                case Matter.Piping:
+                case Matter.ElectricMotor:
+                    return 4f / cubicMeters;
+                case Matter.IronSheeting:
+                case Matter.Canvas:
+                case Matter.PressureCanvas:
+                case Matter.Glass:
+                    return 2f / cubicMeters;
                 default:
-                    return 0;
+                    return 1f / cubicMeters;
             }
         }
 
-        public static float CubicMetersPerMeal(this Matter meal)
+        public static float CubicMetersPerUnit(this Matter matter)
         {
-            float denominator = meal.MealsPerCubicMeter();
+            float denominator = matter.UnitsPerCubicMeter();
 
             if (denominator != 0)
             {
@@ -690,14 +739,16 @@ namespace RedHomestead.Simulation
         {
             this.Amount = initialAmountUnits;
             this.TotalCapacity = capacityUnits;
+            this.Size = ContainerSize.Custom;
         }
         public Container(float Units, ContainerSize size = ContainerSize.Full)
         {
             this.Amount = Units;
             this.TotalCapacity = (float)size / 4f;
+            this.Size = size;
         }
 
-        //Serializable
+        public readonly ContainerSize Size;
         public float TotalCapacity = 1f;
         [SerializeField]
         protected float Amount;
@@ -793,7 +844,7 @@ namespace RedHomestead.Simulation
         /// </summary>
         /// <param name="pullAmount"></param>
         /// <returns></returns>
-        public bool TryConsume(float pullAmount)
+        public bool TryConsumeVolume(float pullAmount)
         {
             float pulled = this.Pull(pullAmount);
             bool pullSuccess = (Math.Abs(pullAmount - pulled) <= 0.000001f);

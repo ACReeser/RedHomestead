@@ -83,7 +83,6 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     {
         if (state)
         {
-            print("firing rockets!");
             haveRocketsFired = true;
             this.cf = this.gameObject.AddComponent<ConstantForce>();
             this.cf.relativeForce = Vector3.up * 45f * rigid.mass;
@@ -91,7 +90,6 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         }
         else
         {
-            print("rockets done!");
             this.cf.enabled = false;
             rocketsFiring = false;
         }
@@ -112,7 +110,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     {
         RaycastHit rayHit;
 
-        if (Physics.Raycast(new Ray(transform.position, transform.TransformDirection(Vector3.down)), out rayHit))
+        if (Physics.Raycast(new Ray(transform.position, transform.TransformDirection(Vector3.down)), out rayHit, 999f, LayerMask.GetMask("Default")))
         {
             return rayHit.distance;
         }
@@ -140,6 +138,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     }
 
     private const float deflateDuration = 2f;
+    private const float packOffset = .6f;
     private float deflateTime = 0f;
     private SphereCollider sphereCollider;
 
@@ -151,7 +150,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         {
             foreach (Transform t in airbagRoot)
             {
-                t.localScale = Vector3.one * Mathf.Lerp(1f, .25f, deflateTime / deflateDuration);
+                t.localScale = Vector3.one * Mathf.Lerp(.5f, .1f, deflateTime / deflateDuration);
             }
             deflateTime += Time.deltaTime;
 
@@ -208,27 +207,30 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         PackLander(o.LineItemUnits);
     }
     
-    private void PackLander(ResourceCountDictionary lineItemUnits)
+    private void PackLander(ResourceUnitCountDictionary lineItemUnits)
     {
         int i = 0;
         foreach(KeyValuePair<Matter, float> kvp in lineItemUnits)
         {
-            for (int vol = 0; vol < kvp.Value; vol++)
+            var crateEnumerator = lineItemUnits.SquareMeters(kvp.Key);
+            while(crateEnumerator.MoveNext())
             {
+                float volume = crateEnumerator.Current;
+
                 Vector3 localPos = new Vector3(
-                    (i % 4) > 1 ? .8f : -.8f,
-                    i > 3 ? 1f : -1f,
-                    (i % 2) == 0 ? .8f : -.8f
+                    (i % 4) > 1 ? packOffset : -packOffset,
+                    i > 3 ? packOffset : -packOffset,
+                    (i % 2) == 0 ? packOffset : -packOffset
                     );
 
-                CreateCratelike(kvp.Key, kvp.Value, localPos, payloadRoot);
+                CreateCratelike(kvp.Key, volume, localPos, payloadRoot);
 
                 i++;
             }
         }
     }
 
-    public static Vector3 HalfSize = new Vector3(.5f, .5f, .5f);
+    public static Vector3 HalfSizeQuarterVolume = new Vector3(.5f, .5f, .5f);
     public static Transform CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null, ContainerSize size = ContainerSize.Full)
     {
         Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
@@ -239,7 +241,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         switch (size)
         {
             case ContainerSize.Quarter:
-                newT.localScale = HalfSize;
+                newT.localScale = HalfSizeQuarterVolume;
                 break;
         }
 

@@ -7,6 +7,8 @@ public class ModuleBridge : MonoBehaviour {
     public Transform ConstructionZonePrefab, IceDrillPrefab, PowerCubePrefab, WaterDepositPrefab, MobileSolarPanelPrefab, PumpPrefab, ToolboxPrefab;
     public Mesh CabinetOn, CabinetOff;
 
+    public Transform LandingZonePrefab;
+
     void Awake()
     {
         Instance = this;

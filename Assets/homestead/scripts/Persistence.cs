@@ -253,6 +253,8 @@ namespace RedHomestead.Persistence
         public MobileSolarPanelData[] MobileSolarPanelData;
         public ToolboxData[] ToolboxData;
         public DepositData[] Deposits;
+        public CargoLanderData[] CargoLanders;
+        public LandingZoneData[] LandingZones;
         internal Dictionary<Simulation.Matter, int> InitialMatterPurchase;
         internal Dictionary<Crafting.Craftable, int> InitialCraftablePurchase;
 
@@ -268,6 +270,7 @@ namespace RedHomestead.Persistence
         public void OnAfterDeserialize()
         {
             DeserializeDeposits();
+            DeserializeLandersAndLZs();
             Dictionary<string, IPowerable> powerableMap = new Dictionary<string, IPowerable>();
             UnityEngine.Debug.Log("deserializing crates");
             DeserializeCrates();
@@ -277,6 +280,15 @@ namespace RedHomestead.Persistence
             UnityEngine.Debug.Log("deserializing modules");
             DeserializeRover(powerableMap);
             DeserializeModules(powerableMap);
+        }
+
+        private void DeserializeLandersAndLZs()
+        {
+            _DestroyCurrent<LandingZone>();
+            _InstantiateMany<LandingZone, LandingZoneData>(LandingZones, ModuleBridge.Instance.LandingZonePrefab);
+            
+            _DestroyCurrent<CargoLander>();
+            _InstantiateMany<CargoLander, CargoLanderData>(CargoLanders, LandingZone.Instance.landerPrefab);
         }
 
         private void DeserializeDeposits()
@@ -519,8 +531,8 @@ namespace RedHomestead.Persistence
                 Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.Container.MatterType), data.Position, data.Rotation) as Transform;
                 ResourceComponent r = t.GetComponent<ResourceComponent>();
                 r.Data = data;
-                if (r.Data.Container.AvailableCapacity < 1f)
-                    t.localScale = BounceLander.HalfSize;
+                if (r.Data.Container.Size == ContainerSize.Quarter)
+                    t.localScale = BounceLander.HalfSizeQuarterVolume;
             }
         }
 
@@ -572,6 +584,8 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<Pump, FacingData>((pump) => this.PumpData = pump);
             this._MarshalManyFromScene<Toolbox, ToolboxData>((box) => this.ToolboxData = box);
             this._MarshalManyFromScene<Deposit, DepositData>((dep) => this.Deposits = dep);
+            this._MarshalManyFromScene<CargoLander, CargoLanderData>((lander) => this.CargoLanders = lander);
+            this._MarshalManyFromScene<LandingZone, LandingZoneData>((lz) => this.LandingZones = lz);
 
             this._MarshalHabitats();
 
@@ -770,7 +784,7 @@ namespace RedHomestead.Persistence
                         Equipment.Equipment.Locked, //tertiary gadget
                         Equipment.Equipment.Locked, //secondary tool
                         Equipment.Equipment.EmptyHand, //unequipped
-                        Equipment.Equipment.RockDrill, //primary tool
+                        Equipment.Equipment.PowerDrill, //primary tool
                     }
                 },
                 Score = new GameScore(),

@@ -20,7 +20,7 @@ public class FoodPrepInterface : HabitatReadout
     {
         ResourceContainer container = this.LinkedHab.Get(Matter.Biomass);
 
-        float meals = container.CurrentAmount * container.MatterType.MealsPerCubicMeter();
+        float meals = container.CurrentAmount * container.MatterType.UnitsPerCubicMeter();
 
         for (int i = 0; i < BiomassStorageRoot.childCount; i++)
         {
@@ -31,7 +31,7 @@ public class FoodPrepInterface : HabitatReadout
 
         container = this.LinkedHab.Get(Matter.MealPowders);
 
-        float powders = container.CurrentAmount * container.MatterType.MealsPerCubicMeter();
+        float powders = container.CurrentAmount * container.MatterType.UnitsPerCubicMeter();
         this.PowderVisualization.gameObject.SetActive(powders > 0f);
     }
 }

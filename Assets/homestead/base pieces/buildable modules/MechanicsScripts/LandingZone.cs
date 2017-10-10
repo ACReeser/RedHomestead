@@ -5,27 +5,72 @@ using RedHomestead.Economy;
 using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Crafting;
+using RedHomestead.Persistence;
 
-public class LandingZone : MonoBehaviour, IDeliveryScript {
-    public Transform landerPrefab;
+[Serializable]
+public class LandingZoneData: FacingData
+{
+    public string LZInstanceID;
+}
+
+public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<LandingZoneData> {
+    public static LandingZone Instance;
+    public Transform bouncePrefab, landerPrefab;
+    public Light[] spotlights;
 
     private Transform currentLander;
 
-	// Use this for initialization
-	void Start () {
-	
+    public LandingZoneData Data { get; set; }
+    internal CargoLander Cargo { get; private set; }
+
+    void Awake () {
+        Instance = this;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+
+    void Start()
+    {
+        if (Data == null)
+        {
+            this.Data = new LandingZoneData()
+            {
+                Transform = this.transform,
+                LZInstanceID = Guid.NewGuid().ToString()
+            };
+        }
+
+        ToggleLights(false);
+    }
+
+    public void ToggleLights(bool isOn)
+    {
+        foreach (var light in spotlights)
+        {
+            light.gameObject.SetActive( isOn );
+        }
+    }
 
     public void Deliver(Order o)
     {
-        Transform lander = GameObject.Instantiate<Transform>(landerPrefab);
-        lander.position = this.transform.position + Vector3.up * 800f;
-        lander.GetComponent<BounceLander>().Deliver(o);
+        switch (o.Via)
+        {
+            case DeliveryType.Drop:
+                Transform bouncer = GameObject.Instantiate<Transform>(bouncePrefab);
+                bouncer.position = this.transform.position + Vector3.up * 800f;
+                bouncer.GetComponent<BounceLander>().Deliver(o);
+                GuiBridge.Instance.ShowNews(NewsSource.IncomingBounce);
+                SunOrbit.Instance.ResetToNormalTime();
+                break;
+            case DeliveryType.Lander:
+            case DeliveryType.Rover:
+                if (this.Cargo == null)
+                {
+                    Transform lander = GameObject.Instantiate<Transform>(landerPrefab);
+                    lander.position = this.transform.position;
+                    this.Cargo = lander.GetComponent<CargoLander>();
+                }
+                Cargo.Deliver(o, this);
+                break;
+        }
     }
 
     public void Deliver(Dictionary<Matter, int> supplies, Dictionary<Craftable, int> craftables)

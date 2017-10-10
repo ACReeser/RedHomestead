@@ -243,7 +243,7 @@ public class FloorplanBridge : MonoBehaviour {
     public void SelectCraftableToBuild()
     {
         Craftable whatToBuild = (Craftable)Enum.Parse(typeof(Craftable), UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.name);
-        List<ResourceEntry> prereqs = Crafting.CraftData[whatToBuild].Requirements;
+        List<IResourceEntry> prereqs = Crafting.CraftData[whatToBuild].Requirements;
 
         if (currentWorkshop == null)
             UnityEngine.Debug.LogWarning("Tried to craft something but no workshop");
@@ -412,7 +412,7 @@ public class FloorplanBridge : MonoBehaviour {
     public void UpdateDetailCraftableProgressView(Craftable craftable, float? progress)
     {
         string progressPercentageString = String.Format("{0:0.#}%", progress.Value * 100f);
-        int completionHours = Crafting.CraftData[craftable].BuildTime;
+        int completionHours = Crafting.CraftData[craftable].BuildTimeHours;
         int currentHours = Mathf.FloorToInt(progress.Value * completionHours);
 
         CraftableFields.Progress.text = String.Format("<b>{0}</b>\n{1}/{2} Hrs", progressPercentageString, currentHours, completionHours);

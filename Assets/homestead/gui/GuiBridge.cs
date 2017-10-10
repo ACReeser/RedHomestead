@@ -192,7 +192,7 @@ public struct PrinterUI
             var newGuy = GameObject.Instantiate<RectTransform>(AllListButtonPrefab, AllList.transform);
             newGuy.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
             newGuy.GetChild(1).GetComponent<Image>().sprite = kvp.Key.Sprite();
-            newGuy.GetChild(2).GetComponent<Text>().text = kvp.Value.BuildTime + "<size=10>hrs</size>";
+            newGuy.GetChild(2).GetComponent<Text>().text = kvp.Value.BuildTimeHours + "<size=10>hrs</size>";
 
             var requires = newGuy.GetChild(3);
             for (int j = 1; j < 5; j++)
@@ -233,7 +233,7 @@ public struct PrinterUI
         //things you do regardless of detail changing
         if (IsCurrentlyPrinting)
         {
-            AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTime * (1f - currentPrinter.FlexData.Progress));
+            AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTimeHours * (1f - currentPrinter.FlexData.Progress));
             TimeFill.fillAmount = currentPrinter.FlexData.Progress;
         }
 
@@ -263,7 +263,7 @@ public struct PrinterUI
                 else
                 {
                     AvailableMaterialsHeader.text = "MATERIALS\nREQUIRED";
-                    AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTime);
+                    AvailablePrintTime.text = GetTimeText(Crafting.PrinterData[newEffectiveDetail].BuildTimeHours);
                     //set detail to give 200px to list of available
                     AvailableDetailPanel.offsetMin = new Vector2(200, 0);
 
@@ -287,7 +287,7 @@ public struct PrinterUI
             t.gameObject.SetActive(show);
             if (show)
             {
-                t.GetComponent<Text>().text = reqs[reqI].Type.ToString() + " x" + reqs[reqI].Count;
+                t.GetComponent<Text>().text = reqs[reqI].ToString();
                 t.GetChild(0).GetComponent<Image>().sprite = reqs[reqI].Type.Sprite();
             }
         }        
@@ -323,7 +323,7 @@ public struct PrinterUI
 
     public void FillAvailableList(ThreeDPrinter printer)
     {
-        List<KeyValuePair<Matter, CraftingData>> available = new List<KeyValuePair<Matter, CraftingData>>();
+        List<KeyValuePair<Matter, PrinterData>> available = new List<KeyValuePair<Matter, PrinterData>>();
         foreach (var kvp in Crafting.PrinterData)
         {
             bool canPrint = true;
@@ -357,7 +357,7 @@ public struct PrinterUI
 
             if (show)
             {
-                KeyValuePair<Matter, CraftingData> kvp = available[i];
+                KeyValuePair<Matter, PrinterData> kvp = available[i];
                 child.name = Convert.ToInt32(kvp.Key).ToString();
                 child.GetChild(0).GetComponent<Text>().text = kvp.Key.ToString();
                 child.GetChild(1).GetComponent<Image>().sprite = kvp.Key.Sprite();
@@ -530,7 +530,7 @@ public class GuiBridge : MonoBehaviour {
     }
 
     //todo: just pass constructionZone, it's less params
-    internal void ShowConstruction(List<ResourceEntry> requiresList, Dictionary<Matter, float> hasCount, Module toBeBuilt)
+    internal void ShowConstruction(List<IResourceEntry> requiresList, Dictionary<Matter, float> hasCount, Module toBeBuilt)
     {
         //show the name of the thing being built
         this.ConstructionPanel.gameObject.SetActive(true);
@@ -541,8 +541,8 @@ public class GuiBridge : MonoBehaviour {
         {
             if (i < requiresList.Count)
             {
-                ResourceEntry resourceEntry = requiresList[i];
-                string output = resourceEntry.Type.ToString() + ": " + hasCount[resourceEntry.Type] + "/" + resourceEntry.Count;
+                IResourceEntry resourceEntry = requiresList[i];
+                string output = resourceEntry.ToStringWithAvailableVolume(hasCount[resourceEntry.Type]);
                 this.ConstructionRequirementsText[i].text = output;
                 this.ConstructionRequirements[i].gameObject.SetActive(true);
             }

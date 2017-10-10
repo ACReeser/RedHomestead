@@ -179,6 +179,14 @@ public class PlayerInput : MonoBehaviour {
         {
             Gremlin.Instance.TriggerRepair();
         }
+
+        if (Input.GetKeyUp(KeyCode.Keypad0) && Input.GetKey(KeyCode.RightControl) && CargoLander.Instance != null)
+        {
+            if (CargoLander.Instance.Data.State == CargoLander.FlightState.Disabled)
+                CargoLander.Instance.Land();
+            else if (CargoLander.Instance.Data.State == CargoLander.FlightState.Landed)
+                CargoLander.Instance.TakeOff();
+        }
 #endif
 
         if (Input.GetKeyUp(KeyCode.F1))
@@ -884,7 +892,7 @@ public class PlayerInput : MonoBehaviour {
                             if (Loadout.Equipped == Equipment.PowerDrill)
                             {
                                 if (Input.GetMouseButtonDown(0))
-                                    PlayInteractionClip(zone.transform.position, Sfx.Construction);
+                                    PlayInteractionClip(zone.transform.position, Sfx.Construction, volumeScale: .5f);
 
                                 if (Input.GetMouseButton(0))
                                 {
@@ -1398,7 +1406,7 @@ public class PlayerInput : MonoBehaviour {
                     if (doInteract)
                     {
                         //bouncelander is on parent of interaction cube
-                        BounceLander landerScript = hitInfo.collider.transform.parent.GetComponent<BounceLander>();
+                        BounceLander landerScript = hitInfo.collider.transform.root.GetComponent<BounceLander>();
 
                         if (landerScript != null)
                         {
@@ -1557,11 +1565,11 @@ public class PlayerInput : MonoBehaviour {
         Time.timeScale = CurrentMode == InputMode.Menu ? 0 : 1f;
     }
 
-    public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip, bool oneShot = true)
+    public void PlayInteractionClip(Vector3 point, AudioClip handleChangeClip, bool oneShot = true, float volumeScale = 1f)
     {
         this.InteractionSource.transform.position = point;
         if (oneShot)
-            this.InteractionSource.PlayOneShot(handleChangeClip);
+            this.InteractionSource.PlayOneShot(handleChangeClip, volumeScale);
         else
         {
             this.InteractionSource.clip = handleChangeClip;

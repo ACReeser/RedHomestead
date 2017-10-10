@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RedHomestead.Economy;
 using RedHomestead.Geography;
 using RedHomestead.Simulation;
+using System.Linq;
 
 public static class Corporations {
     private static List<Stock> BasicCommodity(List<Stock> list = null)

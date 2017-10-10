@@ -18,7 +18,7 @@ public class MealResourceInterface : HabitatResourceInterface {
 
     private void ShowPantry(Transform visualizationRoot, ResourceContainer sumContainer)
     {
-        float meals = sumContainer.CurrentAmount * sumContainer.MatterType.MealsPerCubicMeter();
+        float meals = sumContainer.CurrentAmount * sumContainer.MatterType.UnitsPerCubicMeter();
         for (int i = 0; i < visualizationRoot.childCount; i++)
         {
             visualizationRoot.GetChild(i).gameObject.SetActive(meals >= i + 1);
@@ -40,28 +40,28 @@ public class MealResourceInterface : HabitatResourceInterface {
         float days = (
             (
                 (
-                    (bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) * Matter.OrganicMeals.MealsPerCubicMeter()
+                    (bioC.CurrentAmount + organicC.CurrentAmount + rationC.CurrentAmount) * Matter.OrganicMeals.UnitsPerCubicMeter()
                 ) / 2f
                 +
                 (
-                    (powderC.CurrentAmount + shakeC.CurrentAmount) * Matter.MealShakes.MealsPerCubicMeter()
+                    (powderC.CurrentAmount + shakeC.CurrentAmount) * Matter.MealShakes.UnitsPerCubicMeter()
                 ) / 4f
             )
         );
 
         DisplayOut.text = string.Format("Meals: {0:0.##} day{9}\nBiomass:    {1:0.##}/{2:0.##}\nOrganic:  {3:0.##}/{4:0.##}\nRation:  {10:0.##}/{11:0.##}\nPowdered: {5:0.##}/{6:0.##}\nShakes:      {7:0.##}/{8:0.##}",
             days,    
-            bioC.CurrentAmount * Matter.Biomass.MealsPerCubicMeter(),
-            bioC.TotalCapacity * Matter.Biomass.MealsPerCubicMeter(),
-            organicC.CurrentAmount * Matter.OrganicMeals.MealsPerCubicMeter(),
-            organicC.TotalCapacity * Matter.OrganicMeals.MealsPerCubicMeter(),
-            powderC.CurrentAmount * Matter.MealPowders.MealsPerCubicMeter(),
-            powderC.TotalCapacity * Matter.MealPowders.MealsPerCubicMeter(),
-            shakeC.CurrentAmount * Matter.MealShakes.MealsPerCubicMeter(),
-            shakeC.TotalCapacity * Matter.MealShakes.MealsPerCubicMeter(),
+            bioC.CurrentAmount * Matter.Biomass.UnitsPerCubicMeter(),
+            bioC.TotalCapacity * Matter.Biomass.UnitsPerCubicMeter(),
+            organicC.CurrentAmount * Matter.OrganicMeals.UnitsPerCubicMeter(),
+            organicC.TotalCapacity * Matter.OrganicMeals.UnitsPerCubicMeter(),
+            powderC.CurrentAmount * Matter.MealPowders.UnitsPerCubicMeter(),
+            powderC.TotalCapacity * Matter.MealPowders.UnitsPerCubicMeter(),
+            shakeC.CurrentAmount * Matter.MealShakes.UnitsPerCubicMeter(),
+            shakeC.TotalCapacity * Matter.MealShakes.UnitsPerCubicMeter(),
             (days == 1) ? "" : "s",
-            rationC.CurrentAmount * Matter.RationMeals.MealsPerCubicMeter(),
-            rationC.TotalCapacity * Matter.RationMeals.MealsPerCubicMeter()
+            rationC.CurrentAmount * Matter.RationMeals.UnitsPerCubicMeter(),
+            rationC.TotalCapacity * Matter.RationMeals.UnitsPerCubicMeter()
             );
     }
 

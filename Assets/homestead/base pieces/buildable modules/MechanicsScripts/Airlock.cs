@@ -16,9 +16,10 @@ public class Airlock : GenericBaseModule, IDoorManager {
     public Collider TerrainCollider;
     public Color OnColor, OffColor;
     public SpriteRenderer PressurizedSprite, DepressurizedSprite;
+    public ParticleSystem pressure1, pressure2;
 
     public Transform OuterDoor, InnerDoor, PressurizeButton, DepressurizeButton;
-    public bool IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
+    public bool IsChangingPressure, IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
 
     private Animator OuterAnimator, InnerAnimator;
 
@@ -32,25 +33,44 @@ public class Airlock : GenericBaseModule, IDoorManager {
 
     private void RefreshDoorAndLightState()
     {
-        OuterDoor.name = IsPressurized ? LockedDoorName : ClosedDoorName;
-        InnerDoor.name = IsPressurized ? ClosedDoorName : LockedDoorName;
+        if (IsChangingPressure)
+        {
+            InnerDoor.name = OuterDoor.name = LockedDoorName;
+            PressurizedSprite.color = DepressurizedSprite.color = OffColor;
+        }
+        else
+        {
+            OuterDoor.name = IsPressurized ? LockedDoorName : ClosedDoorName;
+            InnerDoor.name = IsPressurized ? ClosedDoorName : LockedDoorName;
 
-        PressurizedSprite.color = IsPressurized ? OffColor : OnColor;
-        DepressurizedSprite.color = IsPressurized ? OnColor : OffColor;
+            PressurizedSprite.color = IsPressurized ? OffColor : OnColor;
+            DepressurizedSprite.color = IsPressurized ? OnColor : OffColor;
+        }
+
     }
 
     public void Pressurize()
     {
         //only allow it if door is sealed properly
-        if (LinkedHabitat != null && OuterDoorSealed && !IsPressurized)
+        if (LinkedHabitat != null && OuterDoorSealed && !IsPressurized && !IsChangingPressure)
         {
-            IsPressurized = true;
-            RefreshDoorAndLightState();
-            SurvivalTimer.Instance.EnterHabitat(LinkedHabitat);
-            SetPlayerTerrainCollision(true);
-            RefreshSealedButtons();
-            PlayerInput.Instance.FPSController.ToggleDustFootsteps(false);
+            StartCoroutine(StartPressurize());
         }
+    }
+
+    private IEnumerator StartPressurize()
+    {
+        IsChangingPressure = true;
+        pressure1.Play(); pressure2.Play();
+        yield return new WaitForSeconds(2f);
+        pressure1.Stop(); pressure2.Stop();
+        IsPressurized = true;
+        IsChangingPressure = false;
+        RefreshDoorAndLightState();
+        SurvivalTimer.Instance.EnterHabitat(LinkedHabitat);
+        SetPlayerTerrainCollision(true);
+        RefreshSealedButtons();
+        PlayerInput.Instance.FPSController.ToggleDustFootsteps(false);
     }
 
     private void SetPlayerTerrainCollision(bool doIgnore)

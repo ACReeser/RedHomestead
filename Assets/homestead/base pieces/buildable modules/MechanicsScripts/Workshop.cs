@@ -186,7 +186,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
         if (this.FlexData.CurrentCraftable != Craftable.Unspecified)
         {
             float moreHours = (SunOrbit.MartianSecondsPerGameSecond * deltaTime) / 60 / 60;
-            CraftableProgress += moreHours / Crafting.CraftData[this.FlexData.CurrentCraftable].BuildTime;
+            CraftableProgress += moreHours / Crafting.CraftData[this.FlexData.CurrentCraftable].BuildTimeHours;
 
             if (CraftableProgress >= 1)
             {
