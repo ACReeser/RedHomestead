@@ -110,7 +110,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
     {
         RaycastHit rayHit;
 
-        if (Physics.Raycast(new Ray(transform.position, transform.TransformDirection(Vector3.down)), out rayHit))
+        if (Physics.Raycast(new Ray(transform.position, transform.TransformDirection(Vector3.down)), out rayHit, 999f, LayerMask.GetMask("Default")))
         {
             return rayHit.distance;
         }
