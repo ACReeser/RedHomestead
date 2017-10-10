@@ -317,6 +317,13 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
 
         yield return DoFly(airborneLanderPosition, landedLanderLocalPosition);
 
+        bool turnedLightsOn = false;
+        if (Game.Current.Environment.CurrentHour > 20 || Game.Current.Environment.CurrentHour < 6)
+        {
+            this.LZ.ToggleLights(true);
+            turnedLightsOn = true;
+        }
+
         yield return DoFireRockets(airborneLanderHinge, landedLanderHinge);
 
         int i = 0;
@@ -361,8 +368,10 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         yield return new WaitForSeconds(DoorMoveDuration);
         doorSource.Stop();
 
-        movement = null;
+        if (turnedLightsOn)
+            this.LZ.ToggleLights(false);
 
+        movement = null;
     }
 
     /// <summary>

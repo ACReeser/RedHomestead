@@ -16,6 +16,7 @@ public class LandingZoneData: FacingData
 public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<LandingZoneData> {
     public static LandingZone Instance;
     public Transform bouncePrefab, landerPrefab;
+    public Light[] spotlights;
 
     private Transform currentLander;
 
@@ -36,8 +37,18 @@ public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<Landin
                 LZInstanceID = Guid.NewGuid().ToString()
             };
         }
+
+        ToggleLights(false);
     }
-	
+
+    public void ToggleLights(bool isOn)
+    {
+        foreach (var light in spotlights)
+        {
+            light.gameObject.SetActive( isOn );
+        }
+    }
+
     public void Deliver(Order o)
     {
         switch (o.Via)
