@@ -6,7 +6,7 @@ using RedHomestead.Industry;
 
 namespace RedHomestead.Simulation
 {
-    public enum ContainerSize { Quarter = 1, Full = 4 } //, Quadratic = 16 }
+    public enum ContainerSize { Custom = -1, Quarter = 1, Full = 4 } //, Quadratic = 16 }
 
     public enum Energy { Electrical, Thermal }
     
@@ -739,14 +739,16 @@ namespace RedHomestead.Simulation
         {
             this.Amount = initialAmountUnits;
             this.TotalCapacity = capacityUnits;
+            this.Size = ContainerSize.Custom;
         }
         public Container(float Units, ContainerSize size = ContainerSize.Full)
         {
             this.Amount = Units;
             this.TotalCapacity = (float)size / 4f;
+            this.Size = size;
         }
 
-        //Serializable
+        public readonly ContainerSize Size;
         public float TotalCapacity = 1f;
         [SerializeField]
         protected float Amount;

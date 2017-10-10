@@ -13,7 +13,9 @@ public class CargoLanderData: FacingData
     public string LZInstanceID;
     public ResourceUnitCountDictionary Delivery;
     public CargoLander.FlightState State;
-    public int BallisticAngle = -1;
+    public int BallisticAngle;
+    public float Altitude;
+
     [NonSerialized]
     public bool FromSave = true;
 }
@@ -27,8 +29,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
     private const float DoorMoveDuration = 2f;
 
     public enum FlightState { Landing = -1, Disabled, TakingOff = 1, Landed = 9 }
-
-
+    
     public static CargoLander Instance;
     
     public Transform LanderPivot, LanderHinge, Lander;
@@ -45,23 +46,46 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
     private Dictionary<TriggerForwarder, ResourceComponent> Bays;
     private bool rampsDown = false;
 
+    /// <summary>
+    /// Set the LineItems from the order O as arriving now at landing zone Z
+    /// </summary>
+    /// <param name="o"></param>
+    /// <param name="z"></param>
     internal void Deliver(Order o, LandingZone z)
     {
         this.LZ = z;
         this.transform.position = LZ.transform.position + Vector3.up * 2.25f;
         InitBays();
 
+        float minAltitude = LZ.transform.position.y + MinimumAltitude;
         this.Data = new CargoLanderData()
         {
             LZInstanceID = this.LZ.Data.LZInstanceID,
             Transform = this.transform,
             Delivery = o.LineItemUnits,
+            BallisticAngle = UnityEngine.Random.Range(0, 360),
+            Altitude = UnityEngine.Random.Range(minAltitude, minAltitude + AltitudeRangeAboveMinimum),
             FromSave = false //this gets called before Start, so this is a way to signal Start not to re-call Land()
         };
-        
+        InitHingePositions();
+
         Land();
     }
 
+    /// <summary>
+    /// Using Data, find pivot points from angle and altitude
+    /// </summary>
+    private void InitHingePositions()
+    {
+        LanderHinge.localPosition = new Vector3(Data.Altitude, 0, 0);
+        LanderPivot.localRotation = Quaternion.Euler(0f, Data.BallisticAngle, 0f);
+        airborneLanderPosition = new Vector3((float)(Data.Altitude * Math.Sqrt(2f)), Data.Altitude, 0);
+        landedLanderLocalPosition = new Vector3(0, Data.Altitude, 0f);
+    }
+
+    /// <summary>
+    /// Finds trigger forwarder children and adds them to the Bays dict
+    /// </summary>
     private void InitBays()
     {
         if (Bays == null)
@@ -75,17 +99,11 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
     }
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         Instance = this;
 
-        ramps = new DoorRotationLerpContext[Ramps.Length];
-        int i = 0;
-        foreach(Transform t in Ramps)
-        {
-            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f), DoorMoveDuration);
-            i++;
-        }
-
+        InitializeRamps();
         InitBays();
 
         rocketSource.clip = rocket;
@@ -100,29 +118,39 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         {
             LZ = FindObjectsOfType<LandingZone>().Where(x => x.Data.LZInstanceID == this.Data.LZInstanceID).FirstOrDefault();
 
-            if (Data.State == FlightState.Disabled)
-                Lander.gameObject.SetActive(false);
-            else
+            this.transform.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
+            InitHingePositions();
+            SetState(Data.State);
+            
+            switch (Data.State)
             {
-                this.Lander.gameObject.SetActive(true);
-                this.transform.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
-            }
-
-            if (Data.State == FlightState.Landing)
-                Land();
-            else if (Data.State == FlightState.Landed)
-            {
-                this.Lander.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
-                if (!rampsDown)
-                    ToggleAllRamps();
-            }
-            else if (Data.State == FlightState.TakingOff)
-            {
-                this.Lander.SetPositionAndRotation(this.Data.Position, this.Data.Rotation);
-                TakeOff();
+                case FlightState.Landing:
+                    Land();
+                    break;
+                case FlightState.Landed:
+                    if (!rampsDown)
+                        ToggleAllRamps();
+                    break;
+                case FlightState.TakingOff:
+                    TakeOff();
+                    break;
             }
         }
-	}
+    }
+
+    /// <summary>
+    /// Using the public Ramps array, create door rotate lerp contexts for them
+    /// </summary>
+    private void InitializeRamps()
+    {
+        ramps = new DoorRotationLerpContext[Ramps.Length];
+        int i = 0;
+        foreach (Transform t in Ramps)
+        {
+            ramps[i] = new DoorRotationLerpContext(t, t.localRotation, t.localRotation * Quaternion.Euler(0f, -150f, 0f), DoorMoveDuration);
+            i++;
+        }
+    }
 
     private Vector3 airborneLanderPosition, landedLanderLocalPosition;
     private Vector3 airborneLanderHinge = Vector3.zero;
@@ -131,6 +159,9 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
     private Coroutine countdownCoroutine;
     private Coroutine unsnapTimer;
 
+    /// <summary>
+    /// Public entry point for Landing sequence - starts coroutine
+    /// </summary>
     public void Land()
     {
         if (movement != null)
@@ -144,32 +175,27 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         movement = StartCoroutine(DoLand());
     }
 
-    private void CalculateAndPositionFlightArc()
-    {
-        if (Data.BallisticAngle < 0)
-            Data.BallisticAngle = UnityEngine.Random.Range(0, 360);
-
-        float minAltitude = LZ.transform.position.y + MinimumAltitude;
-        float startAltitude = UnityEngine.Random.Range(minAltitude, minAltitude + AltitudeRangeAboveMinimum);
-        LanderHinge.localPosition = new Vector3(startAltitude, 0, 0);
-        LanderPivot.localRotation = Quaternion.Euler(0f, Data.BallisticAngle, 0f);
-        airborneLanderPosition = new Vector3((float)(startAltitude * Math.Sqrt(2f)), startAltitude, 0);
-        landedLanderLocalPosition = new Vector3(0, startAltitude, 0f);
-    }
-
+    /// <summary>
+    /// Public entry point for Take Off sequence - starts coroutine
+    /// </summary>
     public void TakeOff()
     {
         if (movement != null)
             StopCoroutine(movement);
-        
-        CalculateAndPositionFlightArc();
 
+        SunOrbit.Instance.ResetToNormalTime();
         SetState(FlightState.TakingOff);
 
         movement = StartCoroutine(DoTakeOff());
+        countdownCoroutine = null;
     }
 
-
+    /// <summary>
+    /// Flies from startPos to endPos (up in the air)
+    /// </summary>
+    /// <param name="startPos"></param>
+    /// <param name="endPos"></param>
+    /// <returns></returns>
     private IEnumerator DoFly(Vector3 startPos, Vector3 endPos)
     {
         float time = 0f;
@@ -183,6 +209,13 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         Lander.localPosition = endPos;
     }
 
+    /// <summary>
+    /// fires rockets while rotating from startHinge to endHinge
+    /// </summary>
+    /// <param name="startHinge"></param>
+    /// <param name="endHinge"></param>
+    /// <param name="easeOut"></param>
+    /// <returns></returns>
     private IEnumerator DoFireRockets(Vector3 startHinge, Vector3 endHinge, bool easeOut = true)
     {
         float time = 0f;
@@ -223,21 +256,28 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
                 time += Time.deltaTime;
             }
         }
-        LanderHinge.localRotation = Quaternion.Euler(endHinge);
         RocketFire.Stop();
         RocketSmoke.Stop();
         rocketSource.Stop();
     }
 
+    /// <summary>
+    /// take off sequence
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator DoTakeOff()
     {
         yield return new WaitForSeconds(1f);
 
+        #region pre-takeoff ramps up
         doorSource.Play();
         if (rampsDown)
             ToggleAllRamps();
         yield return new WaitForSeconds(DoorMoveDuration);
         doorSource.Stop();
+        #endregion
+
+        //destroy any crates attached, POOF!
         foreach (var kvp in Bays)
         {
             if (kvp.Value != null)
@@ -246,6 +286,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
             }
         }
 
+        #region takeoff countdown
         for (int i = 0; i < 10; i++)
         {
             GuiBridge.Instance.ShowNews(NewsSource.LanderCountdown.CloneWithSuffix(": " + (10 - i) + "s"));
@@ -254,6 +295,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         var liftoffNews = NewsSource.LanderCountdown.CloneWithSuffix(": Liftoff");
         liftoffNews.DurationMilliseconds = 3000f;
         GuiBridge.Instance.ShowNews(liftoffNews);
+        #endregion
 
         yield return DoFireRockets(landedLanderHinge, airborneLanderHinge, false);
 
@@ -261,10 +303,13 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
 
         movement = null;
 
-        Data.State = FlightState.Disabled;
-        Lander.gameObject.SetActive(false);
+        SetState(FlightState.Disabled);
     }
 
+    /// <summary>
+    /// landing sequence
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator DoLand()
     {
         Lander.gameObject.SetActive(true);
@@ -319,29 +364,47 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
 
     }
 
+    /// <summary>
+    /// handles common state like hinge angles, lander position, lander enabled
+    /// </summary>
+    /// <param name="state"></param>
     private void SetState(FlightState state)
     {
         Data.State = state;
+
+        Lander.gameObject.SetActive(state != FlightState.Disabled);
+
+        Quaternion effectiveLanderHingeLocalRotation = Quaternion.identity;
+        Vector3 effectiveLanderLocalPosition = Vector3.zero;
+
         switch (state)
         {
             case FlightState.Landing:
-                LanderHinge.localRotation = Quaternion.identity;
-                CalculateAndPositionFlightArc();
-                Lander.localPosition = airborneLanderPosition;
-                Data.State = FlightState.Landing;
+                effectiveLanderHingeLocalRotation = Quaternion.Euler(airborneLanderHinge);
+                effectiveLanderLocalPosition      = airborneLanderPosition;
                 break;
             case FlightState.Landed:
-                Lander.localPosition = landedLanderLocalPosition;
+                effectiveLanderHingeLocalRotation = Quaternion.Euler(landedLanderHinge);
+                effectiveLanderLocalPosition      = landedLanderLocalPosition;
                 break;
             case FlightState.TakingOff:
-                Lander.localPosition = landedLanderLocalPosition;
+                effectiveLanderHingeLocalRotation = Quaternion.Euler(landedLanderHinge);
+                effectiveLanderLocalPosition      = landedLanderLocalPosition;
                 break;
         }
+
+        LanderHinge.localRotation = effectiveLanderHingeLocalRotation;
+        Lander.localPosition = effectiveLanderLocalPosition;
     }
 
+    /// <summary>
+    /// toggles all ramps
+    /// </summary>
     private void ToggleAllRamps()
     {
         rampsDown = !rampsDown;
+
+        //unrolled loop for performance
         ramps[0].Toggle(StartCoroutine);
         ramps[1].Toggle(StartCoroutine);
         ramps[2].Toggle(StartCoroutine);
@@ -371,12 +434,9 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
             }
         }
 
-        if (Data.State == FlightState.Landed)
+        if (Data.State == FlightState.Landed && countdownCoroutine == null && Bays.Values.All(x => x == null))
         {
-            if (Bays.Values.All(x => x == null))
-            {
-                countdownCoroutine = StartCoroutine(BeginCountdown());
-            }
+            countdownCoroutine = StartCoroutine(BeginCountdown());
         }
 
         unsnapTimer = StartCoroutine(detachTimer());
@@ -388,12 +448,16 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         unsnapTimer = null;
     }
 
+    /// <summary>
+    /// precursor countdown to takeoff
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator BeginCountdown()
     {
         var oneHour = NewsSource.LanderCountdown.CloneWithSuffix(": 1hr");
         oneHour.DurationMilliseconds = 3000f;
         GuiBridge.Instance.ShowNews(oneHour);
-        yield return new WaitForSeconds(60f);
+        yield return new WaitForSeconds(SunOrbit.GameSecondsPerMartianMinute*60f);
         TakeOff();
     }
 }

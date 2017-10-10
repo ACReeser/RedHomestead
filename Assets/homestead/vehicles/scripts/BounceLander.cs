@@ -229,7 +229,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         }
     }
 
-    public static Vector3 HalfSize = new Vector3(.5f, .5f, .5f);
+    public static Vector3 HalfSizeQuarterVolume = new Vector3(.5f, .5f, .5f);
     public static Transform CreateCratelike(Matter matter, float amount, Vector3 position, Transform parent = null, ContainerSize size = ContainerSize.Full)
     {
         Transform newT = Instantiate(EconomyManager.Instance.GetResourceCratePrefab(matter));
@@ -240,7 +240,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         switch (size)
         {
             case ContainerSize.Quarter:
-                newT.localScale = HalfSize;
+                newT.localScale = HalfSizeQuarterVolume;
                 break;
         }
 

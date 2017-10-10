@@ -531,8 +531,8 @@ namespace RedHomestead.Persistence
                 Transform t = GameObject.Instantiate(EconomyManager.Instance.GetResourceCratePrefab(data.Container.MatterType), data.Position, data.Rotation) as Transform;
                 ResourceComponent r = t.GetComponent<ResourceComponent>();
                 r.Data = data;
-                if (r.Data.Container.AvailableCapacity < 1f)
-                    t.localScale = BounceLander.HalfSize;
+                if (r.Data.Container.Size == ContainerSize.Quarter)
+                    t.localScale = BounceLander.HalfSizeQuarterVolume;
             }
         }
 
