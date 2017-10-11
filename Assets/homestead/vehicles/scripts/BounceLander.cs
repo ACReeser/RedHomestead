@@ -200,6 +200,8 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         }
 
         GameObject.Destroy(this.gameObject);
+        CreateCratelike(Matter.Canvas, .5f, this.transform.position + Vector3.left * 2f);
+        CreateCratelike(Matter.Aluminium, .15f, this.transform.position + Vector3.right * 2f);
     }
 
     public void Deliver(Order o)
