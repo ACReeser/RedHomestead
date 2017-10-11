@@ -231,7 +231,7 @@ public class MainMenu : MonoBehaviour {
     private string lastPlayerName;
     private string[] savedPlayerNames;
 
-    internal NewGameChoices NewGameChoices;
+    internal NewGameChoices NewGameChoices = new NewGameChoices();
 
 	// Use this for initialization
 	void Start ()

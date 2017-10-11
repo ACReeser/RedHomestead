@@ -78,14 +78,15 @@ public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<Landin
         int totalN = 0;
         foreach(KeyValuePair<Matter, int> supply in supplies)
         {
-            int amountToSpawn = supply.Value;
-            while (amountToSpawn > 0)
+            float totalAmountToSpawnVolume = supply.Key.CubicMetersPerUnit() * supply.Value;
+            while (totalAmountToSpawnVolume > 0)
             {
                 Vector3 position = GetSpiralPosition(totalN);
-                BounceLander.CreateCratelike(supply.Key, 1f, position);
+                float amountToSpawnVolume = Mathf.Min(1f, totalAmountToSpawnVolume);
+                BounceLander.CreateCratelike(supply.Key, amountToSpawnVolume, position);
 
                 totalN++;
-                amountToSpawn--;
+                totalAmountToSpawnVolume -= amountToSpawnVolume;
             }
         }
         foreach (KeyValuePair<Craftable, int> craftable in craftables)

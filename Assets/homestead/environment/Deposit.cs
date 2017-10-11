@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using RedHomestead.Persistence;
+using RedHomestead.Geography;
 
 [Serializable]
 public class DepositData : FacingData
@@ -38,7 +39,18 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
         FlowManager.Instance.DepositMap.Add(data.DepositInstanceID, this);
 
         if (this.data.Purity < 0f)
+        {
             this.data.Purity = this.data.Extractable.MatterType.RandomPurity();
+            MarsRegionData regionData = Base.Current.Region.Data();
+            if (this.data.Extractable.MatterType == Matter.Water)
+            {
+                this.data.Purity *= regionData.WaterMultiplier;
+            }
+            else
+            {
+                this.data.Purity *= regionData.MineralMultiplier;
+            }
+        }
     }
 
     public void DetachCrate(IMovableSnappable detaching)

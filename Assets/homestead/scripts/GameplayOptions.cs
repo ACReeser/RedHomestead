@@ -11,7 +11,16 @@ using RedHomestead.Buildings;
 
 namespace RedHomestead.GameplayOptions
 {
-    public struct NewGameChoices
+    public class BoughtMatter: Dictionary<Matter, int>
+    {
+        public void Set(Matter m, int input)
+        {
+            this[m] = input;
+        }
+    }
+
+
+    public class NewGameChoices
     {
         public Perk ChosenPlayerTraining;
         public string HomesteadName, PlayerName;
@@ -19,13 +28,13 @@ namespace RedHomestead.GameplayOptions
         public BaseLocation ChosenLocation;
         public int StartingFunds, AllocatedFunds, RemainingFunds;
         public bool BuyRover;
-        public Dictionary<Matter, int> BoughtMatter;
+        public BoughtMatter BoughtMatter;
         public Dictionary<Craftable, int> BoughtCraftables;
 
         public void Init()
         {
             PlayerName = "Everyman";
-            BoughtMatter = new Dictionary<Matter, int>();
+            BoughtMatter = new BoughtMatter();
             BoughtCraftables = new Dictionary<Craftable, int>();
             ChosenFinancing = BackerFinancing.Government;
             ChosenPlayerTraining = Perk.Athlete;
@@ -89,15 +98,20 @@ namespace RedHomestead.GameplayOptions
             }
         }
 
-        private void AddOrIncrement<K>(Dictionary<K, int> dictionary, K key, int addition)
+        private void AddOrIncrementVolume(Dictionary<Matter, int> dictionary, Matter key, float addition)
+        {
+            AddOrIncrement<Matter>(dictionary, key, Mathf.CeilToInt(addition * key.CubicMetersPerUnit()));
+        }
+
+        private void AddOrIncrement<K>(Dictionary<K, int> dictionary, K key, int additionUnits)
         {
             if (dictionary.ContainsKey(key))
             {
-                dictionary[key] += addition;
+                dictionary[key] += additionUnits;
             }
             else
             {
-                dictionary[key] = addition;
+                dictionary[key] = additionUnits;
             }
         }
 
@@ -109,13 +123,13 @@ namespace RedHomestead.GameplayOptions
                 {
                     default:
                     case BackerFinancing.Government:
-                        AddOrIncrement(BoughtMatter, Matter.RationMeals, 1);
+                        AddOrIncrement(BoughtMatter, Matter.RationMeals, 7 * 3);
                         break;
                     case BackerFinancing.TechCorp:
-                        AddOrIncrement(BoughtMatter, Matter.SiliconWafers, 8);
+                        AddOrIncrement(BoughtMatter, Matter.SolarPanels, 4);
                         break;
                     case BackerFinancing.IndustryCorp:
-                        AddOrIncrement(BoughtMatter, Matter.Steel, 10);
+                        AddOrIncrement(BoughtMatter, Matter.IronPowder, 4);
                         break;
                     case BackerFinancing.Benefactor:
                         AddSuppliesFromModule(Module.SmallGasTank);
@@ -128,9 +142,13 @@ namespace RedHomestead.GameplayOptions
         internal void LoadQuickstart()
         {
             this.Init();
-            AddOrIncrement(BoughtMatter, Matter.RationMeals, 1);
-            AddOrIncrement(BoughtMatter, Matter.Water, 2);
-            AddOrIncrement(BoughtMatter, Matter.Oxygen, 2);
+            BoughtMatter.Set(Matter.RationMeals, 1);
+            ChosenLocation = new BaseLocation()
+            {
+                Region = MarsRegion.meridiani_planum
+            };
+            AddOrIncrementVolume(BoughtMatter, Matter.Water, 2);
+            AddOrIncrementVolume(BoughtMatter, Matter.Oxygen, 2);
             this.AddSuppliesFromModule(Module.SmallGasTank);
             this.AddSuppliesFromModule(Module.SabatierReactor);
 

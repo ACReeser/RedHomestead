@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using RedHomestead.Persistence;
+using RedHomestead.GameplayOptions;
 
 public class Autosave : MonoBehaviour
 {
@@ -15,18 +16,22 @@ public class Autosave : MonoBehaviour
         if (Game.Current == null)
         {
             print("Starting new game for editor session");
+            var boughtMatter = new BoughtMatter();
+            boughtMatter.Set(RedHomestead.Simulation.Matter.Water, 1);
+            boughtMatter.Set(RedHomestead.Simulation.Matter.Oxygen, 1);
+            boughtMatter.Set(RedHomestead.Simulation.Matter.Hydrogen, 2);
+
             PersistentDataManager.StartNewGame(new RedHomestead.GameplayOptions.NewGameChoices() {
                 PlayerName = "Ares",
+                ChosenLocation = new RedHomestead.Geography.BaseLocation()
+                {
+                    Region = RedHomestead.Geography.MarsRegion.meridiani_planum
+                },
                 ChosenFinancing = RedHomestead.Economy.BackerFinancing.Government,
                 BuyRover = true,
                 ChosenPlayerTraining = RedHomestead.Perks.Perk.Athlete,
                 RemainingFunds = 1000000,
-                BoughtMatter = new System.Collections.Generic.Dictionary<RedHomestead.Simulation.Matter, int>()
-                {
-                    { RedHomestead.Simulation.Matter.Water, 1 },
-                    { RedHomestead.Simulation.Matter.Oxygen, 1 },
-                    { RedHomestead.Simulation.Matter.Hydrogen, 2 }
-                },
+                BoughtMatter = boughtMatter,
                 BoughtCraftables = new System.Collections.Generic.Dictionary<RedHomestead.Crafting.Craftable, int>()
             });
         }

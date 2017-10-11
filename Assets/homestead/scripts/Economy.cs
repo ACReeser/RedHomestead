@@ -175,10 +175,10 @@ namespace RedHomestead.Economy{
 
         public static Dictionary<Matter, StartingSupplyData> StartingSupplies = new Dictionary<Matter, StartingSupplyData>()
         {
-            { Matter.RationMeals, new StartingSupplyData("1 Week Food", 50000, Matter.RationMeals) },
+            { Matter.RationMeals, new StartingSupplyData("1 Ration Meal", 1000, Matter.RationMeals) },
             { Matter.Water, new StartingSupplyData("1 Week Water", 100000, Matter.Water) },
             { Matter.Oxygen, new StartingSupplyData("Oxygen", 100000, Matter.Oxygen) },
-            { Matter.SiliconWafers, new StartingSupplyData("Solar Panels", 100000, Matter.SiliconWafers) },
+            { Matter.SolarPanels, new StartingSupplyData("Solar Panels", 100000, Matter.SolarPanels) },
             { Matter.Canvas, new StartingSupplyData("Canvas", 100000, Matter.Canvas) },
             { Matter.IronPowder, new StartingSupplyData("Iron Powder", 200000, Matter.IronPowder) },
             { Matter.IronSheeting, new StartingSupplyData("Iron Sheeting", 200000, Matter.IronSheeting) },

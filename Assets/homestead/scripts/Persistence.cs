@@ -10,6 +10,7 @@ using RedHomestead.Economy;
 using RedHomestead.GameplayOptions;
 using RedHomestead.Scoring;
 using RedHomestead.Simulation;
+using RedHomestead.Geography;
 
 namespace RedHomestead.Persistence
 {
@@ -235,6 +236,8 @@ namespace RedHomestead.Persistence
 
         public string Name;
         public int WeatherSeed;
+        public MarsRegion Region;
+        public LatLong LatLong;
         public CrateData[] Crates;
         public HabitatExtraData[] Habitats;
         public ConstructionData[] ConstructionZones;
@@ -753,6 +756,8 @@ namespace RedHomestead.Persistence
                     new Base(true)
                     {
                         Name = choices.HomesteadName,
+                        Region = choices.ChosenLocation.Region,
+                        LatLong = choices.ChosenLocation.LatLong,
                         InitialMatterPurchase = choices.BoughtMatter,
                         InitialCraftablePurchase = choices.BoughtCraftables,
                         Crates = new CrateData[] { },
