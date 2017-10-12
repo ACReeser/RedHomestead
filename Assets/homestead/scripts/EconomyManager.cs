@@ -19,6 +19,10 @@ public class EconomyManager : MonoBehaviour
 #warning todo: make crate/vessel the same prefab, just swap out meshes
     public Transform ResourceCratePrefab, ResourceVesselPrefab, ResourceTankPrefab;
     public Transform[] CraftablePrefabs;
+    public Transform[] DepositPrefabs;
+    public Texture2D[] DepositAbundanceTextures; 
+    public Terrain terrain;
+
 
     public float MinutesUntilPayday = SunOrbit.MartianMinutesPerDay * 7f;
     public AudioClip IncomingDelivery, BuyerFoundForGoods;
@@ -58,12 +62,86 @@ public class EconomyManager : MonoBehaviour
 
         randomIncomeGenerator = new System.Random(Game.Current.Player.WeeklyIncomeSeed);
         NextPayDayAmount = FastForward(Game.Current.Environment.CurrentSol);
+
+        if (Game.Current.IsNewGame)
+        {
+            SeedDeposits();
+        }
     }
+
 
     void OnDestroy()
     {
         SunOrbit.Instance.OnHourChange -= OnHourChange;
         SunOrbit.Instance.OnSolChange -= OnSolChange;
+    }
+
+    private void SeedDeposits()
+    {
+        int numDepositTypes = DepositPrefabs.Length;
+        int numDeposits = 50;
+        float xScale = terrain.terrainData.size.x / 128;
+        float yScale = terrain.terrainData.size.y / 128;
+        for (int i = 0; i < numDeposits; i++)
+        {
+            int depositIndex = UnityEngine.Random.Range(0, numDepositTypes);
+            int x, y;
+            GetXY(depositIndex, out x, out y);
+            Vector3 worldspaceLocation = new Vector3(
+                UnityEngine.Random.Range(x * xScale, (x + 1) * xScale),
+                terrain.terrainData.size.y,
+                UnityEngine.Random.Range(y * yScale, (y + 1) * yScale)
+            ) + terrain.transform.position;
+            //http://answers.unity3d.com/questions/18397/get-height-of-terrain-in-script.html
+            worldspaceLocation.y = terrain.SampleHeight(worldspaceLocation);
+
+            //we're trying not to use raycasts...
+            //RaycastHit hitInfo;
+            //if (Physics.Raycast(worldspaceLocation, Vector3.down, out hitInfo) && hitInfo.collider.transform.CompareTag("terrain"))
+            //{
+            //    GameObject.Instantiate(DepositPrefabs[i], hitInfo.point, hitInfo.no)
+            //}
+
+            Transform newlyBornDeposit = GameObject.Instantiate(DepositPrefabs[depositIndex], worldspaceLocation, Quaternion.identity);
+            //http://answers.unity3d.com/questions/8867/how-to-get-quaternionfromtorotation-and-hitnormal.html
+            Vector3 sample = SampleNormal(worldspaceLocation);
+            Vector3 proj = newlyBornDeposit.forward - (Vector3.Dot(newlyBornDeposit.forward, sample)) * sample;
+            newlyBornDeposit.rotation = Quaternion.LookRotation(proj, sample);
+        }
+    }
+    private Vector3 SampleNormal(Vector3 position)
+    {
+        var terrainLocalPos = position - terrain.transform.position;
+        var normalizedPos = new Vector2(
+            Mathf.InverseLerp(0f, terrain.terrainData.size.x, terrainLocalPos.x),
+            Mathf.InverseLerp(0f, terrain.terrainData.size.z, terrainLocalPos.z)
+        );
+        var terrainNormal = terrain.terrainData.GetInterpolatedNormal(normalizedPos.x, normalizedPos.y);
+
+        return terrainNormal;
+    }
+
+    private void GetXY(int i, out int x, out int y)
+    {
+        bool acceptable = false;
+        do
+        {
+            x = UnityEngine.Random.Range(0, 128);
+            y = UnityEngine.Random.Range(0, 128);
+
+            //threshold of 
+            float threshold = DepositAbundanceTextures[i].GetPixel(x, y).grayscale;
+            if (threshold > 0f)
+            {
+                float roll = UnityEngine.Random.Range(0f, 1f);
+                acceptable =  roll < threshold;
+
+                if (acceptable)
+                    print("threshold of " + threshold + " at " + x + "," + y);
+                else
+                    print("reroll: "+roll+"<"+threshold);
+            }
+        } while (!acceptable);
     }
 
     private void OnSolChange(int sol)
