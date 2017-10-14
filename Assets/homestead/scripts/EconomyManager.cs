@@ -5,11 +5,15 @@ using System;
 using RedHomestead.Simulation;
 using RedHomestead.Persistence;
 using System.Collections.Generic;
+using RedHomestead.Geography;
+using System.Linq;
 
 public class EconomyManager : MonoBehaviour
 {
     public delegate void EconomyHandler();
 
+    private const int AbundantMatterDepositNumberMultiplier = 2;
+    private const int AbundanceMapPixelSize = 128;
     public static EconomyManager Instance;
 
     public event EconomyHandler OnBankAccountChange;
@@ -76,39 +80,93 @@ public class EconomyManager : MonoBehaviour
         SunOrbit.Instance.OnSolChange -= OnSolChange;
     }
 
+    /// <summary>
+    /// each number is the number of deposits of each type, indexed by AbundantMatter enum
+    /// </summary>
+    private static int[] defaultDepositsByMatterType = new int[] { 25, 20, 15, 10, 10, 10, 10 };
+
     private void SeedDeposits()
     {
-        int numDepositTypes = DepositPrefabs.Length;
-        int numDeposits = 50;
-        float xScale = terrain.terrainData.size.x / 128;
-        float yScale = terrain.terrainData.size.y / 128;
-        for (int i = 0; i < numDeposits; i++)
+        //used to tell how many deposit types we have
+        int numDepositTypes = defaultDepositsByMatterType.Length;
+        //used to calculate non-abundant penalty
+        int numDeposits = defaultDepositsByMatterType.Sum();
+        //xScale and yScale turn our 128 bit abundance map pixel locations into real-world positions
+        float xScale = terrain.terrainData.size.x / AbundanceMapPixelSize;
+        float yScale = terrain.terrainData.size.y / AbundanceMapPixelSize;
+
+        //this array is indexed by AbundantMatter, and each value is the number of deposits of that type we will make
+        int[] numberDepositsByMatterType = new int[numDepositTypes];
+        defaultDepositsByMatterType.CopyTo(numberDepositsByMatterType, 0); //copy in the defaults to this array
+
+        AbundantMatter bonusAbundanceType = Base.Current.Region.Data().AbundantMatter;
+        int bonusAbundanceIndex = (int)bonusAbundanceType;
+        //default abundance bonus is 100% more or 2x multiplier
+        //e.g. default 20 iron deposits becomes 40
+        int totalNumberOfAbundantDeposits = numberDepositsByMatterType[bonusAbundanceIndex] * AbundantMatterDepositNumberMultiplier;
+        //we want to keep the total number of deposits constant for performance reasons
+        //so keep track of how many deposit "slots" this doubling has used
+        int numberOfStolenDeposits = totalNumberOfAbundantDeposits - numberDepositsByMatterType[bonusAbundanceIndex];
+        numberDepositsByMatterType[bonusAbundanceIndex] = totalNumberOfAbundantDeposits;
+
+        #region non-abundant rebalance      
+        //calculate a number to subtract from all the other deposit types  
+        //in order to keep the # of deposits the same
+        int nonabundantDepositNumberPenalty = Mathf.FloorToInt(numberOfStolenDeposits / (numDepositTypes - 1));
+        //note: this penalizes smaller abundance deposits more the more normally abundant the abundant matter is
+        //e.g. more Water means a lot less aluminium, and still a lot of iron
+        for (int i = 0; i < numberDepositsByMatterType.Length; i++)
         {
-            int depositIndex = UnityEngine.Random.Range(0, numDepositTypes);
-            int x, y;
-            GetXY(depositIndex, out x, out y);
-            Vector3 worldspaceLocation = new Vector3(
-                UnityEngine.Random.Range(x * xScale, (x + 1) * xScale),
-                terrain.terrainData.size.y,
-                UnityEngine.Random.Range(y * yScale, (y + 1) * yScale)
-            ) + terrain.transform.position;
-            //http://answers.unity3d.com/questions/18397/get-height-of-terrain-in-script.html
-            worldspaceLocation.y = terrain.SampleHeight(worldspaceLocation);
+            if (i != bonusAbundanceIndex)
+            {
+                numberDepositsByMatterType[i] -= nonabundantDepositNumberPenalty;
+            }
+        }
+        #endregion
 
-            //we're trying not to use raycasts...
-            //RaycastHit hitInfo;
-            //if (Physics.Raycast(worldspaceLocation, Vector3.down, out hitInfo) && hitInfo.collider.transform.CompareTag("terrain"))
-            //{
-            //    GameObject.Instantiate(DepositPrefabs[i], hitInfo.point, hitInfo.no)
-            //}
+        //for each type of deposit
+        for (int depositTypeIndex = 0; depositTypeIndex < numDepositTypes; depositTypeIndex++)
+        {
+            AbundantMatter depositType = (AbundantMatter)depositTypeIndex;
+            int numberDepositsOfThisType = numberDepositsByMatterType[depositTypeIndex];
 
-            Transform newlyBornDeposit = GameObject.Instantiate(DepositPrefabs[depositIndex], worldspaceLocation, Quaternion.identity);
-            //http://answers.unity3d.com/questions/8867/how-to-get-quaternionfromtorotation-and-hitnormal.html
-            Vector3 sample = SampleNormal(worldspaceLocation);
-            Vector3 proj = newlyBornDeposit.forward - (Vector3.Dot(newlyBornDeposit.forward, sample)) * sample;
-            newlyBornDeposit.rotation = Quaternion.LookRotation(proj, sample);
+            //for each number of deposits
+            for (int depositIndex = 0; depositIndex < numberDepositsOfThisType; depositIndex++)
+            {
+                int x, y;
+                GetXY(Convert.ToInt32(depositType), out x, out y);
+                //turn that low-res texture coordinate into a high res one
+                Vector3 worldspaceLocation = new Vector3(
+                    UnityEngine.Random.Range(x * xScale, (x + 1) * xScale), //by getting a random float in the same "sector" for x
+                    terrain.terrainData.size.y,
+                    UnityEngine.Random.Range(y * yScale, (y + 1) * yScale) //and z
+                ) + terrain.transform.position; //and make these positions relative to the terrain itself
+
+                //then set the Y altitude by sampling the height at that location
+                //http://answers.unity3d.com/questions/18397/get-height-of-terrain-in-script.html
+                worldspaceLocation.y = terrain.SampleHeight(worldspaceLocation);
+
+                //notice we are not using raycasts! hooray because those are expensive
+                //RaycastHit hitInfo;
+                //if (Physics.Raycast(worldspaceLocation, Vector3.down, out hitInfo) && hitInfo.collider.transform.CompareTag("terrain"))
+                //{
+                //    GameObject.Instantiate(DepositPrefabs[i], hitInfo.point, hitInfo.no)
+                //}
+
+                //now that we have our random worldspace coordinate, create our deposit
+                Transform newlyBornDeposit = GameObject.Instantiate(DepositPrefabs[Convert.ToInt32(depositType)], worldspaceLocation, Quaternion.identity);
+
+                //and align it to the terrain by sampling the normal
+                //http://answers.unity3d.com/questions/8867/how-to-get-quaternionfromtorotation-and-hitnormal.html
+                Vector3 sample = SampleNormal(worldspaceLocation);
+                //and projecting it 
+                Vector3 proj = newlyBornDeposit.forward - (Vector3.Dot(newlyBornDeposit.forward, sample)) * sample;
+                //before turning it into a look rotation
+                newlyBornDeposit.rotation = Quaternion.LookRotation(proj, sample);
+            }
         }
     }
+
     private Vector3 SampleNormal(Vector3 position)
     {
         var terrainLocalPos = position - terrain.transform.position;
@@ -121,25 +179,36 @@ public class EconomyManager : MonoBehaviour
         return terrainNormal;
     }
 
-    private void GetXY(int i, out int x, out int y)
+    /// <summary>
+    /// Given a deposit type index, return a random x and y (from 0 to 128, the size of our abundance maps)
+    /// </summary>
+    /// <param name="depositAbundanceIndex"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    private void GetXY(int depositAbundanceIndex, out int x, out int y)
     {
         bool acceptable = false;
         do
         {
-            x = UnityEngine.Random.Range(0, 128);
-            y = UnityEngine.Random.Range(0, 128);
+            x = UnityEngine.Random.Range(0, AbundanceMapPixelSize);
+            y = UnityEngine.Random.Range(0, AbundanceMapPixelSize);
 
-            //threshold of 
-            float threshold = DepositAbundanceTextures[i].GetPixel(x, y).grayscale;
+            //the threshold is given by the grayscale of the texture
+            float threshold = DepositAbundanceTextures[depositAbundanceIndex].GetPixel(x, y).grayscale;
+            //if there is a chance (it is not black)
             if (threshold > 0f)
             {
+                //make a random 0 to 1 roll
                 float roll = UnityEngine.Random.Range(0f, 1f);
+                //and allow a deposit here if the roll is below the threshold
+                //this means a white pixel (threshold 1) will always allow a deposit
+                //and progressively darker pixels will allow less chance of one
                 acceptable =  roll < threshold;
 
-                if (acceptable)
-                    print("threshold of " + threshold + " at " + x + "," + y);
-                else
-                    print("reroll: "+roll+"<"+threshold);
+                //if (acceptable)
+                //    print("threshold of " + threshold + " at " + x + "," + y);
+                //else
+                //    print("reroll: "+roll+"<"+threshold);
             }
         } while (!acceptable);
     }

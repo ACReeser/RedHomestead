@@ -47,9 +47,9 @@ namespace RedHomestead.Geography
         public float SolarMultiplier;
         public float MineralMultiplier;
         public float WaterMultiplier;
-        public Matter AbundantMatter;
+        public AbundantMatter AbundantMatter;
 
-        public MarsRegionData(float solar, float mineral, float water, Matter abundant)
+        public MarsRegionData(float solar, float mineral, float water, AbundantMatter abundant)
         {
             this.SolarMultiplier = solar;
             this.MineralMultiplier = mineral;
@@ -124,71 +124,71 @@ namespace RedHomestead.Geography
         private static MarsRegionData[] _regionData = new MarsRegionData[]
         {
             //acidalia_planitia,
-            new MarsRegionData(1f, 1f, 1.25f, Matter.Silica), //mid latitude, glacier ice
+            new MarsRegionData(1f, 1f, 1.25f, AbundantMatter.Silica), //mid latitude, glacier ice
             //alba_mons,
-            new MarsRegionData(.8f, 1.25f, .8f, Matter.Iron), //high dust, water in soil
+            new MarsRegionData(.8f, 1.25f, .8f, AbundantMatter.Iron), //high dust, water in soil
             //amazonis_planitia,
-            new MarsRegionData(1.25f, 1f, 1.1f, Matter.Silica), //equatorial, dark streaks
+            new MarsRegionData(1.25f, 1f, 1.1f, AbundantMatter.Silica), //equatorial, dark streaks
             //aonia_terra,
-            new MarsRegionData(.8f, 1.15f, 1.1f, Matter.Iron), //near polar, rough terrain
+            new MarsRegionData(.8f, 1.15f, 1.1f, AbundantMatter.Iron), //near polar, rough terrain
             //arabia_terra,
-            new MarsRegionData(1.25f, 1.15f, 1.1f, Matter.Iron), //equatorial, rough terrain
+            new MarsRegionData(1.25f, 1.15f, 1.1f, AbundantMatter.Iron), //equatorial, rough terrain
             //arcadia_planitia,
-            new MarsRegionData(.8f, 1f, 1.1f, Matter.Iron), //near polar, water in craters
+            new MarsRegionData(.8f, 1f, 1.1f, AbundantMatter.Iron), //near polar, water in craters
             //argyre_planitia,
-            new MarsRegionData(.8f, 1.25f, 1.1f, Matter.Iron), //near polar, impact crater, ancient lake
+            new MarsRegionData(.8f, 1.25f, 1.1f, AbundantMatter.Iron), //near polar, impact crater, ancient lake
             //chryse_planitia,
-            new MarsRegionData(1.25f, 1f, 1f, Matter.Iron), //equatorial
+            new MarsRegionData(1.25f, 1f, 1f, AbundantMatter.Iron), //equatorial
             //daedalia_planum,
-            new MarsRegionData(1f, 1f, .8f, Matter.Iron), //mid latitude, planum, featureless
+            new MarsRegionData(1f, 1f, .8f, AbundantMatter.Iron), //mid latitude, planum, featureless
             //elysium_mons,
-            new MarsRegionData(1f, 1.25f, .6f, Matter.Iron), //mid latitude, mountain
+            new MarsRegionData(1f, 1.25f, .6f, AbundantMatter.Iron), //mid latitude, mountain
             //elysium_planitia,
-            new MarsRegionData(1.25f, 1f, 1.25f, Matter.Iron), //equatorial, water ice in photos
+            new MarsRegionData(1.25f, 1f, 1.25f, AbundantMatter.Iron), //equatorial, water ice in photos
             //hellas_planitia,
-            new MarsRegionData(.8f, 1.25f, 1.25f, Matter.Iron), //near polar, impact crater, water can be liquid
+            new MarsRegionData(.8f, 1.25f, 1.25f, AbundantMatter.Iron), //near polar, impact crater, water can be liquid
             //hesperia_planum,
-            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            new MarsRegionData(1f, 1.1f, 1f, AbundantMatter.Iron), //mid latitude, impact craters
             //lunae_planum,
-            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, impact craters
+            new MarsRegionData(1.25f, 1.1f, 1f, AbundantMatter.Iron), //equatorial, impact craters
             //meridiani_planum,
-            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, high iron content
+            new MarsRegionData(1.25f, 1.1f, 1f, AbundantMatter.Iron), //equatorial, high iron content
             //noachis_terra,
-            new MarsRegionData(.8f, 1.1f, 1f, Matter.Iron), //near polar, rough terrain
+            new MarsRegionData(.8f, 1.1f, 1f, AbundantMatter.Iron), //near polar, rough terrain
             //north_pole,
-            new MarsRegionData(.25f, .5f, 2f, Matter.Water), //pole
+            new MarsRegionData(.25f, .5f, 2f, AbundantMatter.Water), //pole
             //olympus_mons,
-            new MarsRegionData(1f, 1.5f, .8f, Matter.Iron), //equatorial, mountain
+            new MarsRegionData(1f, 1.5f, .8f, AbundantMatter.Iron), //equatorial, mountain
             //planum_australe,
-            new MarsRegionData(.5f, 1.1f, 1.5f, Matter.Iron), //polar, rough
+            new MarsRegionData(.5f, 1.1f, 1.5f, AbundantMatter.Iron), //polar, rough
             //promethei_terra,
-            new MarsRegionData(.8f, 1.1f, 1.1f, Matter.Water), //near polar, rough
+            new MarsRegionData(.8f, 1.1f, 1.1f, AbundantMatter.Water), //near polar, rough
             //south_pole,
-            new MarsRegionData(.25f, .75f, 1.75f, Matter.Water), //pole
+            new MarsRegionData(.25f, .75f, 1.75f, AbundantMatter.Water), //pole
             //syria_thaumasia,
-            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            new MarsRegionData(1f, 1.1f, 1f, AbundantMatter.Iron), //mid latitude, impact craters
             //syrtis_major_planum,
-            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, impact craters
+            new MarsRegionData(1.25f, 1.1f, 1f, AbundantMatter.Iron), //equatorial, impact craters
             //tempe_terra,
-            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            new MarsRegionData(1f, 1.1f, 1f, AbundantMatter.Iron), //mid latitude, impact craters
             //terra_cimmeria,
-            new MarsRegionData(1f, 1.1f, 1f, Matter.Iron), //mid latitude, impact craters
+            new MarsRegionData(1f, 1.1f, 1f, AbundantMatter.Iron), //mid latitude, impact craters
             //terra_sabaea,
-            new MarsRegionData(1.25f, 1.25f, 1f, Matter.Iron), //equatorial, many impact craters
+            new MarsRegionData(1.25f, 1.25f, 1f, AbundantMatter.Iron), //equatorial, many impact craters
             //terra_sirenum,
-            new MarsRegionData(1.15f, 1.1f, 1f, Matter.Iron), //mid to polar latitude, impact craters
+            new MarsRegionData(1.15f, 1.1f, 1f, AbundantMatter.Iron), //mid to polar latitude, impact craters
             //tharsis_montes,
-            new MarsRegionData(1.25f, 1.5f, .8f, Matter.Iron), //equatorial, mountain
+            new MarsRegionData(1.25f, 1.5f, .8f, AbundantMatter.Iron), //equatorial, mountain
             //tyrrhena_terra,
-            new MarsRegionData(1.2f, 1.1f, 1f, Matter.Iron), //mid to equatorial latitude, impact craters
+            new MarsRegionData(1.2f, 1.1f, 1f, AbundantMatter.Iron), //mid to equatorial latitude, impact craters
             //utopia_planitia,
-            new MarsRegionData(1.2f, 1f, 1.33f, Matter.Iron), //mid to equatorial latitude, large amounts of ice
+            new MarsRegionData(1.2f, 1f, 1.33f, AbundantMatter.Iron), //mid to equatorial latitude, large amounts of ice
             //valles_marineris,
-            new MarsRegionData(1.25f, 1f, 1.1f, Matter.Iron), //equatorial latitude, deep + shadows
+            new MarsRegionData(1.25f, 1f, 1.1f, AbundantMatter.Iron), //equatorial latitude, deep + shadows
             //vastitas_borealis,
-            new MarsRegionData(.5f, 1f, 1.5f, Matter.Water), //polar, smooth
+            new MarsRegionData(.5f, 1f, 1.5f, AbundantMatter.Water), //polar, smooth
             //xanthe_terra
-            new MarsRegionData(1.25f, 1.1f, 1f, Matter.Iron), //equatorial, impact craters
+            new MarsRegionData(1.25f, 1.1f, 1f, AbundantMatter.Iron), //equatorial, impact craters
         };
 
         public static MarsRegionData Data(this MarsRegion region)

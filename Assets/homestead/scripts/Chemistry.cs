@@ -9,7 +9,9 @@ namespace RedHomestead.Simulation
     public enum ContainerSize { Custom = -1, Quarter = 1, Full = 4 } //, Quadratic = 16 }
 
     public enum Energy { Electrical, Thermal }
-    
+
+    public enum AbundantMatter { Water, Iron, Silica, Nickel, Copper, Sulfur, Aluminium }
+
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
     public enum Matter {
         Hydrogen = -6, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water,
@@ -111,6 +113,7 @@ namespace RedHomestead.Simulation
             return String.Format("{0} {2:0}/{1:0}", this.Type, this.AmountByUnits, availableVolume * Type.UnitsPerCubicMeter());
         }
     }
+
 
     public static class MatterExtensions
     {
