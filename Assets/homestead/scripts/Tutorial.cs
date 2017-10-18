@@ -9,6 +9,7 @@ public enum FinishTutorialChoice { NextLesson, ExitToMenu, ListOfLessons }
 
 public class Tutorial : MonoBehaviour, ITriggerSubscriber
 {
+    public Canvas TutorialCanvas;
     public RectTransform TutorialPanel;
     public Text Header, Description;
     public Image Backdrop;
@@ -31,6 +32,7 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
         };
         Backdrop.enabled = true;
         Backdrop.canvasRenderer.SetAlpha(0f);
+        TutorialPanel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.sizeDelta.x);
         CurrentLesson.Start();
 	}
 
@@ -69,6 +71,16 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
         currentForwarder = child;
         currentlyColliding = c;
         currentResource = res;
+    }
+
+    public float GetLeftScreenHugXInset()
+    {
+        return 0f;
+    }
+
+    internal float GetCenterScreenXInset()
+    {
+        return (TutorialCanvas.pixelRect.width / 2f) - (TutorialPanel.sizeDelta.x / 2f);
     }
 }
 
@@ -123,41 +135,36 @@ public abstract class TutorialLesson
     }
     protected IEnumerator ToggleTutorialPanel()
     {
-        Vector2 start, end;
         float newBackdropAlpha;
         bool moveCenterToLeft = self.TutorialPanelInForeground;
         bool moveLeftToCenter = !self.TutorialPanelInForeground;
-
-        float y = self.TutorialPanel.anchoredPosition.y;
+        
+        float endInset, startInset;
         if (moveCenterToLeft)
         {
-            self.TutorialPanel.anchorMin = new Vector2(0, .5f);
-            self.TutorialPanel.anchorMax = new Vector2(0, .5f);
-
-            end = new Vector2(self.TutorialPanel.sizeDelta.x / 2f, y);
+            startInset = self.GetCenterScreenXInset();
+            endInset = self.GetLeftScreenHugXInset();
             newBackdropAlpha = 0f;
         }
-        else
+        else //move left to center
         {
-            self.TutorialPanel.anchorMin = new Vector2(.5f, .5f);
-            self.TutorialPanel.anchorMax = new Vector2(.5f, .5f);
-
-            end = new Vector2(0f, y);
+            startInset = self.GetLeftScreenHugXInset();
+            endInset = self.GetCenterScreenXInset();
             newBackdropAlpha = 221f / 256f;
         }
-        start = self.TutorialPanel.anchoredPosition;
-
         float time = 0f; float duration = .6f;
         self.Backdrop.CrossFadeAlpha(newBackdropAlpha, duration, true);
 
+        self.TutorialPanel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, startInset, self.TutorialPanel.sizeDelta.x);
+
         while (time < duration)
         {
-            self.TutorialPanel.anchoredPosition = Vector2.Lerp(start, end, time / duration);
+            self.TutorialPanel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, Mathf.Lerp(startInset, endInset, time / duration), self.TutorialPanel.sizeDelta.x);
             yield return null;
             time += Time.deltaTime;
         }
 
-        self.TutorialPanel.anchoredPosition = end;
+        self.TutorialPanel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, endInset, self.TutorialPanel.sizeDelta.x);
         self.TutorialPanelInForeground = !self.TutorialPanelInForeground;
     }
 
