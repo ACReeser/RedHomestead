@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public interface ITriggerSubscriber
 {
+    Transform transform { get; }
     void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res);
 }
 
-//only used for warehouse so far
 public class TriggerForwarder : MonoBehaviour {
     private ITriggerSubscriber dad;
     public bool OnlyMovableSnappables = true;
@@ -18,11 +19,17 @@ public class TriggerForwarder : MonoBehaviour {
         if (this.dad == null)
             this.dad = this.transform.root.GetComponent<ITriggerSubscriber>();
 
-        if (!OnlyMovableSnappables)
-        {
-            Debug.LogWarningFormat("{0} with dad {1} is using !OnlyMovableSnappables", this.transform.name, this.dad.ToString());
-        }
+        //if (!OnlyMovableSnappables)
+        //{
+        //    Debug.LogWarningFormat("{0} with dad {1} is using !OnlyMovableSnappables", this.transform.name, this.dad.ToString());
+        //}
     }
+
+    public void SetDad(ITriggerSubscriber newDad)
+    {
+        this.dad = newDad;
+    }
+
 
     void OnTriggerEnter(Collider other)
     {

@@ -27,7 +27,7 @@ namespace RedHomestead.GameplayOptions
         public BackerFinancing ChosenFinancing;
         public BaseLocation ChosenLocation;
         public int StartingFunds, AllocatedFunds, RemainingFunds;
-        public bool BuyRover;
+        public bool BuyRover, IsTutorial;
         public BoughtMatter BoughtMatter;
         public Dictionary<Craftable, int> BoughtCraftables;
 

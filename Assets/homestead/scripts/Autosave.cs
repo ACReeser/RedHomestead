@@ -2,6 +2,7 @@
 using System.Collections;
 using RedHomestead.Persistence;
 using RedHomestead.GameplayOptions;
+using UnityEngine.SceneManagement;
 
 public class Autosave : MonoBehaviour
 {
@@ -17,9 +18,14 @@ public class Autosave : MonoBehaviour
         {
             print("Starting new game for editor session");
             var boughtMatter = new BoughtMatter();
-            boughtMatter.Set(RedHomestead.Simulation.Matter.Water, 1);
-            boughtMatter.Set(RedHomestead.Simulation.Matter.Oxygen, 1);
-            boughtMatter.Set(RedHomestead.Simulation.Matter.Hydrogen, 2);
+            bool isTutorial = SceneManager.GetActiveScene().buildIndex == 2;
+
+            if (!isTutorial)
+            {
+                boughtMatter.Set(RedHomestead.Simulation.Matter.Water, 1);
+                boughtMatter.Set(RedHomestead.Simulation.Matter.Oxygen, 1);
+                boughtMatter.Set(RedHomestead.Simulation.Matter.Hydrogen, 2);
+            }
 
             PersistentDataManager.StartNewGame(new RedHomestead.GameplayOptions.NewGameChoices() {
                 PlayerName = "Ares",
@@ -32,7 +38,8 @@ public class Autosave : MonoBehaviour
                 ChosenPlayerTraining = RedHomestead.Perks.Perk.Athlete,
                 RemainingFunds = 1000000,
                 BoughtMatter = boughtMatter,
-                BoughtCraftables = new System.Collections.Generic.Dictionary<RedHomestead.Crafting.Craftable, int>()
+                BoughtCraftables = new System.Collections.Generic.Dictionary<RedHomestead.Crafting.Craftable, int>(),
+                IsTutorial = isTutorial
             });
         }
 #endif

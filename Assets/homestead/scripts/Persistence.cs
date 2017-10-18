@@ -745,8 +745,12 @@ namespace RedHomestead.Persistence
         
         public static void StartNewGame(NewGameChoices choices)
         {
-            choices.AddMinimumSupplies();
-            choices.AddBackerSupplies();
+            if (!choices.IsTutorial)
+            {
+                choices.AddMinimumSupplies();
+                choices.AddBackerSupplies();
+            }
+
             UnityEngine.Debug.Log("Starting new game");
             Game.Current = new Game()
             {
