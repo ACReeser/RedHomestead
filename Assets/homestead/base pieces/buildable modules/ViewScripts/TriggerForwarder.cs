@@ -14,7 +14,8 @@ public class TriggerForwarder : MonoBehaviour {
 
     void Start()
     {
-        this.dad = this.transform.parent.GetComponent<ITriggerSubscriber>();
+        if (this.transform.parent != null)
+            this.dad = this.transform.parent.GetComponent<ITriggerSubscriber>();
 
         if (this.dad == null)
             this.dad = this.transform.root.GetComponent<ITriggerSubscriber>();
