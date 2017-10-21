@@ -1,7 +1,10 @@
-﻿using RedHomestead.Simulation;
+﻿using RedHomestead.Crafting;
+using RedHomestead.Equipment;
+using RedHomestead.Simulation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,7 +44,9 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
 
     public TriggerForwarder Mars101_LZTarget;
 
+    public Transform OutsideHabAnchor, Arrow;
     public LandingZone LZ;
+    public Habitat Hab;
 
     internal TutorialLesson[] Lessons;
     private static int activeTutorialLessonIndex;
@@ -58,6 +63,7 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
         Backdrop.enabled = true;
         Backdrop.canvasRenderer.SetAlpha(0f);
         EventPanel.Group.gameObject.SetActive(false);
+        Arrow.gameObject.SetActive(false);
         TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.Panel.sizeDelta.x);
         CurrentLesson.Start();
 	}
@@ -105,6 +111,11 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
     internal float GetCenterScreenXInset()
     {
         return (TutorialCanvas.pixelRect.width / 2f) - (TutorialPanel.Panel.sizeDelta.x / 2f);
+    }
+
+    internal Airlock GetAirlock()
+    {
+        return FindObjectOfType<Airlock>();
     }
 }
 
@@ -158,7 +169,7 @@ public abstract class TutorialLesson
     {
         StringBuilder sb = new StringBuilder();
         //sb.AppendLine(); sb.AppendLine();
-        for (int i = 0; i < Description.Steps.Length; i++)
+        for (int i = Mathf.Max(0, currentStep - 3); i < Description.Steps.Length; i++)
         {
             if (i > currentStep)
                 break;
@@ -195,6 +206,7 @@ public abstract class TutorialLesson
             endInset = self.GetLeftScreenHugXInset();
             newBackdropAlpha = 0f;
             newBackdropActive = false;
+            Time.timeScale = 1f;
         }
         else //move left to center
         {
@@ -202,6 +214,7 @@ public abstract class TutorialLesson
             endInset = self.GetCenterScreenXInset();
             newBackdropAlpha = 221f / 256f;
             newBackdropActive = true;
+            Time.timeScale = 0f;
         }
         float time = 0f; float duration = .6f;
         self.Backdrop.gameObject.SetActive(!newBackdropActive);
@@ -213,7 +226,7 @@ public abstract class TutorialLesson
         {
             self.TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, Mathf.Lerp(startInset, endInset, time / duration), self.TutorialPanel.Panel.sizeDelta.x);
             yield return null;
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
         }
 
         self.Backdrop.gameObject.SetActive(newBackdropActive);
@@ -221,6 +234,18 @@ public abstract class TutorialLesson
         self.TutorialPanelInForeground = !self.TutorialPanelInForeground;
     }
 
+    protected bool ContinueButtonDown()
+    {
+        return Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space);
+    }
+
+    protected IEnumerator ShowEvent(string header, string description, Sprite sprite)
+    {
+        self.EventPanel.Fill(header, description+"\n\n"+Description.Steps[currentStep], sprite);
+        yield return ToggleEventPanel();
+        yield return new WaitUntil(ContinueButtonDown);
+        yield return ToggleEventPanel();
+    }
     
     protected IEnumerator ToggleEventPanel()
     {
@@ -228,7 +253,16 @@ public abstract class TutorialLesson
         float to = (self.EventPanel.Visible) ? 0f : 1f;
 
         if (!self.EventPanel.Visible)
+        {
+            //start showing panel
             self.EventPanel.Group.gameObject.SetActive(true);
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            //end showing panel
+            Time.timeScale = 1f;
+        }
 
         float time = 0f; float duration = .6f;
 
@@ -237,7 +271,7 @@ public abstract class TutorialLesson
         {
             self.EventPanel.Group.alpha = Mathf.Lerp(from, to, time / duration);
             yield return null;
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
         }
         self.EventPanel.Group.alpha = to;
 
@@ -253,26 +287,9 @@ public abstract class TutorialLesson
         this.self.FinishLesson(FinishTutorialChoice.NextLesson);
     }
 
-    protected abstract IEnumerator Main();
-}
-
-public class MarsSurvival101: TutorialLesson
-{
-    public MarsSurvival101(Tutorial self, Func<IEnumerator, Coroutine> startCo): base(self, startCo) { }
-
-    protected bool ContinueButtonDown()
+    protected IEnumerator HighlightPositionAndWaitUntilPlayerInIt(Vector3 position)
     {
-        return Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Space);
-    }
-
-    protected override IEnumerator Main()
-    {
-        yield return this.ToggleTutorialPanel();
-        yield return new WaitUntil(ContinueButtonDown);
-        yield return this.ToggleTutorialPanel();
-        UpdateStepsText();
-
-        self.Mars101_LZTarget.transform.position = self.LZ.transform.position;
+        self.Mars101_LZTarget.transform.position = position;
         self.Mars101_LZTarget.gameObject.SetActive(true);
 
         do
@@ -283,12 +300,32 @@ public class MarsSurvival101: TutorialLesson
 
         self.ResetTriggerColliderFlags();
         self.Mars101_LZTarget.gameObject.SetActive(false);
+    }
+
+    protected void SetArrow(Transform bulkhead)
+    {
+        self.Arrow.position = bulkhead.position + bulkhead.TransformVector(new Vector3(-0.33f, 0, 3.2f));
+    }
+
+    protected abstract IEnumerator Main();
+}
+
+public class MarsSurvival101: TutorialLesson
+{
+    public MarsSurvival101(Tutorial self, Func<IEnumerator, Coroutine> startCo): base(self, startCo) { }
+
+
+    protected override IEnumerator Main()
+    {
+        yield return this.ToggleTutorialPanel();
+        yield return new WaitUntil(ContinueButtonDown);
+        yield return this.ToggleTutorialPanel();
+        UpdateStepsText();
+        
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.LZ.transform.position);
         CompleteCurrentStep();
 
-        yield return ToggleEventPanel();
-        yield return new WaitUntil(ContinueButtonDown);
-        yield return ToggleEventPanel();
-
+        yield return ShowEvent("INCOMING SUPPLIES", @"The training program is sending a <b>CARGO LANDER</b> to drop off supplies for your homestead.", IconAtlas.Instance.MiscIcons[(int)MiscIcon.Rocket]);
         self.LZ.Deliver(new RedHomestead.Economy.Order()
         {
             LineItemUnits = new ResourceUnitCountDictionary()
@@ -299,14 +336,96 @@ public class MarsSurvival101: TutorialLesson
             Vendor = new RedHomestead.Economy.Vendor(),
             Via = RedHomestead.Economy.DeliveryType.Lander,
         });
-
         do
         {
             yield return new WaitForSeconds(1f);
         }
         while (self.LZ.Cargo == null || self.LZ.Cargo.Data.State == CargoLander.FlightState.Landing);
-
         CompleteCurrentStep();
+
+        yield return ShowEvent("MOVING CRATES", @"Resource crates can be picked up and moved by holding down <b>LEFT MOUSE BUTTON</b>.", Craftable.Crate.AtlasSprite());
+        do
+        {
+            yield return new WaitForSeconds(1f);
+        }
+        while (self.LZ.Cargo.Bays.Values.Any(x => x != null));
+        CompleteCurrentStep();
+
+
+        yield return ShowEvent("AIRLOCK CONSTRUCTION", @"With our new resources, we can build an <b>AIRLOCK</b>.", Craftable.Toolbox.AtlasSprite());        
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.OutsideHabAnchor.position);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("CONSTRUCTION BLUEPRINTS", @"Open up the <b>BLUEPRINTS</b> menu and select the <b>AIRLOCK</b> blueprint.", Craftable.Toolbox.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (PlayerInput.Instance.Loadout.Equipped != Equipment.Blueprints || !PlayerInput.Instance.ModulePlan.IsActive);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("STARTING CONSTRUCTION", @"Place the <b>AIRLOCK</b> blueprint near the <b>HABITAT</b> bulkhead door.", Craftable.Toolbox.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (ConstructionZone.LastPlacedZone == null);
+        CompleteCurrentStep();
+        
+        yield return ShowEvent("CONSTRUCTION MATERIALS", @"Building a module requires the correct materials inside the construction zone.", Craftable.Crate.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (ConstructionZone.LastPlacedZone == null || !ConstructionZone.LastPlacedZone.CanConstruct);
+        CompleteCurrentStep();
+
+
+        yield return ShowEvent("CONSTRUCTION TOOL", @"Constructing modules requires the correct tool: the <b>POWER DRILL</b>.", Craftable.Toolbox.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (PlayerInput.Instance.Loadout.Equipped != Equipment.PowerDrill);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("CONSTRUCTION", @"Using the <b>POWER DRILL</b>, one can construct the module.", Craftable.Toolbox.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (ConstructionZone.LastPlacedZone != null);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("BULKHEADS", @"In order to move between habitat modules, <b>BULKHEADS</b> must be made into a <b>CORRIDOR</b>.", Craftable.Toolbox.AtlasSprite());
+        self.Arrow.gameObject.SetActive(true);
+        SetArrow(self.GetAirlock().Bulkheads[0]);
+        do
+        {
+            yield return null;
+        }
+        while (PlayerInput.Instance.selectedBulkhead == null);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("CORRIDORS", @"<b>CORRIDORS</b> connect habitat modules and distribute power and oxygen.", Craftable.PowerCube.AtlasSprite());
+        SetArrow(self.Hab.Bulkheads[1]);
+        do
+        {
+            yield return null;
+        }
+        while (self.Hab.AdjacentModules == null || self.Hab.AdjacentModules.Count < 1);
+        self.Arrow.gameObject.SetActive(false);
+        CompleteCurrentStep();        
+
+        yield return ShowEvent("PRESSURIZATION", @"The <b>AIRLOCK</b> is the only way to get into the <b>HABITAT</b> .", Matter.Oxygen.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (SurvivalTimer.Instance.IsNotInHabitat);
+        CompleteCurrentStep();
+        self.Mars101_LZTarget.gameObject.SetActive(true);
+        self.Mars101_LZTarget.transform.position = self.Hab.transform.position;
 
         End();
     }
@@ -315,13 +434,24 @@ public class MarsSurvival101: TutorialLesson
     {
         return new TutorialDescription()
         {
-            Name = "MARS SURVIVAL 101",
+            Name = "HOMESTEAD SETUP",
             Description = @"Welcome to Antarctica! 
 In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MARS AUTHORITY</b> has set up this training base.",
             Steps = new string[]
             {
                 "Walk using <b>WASD</b> to the circle of lights: the <b>LANDING ZONE</b>.",
-                "Step away from the <b>LANDING ZONE</b> and wait for the <b>CARGO LANDER</b>."
+                "Step away from the <b>LANDING ZONE</b> and wait for the <b>CARGO LANDER</b>.",
+                "Take the <b>RESOURCE CRATES</b> out of the <b>CARGO LANDER</b> using <b>LMB</b>.",
+                "Walk using <b>WASD</b> to the <b>HABITAT</b>.",
+                "Open <b>BLUEPRINTS</b> by holding <b>TAB</b> and select <b>LIFE SUPPORT > AIRLOCK</b>.",
+                "Use <b>E</b> to place the <b>AIRLOCK</b> near the <b>HABITAT</b>.",
+                "Use <b>LMB</b> to bring the <b>CRATES</b> into the <b>CONSTRUCTION ZONE</b>.",
+                "Equip the <b>POWER DRILL</b> by holding <b>TAB</b> and selecting it.",
+                "Step outside the <b>CONSTRUCTION ZONE</b> and hold <b>LMB</b> while facing the <b>ZONE</b>.",
+                "Use <b>E</b> to select the <b>AIRLOCK BULKHEAD</b>.",
+                "Use <b>E</b> to select the <b>HABITAT BULKHEAD</b>.",
+                "Get into the <b>AIRLOCK</b>, shut the door, and <b>PRESSURIZE</b> it.",
+                "Walk into the <b>HABITAT</b>."
             }
         };
     }

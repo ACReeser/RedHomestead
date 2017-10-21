@@ -43,7 +43,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
     public CargoLanderData Data { get; set; }
 
     private DoorRotationLerpContext[] ramps;
-    private Dictionary<TriggerForwarder, ResourceComponent> Bays;
+    public Dictionary<TriggerForwarder, ResourceComponent> Bays { get; private set; }
     private bool rampsDown = false;
 
     /// <summary>

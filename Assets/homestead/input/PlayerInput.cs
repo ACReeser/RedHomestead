@@ -78,7 +78,9 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private RoverInput DrivingRoverInput;
-    private Collider selectedBulkhead, selectedGasValve, selectedPowerSocket;
+    internal Collider selectedBulkhead { get; private set; }
+    internal Collider selectedGasValve { get; private set; }
+    internal Collider selectedPowerSocket { get; private set; }
     private Rigidbody carriedObject;
     private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
@@ -106,7 +108,7 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private Workshop CurrentCraftablePlanner;
-    private Planning<Module> ModulePlan = new Planning<Module>();
+    public Planning<Module> ModulePlan { get; private set; }
     private Planning<Stuff> StuffPlan = new Planning<Stuff>();
     private Planning<Floorplan> FloorPlan = new Planning<Floorplan>();
 
@@ -118,6 +120,7 @@ public class PlayerInput : MonoBehaviour {
     void Awake()
     {
         Instance = this;
+        ModulePlan = new Planning<Module>();
         InteractionSource.transform.SetParent(null);
         IsOnFoot = true;
     }
