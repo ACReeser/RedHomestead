@@ -511,7 +511,7 @@ In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MA
                 "Use <b>E</b> to select the <b>HABITAT POWER SOCKET</b>.",
                 "Use <b>E</b> to select the <b>RTG POWER SOCKET</b>.",
                 "Walk into the <b>HABITAT</b>.",
-                "Use <b>Z</b> when looking at the <b>BED</b> to <b>SLEEP</b>.",
+                "Use <b>E</b> when looking at the <b>BED</b> to <b>SLEEP</b>.",
             }
         };
     }
