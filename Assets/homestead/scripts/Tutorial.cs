@@ -44,8 +44,9 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
 
     public TriggerForwarder Mars101_LZTarget;
 
-    public Transform OutsideHabAnchor, Arrow;
+    public Transform OutsideHabAnchor, Arrow, RTGAnchor, RTGPowerArrow, HabPowerArrow;
     public LandingZone LZ;
+    public RadioisotopeThermoelectricGenerator RTG;
     public Habitat Hab;
 
     internal TutorialLesson[] Lessons;
@@ -64,6 +65,9 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
         Backdrop.canvasRenderer.SetAlpha(0f);
         EventPanel.Group.gameObject.SetActive(false);
         Arrow.gameObject.SetActive(false);
+        RTG.gameObject.SetActive(false);
+        RTGPowerArrow.gameObject.SetActive(false);
+        HabPowerArrow.gameObject.SetActive(false);
         TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.Panel.sizeDelta.x);
         CurrentLesson.Start();
 	}
@@ -287,10 +291,11 @@ public abstract class TutorialLesson
         this.self.FinishLesson(FinishTutorialChoice.NextLesson);
     }
 
-    protected IEnumerator HighlightPositionAndWaitUntilPlayerInIt(Vector3 position)
+    protected IEnumerator HighlightPositionAndWaitUntilPlayerInIt(Vector3 position, float positionRadius)
     {
         self.Mars101_LZTarget.transform.position = position;
         self.Mars101_LZTarget.gameObject.SetActive(true);
+        self.Mars101_LZTarget.GetComponent<CapsuleCollider>().radius = positionRadius;
 
         do
         {
@@ -322,7 +327,7 @@ public class MarsSurvival101: TutorialLesson
         yield return this.ToggleTutorialPanel();
         UpdateStepsText();
         
-        yield return HighlightPositionAndWaitUntilPlayerInIt(self.LZ.transform.position);
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.LZ.transform.position, 12f);
         CompleteCurrentStep();
 
         yield return ShowEvent("INCOMING SUPPLIES", @"The training program is sending a <b>CARGO LANDER</b> to drop off supplies for your homestead.", IconAtlas.Instance.MiscIcons[(int)MiscIcon.Rocket]);
@@ -353,7 +358,7 @@ public class MarsSurvival101: TutorialLesson
 
 
         yield return ShowEvent("AIRLOCK CONSTRUCTION", @"With our new resources, we can build an <b>AIRLOCK</b>.", Craftable.Toolbox.AtlasSprite());        
-        yield return HighlightPositionAndWaitUntilPlayerInIt(self.OutsideHabAnchor.position);
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.OutsideHabAnchor.position, 10f);
         CompleteCurrentStep();
 
         yield return ShowEvent("CONSTRUCTION BLUEPRINTS", @"Open up the <b>BLUEPRINTS</b> menu and select the <b>AIRLOCK</b> blueprint.", Craftable.Toolbox.AtlasSprite());
@@ -411,21 +416,70 @@ public class MarsSurvival101: TutorialLesson
         SetArrow(self.Hab.Bulkheads[1]);
         do
         {
-            yield return null;
+            yield return new WaitForSeconds(1f);
         }
-        while (self.Hab.AdjacentModules == null || self.Hab.AdjacentModules.Count < 1);
+        while (self.Hab.AdjacentModules == null || !self.Hab.AdjacentModules.Any(x => x is Airlock));
         self.Arrow.gameObject.SetActive(false);
         CompleteCurrentStep();        
 
         yield return ShowEvent("PRESSURIZATION", @"The <b>AIRLOCK</b> is the only way to get into the <b>HABITAT</b> .", Matter.Oxygen.AtlasSprite());
         do
         {
-            yield return null;
+            yield return new WaitForSeconds(1f);
         }
         while (SurvivalTimer.Instance.IsNotInHabitat);
         CompleteCurrentStep();
-        self.Mars101_LZTarget.gameObject.SetActive(true);
-        self.Mars101_LZTarget.transform.position = self.Hab.transform.position;
+
+        
+        yield return ShowEvent("HOME SWEET HOME", @"The <b>HABITAT</b> provides pressure, oxygen, and heat. It also stores power, food, and water.", IconAtlas.Instance.MiscIcons[(int)MiscIcon.Bed]);
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.Hab.transform.position, 3f);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("POWER GENERATION", @"The <b>HABITAT</b> requires large amounts of power to function.", Craftable.PowerCube.AtlasSprite());
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.RTGAnchor.transform.position, 5f);
+        CompleteCurrentStep();
+
+        self.RTG.gameObject.SetActive(true);
+        yield return ShowEvent("POWER OVERLAY", @"A <b>RTG</b> (nuclear power source) has been provided for electricity generation. The <b>POWER OVERLAY</b> allows power generation and consumption to be visualized.", Craftable.PowerCube.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (!PlayerInput.Instance.AlternativeCamera.enabled);
+        CompleteCurrentStep();
+
+        self.HabPowerArrow.gameObject.SetActive(true);
+        yield return ShowEvent("POWERLINES", @"<b>POWERLINES</b> must be added between modules that generate, store, and consume electricity.", Craftable.PowerCube.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (PlayerInput.Instance.selectedPowerSocket == null);
+        self.HabPowerArrow.gameObject.SetActive(false);
+        CompleteCurrentStep();
+
+        self.RTGPowerArrow.gameObject.SetActive(true);
+        yield return ShowEvent("POWERLINES", @"<b>POWERLINES</b>, like corridors, do not require resources.", Craftable.PowerCube.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (!self.Hab.HasPower);
+        self.RTGPowerArrow.gameObject.SetActive(false);
+        CompleteCurrentStep();
+
+        yield return ShowEvent("HABITAT COMPLETE", @"The <b>HABITAT</b> now has <b>POWER</b> and an <b>AIRLOCK</b>.", Craftable.PowerCube.AtlasSprite());
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.Hab.transform.position, 2f);
+        CompleteCurrentStep();
+
+
+        yield return ShowEvent("TUTORIAL COMPLETE", @"Go to <b>SLEEP</b> to finish the tutorial.", Craftable.PowerCube.AtlasSprite());
+        do
+        {
+            yield return null;
+        }
+        while (PlayerInput.Instance.CurrentMode != PlayerInput.InputMode.Sleep);
+        CompleteCurrentStep();
 
         End();
     }
@@ -451,7 +505,13 @@ In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MA
                 "Use <b>E</b> to select the <b>AIRLOCK BULKHEAD</b>.",
                 "Use <b>E</b> to select the <b>HABITAT BULKHEAD</b>.",
                 "Get into the <b>AIRLOCK</b>, shut the door, and <b>PRESSURIZE</b> it.",
-                "Walk into the <b>HABITAT</b>."
+                "Walk into the <b>HABITAT</b>.",
+                "Walk outside the <b>HABITAT</b>, by <b>DEPRESSURIZING</b> the <b>AIRLOCK</b>.",
+                "Use <b>V</b> to see the <b>POWER OVERLAY</b>.",
+                "Use <b>E</b> to select the <b>HABITAT POWER SOCKET</b>.",
+                "Use <b>E</b> to select the <b>RTG POWER SOCKET</b>.",
+                "Walk into the <b>HABITAT</b>.",
+                "Use <b>Z</b> when looking at the <b>BED</b> to <b>SLEEP</b>.",
             }
         };
     }
