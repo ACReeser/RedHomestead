@@ -48,6 +48,8 @@ public abstract class SurvivalResource
 #if (DEVELOPMENT_BUILD || UNITY_EDITOR)
         if (PlayerInput.DoNotDisturb) return true;
 #endif
+        if (Game.Current.IsTutorial && SurvivalTimer.SkipConsume) return true;
+
         DoConsume();
 
         bool newCritical = HoursLeftHint <= 1;
@@ -152,13 +154,14 @@ public class SurvivalTimer : MonoBehaviour {
     public event PlayerInHabitatHandler OnPlayerInHabitatChange;
 
     public Habitat CurrentHabitat { get; private set; }
+    public static bool SkipConsume { get; internal set; }
 
     void Awake () {
         Instance = this;
         CurrentHabitat = null;
     }
 
-    void Start()
+    public void Start()
     {
         SetData(Game.Current.Player.PackData);
         Oxygen.PerkConsumptionCoefficient = RedHomestead.Perks.PerkMultipliers.AirUsage;

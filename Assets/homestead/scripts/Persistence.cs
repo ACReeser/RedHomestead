@@ -661,7 +661,14 @@ namespace RedHomestead.Persistence
             return this.Score.GetScore(Environment.CurrentSol, Environment.CurrentHour);
         }
 
+        /// <summary>
+        /// Marked internal+property to prevent loading from Serialization
+        /// </summary>
         internal bool IsNewGame { get; set; }
+        /// <summary>
+        /// Marked internal+property to prevent loading from Serialization
+        /// </summary>
+        internal bool IsTutorial { get; set; }
 
         public void OnBeforeSerialize()
         {
@@ -755,6 +762,7 @@ namespace RedHomestead.Persistence
             Game.Current = new Game()
             {
                 IsNewGame = true,
+                IsTutorial = choices.IsTutorial,
                 Bases = new Base[]
                 {
                     new Base(true)

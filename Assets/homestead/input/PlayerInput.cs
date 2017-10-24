@@ -125,7 +125,7 @@ public class PlayerInput : MonoBehaviour {
         IsOnFoot = true;
     }
 
-    void Start()
+    public void Start()
     {
         Loadout = new Loadout();
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);

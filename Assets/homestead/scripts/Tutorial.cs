@@ -1,5 +1,8 @@
 ﻿using RedHomestead.Crafting;
 using RedHomestead.Equipment;
+using RedHomestead.GameplayOptions;
+using RedHomestead.Persistence;
+using RedHomestead.Rovers;
 using RedHomestead.Simulation;
 using System;
 using System.Collections;
@@ -42,35 +45,106 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
     public Image Backdrop;
     public MainTutorialPanel TutorialPanel;
 
-    public TriggerForwarder Mars101_LZTarget;
+    public TriggerForwarder WalkToTarget;
 
     public Transform OutsideHabAnchor, Arrow, RTGAnchor, RTGPowerArrow, HabPowerArrow;
     public LandingZone LZ;
     public RadioisotopeThermoelectricGenerator RTG;
     public Habitat Hab;
+    public RectTransform SurvivalPanel;
+    public RoverInput Rover;
+    public CustomFPSController Player;
+    public Toolbox Toolbox;
 
     internal TutorialLesson[] Lessons;
     private static int activeTutorialLessonIndex;
     internal TutorialLesson CurrentLesson { get { return Lessons[activeTutorialLessonIndex]; } }
     internal bool TutorialPanelInForeground;
+    internal bool LessonOver;
 
-	// Use this for initialization
-	void Start () {
-        Mars101_LZTarget.SetDad(this);
+    private Vector3 RoverStartPosition, PlayerStartPosition, ToolboxStartPosition;
+
+    // Use this for initialization
+    void Start ()
+    {
+        if (Rover != null)
+            RoverStartPosition = Rover.transform.position;
+        PlayerStartPosition = Player.transform.position;
+        ToolboxStartPosition = Toolbox.transform.position;
+
+        WalkToTarget.SetDad(this);
         Lessons = new TutorialLesson[]
         {
-            new MarsSurvival101(this, StartCoroutine)
+            new HomesteadSetup(this, StartCoroutine)
         };
         Backdrop.enabled = true;
         Backdrop.canvasRenderer.SetAlpha(0f);
+        TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.Panel.sizeDelta.x);
+        Reset();
+        CurrentLesson.Start();
+	}
+
+    private void Reset()
+    {
+        var boughtMatter = new BoughtMatter();
+        //boughtMatter.Set(RedHomestead.Simulation.Matter.Water, 1);
+        //boughtMatter.Set(RedHomestead.Simulation.Matter.Oxygen, 1);
+        //boughtMatter.Set(RedHomestead.Simulation.Matter.Hydrogen, 2);
+
+        PersistentDataManager.StartNewGame(new RedHomestead.GameplayOptions.NewGameChoices()
+        {
+            PlayerName = "Ares",
+            ChosenLocation = new RedHomestead.Geography.BaseLocation()
+            {
+                Region = RedHomestead.Geography.MarsRegion.meridiani_planum
+            },
+            ChosenFinancing = RedHomestead.Economy.BackerFinancing.Government,
+            BuyRover = true,
+            ChosenPlayerTraining = RedHomestead.Perks.Perk.Athlete,
+            RemainingFunds = 1000000,
+            BoughtMatter = boughtMatter,
+            BoughtCraftables = new System.Collections.Generic.Dictionary<RedHomestead.Crafting.Craftable, int>(),
+            IsTutorial = true
+        });
+        SurvivalTimer.Instance.Start();
+        Hab.Start();
+        PlayerInput.Instance.Start();
+        var movables = FindObjectsOfType<MovableSnappable>();
+        foreach(MovableSnappable movable in movables)
+        {
+            if (movable.transform == Toolbox.transform)
+            {
+                continue;
+            }
+            else
+            {
+                GameObject.Destroy(movable.transform.gameObject);
+            }
+        }
+        var modules = FindObjectsOfType<ModuleGameplay>();
+        foreach (ModuleGameplay module in modules)
+        {
+            if (module.transform == Hab.transform || module.transform == LZ.transform || module.transform == RTG.transform)
+                continue;
+            else
+            {
+                GameObject.Destroy(module.gameObject);
+            }
+        }
+        if (LZ.Cargo != null)
+            LZ.Cargo.EmergencyDisable();
+
+        if (Rover != null)
+            Rover.transform.position = RoverStartPosition;
+        Player.transform.position = PlayerStartPosition;
+        Toolbox.transform.position = ToolboxStartPosition;
+
         EventPanel.Group.gameObject.SetActive(false);
         Arrow.gameObject.SetActive(false);
         RTG.gameObject.SetActive(false);
         RTGPowerArrow.gameObject.SetActive(false);
         HabPowerArrow.gameObject.SetActive(false);
-        TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.Panel.sizeDelta.x);
-        CurrentLesson.Start();
-	}
+    }
 
     public void FinishLesson(FinishTutorialChoice whatDo)
     {
@@ -85,11 +159,29 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
                 activeTutorialLessonIndex++;
             }
 
+            Reset();
             CurrentLesson.Start();
         }
     }
-    
-	void Update () {
+
+    void Update () {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            if (CurrentLesson != null)
+            {
+                LessonOver = true;
+            }
+
+            if (LessonOver && CurrentLesson.Coroutine != null)
+            {
+                LessonOver = true;
+                StopCoroutine(CurrentLesson.Coroutine);
+                CurrentLesson.End();
+                FinishLesson(FinishTutorialChoice.NextLesson);
+            }
+        }
+#endif
 	}
 
     public void ResetTriggerColliderFlags() { currentForwarder = null;  currentlyColliding = null;  currentResource = null; }
@@ -97,7 +189,7 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
     public Collider currentlyColliding{ get; private set;}
     public IMovableSnappable currentResource{ get; private set;}
 
-    public bool PlayerInLZ { get { return currentForwarder == Mars101_LZTarget && PlayerInTrigger; } }
+    public bool PlayerInLZ { get { return currentForwarder == WalkToTarget && PlayerInTrigger; } }
     public bool PlayerInTrigger { get { return currentlyColliding != null && currentlyColliding.CompareTag("Player"); } }
 
     public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
@@ -143,7 +235,7 @@ public abstract class TutorialLesson
 {
     protected Tutorial self;
     protected Func<IEnumerator, Coroutine> StartCoroutine;
-    public Coroutine coroutine { get; private set; }
+    public Coroutine Coroutine { get; private set; }
     protected TutorialDescription Description { get; private set; }
 
     public TutorialLesson(Tutorial self, Func<IEnumerator, Coroutine> startCo)
@@ -193,8 +285,18 @@ public abstract class TutorialLesson
 
     public void Start()
     {
+        currentStep = 0;
+        for (int i = 0; i < Description.StepsComplete.Length; i++)
+        {
+            Description.StepsComplete[i] = false;
+        }
+
+        bool survivalEnabled = IsSurvivalEnabled();
+        self.SurvivalPanel.gameObject.SetActive(survivalEnabled);
+        SurvivalTimer.SkipConsume = !survivalEnabled;
+
         UpdateDescription();
-        this.coroutine = StartCoroutine(Main());
+        this.Coroutine = StartCoroutine(Main());
     }
     protected IEnumerator ToggleTutorialPanel()
     {
@@ -285,17 +387,16 @@ public abstract class TutorialLesson
             self.EventPanel.Group.gameObject.SetActive(false);
     }
 
-    protected void End()
+    public void End()
     {
-        this.coroutine = null;
-        this.self.FinishLesson(FinishTutorialChoice.NextLesson);
+        this.Coroutine = null;
     }
 
     protected IEnumerator HighlightPositionAndWaitUntilPlayerInIt(Vector3 position, float positionRadius)
     {
-        self.Mars101_LZTarget.transform.position = position;
-        self.Mars101_LZTarget.gameObject.SetActive(true);
-        self.Mars101_LZTarget.GetComponent<CapsuleCollider>().radius = positionRadius;
+        self.WalkToTarget.transform.position = position;
+        self.WalkToTarget.gameObject.SetActive(true);
+        self.WalkToTarget.GetComponent<CapsuleCollider>().radius = positionRadius;
 
         do
         {
@@ -304,7 +405,7 @@ public abstract class TutorialLesson
         while (!self.PlayerInLZ);
 
         self.ResetTriggerColliderFlags();
-        self.Mars101_LZTarget.gameObject.SetActive(false);
+        self.WalkToTarget.gameObject.SetActive(false);
     }
 
     protected void SetArrow(Transform bulkhead)
@@ -313,12 +414,17 @@ public abstract class TutorialLesson
     }
 
     protected abstract IEnumerator Main();
+    protected abstract bool IsSurvivalEnabled();
 }
 
-public class MarsSurvival101: TutorialLesson
+public class HomesteadSetup: TutorialLesson
 {
-    public MarsSurvival101(Tutorial self, Func<IEnumerator, Coroutine> startCo): base(self, startCo) { }
+    public HomesteadSetup(Tutorial self, Func<IEnumerator, Coroutine> startCo): base(self, startCo) { }
 
+    protected override bool IsSurvivalEnabled()
+    {
+        return false;
+    }
 
     protected override IEnumerator Main()
     {

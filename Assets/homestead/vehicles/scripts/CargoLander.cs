@@ -374,6 +374,16 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
         movement = null;
     }
 
+    internal void EmergencyDisable()
+    {
+        if (movement != null)
+            StopCoroutine(movement);
+        if (countdownCoroutine != null)
+            StopCoroutine(countdownCoroutine);
+
+        SetState(FlightState.Disabled);
+    }
+
     /// <summary>
     /// handles common state like hinge angles, lander position, lander enabled
     /// </summary>

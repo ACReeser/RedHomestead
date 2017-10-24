@@ -98,7 +98,7 @@ public abstract class ModuleGameplay : MonoBehaviour, ISink, IPowerable, IBuilda
     protected List<IPumpable> Adjacent = new List<IPumpable>();
     public List<IPumpable> AdjacentPumpables { get { return this.Adjacent; } }
 
-    void Start()
+    public void Start()
     {
         SoundSource = this.GetComponent<AudioSource>();
 
