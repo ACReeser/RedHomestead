@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public enum FinishTutorialChoice { NextLesson, ExitToMenu, ListOfLessons }
@@ -51,7 +52,7 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
     public LandingZone LZ;
     public RadioisotopeThermoelectricGenerator RTG;
     public Habitat Hab;
-    public RectTransform SurvivalPanel;
+    public RectTransform SurvivalPanel, MenuPanel;
     public RoverInput Rover;
     public CustomFPSController Player;
     public Toolbox Toolbox;
@@ -71,18 +72,33 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
             RoverStartPosition = Rover.transform.position;
         PlayerStartPosition = Player.transform.position;
         ToolboxStartPosition = Toolbox.transform.position;
-
         WalkToTarget.SetDad(this);
+
         Lessons = new TutorialLesson[]
         {
             new HomesteadSetup(this, StartCoroutine)
         };
-        Backdrop.enabled = true;
-        Backdrop.canvasRenderer.SetAlpha(0f);
         TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.Panel.sizeDelta.x);
+        ToggleMenu(true);
         Reset();
-        CurrentLesson.Start();
 	}
+
+    private bool menuShowing;
+    public void ToggleMenu(bool state)
+    {
+        menuShowing = state;
+
+        Backdrop.enabled = menuShowing;
+        Backdrop.canvasRenderer.SetAlpha(menuShowing ? 1f : 1f);
+
+        TutorialPanel.Panel.gameObject.SetActive(!menuShowing);
+        MenuPanel.gameObject.SetActive(menuShowing);
+
+        Cursor.lockState = menuShowing ? CursorLockMode.None : CursorLockMode.Confined;
+        Cursor.visible = menuShowing;
+        PlayerInput.Instance.FPSController.FreezeLook = menuShowing;
+        PlayerInput.Instance.FPSController.FreezeMovement = menuShowing;
+    }
 
     private void Reset()
     {
@@ -146,40 +162,24 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
         HabPowerArrow.gameObject.SetActive(false);
     }
 
-    public void FinishLesson(FinishTutorialChoice whatDo)
+    public void StartNextLesson()
     {
-        if (whatDo == FinishTutorialChoice.NextLesson)
+        if (activeTutorialLessonIndex == Lessons.Length - 1)
         {
-            if (activeTutorialLessonIndex == Lessons.Length - 1)
-            {
-                activeTutorialLessonIndex = 0;
-            }
-            else
-            {
-                activeTutorialLessonIndex++;
-            }
-
-            Reset();
-            CurrentLesson.Start();
+            activeTutorialLessonIndex = 0;
         }
+        else
+        {
+            activeTutorialLessonIndex++;
+        }
+        SelectTutorial(activeTutorialLessonIndex);
     }
 
     void Update () {
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F5))
         {
-            if (CurrentLesson != null)
-            {
-                LessonOver = true;
-            }
-
-            if (LessonOver && CurrentLesson.Coroutine != null)
-            {
-                LessonOver = true;
-                StopCoroutine(CurrentLesson.Coroutine);
-                CurrentLesson.End();
-                FinishLesson(FinishTutorialChoice.NextLesson);
-            }
+            CancelTutorial();
         }
 #endif
 	}
@@ -212,6 +212,34 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
     internal Airlock GetAirlock()
     {
         return FindObjectOfType<Airlock>();
+    }
+
+    public void ExitToMainMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void CancelTutorial()
+    {
+        if (CurrentLesson != null)
+        {
+            LessonOver = true;
+        }
+
+        if (LessonOver && CurrentLesson.Coroutine != null)
+        {
+            LessonOver = true;
+            StopCoroutine(CurrentLesson.Coroutine);
+            CurrentLesson.End();
+            ToggleMenu(true);
+        }
+    }
+
+    public void SelectTutorial(int index)
+    {
+        ToggleMenu(false);
+        activeTutorialLessonIndex = index;
+        CurrentLesson.Start();
     }
 }
 
@@ -600,6 +628,63 @@ In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MA
             Steps = new string[]
             {
                 "Walk using <b>WASD</b> to the circle of lights: the <b>LANDING ZONE</b>.",
+                "Step away from the <b>LANDING ZONE</b> and wait for the <b>CARGO LANDER</b>.",
+                "Take the <b>RESOURCE CRATES</b> out of the <b>CARGO LANDER</b> using <b>LMB</b>.",
+                "Walk using <b>WASD</b> to the <b>HABITAT</b>.",
+                "Open <b>BLUEPRINTS</b> by holding <b>TAB</b> and select <b>LIFE SUPPORT > AIRLOCK</b>.",
+                "Use <b>E</b> to place the <b>AIRLOCK</b> near the <b>HABITAT</b>.",
+                "Use <b>LMB</b> to bring the <b>CRATES</b> into the <b>CONSTRUCTION ZONE</b>.",
+                "Equip the <b>POWER DRILL</b> by holding <b>TAB</b> and selecting it.",
+                "Step outside the <b>CONSTRUCTION ZONE</b> and hold <b>LMB</b> while facing the <b>ZONE</b>.",
+                "Use <b>E</b> to select the <b>AIRLOCK BULKHEAD</b>.",
+                "Use <b>E</b> to select the <b>HABITAT BULKHEAD</b>.",
+                "Get into the <b>AIRLOCK</b>, shut the door, and <b>PRESSURIZE</b> it.",
+                "Walk into the <b>HABITAT</b>.",
+                "Walk outside the <b>HABITAT</b>, by <b>DEPRESSURIZING</b> the <b>AIRLOCK</b>.",
+                "Use <b>V</b> to see the <b>POWER OVERLAY</b>.",
+                "Use <b>E</b> to select the <b>HABITAT POWER SOCKET</b>.",
+                "Use <b>E</b> to select the <b>RTG POWER SOCKET</b>.",
+                "Walk into the <b>HABITAT</b>.",
+                "Use <b>E</b> when looking at the <b>BED</b> to <b>SLEEP</b>.",
+            }
+        };
+    }
+}
+
+
+public class SurvivalLesson : TutorialLesson
+{
+    public SurvivalLesson(Tutorial self, Func<IEnumerator, Coroutine> startCo) : base(self, startCo) { }
+
+    protected override bool IsSurvivalEnabled()
+    {
+        return true;
+    }
+
+    protected override IEnumerator Main()
+    {
+        yield return this.ToggleTutorialPanel();
+        yield return new WaitUntil(ContinueButtonDown);
+        yield return this.ToggleTutorialPanel();
+        UpdateStepsText();
+
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.Rover.transform.position, 12f);
+        CompleteCurrentStep();
+
+
+        End();
+    }
+
+    internal override TutorialDescription GetDescription()
+    {
+        return new TutorialDescription()
+        {
+            Name = "MARS SURVIVAL 101",
+            Description = @"Welcome to Antarctica! 
+In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MARS AUTHORITY</b> has set up this training base.",
+            Steps = new string[]
+            {
+                "Walk using <b>WASD</b> to the <b>ROVER</b>.",
                 "Step away from the <b>LANDING ZONE</b> and wait for the <b>CARGO LANDER</b>.",
                 "Take the <b>RESOURCE CRATES</b> out of the <b>CARGO LANDER</b> using <b>LMB</b>.",
                 "Walk using <b>WASD</b> to the <b>HABITAT</b>.",
