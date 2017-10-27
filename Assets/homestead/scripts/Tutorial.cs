@@ -76,7 +76,8 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
 
         Lessons = new TutorialLesson[]
         {
-            new HomesteadSetup(this, StartCoroutine)
+            new HomesteadSetup(this, StartCoroutine),
+            new SurvivalLesson(this, StartCoroutine)
         };
         TutorialPanel.Panel.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, GetLeftScreenHugXInset(), TutorialPanel.Panel.sizeDelta.x);
         ToggleMenu(true);
@@ -221,6 +222,7 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
 
     public void CancelTutorial()
     {
+        GuiBridge.Instance.ToggleEscapeMenu();
         if (CurrentLesson != null)
         {
             LessonOver = true;
@@ -322,10 +324,14 @@ public abstract class TutorialLesson
         bool survivalEnabled = IsSurvivalEnabled();
         self.SurvivalPanel.gameObject.SetActive(survivalEnabled);
         SurvivalTimer.SkipConsume = !survivalEnabled;
+        self.Rover.gameObject.SetActive(IsRoverVisible());
 
         UpdateDescription();
         this.Coroutine = StartCoroutine(Main());
     }
+
+    internal abstract bool IsRoverVisible();
+
     protected IEnumerator ToggleTutorialPanel()
     {
         float newBackdropAlpha;
@@ -649,6 +655,11 @@ In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MA
             }
         };
     }
+
+    internal override bool IsRoverVisible()
+    {
+        return false;
+    }
 }
 
 
@@ -661,6 +672,11 @@ public class SurvivalLesson : TutorialLesson
         return true;
     }
 
+    internal override bool IsRoverVisible()
+    {
+        return true;
+    }
+
     protected override IEnumerator Main()
     {
         yield return this.ToggleTutorialPanel();
@@ -668,10 +684,10 @@ public class SurvivalLesson : TutorialLesson
         yield return this.ToggleTutorialPanel();
         UpdateStepsText();
 
-        yield return HighlightPositionAndWaitUntilPlayerInIt(self.Rover.transform.position, 12f);
+        self.Rover.Data.EnergyContainer.Push(self.Rover.Data.EnergyContainer.TotalCapacity);
+        yield return HighlightPositionAndWaitUntilPlayerInIt(self.Rover.transform.TransformPoint(-6.91f, .2f, 2.43f), 12f);
         CompleteCurrentStep();
-
-
+        
         End();
     }
 
@@ -685,7 +701,7 @@ In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MA
             Steps = new string[]
             {
                 "Walk using <b>WASD</b> to the <b>ROVER</b>.",
-                "Step away from the <b>LANDING ZONE</b> and wait for the <b>CARGO LANDER</b>.",
+                "Use <b>E</b> to step into the <b>ROVER</b>.",
                 "Take the <b>RESOURCE CRATES</b> out of the <b>CARGO LANDER</b> using <b>LMB</b>.",
                 "Walk using <b>WASD</b> to the <b>HABITAT</b>.",
                 "Open <b>BLUEPRINTS</b> by holding <b>TAB</b> and select <b>LIFE SUPPORT > AIRLOCK</b>.",
