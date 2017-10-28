@@ -731,7 +731,9 @@ public class PlayerInput : MonoBehaviour {
 
         return localEulerAngles;
     }
-    
+
+    private const float DefaultManualMiningPerTick = 0.004f;
+
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
         if (Input.GetKeyUp(KeyCode.Escape))
@@ -1009,7 +1011,7 @@ public class PlayerInput : MonoBehaviour {
 
                     if (lastDeposit != null)
                     {
-                        if (Loadout.Equipped == Equipment.RockDrill)
+                        if (Loadout.Equipped == Equipment.RockDrill && lastDeposit.HasCrate)
                         {
                             if (Input.GetMouseButtonDown(0))
                             {
@@ -1021,7 +1023,7 @@ public class PlayerInput : MonoBehaviour {
                             if (Input.GetMouseButton(0))
                             {
                                 newPrompt = Prompts.MineHint;
-                                newPrompt.Progress = lastDeposit.Mine(Time.deltaTime * PerkMultipliers.ExcavationSpeed);
+                                newPrompt.Progress = lastDeposit.Mine(DefaultManualMiningPerTick * Time.deltaTime * PerkMultipliers.ExcavationSpeed);
 
                                 if (Prompts.MineHint.Progress >= 1f)
                                 {
