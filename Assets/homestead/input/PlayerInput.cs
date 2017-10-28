@@ -1027,8 +1027,7 @@ public class PlayerInput : MonoBehaviour {
 
                                 if (Prompts.MineHint.Progress >= 1f)
                                 {
-                                    DrillSparks.Stop();
-                                    InteractionSource.Stop();
+                                    StopDrilling();
                                 }
                                 else
                                 {
@@ -1037,9 +1036,7 @@ public class PlayerInput : MonoBehaviour {
                             }
                             else
                             {
-                                DrillSparks.Stop();
-                                InteractionSource.Stop();
-                                lastDeposit.ToggleMining(false);
+                                StopDrilling();
 
                                 newPrompt = Prompts.MineHint;
                                 newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
@@ -1503,11 +1500,22 @@ public class PlayerInput : MonoBehaviour {
         {
             Blower.Stop();
         }
+        else if (lastDeposit != null && lastDeposit.IsMining)
+        {
+            StopDrilling();
+        }
 
         if (!doInteract && Input.GetKeyUp(KeyCode.P))
         {
             PlacePostIt();
         }
+    }
+
+    private void StopDrilling()
+    {
+        DrillSparks.Stop();
+        InteractionSource.Stop();
+        lastDeposit.ToggleMining(false);
     }
 
     private Collider selectedUmbilical;

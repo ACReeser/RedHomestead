@@ -30,6 +30,7 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
     private Vector3 cratePosition;
     internal static OreLerper OreLerper;
     internal bool HasCrate { get { return snappedCrate != null; } }
+    internal bool IsMining { get; private set; }
 
     void Start()
     {
@@ -116,6 +117,8 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
         }
 
         OreLerper.Toggle(state, this.transform.position, this.cratePosition, this.typeMat);
+
+        IsMining = state;
     }
 
     internal float Mine(float amount)
