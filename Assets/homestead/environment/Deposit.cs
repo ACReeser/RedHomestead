@@ -20,16 +20,22 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
     [SerializeField]
     private DepositData data;
     public DepositData Data { get { return data; } set { data = value; } }
-    public Transform DrillingParticlesPrefab;
+    public Transform OrePrefab;
 
     private const float VerticalDrillOffset = 1.11f;
     private IceDrill snappedDrill;
     private Coroutine unsnapTimer;
     private Material typeMat;
+    private ResourceComponent snappedCrate;
+    private Vector3 cratePosition;
+    internal static OreLerper OreLerper;
+    internal bool HasCrate { get { return snappedCrate != null; } }
+    internal bool IsMining { get; private set; }
 
     void Start()
     {
         typeMat = transform.GetChild(1).GetComponent<MeshRenderer>().material;
+        cratePosition = this.transform.TransformPoint(new Vector3(-2f, 0.45f, -2f));
 
         if (String.IsNullOrEmpty(data.DepositInstanceID))
         {
@@ -55,7 +61,15 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
 
     public void DetachCrate(IMovableSnappable detaching)
     {
-        snappedDrill = null;
+#pragma warning disable CS0252 // Possible unintended reference comparison; left hand side needs cast
+        if (detaching == snappedDrill)
+#pragma warning restore CS0252 // Possible unintended reference comparison; left hand side needs cast
+            snappedDrill = null;
+#pragma warning disable CS0252 // Possible unintended reference comparison; left hand side needs cast
+        else if (detaching == snappedCrate)
+#pragma warning restore CS0252 // Possible unintended reference comparison; left hand side needs cast
+            snappedCrate = null;
+
         unsnapTimer = StartCoroutine(UnsnapTimer());
     }
 
@@ -69,35 +83,47 @@ public class Deposit : MonoBehaviour, IDataContainer<DepositData>, ICrateSnapper
     {
         var iceDrill = other.GetComponent<IceDrill>();
 
-        if (iceDrill != null && unsnapTimer == null)
+        if (iceDrill != null && Data.Extractable.MatterType == Matter.Water && unsnapTimer == null)
         {
-            iceDrill.SnapCrate(this, this.transform.position + Vector3.up * VerticalDrillOffset);
+            iceDrill.SnapCrate(this, this.transform.TransformPoint(Vector3.up * VerticalDrillOffset));
             snappedDrill = iceDrill;
+        }
+        else
+        {
+            var res = other.GetComponent<ResourceComponent>();
+            if (res != null && unsnapTimer == null)
+            {
+                if (res.Data.Container.MatterType == Matter.Unspecified)
+                {
+                    res.Data.Container.MatterType = this.Data.Extractable.MatterType;
+                    res.RefreshLabel();
+                }
+
+                if (res.Data.Container.MatterType == this.Data.Extractable.MatterType)
+                {
+                    res.SnapCrate(this, this.cratePosition);
+                    snappedCrate = res;
+                }
+            }
         }
     }
 
     internal void ToggleMining(bool state)
     {
-        if (PlayerInput.Instance.DrillingParticles == null)
+        if (Deposit.OreLerper == null)
         {
-            ParticleSystem newSys = GameObject.Instantiate(DrillingParticlesPrefab, transform.position, Quaternion.Euler(90, 0, 0)).GetComponent<ParticleSystem>();
-            PlayerInput.Instance.DrillingParticles = newSys;
+            OreLerper = 
+                GameObject.Instantiate(OrePrefab, transform.position, transform.rotation).GetComponent<OreLerper>();
         }
 
-        if (state)
-        {
-            PlayerInput.Instance.DrillingParticles.transform.position = transform.position;
-            PlayerInput.Instance.DrillingParticles.GetComponent<ParticleSystemRenderer>().material = this.typeMat;
-            PlayerInput.Instance.DrillingParticles.Play();
-        }
-        else
-        {
-            PlayerInput.Instance.DrillingParticles.Stop();
-        }
+        OreLerper.Toggle(state, this.transform.position, this.cratePosition, this.typeMat);
+
+        IsMining = state;
     }
 
-    internal float Mine(float v)
+    internal float Mine(float amount)
     {
-        return .75f;
+        snappedCrate.Data.Container.Push(Data.Extractable.Pull(amount));
+        return Data.Extractable.UtilizationPercentage;
     }
 }

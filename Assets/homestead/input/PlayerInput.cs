@@ -78,7 +78,9 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private RoverInput DrivingRoverInput;
-    private Collider selectedBulkhead, selectedGasValve, selectedPowerSocket;
+    internal Collider selectedBulkhead { get; private set; }
+    internal Collider selectedGasValve { get; private set; }
+    internal Collider selectedPowerSocket { get; private set; }
     private Rigidbody carriedObject;
     private Matter selectedCompound = Matter.Unspecified;
     private List<Transform> createdTubes = new List<Transform>();
@@ -106,7 +108,7 @@ public class PlayerInput : MonoBehaviour {
     }
 
     private Workshop CurrentCraftablePlanner;
-    private Planning<Module> ModulePlan = new Planning<Module>();
+    public Planning<Module> ModulePlan { get; private set; }
     private Planning<Stuff> StuffPlan = new Planning<Stuff>();
     private Planning<Floorplan> FloorPlan = new Planning<Floorplan>();
 
@@ -118,11 +120,12 @@ public class PlayerInput : MonoBehaviour {
     void Awake()
     {
         Instance = this;
+        ModulePlan = new Planning<Module>();
         InteractionSource.transform.SetParent(null);
         IsOnFoot = true;
     }
 
-    void Start()
+    public void Start()
     {
         Loadout = new Loadout();
         GuiBridge.Instance.BuildRadialMenu(this.Loadout);
@@ -728,7 +731,9 @@ public class PlayerInput : MonoBehaviour {
 
         return localEulerAngles;
     }
-    
+
+    private const float DefaultManualMiningPerTick = 0.004f;
+
     private void HandleDefaultInput(ref PromptInfo newPrompt, bool doInteract)
     {
         if (Input.GetKeyUp(KeyCode.Escape))
@@ -1006,7 +1011,7 @@ public class PlayerInput : MonoBehaviour {
 
                     if (lastDeposit != null)
                     {
-                        if (Loadout.Equipped == Equipment.RockDrill)
+                        if (Loadout.Equipped == Equipment.RockDrill && lastDeposit.HasCrate)
                         {
                             if (Input.GetMouseButtonDown(0))
                             {
@@ -1018,12 +1023,11 @@ public class PlayerInput : MonoBehaviour {
                             if (Input.GetMouseButton(0))
                             {
                                 newPrompt = Prompts.MineHint;
-                                newPrompt.Progress = lastDeposit.Mine(Time.deltaTime * PerkMultipliers.ExcavationSpeed);
+                                newPrompt.Progress = lastDeposit.Mine(DefaultManualMiningPerTick * Time.deltaTime * PerkMultipliers.ExcavationSpeed);
 
                                 if (Prompts.MineHint.Progress >= 1f)
                                 {
-                                    DrillSparks.Stop();
-                                    InteractionSource.Stop();
+                                    StopDrilling();
                                 }
                                 else
                                 {
@@ -1032,9 +1036,7 @@ public class PlayerInput : MonoBehaviour {
                             }
                             else
                             {
-                                DrillSparks.Stop();
-                                InteractionSource.Stop();
-                                lastDeposit.ToggleMining(false);
+                                StopDrilling();
 
                                 newPrompt = Prompts.MineHint;
                                 newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
@@ -1498,11 +1500,22 @@ public class PlayerInput : MonoBehaviour {
         {
             Blower.Stop();
         }
+        else if (lastDeposit != null && lastDeposit.IsMining)
+        {
+            StopDrilling();
+        }
 
         if (!doInteract && Input.GetKeyUp(KeyCode.P))
         {
             PlacePostIt();
         }
+    }
+
+    private void StopDrilling()
+    {
+        DrillSparks.Stop();
+        InteractionSource.Stop();
+        lastDeposit.ToggleMining(false);
     }
 
     private Collider selectedUmbilical;

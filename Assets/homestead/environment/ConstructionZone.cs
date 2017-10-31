@@ -50,6 +50,8 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
     }
 
     internal static ConstructionZone ZoneThatPlayerIsStandingIn;
+    internal static ConstructionZone LastPlacedZone;
+
     internal List<ResourceComponent> ResourceList;
     internal bool CanConstruct { get; private set; }
 
@@ -70,6 +72,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         ModulePrefab = PrefabCache<Module>.Cache.GetPrefab(toBuild);
 
         InitializeRequirements();
+        LastPlacedZone = this;
     }
     
     public void InitializeRequirements()
@@ -275,5 +278,14 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
         }
 
         Destroy(this.gameObject);
+    }
+
+    void OnDestroy()
+    {
+        if (this == LastPlacedZone)
+            LastPlacedZone = null;
+
+        if (this == ZoneThatPlayerIsStandingIn)
+            ZoneThatPlayerIsStandingIn = null;
     }
 }

@@ -43,7 +43,7 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
     public CargoLanderData Data { get; set; }
 
     private DoorRotationLerpContext[] ramps;
-    private Dictionary<TriggerForwarder, ResourceComponent> Bays;
+    public Dictionary<TriggerForwarder, ResourceComponent> Bays { get; private set; }
     private bool rampsDown = false;
 
     /// <summary>
@@ -372,6 +372,16 @@ public class CargoLander : MonoBehaviour, ICrateSnapper, ITriggerSubscriber, IDa
             this.LZ.ToggleLights(false);
 
         movement = null;
+    }
+
+    internal void EmergencyDisable()
+    {
+        if (movement != null)
+            StopCoroutine(movement);
+        if (countdownCoroutine != null)
+            StopCoroutine(countdownCoroutine);
+
+        SetState(FlightState.Disabled);
     }
 
     /// <summary>

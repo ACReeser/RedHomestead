@@ -450,8 +450,17 @@ public class MainMenu : MonoBehaviour {
         UnityEngine.SceneManagement.SceneManager.LoadScene("main", UnityEngine.SceneManagement.LoadSceneMode.Single);
     }
 
+    public void StartTutorial()
+    {
+        NewGameChoices.IsTutorial = true;
+        NewGameChoices.ChosenLocation = new BaseLocation();
+        PersistentDataManager.StartNewGame(NewGameChoices);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("tutorial", UnityEngine.SceneManagement.LoadSceneMode.Single);
+    }
+
     public void StartQuickstart()
     {
+        PersistentDataManager.StartNewGame(NewGameChoices);
 #warning todo: make sure quickstart at quickstart equipment/training
         this.NewGameChoices.LoadQuickstart();
         LaunchGame();
