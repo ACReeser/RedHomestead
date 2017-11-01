@@ -799,7 +799,7 @@ namespace RedHomestead.Persistence
                         Equipment.Equipment.ChemicalSniffer, //secondary gadget
                         Equipment.Equipment.Blueprints, //primary gadget
                         Equipment.Equipment.Locked, //tertiary gadget
-                        Equipment.Equipment.RockDrill, //secondary tool
+                        Equipment.Equipment.Locked, //secondary tool
                         Equipment.Equipment.EmptyHand, //unequipped
                         Equipment.Equipment.PowerDrill, //primary tool
                     }
