@@ -56,6 +56,7 @@ public class Tutorial : MonoBehaviour, ITriggerSubscriber
     public RoverInput Rover;
     public CustomFPSController Player;
     public Toolbox Toolbox;
+    public SolarPanel HabitatSolarPanel, ExteriorSolarPanel;
 
     internal TutorialLesson[] Lessons;
     private static int activeTutorialLessonIndex;
@@ -696,28 +697,71 @@ public class SurvivalLesson : TutorialLesson
         return new TutorialDescription()
         {
             Name = "MARS SURVIVAL 101",
-            Description = @"Welcome to Antarctica! 
-In order to prepare new homesteaders for the harsh Martian terrain, the <b>UN MARS AUTHORITY</b> has set up this training base.",
+            Description = @"Survive Antarctica! 
+In order to prepare your survival skills for the harsh Martian environment, you will use your <b>EVA SUIT</b> for power and oxygen.",
             Steps = new string[]
             {
+                "Walk using <b>WASD</b> to the <b>WAYPOINT</b>.",
+                //spending time outside drains OXYGEN quickly and POWER slowly
                 "Walk using <b>WASD</b> to the <b>ROVER</b>.",
+
+                //your suit is now low on OXYGEN. The ROVER is your lifeboat: it contains extra OXYGEN and POWER.
                 "Use <b>E</b> to step into the <b>ROVER</b>.",
-                "Take the <b>RESOURCE CRATES</b> out of the <b>CARGO LANDER</b> using <b>LMB</b>.",
+
+                //A ROVER uses POWER to drive and resupply your suit. It can be recharged by power sources.
+                "Use <b>WASD</b> to drive the <b>ROVER</b> near the <b>SOLAR PANELS</b>.",
+                //A ROVER can also act like a battery to power other things.
+                "Use <b>ESC</b> to step outside the <b>ROVER</b>.",
+
+                //Your ROVER has two UMBILICAL PORTS that also act as POWER SOCKETS.
+                "Use <b>E</b> to select the <b>ROVER</b> <b>UMBILICAL PORT</b>.",
+                //
+                "Use <b>E</b> to select the <b>SOLAR PANEL</b> <b>POWER SOCKET</b>.",
+
+                //Your ROVER can be supplied with OXYGEN, POWER, and WATER at the same time via the ROVER STATION
+                "Use <b>WASD</b> to drive the <b>ROVER</b> near the <b>ROVER STATION</b>.",
+
+                //
+                "Use <b>ESC</b> to step outside the <b>ROVER</b>.",
+                //
+                "Use <b>E</b> to select the <b>ROVER STATION</b> <b>UMBILICAL PORT</b>.",
+                //
+                "Use <b>E</b> to select the <b>ROVER</b> <b>UMBILICAL PORT</b>.",
+
+                //the ROVER is not the only way to resupply your EVA suit
+                "Use <b>WASD</b> to walk to the <b>EVA STATION</b>.",
+                //
+                "Hold <b>E</b> to refill your <b>EVA SUIT</b>.",
+
+                //The martian environment has many other inhospitable features, like dust storms
                 "Walk using <b>WASD</b> to the <b>HABITAT</b>.",
-                "Open <b>BLUEPRINTS</b> by holding <b>TAB</b> and select <b>LIFE SUPPORT > AIRLOCK</b>.",
-                "Use <b>E</b> to place the <b>AIRLOCK</b> near the <b>HABITAT</b>.",
-                "Use <b>LMB</b> to bring the <b>CRATES</b> into the <b>CONSTRUCTION ZONE</b>.",
-                "Equip the <b>POWER DRILL</b> by holding <b>TAB</b> and selecting it.",
-                "Step outside the <b>CONSTRUCTION ZONE</b> and hold <b>LMB</b> while facing the <b>ZONE</b>.",
-                "Use <b>E</b> to select the <b>AIRLOCK BULKHEAD</b>.",
-                "Use <b>E</b> to select the <b>HABITAT BULKHEAD</b>.",
-                "Get into the <b>AIRLOCK</b>, shut the door, and <b>PRESSURIZE</b> it.",
+
+                //the WEATHER STATION can forecast DUST STORMS
+                "Walk using <b>WASD</b> to the <b>TOOLBOX</b>.",
+                
+                //dust builds up on solar panels and degrades power output
+                "Use <b>E</b> to open the <b>TOOLBOX</b>.",
+
+                //the BLOWER tool blows dust off of solar panels
+                "Use <b>E</b> to swap for the <b>BLOWER</b>.",
+                //
+                "Walk using <b>WASD</b> to the <b>SOLAR PANELS</b>.",
+                //
+                "Hold <b>LMB</b> while looking at the <b>SOLAR PANELS</b> to blow off accumulated <b>DUST</b>.",
+
+                //your habitat has sprung a leak!
+                "Run using <b>SHIFT + WASD</b> to the <b>TOOLBOX</b>.",
+
+                //the spanner tool allows you to fix malfunctions
+                "Use <b>E</b> to swap for the <b>SPANNER</b>.",
+
+                //malfunctions cause modules to lose OXYGEN or POWER
+                "Hold <b>E</b> while looking at the <b>HABITAT</b> to repair it.",
+                
+                //congratulations you can now survive the martian environment
                 "Walk into the <b>HABITAT</b>.",
-                "Walk outside the <b>HABITAT</b>, by <b>DEPRESSURIZING</b> the <b>AIRLOCK</b>.",
-                "Use <b>V</b> to see the <b>POWER OVERLAY</b>.",
-                "Use <b>E</b> to select the <b>HABITAT POWER SOCKET</b>.",
-                "Use <b>E</b> to select the <b>RTG POWER SOCKET</b>.",
-                "Walk into the <b>HABITAT</b>.",
+
+                //sleep to exit the tutorial
                 "Use <b>E</b> when looking at the <b>BED</b> to <b>SLEEP</b>.",
             }
         };
