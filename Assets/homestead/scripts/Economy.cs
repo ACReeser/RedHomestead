@@ -169,7 +169,7 @@ namespace RedHomestead.Economy{
                     return 16;
                 default:
                 case DeliveryType.Rover:
-                    return 12;
+                    return 16;
             }
         }
 
