@@ -6,7 +6,9 @@ using UnityEngine;
 public class DroneRover : MonoBehaviour {
     public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate;
     public Transform[] Latches = new Transform[4];
+    public LineRenderer[] Wires = new LineRenderer[4];
 
+    
     private const float backBraceInZ = -1.89f;
     private Vector3 backBraceInPosition = new Vector3(0f, 0f, backBraceInZ);
 
@@ -49,12 +51,20 @@ public class DroneRover : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        ShuttleLeftPosition = new Vector3(ShuttleLeftX, Shuttle.localPosition.y, this.Shuttle.localPosition.z);
+        ShuttleRightPosition = new Vector3(ShuttleRightX, this.Shuttle.localPosition.y, this.Shuttle.localPosition.z);
+
         this.Canvas.localScale = Vector3.one;
         this.Gantry.localPosition = GantryDepth0Position;
         this.BackBrace.localPosition = backBraceInPosition;
         BackGate.localRotation = gateUpRotation;
-        ShuttleLeftPosition = new Vector3(ShuttleLeftX, Shuttle.localPosition.y, this.Shuttle.localPosition.z);
-        ShuttleRightPosition = new Vector3(ShuttleRightX, this.Shuttle.localPosition.y, this.Shuttle.localPosition.z);
+        Shuttle.localPosition = ShuttleLeftPosition;
+        GrabberPlate.localPosition = grabberTopPosition;
+
+        foreach (LineRenderer r in Wires)
+        {
+            r.SetPosition(1, new Vector3(0f, 0f, 0f));
+        }
     }
     internal bool isDroppingOff = false;
 
@@ -142,6 +152,11 @@ public class DroneRover : MonoBehaviour {
         {
             float t = time / duration;
             GrabberPlate.localPosition = Vector3.Lerp(from, to, t);
+            float distance = Shuttle.position.y - GrabberPlate.position.y;
+            foreach(LineRenderer r in Wires)
+            {
+                r.SetPosition(1, new Vector3(0f, 0f, distance));
+            }
             //update wires
             yield return null;
             time += Time.deltaTime;
