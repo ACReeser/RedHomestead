@@ -1,13 +1,26 @@
-﻿using System;
+﻿using RedHomestead.Economy;
+using RedHomestead.Persistence;
+using RedHomestead.Simulation;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DroneRover : MonoBehaviour {
-    public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate;
+[Serializable]
+public class DroneRoverData: FacingData
+{
+    public ResourceUnitCountDictionary Delivery;
+}
+
+public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
+    public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate, BedAnchor;
     public Transform[] Latches = new Transform[4];
     public LineRenderer[] Wires = new LineRenderer[4];
 
+    private const int NumberOfXSlots = 2;
+    private const int NumberOfYSlots = 2;
+    private const int NumberOfZSlots = 5;
+    private IMovableSnappable[,,] Slots = new IMovableSnappable[NumberOfXSlots, NumberOfYSlots, NumberOfZSlots];
     
     private const float backBraceInZ = -1.89f;
     private Vector3 backBraceInPosition = new Vector3(0f, 0f, backBraceInZ);
@@ -44,6 +57,8 @@ public class DroneRover : MonoBehaviour {
     private Quaternion Latch2ClosedRotation = Quaternion.Euler(LatchClosedRot, 0f, 0f);
     private Quaternion Latch3ClosedRotation = Quaternion.Euler(0f, -LatchClosedRot, -90f);
     private const float LatchOpenRotX = 0f;
+    private const float BedCrateSeparation = 0.55f;
+    private const float LatchDurationSeconds = 0.5f;
     private Quaternion Latch0OpenRotation = Quaternion.Euler(0f, 0f, 0f);
     private Quaternion Latch1OpenRotation = Quaternion.Euler(0f, 0f, -90f);
     private Quaternion Latch2OpenRotation = Quaternion.Euler(90f, 0f, 0f);
@@ -67,38 +82,152 @@ public class DroneRover : MonoBehaviour {
         }
     }
     internal bool isDroppingOff = false;
+    private Transform currentlyGrabbedCratelike;
 
-	// Update is called once per frame
-	void Update () {
+    public DroneRoverData Data { get; set; }
+
+    // Update is called once per frame
+    void Update () {
 		if (Input.GetKeyDown(KeyCode.Keypad0) && Input.GetKeyDown(KeyCode.Keypad0) && !isDroppingOff)
         {
             StartCoroutine(DropOff());
         }
 	}
 
+    private void Deliver(Order o)
+    {
+        this.Data = new DroneRoverData()
+        {
+            Delivery = o.LineItemUnits
+        };
+
+        int i = 0;
+        foreach (Matter key in this.Data.Delivery.Keys)
+        {
+            var crateEnumerator = this.Data.Delivery.SquareMeters(key);
+            while (crateEnumerator.MoveNext())
+            {
+                float volume = crateEnumerator.Current;
+
+                int x, y, z;
+                if (TryGetOpenSlot(out x, out y, out z))
+                {
+                    float xF = BedCrateSeparation;
+                    if (x > 0)
+                        xF = -xF; 
+                    Vector3 cratelikePosition = this.BedAnchor.localPosition + new Vector3(xF, y * 1f, z * 1f);
+                    var newCratelike = BounceLander.CreateCratelike(key, volume, cratelikePosition, this.transform);
+                    Slots[x, y, z] = newCratelike.GetComponent<IMovableSnappable>();
+                }
+                i++;
+            }
+        }
+    }
+
+    private bool TryGetOpenSlot(out int iX, out int iY, out int iZ)
+    {
+        for (iZ = 0; iZ < NumberOfZSlots; iZ++)
+        {
+            for (iY = 0; iY < NumberOfYSlots; iY++)
+            {
+                for (iX = 0; iX < NumberOfXSlots; iX++)
+                {
+                    if (Slots[iX, iY, iZ] == null)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        iX = iY = iZ = -1;
+        return false;
+    }
+
+    private struct CargoBayPoint { public int X, Y, Z; }
+
+    private IEnumerator<CargoBayPoint> UnpackSlots()
+    {
+        int iX;
+        int iY;
+        int iZ;
+        for (iZ = NumberOfZSlots - 1; iZ > -1; iZ--)
+        {
+            for (iX = 0; iX < NumberOfXSlots; iX++)
+            {
+                for (iY = NumberOfYSlots - 1; iY > -1; iY--)
+                {
+                    if (Slots[iX, iY, iZ] != null)
+                    {
+                        yield return new CargoBayPoint()
+                        {
+                            X = iX,
+                            Y = iY,
+                            Z = iZ
+                        };
+                    }
+                }
+            }
+        }
+    }
+
     private IEnumerator DropOff()
     {
+        this.Deliver(new Order()
+        {
+            LineItemUnits = new ResourceUnitCountDictionary()
+            {
+                { Matter.Hydrogen, 16 }
+            }
+        });
+
         isDroppingOff = true;
         yield return SetUp();
 
-        yield return SeekToCargoBay(0, false);
-        yield return Latch(true);
-        yield return SeekToBrace(false);
-        yield return SetDownOnGround();
-        yield return SeekToCargoBay(1, true);
-        yield return Latch(true);
-        yield return SeekToBrace(true);
-        yield return SetDownOnGround();
+        var unpacker = UnpackSlots();
+        int lastZ = -1;
+        while (unpacker.MoveNext())
+        {
+            if (lastZ < 0)
+                lastZ = unpacker.Current.Z;
 
-        yield return SeekToCargoBay(0, false);
+            print(string.Format("Unpacking {0},{1},{2}", unpacker.Current.X, unpacker.Current.Y, unpacker.Current.Z));
+            yield return SeekToCargoBay(unpacker.Current);
+            yield return Latch(true);
+            currentlyGrabbedCratelike = Slots[unpacker.Current.X, unpacker.Current.Y, unpacker.Current.Z].transform;
+            currentlyGrabbedCratelike.SetParent(GrabberPlate);
+            currentlyGrabbedCratelike.localPosition = new Vector3(0f, 0f, -.5f);
+
+            if (lastZ != unpacker.Current.Z)
+            {
+                yield return Drive(1.5f);
+                lastZ = unpacker.Current.Z;
+            }
+            yield return SeekToBrace(unpacker.Current.X == 1);
+
+            yield return SetDownOnGround(unpacker.Current.Y);
+        }
+
+        yield return SeekToCargoBay(new CargoBayPoint());
         yield return TearDown();
         isDroppingOff = false;
     }
 
-    private IEnumerator SeekToCargoBay(int depth, bool isRight)
+    private IEnumerator Drive(float amount)
     {
-        Vector3 gantryTo = GantryDepth0Position + (Vector3.forward * depth);
-        Vector3 shuttleTo = isRight ? ShuttleRightPosition : ShuttleLeftPosition;
+        float forward = 0f;
+        while (forward < amount)
+        {
+            this.transform.Translate(Vector3.back * 0.025f, Space.Self);
+            forward += 0.025f;
+            yield return null;
+        }
+    }
+
+    private IEnumerator SeekToCargoBay(CargoBayPoint point)
+    {
+        Vector3 gantryTo = GantryDepth0Position + (Vector3.forward * point.Z);
+        Vector3 shuttleTo = point.X == 1 ? ShuttleRightPosition : ShuttleLeftPosition;
         yield return SeekTo(Gantry.localPosition, gantryTo, Shuttle.localPosition, shuttleTo);
     }
 
@@ -124,13 +253,20 @@ public class DroneRover : MonoBehaviour {
     }
 
     //grabber top, grabber bottom, unlatch, grabber top
-    private IEnumerator SetDownOnGround()
+    private IEnumerator SetDownOnGround(int y)
     {
-        yield return MoveGrabber(grabberTopPosition, grabberBottomBottomPosition);
+        Vector3 targetBottomPositions = y == 1 ? grabberBottomBottomPosition : grabberBottomTopPosition;
+        yield return MoveGrabber(grabberTopPosition, targetBottomPositions);
         
         yield return Latch(false);
 
-        yield return MoveGrabber(grabberBottomBottomPosition, grabberTopPosition);
+        if (currentlyGrabbedCratelike != null)
+        {
+            BounceLander.EnlivenCratelike(currentlyGrabbedCratelike);
+            currentlyGrabbedCratelike = null;
+        }
+
+        yield return MoveGrabber(targetBottomPositions, grabberTopPosition);
     }
 
     //grabber top, grabber bottom, latch, grabber top
@@ -161,12 +297,14 @@ public class DroneRover : MonoBehaviour {
             yield return null;
             time += Time.deltaTime;
         }
+
+        GrabberPlate.localPosition = to;
     }
 
     private IEnumerator Latch(bool openToClose)
     {
         float time = 0f;
-        float duration = 1f;
+        float duration = LatchDurationSeconds;
         Quaternion from0;
         Quaternion from1;
         Quaternion from2;

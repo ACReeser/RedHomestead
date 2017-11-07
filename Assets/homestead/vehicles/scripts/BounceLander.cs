@@ -192,11 +192,7 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
         for (int i = payloadRoot.childCount - 1; i > -1; i--)
         {
             Transform t = payloadRoot.GetChild(i);
-            t.GetComponent<Collider>().enabled = true;
-            Rigidbody r = t.GetComponent<Rigidbody>();
-            r.isKinematic = false;
-            r.useGravity = true;
-            t.transform.parent = null;
+            EnlivenCratelike(t);
         }
 
         GameObject.Destroy(this.gameObject);
@@ -277,5 +273,14 @@ public class BounceLander : MonoBehaviour, IDeliveryScript
             rigibody.isKinematic = true;
             rigibody.useGravity = false;
         }
+    }
+
+    public static void EnlivenCratelike(Transform t)
+    {
+        t.GetComponent<Collider>().enabled = true;
+        Rigidbody r = t.GetComponent<Rigidbody>();
+        r.isKinematic = false;
+        r.useGravity = true;
+        t.transform.parent = null;
     }
 }
