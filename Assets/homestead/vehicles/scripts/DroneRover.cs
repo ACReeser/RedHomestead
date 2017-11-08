@@ -22,21 +22,21 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
     private const int NumberOfZSlots = 5;
     private IMovableSnappable[,,] Slots = new IMovableSnappable[NumberOfXSlots, NumberOfYSlots, NumberOfZSlots];
     
-    private const float backBraceInZ = -1.89f;
+    private const float backBraceInZ = 1.89f;
     private Vector3 backBraceInPosition = new Vector3(0f, 0f, backBraceInZ);
 
     private const float CanvasFoldedScaleY = .1929f;
     private Vector3 canvasFoldedScale = new Vector3(1f, CanvasFoldedScaleY, 1f);
 
     private const float BackGateUpRotX = -90f;
-    private Quaternion gateUpRotation = Quaternion.Euler(BackGateUpRotX, 0f, 0f);
-    private const float BackGateDownRotX = 90f;
-    private Quaternion gateDownRotation = Quaternion.Euler(BackGateDownRotX, 0f, 0f);
+    private Quaternion gateUpRotation = Quaternion.Euler(BackGateUpRotX, 180f, 0f);
+    private const float BackGateDownRotX = 89.9f;
+    private Quaternion gateDownRotation = Quaternion.Euler(BackGateDownRotX, 180f, 0f);
 
     private const float GantryY = 4.306025f;
-    private const float GantryBraceZ = 3.702f;
+    private const float GantryBraceZ = -3.702f;
     private Vector3 GantryBracePosition = new Vector3(0f, GantryY, GantryBraceZ);
-    private const float GantryDepth0Z = -1.287f;
+    private const float GantryDepth0Z = 1.287f;
     private Vector3 GantryDepth0Position = new Vector3(0f, GantryY, GantryDepth0Z);
 
     private const float GrabberTopZ = -1.95f;
@@ -115,7 +115,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
                     float xF = BedCrateSeparation;
                     if (x > 0)
                         xF = -xF; 
-                    Vector3 cratelikePosition = this.BedAnchor.localPosition + new Vector3(xF, y * 1f, z * 1f);
+                    Vector3 cratelikePosition = this.BedAnchor.localPosition - new Vector3(xF, y * -1f, z * 1f);
                     var newCratelike = BounceLander.CreateCratelike(key, volume, cratelikePosition, this.transform);
                     Slots[x, y, z] = newCratelike.GetComponent<IMovableSnappable>();
                 }
@@ -218,7 +218,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
         float forward = 0f;
         while (forward < amount)
         {
-            this.transform.Translate(Vector3.back * 0.025f, Space.Self);
+            this.transform.Translate(Vector3.forward * 0.025f, Space.Self);
             forward += 0.025f;
             yield return null;
         }
@@ -226,7 +226,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
     private IEnumerator SeekToCargoBay(CargoBayPoint point)
     {
-        Vector3 gantryTo = GantryDepth0Position + (Vector3.forward * point.Z);
+        Vector3 gantryTo = GantryDepth0Position + (Vector3.back * point.Z);
         Vector3 shuttleTo = point.X == 1 ? ShuttleRightPosition : ShuttleLeftPosition;
         yield return SeekTo(Gantry.localPosition, gantryTo, Shuttle.localPosition, shuttleTo);
     }
