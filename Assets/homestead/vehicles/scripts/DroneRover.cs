@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 [Serializable]
 public class DroneRoverData: FacingData
@@ -13,9 +14,10 @@ public class DroneRoverData: FacingData
 }
 
 public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
-    public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate, BedAnchor;
+    public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate, BedAnchor, SpawnStart, DropoffLocation;
     public Transform[] Latches = new Transform[4];
     public LineRenderer[] Wires = new LineRenderer[4];
+    public Transform[] Wheels = new Transform[6];
 
     private const int NumberOfXSlots = 2;
     private const int NumberOfYSlots = 2;
@@ -64,6 +66,8 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
     private Quaternion Latch2OpenRotation = Quaternion.Euler(90f, 0f, 0f);
     private Quaternion Latch3OpenRotation = Quaternion.Euler(0f, -90f, -90f);
 
+    private NavMeshAgent agent;
+
     // Use this for initialization
     void Start () {
         ShuttleLeftPosition = new Vector3(ShuttleLeftX, Shuttle.localPosition.y, this.Shuttle.localPosition.z);
@@ -80,6 +84,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
         {
             r.SetPosition(1, new Vector3(0f, 0f, 0f));
         }
+        agent = this.GetComponent<NavMeshAgent>();
     }
     internal bool isDroppingOff = false;
     private Transform currentlyGrabbedCratelike;
@@ -91,6 +96,19 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 		if (Input.GetKeyDown(KeyCode.Keypad0) && Input.GetKeyDown(KeyCode.Keypad0) && !isDroppingOff)
         {
             StartCoroutine(DropOff());
+        }
+        else if (Input.GetKeyDown(KeyCode.KeypadEnter) && Input.GetKeyDown(KeyCode.KeypadPlus))
+        {
+            this.transform.position = SpawnStart.position;
+            agent.destination = DropoffLocation.position;
+        }
+
+        if (this.agent.velocity.sqrMagnitude > 0f)
+        {
+            foreach(Transform tire in Wheels)
+            {
+                tire.Rotate(Vector3.left, this.agent.velocity.sqrMagnitude * 1.2f, Space.Self);
+            }
         }
 	}
 
