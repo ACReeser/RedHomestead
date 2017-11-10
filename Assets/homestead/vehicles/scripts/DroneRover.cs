@@ -97,11 +97,6 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
         {
             StartCoroutine(DropOff());
         }
-        else if (Input.GetKeyDown(KeyCode.KeypadEnter) && Input.GetKeyDown(KeyCode.KeypadPlus))
-        {
-            this.transform.position = SpawnStart.position;
-            agent.destination = DropoffLocation.position;
-        }
 
         if (this.agent.velocity.sqrMagnitude > 0f)
         {
@@ -198,6 +193,10 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
                 { Matter.Hydrogen, 16 }
             }
         });
+        this.transform.position = SpawnStart.position;
+        this.agent.destination = DropoffLocation.position;
+        yield return WaitUntilAtNextPosition();
+        this.agent.enabled = false;
 
         isDroppingOff = true;
         yield return SetUp();
@@ -218,7 +217,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
             if (lastZ != unpacker.Current.Z)
             {
-                yield return Drive(1.5f);
+                yield return ManualDrive(1.5f);
                 lastZ = unpacker.Current.Z;
             }
             yield return SeekToBrace(unpacker.Current.X == 1);
@@ -228,18 +227,25 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
         yield return SeekToCargoBay(new CargoBayPoint());
         yield return TearDown();
+        this.agent.destination = SpawnStart.position;
+        this.agent.enabled = true;
+        yield return WaitUntilAtNextPosition();
+
         isDroppingOff = false;
+        this.gameObject.SetActive(false);
     }
 
-    private IEnumerator Drive(float amount)
-    {
-        float forward = 0f;
-        while (forward < amount)
+    private IEnumerator WaitUntilAtNextPosition()
+    {        
+        while (!AgentHasArrived())
         {
-            this.transform.Translate(Vector3.forward * 0.025f, Space.Self);
-            forward += 0.025f;
             yield return null;
         }
+    }
+
+    private bool AgentHasArrived()
+    {
+        return !this.agent.pathPending && (this.agent.remainingDistance == Mathf.Infinity || this.agent.remainingDistance <= this.agent.stoppingDistance) && (!this.agent.hasPath || this.agent.velocity.sqrMagnitude == 0f);
     }
 
     private IEnumerator SeekToCargoBay(CargoBayPoint point)
@@ -269,6 +275,22 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
             time += Time.deltaTime;
         }
     }
+
+    private IEnumerator ManualDrive(float amount)
+    {
+        float forward = 0f;
+        while (forward < amount)
+        {
+            this.transform.Translate(Vector3.forward * 0.025f, Space.Self);
+            forward += 0.025f;
+            foreach (Transform tire in Wheels)
+            {
+                tire.Rotate(Vector3.left, 5f, Space.Self);
+            }
+            yield return null;
+        }
+    }
+
 
     //grabber top, grabber bottom, unlatch, grabber top
     private IEnumerator SetDownOnGround(int y)
