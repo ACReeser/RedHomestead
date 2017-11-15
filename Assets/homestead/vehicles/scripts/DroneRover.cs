@@ -35,18 +35,28 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
     private const float BackGateDownRotX = 89.9f;
     private Quaternion gateDownRotation = Quaternion.Euler(BackGateDownRotX, 180f, 0f);
 
-    private const float GantryY = 4.306025f;
+    private const float GantryY = 3.598f;
     private const float GantryBraceZ = -3.702f;
     private Vector3 GantryBracePosition = new Vector3(0f, GantryY, GantryBraceZ);
     private const float GantryDepth0Z = 1.287f;
     private Vector3 GantryDepth0Position = new Vector3(0f, GantryY, GantryDepth0Z);
 
+    //#region grabber plate positions
     private const float GrabberTopZ = -1.95f;
     private Vector3 grabberTopPosition = new Vector3(0f, 0f, GrabberTopZ);
-    private const float GrabberBottomBottomZ = -39.72f;
-    private Vector3 grabberBottomBottomPosition = new Vector3(0f, 0f, GrabberBottomBottomZ);
-    private const float GrabberBottomTopZ = -25.89f;
-    private Vector3 grabberBottomTopPosition = new Vector3(0f, 0f, GrabberBottomTopZ);
+
+    private const float GrabberCargoTopZ = -2.25f;
+    private Vector3 grabberCargoTopPosition = new Vector3(0f, 0f, GrabberCargoTopZ);
+
+    private const float GrabberCargoBottomZ = -14.9f;
+    private Vector3 grabberCargoBottomPosition = new Vector3(0f, 0f, GrabberCargoBottomZ);
+
+    private const float GrabberGroundBottomZ = -29.72f;
+    private Vector3 grabberGroundBottomPosition = new Vector3(0f, 0f, GrabberGroundBottomZ);
+
+    private const float GrabberGroundTopZ = -17.89f;
+    private Vector3 grabberGroundTopPosition = new Vector3(0f, 0f, GrabberGroundTopZ);
+    //#endregion
 
     private const float ShuttleLeftX = 0.425f;
     private Vector3 ShuttleLeftPosition;
@@ -210,10 +220,11 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
             print(string.Format("Unpacking {0},{1},{2}", unpacker.Current.X, unpacker.Current.Y, unpacker.Current.Z));
             yield return SeekToCargoBay(unpacker.Current);
-            yield return Latch(true);
-            currentlyGrabbedCratelike = Slots[unpacker.Current.X, unpacker.Current.Y, unpacker.Current.Z].transform;
-            currentlyGrabbedCratelike.SetParent(GrabberPlate);
-            currentlyGrabbedCratelike.localPosition = new Vector3(0f, 0f, -.5f);
+
+            if (unpacker.Current.Y == 0)
+                yield return PickUpFromBottomCargo(unpacker);
+            else
+                yield return PickUpFromTopCargo(unpacker);
 
             if (lastZ != unpacker.Current.Z)
             {
@@ -233,6 +244,13 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
         isDroppingOff = false;
         this.gameObject.SetActive(false);
+    }
+
+    private void GrabberGrabCratelike(IEnumerator<CargoBayPoint> unpacker)
+    {
+        currentlyGrabbedCratelike = Slots[unpacker.Current.X, unpacker.Current.Y, unpacker.Current.Z].transform;
+        currentlyGrabbedCratelike.SetParent(GrabberPlate);
+        currentlyGrabbedCratelike.localPosition = new Vector3(0f, 0f, -.5f);
     }
 
     private IEnumerator WaitUntilAtNextPosition()
@@ -295,7 +313,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
     //grabber top, grabber bottom, unlatch, grabber top
     private IEnumerator SetDownOnGround(int y)
     {
-        Vector3 targetBottomPositions = y == 1 ? grabberBottomBottomPosition : grabberBottomTopPosition;
+        Vector3 targetBottomPositions = y == 1 ? grabberGroundBottomPosition : grabberGroundTopPosition;
         yield return MoveGrabber(grabberTopPosition, targetBottomPositions);
         
         yield return Latch(false);
@@ -309,14 +327,50 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
         yield return MoveGrabber(targetBottomPositions, grabberTopPosition);
     }
 
-    //grabber top, grabber bottom, latch, grabber top
+
+    /// <summary>
+    /// grabber top, grabber bottom, latch, grabber top
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator PickUpFromGround()
     {
-        yield return MoveGrabber(grabberTopPosition, grabberBottomBottomPosition);
+        yield return MoveGrabber(grabberTopPosition, grabberGroundBottomPosition);
         
         yield return Latch(true);
 
-        yield return MoveGrabber(grabberBottomBottomPosition, grabberTopPosition);
+        yield return MoveGrabber(grabberGroundBottomPosition, grabberTopPosition);
+    }
+
+    /// <summary>
+    /// grabs from top cargo position
+    /// </summary>
+    /// <param name="unpacker"></param>
+    /// <returns></returns>
+    private IEnumerator PickUpFromTopCargo(IEnumerator<CargoBayPoint> unpacker)
+    {
+        yield return MoveGrabber(grabberTopPosition, grabberCargoTopPosition);
+
+        yield return Latch(true);
+
+        GrabberGrabCratelike(unpacker);
+
+        yield return MoveGrabber(grabberCargoTopPosition, grabberTopPosition);
+    }
+
+    /// <summary>
+    /// grabs from top cargo position
+    /// </summary>
+    /// <param name="unpacker"></param>
+    /// <returns></returns>
+    private IEnumerator PickUpFromBottomCargo(IEnumerator<CargoBayPoint> unpacker)
+    {
+        yield return MoveGrabber(grabberTopPosition, grabberCargoBottomPosition);
+
+        yield return Latch(true);
+
+        GrabberGrabCratelike(unpacker);
+
+        yield return MoveGrabber(grabberCargoBottomPosition, grabberTopPosition);
     }
 
     private IEnumerator MoveGrabber(Vector3 from, Vector3 to)
