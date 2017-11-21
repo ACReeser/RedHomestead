@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 65684428078350046}
   - component: {fileID: 54769794798055278}
   - component: {fileID: 114675529471610938}
+  - component: {fileID: 208057772211761874}
   m_Layer: 8
   m_Name: WaterBarrel
   m_TagString: movable
@@ -345,6 +346,7 @@ MonoBehaviour:
       TotalCapacity: 1
       Amount: 0
       MatterType: 0
+      AvgPurity: 0
   ResourceLabelMeshes: []
   CompoundLabelMeshes:
   - {fileID: 4300026, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
@@ -357,3 +359,18 @@ MonoBehaviour:
   PrinterMaterial: {fileID: 2100000, guid: ccfecc7f4afe55a40ba26a760478875a, type: 2}
   RawMaterial: {fileID: 2100000, guid: 8fc3679fc3dc6d34f81c513208fcb73d, type: 2}
   CrateRenderer: {fileID: 23697629512778354}
+--- !u!208 &208057772211761874
+NavMeshObstacle:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1189009071442206}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5

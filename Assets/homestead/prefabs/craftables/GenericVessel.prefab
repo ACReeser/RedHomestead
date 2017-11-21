@@ -26,6 +26,7 @@ GameObject:
   - component: {fileID: 6541822}
   - component: {fileID: 5479682}
   - component: {fileID: 11457606}
+  - component: {fileID: 208344397056143622}
   m_Layer: 8
   m_Name: GenericVessel
   m_TagString: movable
@@ -316,6 +317,7 @@ MonoBehaviour:
       TotalCapacity: 1
       Amount: 0
       MatterType: 0
+      AvgPurity: 0
   ResourceLabelMeshes: []
   CompoundLabelMeshes:
   - {fileID: 4300026, guid: 798c64b11c24a1e42b904939bab7be68, type: 3}
@@ -343,3 +345,18 @@ Prefab:
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 107862}
   m_IsPrefabParent: 1
+--- !u!208 &208344397056143622
+NavMeshObstacle:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 107862}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5

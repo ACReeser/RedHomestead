@@ -140,6 +140,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
                         xF = -xF; 
                     Vector3 cratelikePosition = this.BedAnchor.localPosition - new Vector3(xF, y * -1f, z * 1f);
                     var newCratelike = BounceLander.CreateCratelike(key, volume, cratelikePosition, this.transform);
+                    newCratelike.GetComponent<NavMeshObstacle>().enabled = false;
                     Slots[x, y, z] = newCratelike.GetComponent<IMovableSnappable>();
                 }
                 i++;
@@ -238,8 +239,8 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
         yield return SeekToCargoBay(new CargoBayPoint());
         yield return TearDown();
-        this.agent.destination = SpawnStart.position;
         this.agent.enabled = true;
+        this.agent.destination = SpawnStart.position;
         yield return WaitUntilAtNextPosition();
 
         isDroppingOff = false;
@@ -320,6 +321,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
 
         if (currentlyGrabbedCratelike != null)
         {
+            currentlyGrabbedCratelike.GetComponent<NavMeshObstacle>().enabled = true;
             BounceLander.EnlivenCratelike(currentlyGrabbedCratelike);
             currentlyGrabbedCratelike = null;
         }
