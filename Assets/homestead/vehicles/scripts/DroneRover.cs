@@ -14,10 +14,12 @@ public class DroneRoverData: FacingData
 }
 
 public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
-    public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate, BedAnchor, SpawnStart, DropoffLocation;
+    public Transform BackBrace, Gantry, Shuttle, Canvas, WireGuide, GrabberPlate, BackGate, BedAnchor;
     public Transform[] Latches = new Transform[4];
     public LineRenderer[] Wires = new LineRenderer[4];
     public Transform[] Wheels = new Transform[6];
+
+    private LandingZone DropoffZone;
 
     private const int NumberOfXSlots = 2;
     private const int NumberOfYSlots = 2;
@@ -100,14 +102,8 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
     private Transform currentlyGrabbedCratelike;
 
     public DroneRoverData Data { get; set; }
-
-    // Update is called once per frame
+    
     void Update () {
-		if (Input.GetKeyDown(KeyCode.Keypad0) && Input.GetKeyDown(KeyCode.Keypad0) && !isDroppingOff)
-        {
-            StartCoroutine(DropOff());
-        }
-
         if (this.agent.velocity.sqrMagnitude > 0f)
         {
             foreach(Transform tire in Wheels)
@@ -115,9 +111,17 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
                 tire.Rotate(Vector3.left, this.agent.velocity.sqrMagnitude * 1.2f, Space.Self);
             }
         }
-	}
+    }
 
-    private void Deliver(Order o)
+    internal void Deliver(Order o, LandingZone z)
+    {
+        this.DropoffZone = z;
+        this.gameObject.SetActive(true);
+
+        StartCoroutine(DropOff(o));
+    }
+
+    private void Pack(Order o)
     {
         this.Data = new DroneRoverData()
         {
@@ -195,17 +199,11 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
         }
     }
 
-    private IEnumerator DropOff()
+    private IEnumerator DropOff(Order o)
     {
-        this.Deliver(new Order()
-        {
-            LineItemUnits = new ResourceUnitCountDictionary()
-            {
-                { Matter.Hydrogen, 16 }
-            }
-        });
-        this.transform.position = SpawnStart.position;
-        this.agent.destination = DropoffLocation.position;
+        this.Pack(o);
+        agent = this.GetComponent<NavMeshAgent>();
+        this.agent.destination = DropoffZone.transform.position;
         yield return WaitUntilAtNextPosition();
         this.agent.enabled = false;
 
@@ -240,7 +238,7 @@ public class DroneRover : MonoBehaviour, IDataContainer<DroneRoverData> {
         yield return SeekToCargoBay(new CargoBayPoint());
         yield return TearDown();
         this.agent.enabled = true;
-        this.agent.destination = SpawnStart.position;
+        this.agent.destination = this.DropoffZone.droneSpawnPoint.position;
         yield return WaitUntilAtNextPosition();
 
         isDroppingOff = false;

@@ -15,13 +15,15 @@ public class LandingZoneData: FacingData
 
 public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<LandingZoneData> {
     public static LandingZone Instance;
-    public Transform bouncePrefab, landerPrefab;
+    public Transform bouncePrefab, landerPrefab, droneRoverPrefab;
+    public Transform droneSpawnPoint;
     public Light[] spotlights;
 
     private Transform currentLander;
 
     public LandingZoneData Data { get; set; }
     internal CargoLander Cargo { get; private set; }
+    internal DroneRover DroneCargoRover { get; private set; }
 
     void Awake () {
         Instance = this;
@@ -61,7 +63,6 @@ public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<Landin
                 SunOrbit.Instance.ResetToNormalTime();
                 break;
             case DeliveryType.Lander:
-            case DeliveryType.Rover:
                 if (this.Cargo == null)
                 {
                     Transform lander = GameObject.Instantiate<Transform>(landerPrefab);
@@ -69,6 +70,15 @@ public class LandingZone : MonoBehaviour, IDeliveryScript, IDataContainer<Landin
                     this.Cargo = lander.GetComponent<CargoLander>();
                 }
                 Cargo.Deliver(o, this);
+                break;
+            case DeliveryType.Rover:
+                if (this.DroneCargoRover == null)
+                {
+                    Transform rover = GameObject.Instantiate<Transform>(droneRoverPrefab);
+                    rover.position = this.droneSpawnPoint.position;
+                    this.DroneCargoRover = rover.GetComponent<DroneRover>();
+                }
+                DroneCargoRover.Deliver(o, this);
                 break;
         }
     }
