@@ -77,13 +77,20 @@ namespace RedHomestead.Environment
 
     public class DustManager
     {
+        private const float FollowIntervalSeconds = 1f;
         private System.Random random;
         private Transform DuskAndDawnOnlyParent;
         private SurvivalTimer survivalTimer;
         private EnvironmentData environment;
         private Weather yesterday, today, tomorrow;
 
-        public DustManager(SunOrbit orb, Persistence.Game game, Persistence.Base @base, SurvivalTimer timer)
+        public DustManager(
+            SunOrbit orb, 
+            Persistence.Game game, 
+            Persistence.Base @base, 
+            SurvivalTimer timer,
+            Func<IEnumerator, Coroutine> startCoroutine,
+            Action<Coroutine> stopCoroutine)
         {
             survivalTimer = timer;
             survivalTimer.OnPlayerInHabitatChange += _OnPlayerInHabitatChange;
@@ -94,6 +101,8 @@ namespace RedHomestead.Environment
             DuskAndDawnOnlyParent = orb.DuskAndDawnOnlyParent;
             environment = game.Environment;
             this.random = new System.Random(@base.WeatherSeed);
+            this.startCoroutine = startCoroutine;
+            this.stopCoroutine = stopCoroutine;
             FastForward(environment.CurrentSol);
             DoAfterSolChange();
 
@@ -129,6 +138,11 @@ namespace RedHomestead.Environment
         }
 
         private bool isDawnOrDusk = false;
+        private readonly Func<IEnumerator, Coroutine> startCoroutine;
+        private readonly Action<Coroutine> stopCoroutine;
+        private Coroutine currentFollow;
+        private bool currentlyShowingDustStormParticles;
+
         private void _OnDusk(bool isStart)
         {
             isDawnOrDusk = isStart;
@@ -203,14 +217,17 @@ namespace RedHomestead.Environment
 
         private void RefreshDustParticleSystems()
         {
+            this.currentlyShowingDustStormParticles = !playerInHabitat && (isDawnOrDusk || today.Coverage != DustCoverage.None);
+            ParticleSystem.MinMaxCurve dustStormRateOverTime = today.Coverage.EmissionCurve();
+
             foreach (Transform t in DuskAndDawnOnlyParent)
             {
                 var ps = t.GetComponent<ParticleSystem>();
                 if (ps != null)
                 {
                     var emission = ps.emission;
-                    emission.rateOverTime = today.Coverage.EmissionCurve();
-                    emission.enabled = !playerInHabitat && (isDawnOrDusk || today.Coverage != DustCoverage.None);
+                    emission.rateOverTime = dustStormRateOverTime;
+                    emission.enabled = currentlyShowingDustStormParticles;
 
                     if (emission.enabled && !ps.isPlaying)
                         ps.Play();
@@ -219,7 +236,37 @@ namespace RedHomestead.Environment
                 }
             }
 
+            if (currentlyShowingDustStormParticles)
+            {
+                this.currentFollow = this.startCoroutine(follow());
+            }
+            else
+            {
+                StopFollowCoroutine();
+            }
+
             RenderSettings.fog = today.Coverage == DustCoverage.Stormy;
+        }
+
+        private void StopFollowCoroutine()
+        {
+            if (this.currentFollow != null)
+            {
+                this.stopCoroutine(this.currentFollow);
+            }
+        }
+
+        private IEnumerator follow()
+        {
+            while(currentlyShowingDustStormParticles)
+            {
+                yield return new WaitForSeconds(FollowIntervalSeconds);
+
+                foreach (Transform t in DuskAndDawnOnlyParent)
+                {
+                    t.position = new Vector3(PlayerInput.Instance.transform.position.x, PlayerInput.Instance.transform.position.y, PlayerInput.Instance.transform.position.z);
+                }            
+            }
         }
     }
 

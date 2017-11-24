@@ -48,7 +48,7 @@ public class SunOrbit : MonoBehaviour {
 	void Start () {
         RefreshClockTextMeshes();
         UpdateClockSpeedArrows();
-        DustManager = new DustManager(this, Game.Current, Base.Current, SurvivalTimer.Instance);
+        DustManager = new DustManager(this, Game.Current, Base.Current, SurvivalTimer.Instance, StartCoroutine, StopCoroutine);
 	}
 
     public void RefreshClockTextMeshes()
