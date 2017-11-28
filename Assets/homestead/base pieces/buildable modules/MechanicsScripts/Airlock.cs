@@ -20,6 +20,8 @@ public class Airlock : GenericBaseModule, IDoorManager {
 
     public Transform OuterDoor, InnerDoor, PressurizeButton, DepressurizeButton;
     public bool IsChangingPressure, IsPressurized, OuterDoorSealed = true, InnerDoorSealed = true;
+    public AudioClip PressurizeSfx, DepressurizeSfx;
+    public AudioSource Source;
 
     private Animator OuterAnimator, InnerAnimator;
 
@@ -62,6 +64,7 @@ public class Airlock : GenericBaseModule, IDoorManager {
     {
         IsChangingPressure = true;
         pressure1.Play(); pressure2.Play();
+        Source.PlayOneShot(PressurizeSfx);
         yield return new WaitForSeconds(2f);
         pressure1.Stop(); pressure2.Stop();
         IsPressurized = true;
@@ -88,6 +91,7 @@ public class Airlock : GenericBaseModule, IDoorManager {
         if (InnerDoorSealed && IsPressurized)
         {
             IsPressurized = false;
+            Source.PlayOneShot(DepressurizeSfx);
             RefreshDoorAndLightState();
             SurvivalTimer.Instance.BeginEVA();
             SetPlayerTerrainCollision(false);
