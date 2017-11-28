@@ -1664,11 +1664,11 @@ public class PlayerInput : MonoBehaviour {
     {
         if (ModulePlan.IsActive)
         {
-            if (Input.GetMouseButton(0) && ModulePlan.Type != Module.SolarPanelSmall)
+            if (Input.GetMouseButton(0) && ModulePlan.Type.CanRotate())
             {
                 ModulePlan.Rotate(true);
             }
-            else if (Input.GetMouseButton(1) && ModulePlan.Type != Module.SolarPanelSmall)
+            else if (Input.GetMouseButton(1) && ModulePlan.Type.CanRotate())
             {
                 ModulePlan.Rotate(false);
             }
@@ -1697,6 +1697,49 @@ public class PlayerInput : MonoBehaviour {
                         //then take the average height between them
                         //and invalidate the placement if it passes some threshold
                         ModulePlan.Visualization.position = hitInfo.point;
+
+                        if (ModulePlan.Type.IsHabitatModule())
+                        {
+                            GameObject[] bulkheads = GameObject.FindGameObjectsWithTag("bulkhead");
+
+                            float close = 999f;
+                            Transform closest = null;
+                            foreach(var bulkhead in bulkheads)
+                            {
+                                if (bulkhead.transform.root == ModulePlan.Visualization.root)
+                                    continue;
+                                else
+                                {
+                                    float candidate = (bulkhead.transform.position - ModulePlan.Visualization.transform.position).sqrMagnitude;
+                                    if (candidate > 36f)
+                                    {
+                                        continue;
+                                    }
+                                    else if (candidate < close)
+                                    {
+                                        close = candidate;
+                                        closest = bulkhead.transform;
+                                    }
+                                }
+                            }
+                            if (closest != null)
+                            {
+                                Vector3 newPosition = closest.TransformPoint(Vector3.right * Mathf.Sqrt(close));
+                                newPosition.y = hitInfo.point.y;
+                                ModulePlan.Visualization.position = newPosition;
+
+                                float rotationDegrees = Mathf.Abs( ModulePlan.Visualization.rotation.eulerAngles.y);
+                                if (rotationDegrees != 0f && (rotationDegrees < 10 || rotationDegrees > 80))
+                                {
+                                    var vec = ModulePlan.Visualization.rotation.eulerAngles;
+                                    vec.x = Mathf.Round(vec.x / 90) * 90;
+                                    vec.y = Mathf.Round(vec.y / 90) * 90;
+                                    vec.z = Mathf.Round(vec.z / 90) * 90;
+                                    ModulePlan.Visualization.rotation = Quaternion.Euler(vec);
+                                }
+                            }
+
+                        }
 
                         if (doInteract)
                         {

@@ -78,6 +78,31 @@ namespace RedHomestead.Buildings
             }
         }
 
+        public static bool CanRotate(this Module module)
+        {
+            switch (module)
+            {
+                case Module.SolarPanelSmall:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        public static bool IsHabitatModule(this Module module)
+        {
+            switch (module)
+            {
+                case Module.Workshop:
+                case Module.Airlock:
+                case Module.GreenhouseHall:
+                case Module.HallwayNode:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         /// <summary>
         /// In seconds
         /// </summary>
