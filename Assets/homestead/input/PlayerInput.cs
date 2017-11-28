@@ -18,7 +18,7 @@ using RedHomestead.Agriculture;
 [Serializable]
 public struct InteractionClips
 {
-    public AudioClip Drill, Construction;
+    public AudioClip Drill, Construction, PlugIn;
 }
 
 /// <summary>
@@ -2157,6 +2157,7 @@ public class PlayerInput : MonoBehaviour {
             selectedPowerSocket = null;
             CurrentMode = InputMode.Normal;
             GuiBridge.Instance.RefreshMode();
+            PlayInteractionClip(g2.transform.position, Sfx.PlugIn, volumeScale: .5f);
         }
     }
 
