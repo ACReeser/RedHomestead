@@ -415,7 +415,7 @@ namespace RedHomestead.Simulation
             }
             else
             {
-                return IconAtlas.Instance.ResourceIcons[i - 1]; // 1 unspecified
+                return IconAtlas.Instance.ResourceIcons[i]; // 1 unspecified
             }
         }
 
