@@ -18,7 +18,7 @@ using RedHomestead.Agriculture;
 [Serializable]
 public struct InteractionClips
 {
-    public AudioClip Drill, Construction, PlugIn;
+    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose;
 }
 
 /// <summary>
@@ -929,14 +929,20 @@ public class PlayerInput : MonoBehaviour {
                             break;
                         case Airlock.OpenDoorName:
                             if (doInteract)
+                            {
+                                PlayInteractionClip(hitInfo.point, Sfx.DoorClose, volumeScale: .4f);
                                 doorM.ToggleDoor(hitInfo.collider.transform);
+                            }
                             else
                                 newPrompt = Prompts.CloseDoorHint;
                             break;
                         case Airlock.ClosedDoorName:
                         default:
                             if (doInteract)
+                            {
+                                PlayInteractionClip(hitInfo.point, Sfx.DoorOpen, volumeScale:.4f);
                                 doorM.ToggleDoor(hitInfo.collider.transform);
+                            }
                             else
                                 newPrompt = Prompts.OpenDoorHint;
                             break;
