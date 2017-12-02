@@ -16,12 +16,15 @@ namespace RedHomestead.Crafting
         IceDrill,
         Pump,
         Crate,
-        Toolbox
+        Toolbox,
+        EVAOxygenTank,
+        EVABatteries,
+        EVAToolbelt
     }
 
     public enum CraftableGroup
     {
-        Power, Storage, Extraction
+        Power, Storage, Extraction, SuitUpgrade
     }
 
     public interface IBlueprintDetailable
@@ -92,7 +95,7 @@ namespace RedHomestead.Crafting
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceUnitEntry(1, Matter.CopperWire),
                         new ResourceVolumeEntry(.5f, Matter.Aluminium),
                         new ResourceUnitEntry(1, Matter.Glass)
                     },
@@ -149,9 +152,71 @@ namespace RedHomestead.Crafting
                     Description = "A portable drill to mine water ice from deposits.",
                     PowerSteady = 1
                 }
+            },
+            {
+                Craftable.EVABatteries, new CraftingData()
+                {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(1, Matter.CopperWire),
+                        new ResourceVolumeEntry(.25f, Matter.Aluminium),
+                        new ResourceUnitEntry(1, Matter.Glass)
+                    },
+                    Description = "Extra batteries for the EVA Suit."
+                }
+            },
+            {
+                Craftable.EVAOxygenTank, new CraftingData()
+                {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(1, Matter.ElectricMotor),
+                        new ResourceVolumeEntry(.25f, Matter.Steel),
+                        new ResourceUnitEntry(1, Matter.Piping)
+                    },
+                    Description = "Extra oxygen for the EVA Suit."
+                }
+            },
+            {
+                Craftable.EVAToolbelt, new CraftingData()
+                {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(1, Matter.Canvas),
+                        new ResourceVolumeEntry(.25f, Matter.Aluminium),
+                    },
+                    Description = "Extra tool slots for the EVA Suit."
+                }
             }
         };
 
+        public static bool IsCraftableEVASuitComponent(this Craftable craftable)
+        {
+            switch (craftable)
+            {
+                case Craftable.EVABatteries:
+                case Craftable.EVAOxygenTank:
+                case Craftable.EVAToolbelt:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static EVA.EVAUpgrade ToEVASuitUpgrade(this Craftable craftable)
+        {
+            switch (craftable)
+            {
+                case Craftable.EVABatteries:
+                    return EVA.EVAUpgrade.Battery;
+                case Craftable.EVAOxygenTank:
+                    return EVA.EVAUpgrade.Oxygen;
+                case Craftable.EVAToolbelt:
+                    return EVA.EVAUpgrade.Toolbelt;
+                default:
+                    return EVA.EVAUpgrade.None;
+            }
+        }
         public static Dictionary<CraftableGroup, Craftable[]> CraftableGroupMap = new Dictionary<CraftableGroup, Craftable[]>()
         {
             {
@@ -176,6 +241,15 @@ namespace RedHomestead.Crafting
                 new Craftable[]
                 {
                     Craftable.IceDrill,
+                }
+            },
+            {
+                CraftableGroup.SuitUpgrade,
+                new Craftable[]
+                {
+                    Craftable.EVAOxygenTank,
+                    Craftable.EVABatteries,
+                    Craftable.EVAToolbelt,
                 }
             },
         };

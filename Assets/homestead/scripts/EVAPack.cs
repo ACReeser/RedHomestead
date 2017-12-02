@@ -6,6 +6,15 @@ using RedHomestead.Simulation;
 
 namespace RedHomestead.EVA
 {
+    public enum EVAUpgrade
+    {
+        None     = 0,
+        Oxygen   = 1,
+        Battery  = 2,
+        Toolbelt = 4,
+        Jetpack  = 8
+    }
+
     [Serializable]
     public class PackResourceData
     {
@@ -35,6 +44,17 @@ namespace RedHomestead.EVA
         public PackResourceData Water;
         public PackResourceData Food;
         public string CurrentHabitatModuleInstanceID;
+        public EVAUpgrade Upgrades;
+
+        public bool HasUpgrade(EVAUpgrade queryUpgrade)
+        {
+            return (Upgrades & queryUpgrade) != 0;
+        }
+
+        public void SetUpgrade(EVAUpgrade newUpgrade)
+        {
+            Upgrades |= newUpgrade;
+        }
 
         protected override void BeforeMarshal(Transform t)
         {

@@ -93,10 +93,17 @@ public class DoorRotationLerpContext
     }
 }
 
+[Serializable]
 public class WorkshopFlexData
 {
     public Craftable CurrentCraftable = Craftable.Unspecified;
     public float Progress;
+}
+
+[Serializable]
+public class EVAUpgradeSuitTransforms
+{
+    public Transform Batteries, OxygenTank, Toolbelt, Jetpack;
 }
 
 public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, WorkshopFlexData>
@@ -109,6 +116,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
 
     public Transform[] Tools { get { return ToolsInLockers; } }
     public Transform[] Lockers { get { return lockers; } }
+    public EVAUpgradeSuitTransforms EVAUpgrades;
 
     private bool CurrentlyViewingDetail = false;
     private Dictionary<Transform, DoorRotationLerpContext> doorRotator = new Dictionary<Transform, DoorRotationLerpContext>();
@@ -159,6 +167,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
     {
         this.SetCurrentCraftable(this.FlexData.CurrentCraftable);
         this.InitializeSwappable();
+        this.RefreshSuitDisplay();
     }
 
     public void SetCurrentCraftable(Craftable c)
@@ -202,7 +211,23 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
 
     private void SpawnCraftable(Craftable craftable)
     {
-        BounceLander.CreateCratelike(craftable, this.SpawnPosition.position);
+        if (craftable.IsCraftableEVASuitComponent())
+        {
+            Game.Current.Player.PackData.SetUpgrade(craftable.ToEVASuitUpgrade());
+            RefreshSuitDisplay();
+        }
+        else
+        {
+            BounceLander.CreateCratelike(craftable, this.SpawnPosition.position);
+        }
+    }
+
+    private void RefreshSuitDisplay()
+    {
+        EVAUpgrades.OxygenTank.gameObject.SetActive(Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Oxygen));
+        EVAUpgrades.Batteries.gameObject.SetActive(Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Battery));
+        EVAUpgrades.Toolbelt.gameObject.SetActive(Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Toolbelt));
+        EVAUpgrades.Jetpack.gameObject.SetActive(Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Jetpack));
     }
 
     internal void ToggleCraftableView(bool overallState)
