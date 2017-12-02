@@ -8,6 +8,7 @@ using RedHomestead.Buildings;
 using RedHomestead.Simulation;
 using RedHomestead.Crafting;
 using System.Linq;
+using RedHomestead.Persistence;
 
 [Serializable]
 public abstract class InteriorFields<G, C> where C : IConvertible
@@ -60,7 +61,7 @@ public abstract class InteriorFields<G, C> where C : IConvertible
                 C child = children[i];
 
                 int index = Convert.ToInt32(child);
-                if (index < allPrefabs.Length && allPrefabs[index] != null)
+                if (index < allPrefabs.Length && allPrefabs[index] != null && CanSelectChild(child))
                 {
                     t.gameObject.SetActive(true);
                     //cheat and set the name to the enum value;
@@ -79,6 +80,11 @@ public abstract class InteriorFields<G, C> where C : IConvertible
             }
             i++;
         }
+    }
+
+    protected virtual bool CanSelectChild(C child)
+    {
+        return true;
     }
 
     public abstract Dictionary<G, C[]> Map { get; }
@@ -123,6 +129,14 @@ public class CraftableFields : InteriorFields<CraftableGroup, Craftable>
         {
             return Crafting.CraftableGroupMap;
         }
+    }
+
+    protected override bool CanSelectChild(Craftable child)
+    {
+        if (child.IsCraftableEVASuitComponent())
+            return !Game.Current.Player.PackData.HasUpgrade(child.ToEVASuitUpgrade());
+        else
+            return true;
     }
 
     private bool DetailState;
@@ -249,7 +263,15 @@ public class FloorplanBridge : MonoBehaviour {
             UnityEngine.Debug.LogWarning("Tried to craft something but no workshop");
         else if (currentWorkshop.FlexData.CurrentCraftable == Craftable.Unspecified)
         {
-            if (Warehouse.GlobalResourceList.CanConsume(prereqs))
+            bool cheat = false;
+#if UNITY_EDITOR
+            cheat = Input.GetKey(KeyCode.C);
+#endif
+            if (cheat)
+            {
+                SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);
+            }
+            else if (Warehouse.GlobalResourceList.CanConsume(prereqs))
             {
                 Warehouse.GlobalResourceList.Consume(prereqs);
                 SelectThing(CraftableFields, null, PlayerInput.Instance.PlanCraftable);

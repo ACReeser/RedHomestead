@@ -168,6 +168,7 @@ namespace RedHomestead.Crafting
             {
                 Craftable.EVAOxygenTank, new CraftingData()
                 {
+                    BuildTimeHours = 15,
                     Requirements = new List<IResourceEntry>()
                     {
                         new ResourceUnitEntry(1, Matter.ElectricMotor),
@@ -180,6 +181,7 @@ namespace RedHomestead.Crafting
             {
                 Craftable.EVAToolbelt, new CraftingData()
                 {
+                    BuildTimeHours = 5,
                     Requirements = new List<IResourceEntry>()
                     {
                         new ResourceUnitEntry(1, Matter.Canvas),

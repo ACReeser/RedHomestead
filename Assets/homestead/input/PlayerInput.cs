@@ -27,7 +27,7 @@ public struct InteractionClips
 public class PlayerInput : MonoBehaviour {
     public static PlayerInput Instance;
 
-    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Umbilical, Crafting, Printing }
+    public enum InputMode { Menu = -1, Normal = 0, PostIt, Sleep, Terminal, Pipeline, Powerline, Umbilical, ThinkingAboutCrafting, Crafting, Printing }
 
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
@@ -227,24 +227,23 @@ public class PlayerInput : MonoBehaviour {
                         HandleSledgeInput(ref newPrompt);
                         break;
                 }
-
-                if (CurrentCraftablePlanner != null)
-                {
-                    if (Input.GetKeyUp(KeyCode.G))
-                    {
-                        ToggleCraftableBlueprintMode(true);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Tab))
-                    {
-                        ToggleCraftableBlueprintMode(false);
-                    }
-                }
                 break;
             case InputMode.PostIt:
                 HandlePostItInput(ref newPrompt, doInteract);
                 break;
             case InputMode.Sleep:
                 HandleSleepInput(ref newPrompt, doInteract);
+                break;
+            case InputMode.ThinkingAboutCrafting:
+                if (Input.GetKeyUp(KeyCode.G))
+                {
+                    ToggleCraftableBlueprintMode(true);
+                }
+                else if (Input.GetKeyUp(KeyCode.Escape))
+                {
+                    ToggleCraftableBlueprintMode(false);
+                    CurrentMode = InputMode.Normal;
+                }
                 break;
             case InputMode.Crafting:
                 HandleCraftingInput(ref newPrompt, doInteract);
@@ -408,6 +407,7 @@ public class PlayerInput : MonoBehaviour {
 
         if (wakeyWakeySignal.HasValue && wakeyWakeySignal.Value != WakeSignal.DayStart)
         {
+            SunOrbit.Instance.ResetToNormalTime();
             CurrentCraftablePlanner.ToggleCraftableView(false);
             
             ToggleCraftableBlueprintMode(false);
@@ -1220,7 +1220,11 @@ public class PlayerInput : MonoBehaviour {
 
                             this.ToggleCraftableBlueprintMode(true);
 
-                            if (CurrentCraftablePlanner.CurrentCraftable != Craftable.Unspecified)
+                            if (CurrentCraftablePlanner.CurrentCraftable == Craftable.Unspecified)
+                            {
+                                this.CurrentMode = InputMode.ThinkingAboutCrafting;
+                            }
+                            else
                             {
                                 this.CurrentMode = InputMode.Crafting;
                             }
