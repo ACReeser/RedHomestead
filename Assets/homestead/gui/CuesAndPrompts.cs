@@ -586,11 +586,11 @@ public static class Prompts {
         Description = "Craft",
         Key = "E"
     };
-    internal static PromptInfo WorkshopSuitHint = new PromptInfo()
-    {
-        Description = "Upgrade",
-        Key = "E"
-    };
+    //internal static PromptInfo WorkshopSuitHint = new PromptInfo()
+    //{
+    //    Description = "Upgrade",
+    //    Key = "E"
+    //};
     internal static PromptInfo DeployableDeployHint = new PromptInfo()
     {
         Description = "Pick up",

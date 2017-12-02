@@ -1250,17 +1250,17 @@ public class PlayerInput : MonoBehaviour {
                         }
                     }
                 }
-                else if (hitInfo.collider.CompareTag("suit"))
-                {
-                    if (doInteract)
-                    {
+                //else if (hitInfo.collider.CompareTag("suit"))
+                //{
+                //    if (doInteract)
+                //    {
 
-                    }
-                    else
-                    {
-                        newPrompt = Prompts.WorkshopSuitHint;
-                    }
-                }
+                //    }
+                //    else
+                //    {
+                //        newPrompt = Prompts.WorkshopSuitHint;
+                //    }
+                //}
                 else if (hitInfo.collider.CompareTag("postit"))
                 {
                     if (doInteract)
