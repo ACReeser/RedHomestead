@@ -431,7 +431,7 @@ public class PlayerInput : MonoBehaviour {
 
                     if (repairable != null)
                     {
-                        if (Input.GetKey(KeyCode.E))
+                        if (Input.GetMouseButton(0))
                         {
                             Gremlin.Instance.EffectRepair(repairable);
                         }

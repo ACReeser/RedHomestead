@@ -54,6 +54,16 @@ namespace RedHomestead.EVA
         public void SetUpgrade(EVAUpgrade newUpgrade)
         {
             Upgrades |= newUpgrade;
+
+            switch(newUpgrade)
+            {
+                case EVAUpgrade.Battery:
+                    EVA.UpgradePower(this);
+                    break;
+                case EVAUpgrade.Oxygen:
+                    EVA.UpgradeOxygen(this);
+                    break;
+            }
         }
 
         protected override void BeforeMarshal(Transform t)

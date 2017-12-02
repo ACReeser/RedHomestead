@@ -578,7 +578,7 @@ public static class Prompts {
     internal static PromptInfo RepairHint = new PromptInfo()
     {
         Description = "Repair",
-        Key = "E",
+        Key = "LMB",
         UsesProgress = true
     };
     internal static PromptInfo WorkshopHint = new PromptInfo()
