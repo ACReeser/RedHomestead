@@ -21,6 +21,7 @@ namespace RedHomestead.EVA
         public Container Container;
         
         public float ConsumptionPerSecond;
+        public float DeprivationSeconds;
 
         public PackResourceData() { }
         public PackResourceData(float max, float consumption)
@@ -67,6 +68,11 @@ namespace RedHomestead.EVA
                     PlayerInput.Instance.Loadout.UpgradeToBigToolbelt();
                     break;
             }
+        }
+
+        public bool IsInDeprivationMode()
+        {
+            return (Oxygen.DeprivationSeconds > 0f || Power.DeprivationSeconds > 0f || Food.DeprivationSeconds > 0f || Water.DeprivationSeconds > 0f);
         }
 
         protected override void BeforeMarshal(Transform t)

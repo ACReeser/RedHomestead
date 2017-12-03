@@ -119,6 +119,14 @@ public class SingleSurvivalResource : SurvivalResource
 public enum Temperature { Cold, Temperate, Hot }
 public delegate void PlayerInHabitatHandler(bool isInHabitat);
 
+public class DeprivationDurations
+{
+    public float OxygenDeprivationSurvivalTimeSeconds = 10f;
+    public float PowerDeprivationSurvivalTimeSeconds = 20f;
+    public float FoodDeprivationSurvivalTimeSeconds = 240f;
+    public float WaterDeprivationSurvivalTimeSeconds = 120f;
+}
+
 public class SurvivalTimer : MonoBehaviour {
     public static SurvivalTimer Instance;
 
@@ -136,6 +144,8 @@ public class SurvivalTimer : MonoBehaviour {
     internal PackData Data { get; private set; }
     internal Temperature ExternalTemperature;
     public AudioClip IncomingSolarFlare;
+
+    internal DeprivationDurations DeprivationDurations = new DeprivationDurations();
 
     public bool IsNotInHabitat
     {
@@ -234,26 +244,46 @@ public class SurvivalTimer : MonoBehaviour {
         
         if (!nonSuitOxygenSuccess && !Oxygen.TryConsume())
         {
-            KillPlayer("ASPHYXIATION");
-            return;
+            Oxygen.Data.DeprivationSeconds += Time.deltaTime;
         }
         
         if (!nonSuitPowerSuccess && !Power.TryConsume())
         {
-            KillPlayer("EXPOSURE");
-            return;
+            Power.Data.DeprivationSeconds += Time.deltaTime;
         }
 
         if (!Water.TryConsume())
         {
-            KillPlayer("DEHYDRATION");
-            return;
+            Water.Data.DeprivationSeconds += Time.deltaTime;
         }
         
         if (!Food.TryConsume())
         {
-            KillPlayer("STARVATION");
-            return;
+            Food.Data.DeprivationSeconds += Time.deltaTime;
+        }
+
+        if (Data.IsInDeprivationMode())
+        {
+            if (Oxygen.Data.DeprivationSeconds > DeprivationDurations.OxygenDeprivationSurvivalTimeSeconds)
+            {
+                KillPlayer("ASPHYXIATION");
+            }
+            else if (Power.Data.DeprivationSeconds > DeprivationDurations.PowerDeprivationSurvivalTimeSeconds)
+            {
+                KillPlayer("EXPOSURE");
+            }
+            else if (Water.Data.DeprivationSeconds > DeprivationDurations.WaterDeprivationSurvivalTimeSeconds)
+            {
+                KillPlayer("DEHYDRATION");
+            }
+            else if (Food.Data.DeprivationSeconds > DeprivationDurations.FoodDeprivationSurvivalTimeSeconds)
+            {
+                KillPlayer("STARVATION");
+            }
+            else
+            {
+                GuiBridge.Instance.RefreshDeprivationUX(this);
+            }
         }
     }
 
@@ -268,6 +298,7 @@ public class SurvivalTimer : MonoBehaviour {
 
     private void KillPlayer(string reason)
     {
+        GuiBridge.Instance.ResetDeprivationUX();
         PlayerInput.Instance.KillPlayer(reason);
         this.enabled = false;
     }

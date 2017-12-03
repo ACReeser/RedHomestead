@@ -881,6 +881,7 @@ public class GuiBridge : MonoBehaviour {
 
     void OnDestroy()
     {
+        ResetDeprivationUX();
         PostProfile.motionBlur.enabled = false;
     }
 
@@ -899,5 +900,93 @@ public class GuiBridge : MonoBehaviour {
     public void SelectPrintable(int number)
     {
         Printer.Select(number);
+    }
+
+    internal void ResetDeprivationUX()
+    {
+        PostProfile.colorGrading.Reset();
+        PostProfile.vignette.Reset();
+        PlayerInput.Instance.HeartbeatSource.Stop();
+        PlayerInput.Instance.VocalSource.Stop();
+    }
+
+    internal void RefreshDeprivationUX(SurvivalTimer survivalTimer)
+    {
+        bool isPowerDeprived = survivalTimer.Data.Power.DeprivationSeconds > 0f,
+             isOxygenDeprived = survivalTimer.Data.Oxygen.DeprivationSeconds > 0f;
+
+        //sounds
+        if (isOxygenDeprived && !PlayerInput.Instance.HeartbeatSource.isPlaying)
+        {
+            PlayerInput.Instance.VocalSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.Gasping;
+            PlayerInput.Instance.VocalSource.Play();
+            PlayerInput.Instance.HeartbeatSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.SlowToDeathHeartbeat;
+            PlayerInput.Instance.HeartbeatSource.Play();
+        }
+        else if (isPowerDeprived && !PlayerInput.Instance.HeartbeatSource.isPlaying)
+        {
+            PlayerInput.Instance.VocalSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.Chattering;
+            PlayerInput.Instance.VocalSource.Play();
+            PlayerInput.Instance.HeartbeatSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.SlowHeartbeat;
+            PlayerInput.Instance.HeartbeatSource.Play();
+        }
+
+        //colorgrading
+        if (isOxygenDeprived)
+        {
+            PostProfile.colorGrading.enabled = true;
+            float lerpT = survivalTimer.Data.Oxygen.DeprivationSeconds / survivalTimer.DeprivationDurations.OxygenDeprivationSurvivalTimeSeconds;
+            ColorGradingModel.Settings newSettings = ColorGradingModel.Settings.defaultSettings;
+            ColorGradingModel.BasicSettings newBasics = ColorGradingModel.BasicSettings.defaultSettings;
+            newBasics.saturation = Mathf.Min(1f, Mathf.Lerp(1f, 0f, lerpT)+.25f);
+            newBasics.contrast = Mathf.Lerp(1f, 2f, lerpT);
+            newSettings.basic = newBasics;
+            PostProfile.colorGrading.settings = newSettings;
+        }
+        else if (isPowerDeprived)
+        {
+            PostProfile.colorGrading.enabled = true;
+            float lerpT = survivalTimer.Data.Power.DeprivationSeconds / survivalTimer.DeprivationDurations.PowerDeprivationSurvivalTimeSeconds;
+            ColorGradingModel.Settings newSettings = ColorGradingModel.Settings.defaultSettings;
+            ColorGradingModel.BasicSettings newBasics = ColorGradingModel.BasicSettings.defaultSettings;
+            newBasics.temperature = Mathf.Lerp(0f, -40f, lerpT);
+            newSettings.basic = newBasics;
+            PostProfile.colorGrading.settings = newSettings;
+        }
+        else
+        {
+            PostProfile.colorGrading.enabled = false;
+        }
+
+        //vignetting
+        if (isOxygenDeprived)
+        {
+            PostProfile.vignette.enabled = true;
+            float lerpT = survivalTimer.Data.Oxygen.DeprivationSeconds;
+            lerpT -= (float)Math.Truncate(lerpT);
+
+            VignetteModel.Settings newSettings = VignetteModel.Settings.defaultSettings;
+            newSettings.color = new Color(51f / 255f, 51f / 255f, 51f / 255f);
+            newSettings.intensity = Mathf.PingPong(lerpT, .5f);
+            newSettings.smoothness = 1f;
+            newSettings.roundness = 1f;
+            PostProfile.vignette.settings = newSettings;
+        }
+        else if (isPowerDeprived)
+        {
+            PostProfile.vignette.enabled = true;
+            float lerpT = survivalTimer.Data.Power.DeprivationSeconds / survivalTimer.DeprivationDurations.PowerDeprivationSurvivalTimeSeconds;
+
+            VignetteModel.Settings newSettings = VignetteModel.Settings.defaultSettings;
+            newSettings.color = new Color(68f/255f, 108f / 255f, 255f / 255f);
+            newSettings.intensity = Mathf.Lerp(0f, 0.76f, lerpT);
+            newSettings.smoothness = 0.169f;
+            newSettings.roundness = 1;
+            PostProfile.vignette.settings = newSettings;
+        }
+        else
+        {
+            PostProfile.vignette.enabled = false;
+        }
     }
 }

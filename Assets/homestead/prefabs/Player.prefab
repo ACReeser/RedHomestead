@@ -42,6 +42,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4473373143450360}
   - component: {fileID: 20218270566495708}
+  - component: {fileID: 82815342613660594}
   m_Layer: 0
   m_Name: AlternativeCamera
   m_TagString: Untagged
@@ -193,6 +194,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4136689515377200}
+  - component: {fileID: 82306457008030258}
   m_Layer: 0
   m_Name: HeadlampHarness
   m_TagString: Untagged
@@ -746,6 +748,166 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!82 &82306457008030258
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1821760051034904}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 1636e5c1a861dc14087b2c3f68c592e6, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 1.01
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+--- !u!82 &82815342613660594
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1105857416092938}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: addf4d46b0b6645459f846fbe18b8df4, type: 3}
+  m_PlayOnAwake: 0
+  m_Volume: 0.245
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 1.01
+  Pan2D: 0
+  rolloffMode: 1
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!82 &82995353811288680
 AudioSource:
   m_ObjectHideFlags: 1
@@ -1111,12 +1273,22 @@ MonoBehaviour:
   DrillSparks: {fileID: 198501689429520330}
   Blower: {fileID: 198411425606318970}
   InteractionSource: {fileID: 82153019174238806}
+  HeartbeatSource: {fileID: 82815342613660594}
+  VocalSource: {fileID: 82306457008030258}
   Sfx:
     Drill: {fileID: 8300000, guid: 094ab40a990d1dc43a01cbe3b2629d2e, type: 3}
     Construction: {fileID: 8300000, guid: 7de687db6bfd1584c866fc6b488d61b5, type: 3}
     PlugIn: {fileID: 8300000, guid: 9518f573adf717549bcfd36964d12ff0, type: 3}
     DoorOpen: {fileID: 8300000, guid: 60049d5dd9d47b8409d24cdedee1f293, type: 3}
     DoorClose: {fileID: 8300000, guid: f9f2ed205e49ba14eb0782a7c8920c30, type: 3}
+  HeartbeatsAndVocals:
+    FastHeartbeat: {fileID: 8300000, guid: addf4d46b0b6645459f846fbe18b8df4, type: 3}
+    SlowHeartbeat: {fileID: 8300000, guid: b619021853b3c684fa97192b79df47e7, type: 3}
+    MediumHeartbeat: {fileID: 8300000, guid: 136a09c3970d1bc4d8288aaf49374169, type: 3}
+    SlowToDeathHeartbeat: {fileID: 8300000, guid: 64a7974863aa3ed4ea7378f51670f5d6,
+      type: 3}
+    Chattering: {fileID: 8300000, guid: c97355a0bf01db34fb2a0524e234fcdd, type: 3}
+    Gasping: {fileID: 8300000, guid: 1636e5c1a861dc14087b2c3f68c592e6, type: 3}
   GoodMorningHomesteader: {fileID: 8300000, guid: 8fc84a462a2c88247b1eb0ad83cf4199,
     type: 3}
 --- !u!143 &143670258083324674

@@ -20,6 +20,11 @@ public struct InteractionClips
 {
     public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose;
 }
+[Serializable]
+public struct HeartbeatVocalNoiseClips
+{
+    public AudioClip FastHeartbeat, SlowHeartbeat, MediumHeartbeat, SlowToDeathHeartbeat, Chattering, Gasping;
+}
 
 /// <summary>
 /// Responsible for raycasting, modes, and gameplay input
@@ -64,8 +69,9 @@ public class PlayerInput : MonoBehaviour {
     public Material translucentPlanningMat, translucentInvalidPlanningMat;
     public ParticleSystem DrillSparks, Blower;
 
-    public AudioSource InteractionSource;
+    public AudioSource InteractionSource, HeartbeatSource, VocalSource;
     public InteractionClips Sfx;
+    public HeartbeatVocalNoiseClips HeartbeatsAndVocals;
     public AudioClip GoodMorningHomesteader;
 
     internal InputMode CurrentMode = InputMode.Normal;
