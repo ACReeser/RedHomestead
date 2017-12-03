@@ -1242,7 +1242,11 @@ public class PlayerInput : MonoBehaviour {
                     {
                         if (doInteract)
                         {
-                            swappable.SwapEquipment(hitInfo.collider.transform);
+                            swappable.SwapEquipment(hitInfo.collider.transform, Slot.PrimaryTool);
+                        }
+                        else if (Input.GetKeyUp(KeyCode.Q) && Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Toolbelt))
+                        {
+                            swappable.SwapEquipment(hitInfo.collider.transform, Slot.SecondaryTool);
                         }
                         else
                         {

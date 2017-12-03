@@ -88,6 +88,13 @@ namespace RedHomestead.Equipment
             this._loadout[aSlot] = e;
         }
 
+        internal void UpgradeToBigToolbelt()
+        {
+            this.OutdoorGadgets[2] = Equipment.EmptyHand;
+            this._loadout[Slot.SecondaryTool] = Equipment.EmptyHand;
+            this._loadout[Slot.TertiaryGadget] = Equipment.EmptyHand;
+        }
+
         private Equipment preWrenchPrimarySlot;
         internal void ToggleRepairWrench(bool doRepairs)
         {
@@ -169,14 +176,14 @@ namespace RedHomestead.Equipment
             }
         }
 
-        public static void SwapEquipment(this IEquipmentSwappable swapper, Transform lockerT)
+        public static void SwapEquipment(this IEquipmentSwappable swapper, Transform lockerT, Slot slot = Slot.PrimaryTool)
         {
             Equipment fromLocker = swapper.EquipmentLockers[lockerT],
-                fromPlayer = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
+                fromPlayer = PlayerInput.Instance.Loadout[slot];
 
             int lockerIndex = Array.IndexOf(swapper.Lockers, lockerT);
 
-            PlayerInput.Instance.Loadout.PutEquipmentInSlot(Slot.PrimaryTool, fromLocker);
+            PlayerInput.Instance.Loadout.PutEquipmentInSlot(slot, fromLocker);
             swapper.EquipmentLockers[lockerT] = fromPlayer;
             swapper.LockerEquipment[lockerIndex] = fromPlayer;
 
@@ -199,22 +206,34 @@ namespace RedHomestead.Equipment
             GuiBridge.Instance.RefreshEquipped();
         }
 
+        public static string GetLockerSwapDescription(Equipment fromLocker, Slot slot)
+        {
+            Equipment current = PlayerInput.Instance.Loadout[slot];
+            
+            if (fromLocker == current)
+                return null;
+            if (current == Equipment.EmptyHand)
+                return "Pick up " + fromLocker.ToString();
+            else if (fromLocker == Equipment.EmptyHand)
+                return "Put away " + current.ToString();
+            else
+                return String.Format("Swap {0} for {1}", current.ToString(), fromLocker.ToString());
+        }
+
         public static PromptInfo GetLockerPrompt(this IEquipmentSwappable swapper, Transform transform)
         {
-            Equipment fromLocker = swapper.EquipmentLockers[transform],
-                current = PlayerInput.Instance.Loadout[Slot.PrimaryTool];
+            Equipment fromLocker = swapper.EquipmentLockers[transform];
 
-            if (fromLocker != current)
+            Prompts.SwapEquipmentHint.Description = GetLockerSwapDescription(fromLocker, Slot.PrimaryTool);
+
+            if (Game.Current.Player.PackData.HasUpgrade(EVA.EVAUpgrade.Toolbelt))
             {
-                string desc = "";
-                if (current == Equipment.EmptyHand)
-                    desc = "Pick up " + fromLocker.ToString();
-                else if (fromLocker == Equipment.EmptyHand)
-                    desc = "Put away " + current.ToString();
-                else
-                    desc = String.Format("Swap {0} for {1}", current.ToString(), fromLocker.ToString());
+                Prompts.SwapEquipmentHint.SecondaryKey = "Q";
+                Prompts.SwapEquipmentHint.SecondaryDescription = GetLockerSwapDescription(fromLocker, Slot.SecondaryTool);
+            }
 
-                Prompts.SwapEquipmentHint.Description = desc;
+            if (Prompts.SwapEquipmentHint.Description != null || Prompts.SwapEquipmentHint.SecondaryDescription != null)
+            {
                 return Prompts.SwapEquipmentHint;
             }
             else

@@ -63,6 +63,9 @@ namespace RedHomestead.EVA
                 case EVAUpgrade.Oxygen:
                     EVA.UpgradeOxygen(this);
                     break;
+                case EVAUpgrade.Toolbelt:
+                    PlayerInput.Instance.Loadout.UpgradeToBigToolbelt();
+                    break;
             }
         }
 
