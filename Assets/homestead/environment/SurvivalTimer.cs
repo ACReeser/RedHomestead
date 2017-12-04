@@ -13,7 +13,7 @@ namespace RedHomestead
     [Serializable]
     public struct SurvivalResourceAudio
     {
-        public AudioClip WarningClip, CriticalClip;
+        public AudioClip WarningClip, CriticalClip, DepletedClip;
     }
 }
 
@@ -220,7 +220,8 @@ public class SurvivalTimer : MonoBehaviour {
         GuiBridge.Instance.RefreshTemperatureGauges();
     }
 
-    void Update () {
+    void Update ()
+    {
         bool isNotInHab = IsNotInHabitat;
 
         bool nonSuitOxygenSuccess = false, nonSuitPowerSuccess = false;
@@ -241,26 +242,11 @@ public class SurvivalTimer : MonoBehaviour {
                 nonSuitPowerSuccess = true; //HabitatPower.TryConsume(); //heater is just on, already factored in
             }
         }
-        
-        if (!nonSuitOxygenSuccess && !Oxygen.TryConsume())
-        {
-            Oxygen.Data.DeprivationSeconds += Time.deltaTime;
-        }
-        
-        if (!nonSuitPowerSuccess && !Power.TryConsume())
-        {
-            Power.Data.DeprivationSeconds += Time.deltaTime;
-        }
 
-        if (!Water.TryConsume())
-        {
-            Water.Data.DeprivationSeconds += Time.deltaTime;
-        }
-        
-        if (!Food.TryConsume())
-        {
-            Food.Data.DeprivationSeconds += Time.deltaTime;
-        }
+        TryConsume(nonSuitOxygenSuccess, Oxygen);
+        TryConsume(nonSuitPowerSuccess, Power);
+        TryConsume(false, Water);
+        TryConsume(false, Food);
 
         if (Data.IsInDeprivationMode())
         {
@@ -284,6 +270,24 @@ public class SurvivalTimer : MonoBehaviour {
             {
                 GuiBridge.Instance.RefreshDeprivationUX(this);
             }
+        }
+    }
+
+    private void TryConsume(bool nonSuitSuccess, SingleSurvivalResource resource)
+    {
+        if (!nonSuitSuccess && !resource.TryConsume())
+        {
+            if (resource.Data.DeprivationSeconds == 0f)
+            {
+                SunOrbit.Instance.CheckEmergencyReset();
+                GuiBridge.Instance.ComputerAudioSource.PlayOneShot(resource.AudioClips.DepletedClip);
+            }
+
+            resource.Data.DeprivationSeconds += Time.deltaTime;
+        }
+        else
+        {
+            resource.Data.DeprivationSeconds = 0;
         }
     }
 
