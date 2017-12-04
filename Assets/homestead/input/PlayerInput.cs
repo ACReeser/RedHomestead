@@ -18,7 +18,7 @@ using RedHomestead.Agriculture;
 [Serializable]
 public struct InteractionClips
 {
-    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose;
+    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, EatCrispyFood, DrinkShake, DrinkWater;
 }
 [Serializable]
 public struct HeartbeatVocalNoiseClips
@@ -1130,6 +1130,7 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
+                        PlayInteractionClip(hitInfo.collider.transform.position, Sfx.DrinkWater, true, 0.5f);
                         SurvivalTimer.Instance.FillWater();
                     }
                     else
@@ -1179,15 +1180,15 @@ public class PlayerInput : MonoBehaviour {
                 }
                 else if (hitInfo.collider.CompareTag("mealorganic"))
                 {
-                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealOrganicEatHint, Matter.OrganicMeals);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealOrganicEatHint, Matter.OrganicMeals, Sfx.EatCrispyFood);
                 }
                 else if (hitInfo.collider.CompareTag("mealprepared"))
                 {
-                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealPreparedEatHint, Matter.RationMeals);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealPreparedEatHint, Matter.RationMeals, Sfx.EatCrispyFood);
                 }
                 else if (hitInfo.collider.CompareTag("mealshake"))
                 {
-                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealShakeEatHint, Matter.MealShakes);
+                    newPrompt = OnFoodHover(hitInfo.collider, doInteract, Prompts.MealShakeEatHint, Matter.MealShakes, Sfx.DrinkShake);
                 }
                 else if (hitInfo.collider.CompareTag("terminal"))
                 {
@@ -1828,11 +1829,12 @@ public class PlayerInput : MonoBehaviour {
         return Physics.Raycast(new Ray(this.transform.position, this.transform.forward), out hitInfo, InteractionRaycastDistance, LayerMask.GetMask(layerNames), triggerInteraction);
     }
 
-    private PromptInfo OnFoodHover(Collider collider, bool doInteract, PromptInfo eatHint, Matter mealType)
+    private PromptInfo OnFoodHover(Collider collider, bool doInteract, PromptInfo eatHint, Matter mealType, AudioClip clip)
     {
         if (doInteract)
         {
             collider.transform.root.GetComponent<Habitat>().Eat(mealType);
+            PlayInteractionClip(collider.transform.position, clip, true, 0.5f);
             return null;
         }
         else
