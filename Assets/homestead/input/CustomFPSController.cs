@@ -53,7 +53,7 @@ public class CustomFPSController : MonoBehaviour
     private AudioClip[] activeFootsteps;
 
     private Camera m_Camera;
-    private bool m_Jump;
+    private bool m_Jump, m_Thrusting;
     private float m_YRotation;
     private Vector2 m_Input;
     private Vector3 moveDirection = Vector3.zero;
@@ -91,7 +91,7 @@ public class CustomFPSController : MonoBehaviour
         m_RunSpeed *= PerkMultipliers.RunSpeed;
         //alex
         activeFootsteps = footstepsDust;
-        this.InitializeMouseLook();        
+        this.InitializeMouseLook();
     }
 
 
@@ -102,7 +102,7 @@ public class CustomFPSController : MonoBehaviour
             RotateView();
 
         // the jump state needs to read here to make sure it is not missed
-        if (!m_Jump)
+        if (!m_Jump && !m_Jumping)
         {
             m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
         }
@@ -115,9 +115,14 @@ public class CustomFPSController : MonoBehaviour
             moveDirection.y = 0f;
             m_Jumping = false;
         }
-        if (!m_CharacterController.isGrounded && !m_Jumping && m_PreviouslyGrounded)
+        if (!m_CharacterController.isGrounded)
         {
-            moveDirection.y = 0f;
+            if (m_Jumping)
+            {
+                m_Thrusting = CrossPlatformInputManager.GetButton("Jump");
+            }
+            else if (m_PreviouslyGrounded)
+                moveDirection.y = 0f;
         }
 
         m_PreviouslyGrounded = m_CharacterController.isGrounded;
@@ -133,7 +138,7 @@ public class CustomFPSController : MonoBehaviour
         PlaceBootprint();
     }
 
-    Vector3 currentHitNormal, currentHitPosition;
+    Vector3 currentHitNormal, currentHitPosition, JetpackPropulsion = new Vector3(0, 9f, 0f);
 
     private void FixedUpdate()
     {
@@ -163,7 +168,11 @@ public class CustomFPSController : MonoBehaviour
         else
         {
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = m_Jumping ? jumpDirection : transform.forward * m_Input.y + transform.right * m_Input.x;
+            Vector3 desiredMove =
+                m_Jumping && !m_Thrusting ?
+                            jumpDirection
+                            :
+                            transform.forward * m_Input.y + transform.right * m_Input.x;
 
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
@@ -193,6 +202,12 @@ public class CustomFPSController : MonoBehaviour
             }
             else
             {
+                if (m_Thrusting)
+                {
+                    moveDirection += JetpackPropulsion * Time.deltaTime;
+                    jumpDirection = moveDirection;
+                }
+
                 moveDirection += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
             }
 
@@ -298,11 +313,11 @@ public class CustomFPSController : MonoBehaviour
         }
         else
         {
-    #if !MOBILE_INPUT
+#if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
             // keep track of whether or not the character is walking or running
             m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
-    #endif
+#endif
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
             m_Input = new Vector2(horizontal, vertical);
@@ -380,7 +395,7 @@ public class CustomFPSController : MonoBehaviour
             return;
         }
     }
-    
+
     public SpriteRenderer[] bootSprites = new SpriteRenderer[8];
 
     private bool isOnLeftBoot = true;
@@ -395,7 +410,7 @@ public class CustomFPSController : MonoBehaviour
         {
             lastBootIndex++;
             lastBootIndex %= bootSprites.Length;
-        
+
             bootSprites[lastBootIndex].transform.position = currentHitPosition + currentHitNormal * .01f;
             bootSprites[lastBootIndex].transform.rotation = this.transform.rotation * Quaternion.Euler(currentHitNormal + Vector3.right * 90);
             bootSprites[lastBootIndex].flipX = !isOnLeftBoot;
