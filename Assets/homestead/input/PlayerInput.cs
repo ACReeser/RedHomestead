@@ -18,7 +18,7 @@ using RedHomestead.Agriculture;
 [Serializable]
 public struct InteractionClips
 {
-    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, EatCrispyFood, DrinkShake, DrinkWater;
+    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, EatCrispyFood, DrinkShake, DrinkWater, StartSleep;
 }
 [Serializable]
 public struct HeartbeatVocalNoiseClips
@@ -2271,6 +2271,7 @@ public class PlayerInput : MonoBehaviour {
 
     private void BeginSleep(Transform enterTranform, Transform exitTransform)
     {
+        PlayInteractionClip(enterTranform.position, Sfx.StartSleep, true, .6f);
         lerpCtx = new PlayerLerpContext()
         {
             FromPosition = FPSController.transform.position,
