@@ -33,7 +33,8 @@ namespace RedHomestead.Buildings
         WeatherStation,
         GlassFurnace,
         ThreeDPrinter,
-        AirMiner
+        AirMiner,
+        GroundSolarPanel
     }
 
     /// <summary>
@@ -82,6 +83,7 @@ namespace RedHomestead.Buildings
         {
             switch (module)
             {
+                case Module.GroundSolarPanel:
                 case Module.SolarPanelSmall:
                     return false;
                 default:
@@ -120,7 +122,7 @@ namespace RedHomestead.Buildings
                 }
             },
             {
-                Module.SolarPanelSmall, new BuildingData()
+                Module.GroundSolarPanel, new BuildingData()
                 {
                     Requirements = new List<IResourceEntry>()
                     {
@@ -128,6 +130,20 @@ namespace RedHomestead.Buildings
                         new ResourceUnitEntry(2, Matter.SolarPanels)
                     },
                     Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear.",
+                    PowerMin = 0,
+                    PowerMax = 9
+                }
+            },
+            {
+                Module.SolarPanelSmall, new BuildingData()
+                {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(1, Matter.ElectricMotor),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
+                        new ResourceUnitEntry(2, Matter.SolarPanels)
+                    },
+                    Description = "A solar panel rack that generates free energy, but only when the sun is shining and the sky is clear. The heliotropic function means that the panels always face the sun.",
                     PowerMin = 0,
                     PowerMax = 9
                 }
@@ -415,6 +431,7 @@ namespace RedHomestead.Buildings
                 ConstructionGroup.Power,
                 new Module[]
                 {
+                    Module.GroundSolarPanel,
                     Module.SolarPanelSmall,
                     Module.JunctionBox
                 }

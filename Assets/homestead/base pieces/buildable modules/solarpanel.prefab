@@ -8,7 +8,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 491350}
-  - component: {fileID: 11488376}
+  - component: {fileID: 114937339833694152}
   m_Layer: 0
   m_Name: solarpanel
   m_TagString: Untagged
@@ -54,7 +54,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 114136}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 692.13, y: 0.47, z: 1001}
+  m_LocalPosition: {x: 737.65, y: 0.26466182, z: 1014.48}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4198908412503994}
@@ -104,54 +104,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 197974}
   m_Mesh: {fileID: 4300000, guid: 07950cd20335aa640b7d54efc6bd29a2, type: 3}
---- !u!114 &11488376
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 114136}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 029fdd3da1fe7404a8130e6b374e1eff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  powerViz:
-    PowerBacking: {fileID: 33798540787989886}
-    PowerMask: {fileID: 4237535329304692}
-    PowerActive: {fileID: 4899339226440062}
-  failureEffectAnchors:
-    Electrical: {fileID: 4273414989787278}
-    Pressure: {fileID: 0}
-    HabitatPressure: {fileID: 0}
-  data:
-    Position: {x: 0, y: 0, z: 0}
-    Rotation: {x: 0, y: 0, z: 0, w: 0}
-    EnergyHistory:
-      _history:
-        _Buckets: 0000000001000000ffffffff
-        _HashCodes: 000000000100000000000000
-        _Next: ffffffffffffffff00000000
-        _Count: 2
-        _Version: 2
-        _FreeList: -1
-        _FreeCount: 0
-        _Keys: 000000000100000000000000
-        _Values:
-        - P: 0
-          C: 0
-        - P: 0
-          C: 0
-        - P: 0
-          C: 0
-    ModuleType: 0
-    ModuleInstanceID: 
-    FaultedPercentage: 0
-    IsOn: 0
-    F: 
-  PivotPoles:
-  - {fileID: 4881442488516504}
-  panel1Mesh: {fileID: 23320823338339506}
-  panel2Mesh: {fileID: 23320823338339506}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -173,12 +125,13 @@ GameObject:
   - component: {fileID: 4103142756460274}
   - component: {fileID: 33192488368291850}
   - component: {fileID: 23240991879344994}
+  - component: {fileID: 65109610377518094}
   m_Layer: 0
   m_Name: base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &1197652963700056
 GameObject:
@@ -195,7 +148,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &1198638236519672
 GameObject:
@@ -205,10 +158,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4812906758290196}
-  - component: {fileID: 33156009859496216}
-  - component: {fileID: 23584000281662230}
+  - component: {fileID: 65773209354484552}
   m_Layer: 0
-  m_Name: solar_panel
+  m_Name: solar_panel_collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -246,7 +198,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &1379321692979986
 GameObject:
@@ -293,7 +245,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!1 &1667363462725474
 GameObject:
@@ -346,6 +298,24 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!1 &1887352409772686
+GameObject:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4246985103390546}
+  - component: {fileID: 33156009859496216}
+  - component: {fileID: 23584000281662230}
+  - component: {fileID: 65880673785531558}
+  m_Layer: 0
+  m_Name: solar_panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!1 &1899569077636390
 GameObject:
@@ -433,6 +403,19 @@ Transform:
   m_Father: {fileID: 4899339226440062}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 90.00001, y: 0, z: 0}
+--- !u!4 &4246985103390546
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1887352409772686}
+  m_LocalRotation: {x: 1.1477454e-15, y: 0.7071064, z: -1.1477441e-15, w: 0.7071072}
+  m_LocalPosition: {x: -9.638466, y: -0.0000016100932, z: -0.97174484}
+  m_LocalScale: {x: 0.40271604, y: 10.362577, z: 10.362577}
+  m_Children: []
+  m_Father: {fileID: 4881442488516504}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4273414989787278
 Transform:
   m_ObjectHideFlags: 1
@@ -491,12 +474,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1198638236519672}
-  m_LocalRotation: {x: 1.1477454e-15, y: 0.7071064, z: -1.1477441e-15, w: 0.7071072}
-  m_LocalPosition: {x: -9.638466, y: -0.0000016100932, z: -0.97174484}
-  m_LocalScale: {x: 0.40271604, y: 10.362577, z: 10.362577}
+  m_LocalRotation: {x: -0, y: 0.7071064, z: -1.4210853e-14, w: 0.7071072}
+  m_LocalPosition: {x: -9.63847, y: -0.0000012353155, z: -0.9717418}
+  m_LocalScale: {x: 0.4027186, y: 10.362582, z: 10.362582}
   m_Children: []
   m_Father: {fileID: 4881442488516504}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4881442488516504
 Transform:
@@ -509,6 +492,7 @@ Transform:
   m_LocalScale: {x: 0.09650109, y: 0.09650109, z: 1.3412842}
   m_Children:
   - {fileID: 4544140336834854}
+  - {fileID: 4246985103390546}
   - {fileID: 4812906758290196}
   m_Father: {fileID: 4010725684751424}
   m_RootOrder: 1
@@ -661,7 +645,7 @@ MeshRenderer:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1198638236519672}
+  m_GameObject: {fileID: 1887352409772686}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -860,7 +844,7 @@ MeshFilter:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1198638236519672}
+  m_GameObject: {fileID: 1887352409772686}
   m_Mesh: {fileID: 4300008, guid: 3977b71c230b6194ca9515d247e4d971, type: 3}
 --- !u!33 &33192488368291850
 MeshFilter:
@@ -918,6 +902,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1737102821348604}
   m_Mesh: {fileID: 4300000, guid: 07950cd20335aa640b7d54efc6bd29a2, type: 3}
+--- !u!65 &65109610377518094
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1020318774524710}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.01299, y: 0.7333982, z: 1.6319661}
+  m_Center: {x: 0, y: 7.2931824e-16, z: 0.5513211}
 --- !u!65 &65514014377274054
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -930,6 +926,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.5, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &65773209354484552
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1198638236519672}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 9.427176, y: 2.5516295, z: 0.10630999}
+  m_Center: {x: -2.36, y: 0.011939574, z: 0.94684875}
 --- !u!65 &65868223773156530
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -942,3 +950,62 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.5, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &65880673785531558
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1887352409772686}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 9.427176, y: 2.5516295, z: 0.10630999}
+  m_Center: {x: 9.352241, y: 0.011939574, z: 0.94684875}
+--- !u!114 &114937339833694152
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 114136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41440948f5e0b34419d2166ef4cea6fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerViz:
+    PowerBacking: {fileID: 33798540787989886}
+    PowerMask: {fileID: 4237535329304692}
+    PowerActive: {fileID: 4899339226440062}
+  failureEffectAnchors:
+    Electrical: {fileID: 4273414989787278}
+    Pressure: {fileID: 0}
+    HabitatPressure: {fileID: 0}
+  data:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    EnergyHistory:
+      _history:
+        _Buckets: 0000000001000000ffffffff
+        _HashCodes: 000000000100000000000000
+        _Next: ffffffffffffffff00000000
+        _Count: 2
+        _Version: 2
+        _FreeList: -1
+        _FreeCount: 0
+        _Keys: 000000000100000000000000
+        _Values:
+        - P: 0
+          C: 0
+        - P: 0
+          C: 0
+        - P: 0
+          C: 0
+    ModuleType: 0
+    ModuleInstanceID: 
+    FaultedPercentage: 0
+    IsOn: 0
+    F: 
+  panelMesh: {fileID: 23320823338339506}
+  PivotPoles:
+  - {fileID: 4881442488516504}
