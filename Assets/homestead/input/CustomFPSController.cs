@@ -73,6 +73,8 @@ public class CustomFPSController : MonoBehaviour
     private bool m_Jumping;
     private AudioSource m_AudioSource;
 
+    public Transform jetpackHarness;
+    public ParticleSystem[] jetpacks;
     public bool FreezeMovement = false;
     public bool FreezeLook = false;
 
@@ -114,12 +116,28 @@ public class CustomFPSController : MonoBehaviour
             PlayLandingSound();
             moveDirection.y = 0f;
             m_Jumping = false;
+            m_Thrusting = false;
+            if (jetpacks[0].isPlaying)
+            {
+                jetpacks[0].Stop();
+                jetpacks[1].Stop();
+            }
         }
         if (!m_CharacterController.isGrounded)
         {
             if (m_Jumping)
             {
                 m_Thrusting = CrossPlatformInputManager.GetButton("Jump");
+                if (m_Thrusting && !jetpacks[0].isPlaying)
+                {
+                    jetpacks[0].Play();
+                    jetpacks[1].Play();
+                }
+                else if (!m_Thrusting && jetpacks[0].isPlaying)
+                {
+                    jetpacks[0].Stop();
+                    jetpacks[1].Stop();
+                }
             }
             else if (m_PreviouslyGrounded)
                 moveDirection.y = 0f;
@@ -205,6 +223,7 @@ public class CustomFPSController : MonoBehaviour
                 if (m_Thrusting)
                 {
                     moveDirection += JetpackPropulsion * Time.deltaTime;
+                    jetpackHarness.localRotation = Quaternion.Euler(-moveDirection.z*45f, 0f, -moveDirection.x * 45f);
                     jumpDirection = moveDirection;
                 }
 
