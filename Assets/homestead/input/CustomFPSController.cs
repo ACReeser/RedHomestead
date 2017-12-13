@@ -223,7 +223,7 @@ public class CustomFPSController : MonoBehaviour
                 if (m_Thrusting)
                 {
                     moveDirection += JetpackPropulsion * Time.deltaTime;
-                    jetpackHarness.localRotation = Quaternion.Euler(-moveDirection.z*45f, 0f, -moveDirection.x * 45f);
+                    //jetpackHarness.localRotation = Quaternion.Euler(-moveDirection.z*45f, 0f, -moveDirection.x * 45f);
                     jumpDirection = moveDirection;
                 }
 
