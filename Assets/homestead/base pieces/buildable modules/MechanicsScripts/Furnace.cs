@@ -140,6 +140,8 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
                 oreParticles.Play();
 
             yield return new WaitForSeconds(oreParticles.main.duration);
+            capturedOre.Data.Container.MatterType = Matter.Unspecified;
+            capturedOre.RefreshLabel();
         }
         
         this.isPlatformUp = this.isRaisingAndDumping;
@@ -222,7 +224,8 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
                 //we can make this powder
                 //and
                 //not currently smelting anything or matching ore is what we're smelting
-                if (capturedOre == null || matches(capturedOre.Data.Container.MatterType, res.Data.Container.MatterType) &&
+                if (capturedOre == null || 
+                    (capturedOre.Data.Container.MatterType == Matter.Unspecified || matches(capturedOre.Data.Container.MatterType, res.Data.Container.MatterType)) &&
                     (res.Data.Container.MatterType.MatchingOre().MatchingPowder() != Matter.Unspecified) &&
                     (FlexData.CurrentOre == Matter.Unspecified || res.Data.Container.MatterType.MatchingOre() == FlexData.CurrentOre))
                 {
@@ -295,6 +298,8 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
             if (capturedPowder == null)
             {
 #warning furnace does not create powder crate yet if none assigned
+                var newT = BounceLander.CreateCratelike(FlexData.CurrentOre.MatchingPowder(), 0f, powderSnap.transform.position);
+                newT.GetComponent<ResourceComponent>();
             }
             else
             {
