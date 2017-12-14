@@ -18,7 +18,7 @@ using RedHomestead.Agriculture;
 [Serializable]
 public struct InteractionClips
 {
-    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, EatCrispyFood, DrinkShake, DrinkWater, StartSleep;
+    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, EatCrispyFood, DrinkShake, DrinkWater, StartSleep, Repair;
 }
 [Serializable]
 public struct HeartbeatVocalNoiseClips
@@ -437,6 +437,9 @@ public class PlayerInput : MonoBehaviour {
 
                     if (repairable != null)
                     {
+                        if (Input.GetMouseButtonDown(0))
+                            PlayInteractionClip(repairable.transform.position, Sfx.Repair, volumeScale: .5f);
+
                         if (Input.GetMouseButton(0))
                         {
                             Gremlin.Instance.EffectRepair(repairable);
