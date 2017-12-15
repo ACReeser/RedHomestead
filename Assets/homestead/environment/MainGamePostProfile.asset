@@ -100,14 +100,14 @@ MonoBehaviour:
     m_Enabled: 0
     m_Settings:
       bloom:
-        intensity: 0.5
+        intensity: 0
         threshold: 1.1
         softKnee: 0.5
         radius: 4
         antiFlicker: 0
       lensDirt:
-        texture: {fileID: 0}
-        intensity: 3
+        texture: {fileID: 2800000, guid: 7445ff32420f5214db611813bf5c3139, type: 3}
+        intensity: 12.19
   colorGrading:
     m_Enabled: 0
     m_Settings:
@@ -134,9 +134,9 @@ MonoBehaviour:
       colorWheels:
         mode: 1
         log:
-          slope: {r: 0, g: 0, b: 0, a: 0}
-          power: {r: 0, g: 0, b: 0, a: 0}
-          offset: {r: 0, g: 0, b: 0, a: 0}
+          slope: {r: 1, g: 1, b: 1, a: 0}
+          power: {r: 1, g: 1, b: 1, a: 0}
+          offset: {r: 1, g: 1, b: 1, a: 0}
         linear:
           lift: {r: 0, g: 0, b: 0, a: 0}
           gamma: {r: 0, g: 0, b: 0, a: 0}
@@ -160,7 +160,7 @@ MonoBehaviour:
               tangentMode: 0
             m_PreInfinity: 2
             m_PostInfinity: 2
-            m_RotationOrder: 4
+            m_RotationOrder: 0
           m_Loop: 0
           m_ZeroValue: 0
           m_Range: 1
@@ -289,9 +289,9 @@ MonoBehaviour:
     m_Enabled: 0
     m_Settings:
       colored: 0
-      intensity: 0.293
-      size: 1
-      luminanceContribution: 0.8
+      intensity: 1
+      size: 0.3
+      luminanceContribution: 0
   vignette:
     m_Enabled: 0
     m_Settings:

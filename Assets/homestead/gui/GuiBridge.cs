@@ -904,16 +904,26 @@ public class GuiBridge : MonoBehaviour {
 
     internal void ResetDeprivationUX()
     {
-        PostProfile.colorGrading.Reset();
-        PostProfile.vignette.Reset();
+        Reset(PostProfile.colorGrading);
+        Reset(PostProfile.vignette);
+        Reset(PostProfile.depthOfField);
+        Reset(PostProfile.motionBlur);
         PlayerInput.Instance.HeartbeatSource.Stop();
         PlayerInput.Instance.VocalSource.Stop();
+    }
+
+    private void Reset(PostProcessingModel model)
+    {
+        model.Reset();
+        model.enabled = false;
     }
 
     internal void RefreshDeprivationUX(SurvivalTimer survivalTimer)
     {
         bool isPowerDeprived = survivalTimer.Data.Power.DeprivationSeconds > 0f,
-             isOxygenDeprived = survivalTimer.Data.Oxygen.DeprivationSeconds > 0f;
+             isOxygenDeprived = survivalTimer.Data.Oxygen.DeprivationSeconds > 0f,
+             isFoodDeprived = survivalTimer.Data.Food.DeprivationSeconds > 0f,
+             isWaterDeprived = survivalTimer.Data.Water.DeprivationSeconds > 0f;
 
         //sounds
         if (isOxygenDeprived && !PlayerInput.Instance.HeartbeatSource.isPlaying)
@@ -927,6 +937,16 @@ public class GuiBridge : MonoBehaviour {
         {
             PlayerInput.Instance.VocalSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.Chattering;
             PlayerInput.Instance.VocalSource.Play();
+            PlayerInput.Instance.HeartbeatSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.SlowHeartbeat;
+            PlayerInput.Instance.HeartbeatSource.Play();
+        }
+        else if (isFoodDeprived && !PlayerInput.Instance.HeartbeatSource.isPlaying)
+        {
+            PlayerInput.Instance.HeartbeatSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.SlowHeartbeat;
+            PlayerInput.Instance.HeartbeatSource.Play();
+        }
+        else if (isWaterDeprived && !PlayerInput.Instance.HeartbeatSource.isPlaying)
+        {
             PlayerInput.Instance.HeartbeatSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.SlowHeartbeat;
             PlayerInput.Instance.HeartbeatSource.Play();
         }
@@ -953,9 +973,57 @@ public class GuiBridge : MonoBehaviour {
             newSettings.basic = newBasics;
             PostProfile.colorGrading.settings = newSettings;
         }
+        else if (isWaterDeprived)
+        {
+            PostProfile.colorGrading.enabled = true;
+            float lerpT = survivalTimer.Data.Water.DeprivationSeconds / survivalTimer.DeprivationDurations.WaterDeprivationSurvivalTimeSeconds;
+            ColorGradingModel.Settings newSettings = ColorGradingModel.Settings.defaultSettings;
+            ColorGradingModel.BasicSettings newBasics = ColorGradingModel.BasicSettings.defaultSettings;
+            newBasics.temperature = Mathf.Lerp(0f, 35f, lerpT);
+            newBasics.saturation = Mathf.Lerp(1f, 0f, lerpT);
+            newSettings.basic = newBasics;
+            PostProfile.colorGrading.settings = newSettings;
+        }
+        else if (isFoodDeprived)
+        {
+            PostProfile.colorGrading.enabled = true;
+            float lerpT = survivalTimer.Data.Food.DeprivationSeconds / survivalTimer.DeprivationDurations.FoodDeprivationSurvivalTimeSeconds;
+            ColorGradingModel.Settings newSettings = ColorGradingModel.Settings.defaultSettings;
+            ColorGradingModel.BasicSettings newBasics = ColorGradingModel.BasicSettings.defaultSettings;
+            newBasics.contrast = Mathf.Lerp(1f, 1.5f, lerpT);
+            newBasics.saturation = Mathf.Lerp(1f, 0f, lerpT);
+            newSettings.basic = newBasics;
+            PostProfile.colorGrading.settings = newSettings;
+        }
         else
         {
             PostProfile.colorGrading.enabled = false;
+        }
+
+        //motion blur
+        if (isFoodDeprived)
+        {
+            PostProfile.motionBlur.enabled = true;
+            float lerpT = survivalTimer.Data.Food.DeprivationSeconds / survivalTimer.DeprivationDurations.FoodDeprivationSurvivalTimeSeconds;
+            MotionBlurModel.Settings newSettings = MotionBlurModel.Settings.defaultSettings;
+            newSettings.frameBlending = Mathf.Lerp(1f, 0.5f, lerpT);
+            newSettings.shutterAngle = Mathf.Lerp(0f, 360f, lerpT);
+            newSettings.sampleCount = 4;
+            PostProfile.motionBlur.settings = newSettings;
+        }
+
+        //depth of field
+        if (isWaterDeprived)
+        {
+            PostProfile.depthOfField.enabled = true;
+            float lerpT = survivalTimer.Data.Water.DeprivationSeconds / survivalTimer.DeprivationDurations.WaterDeprivationSurvivalTimeSeconds;
+            DepthOfFieldModel.Settings newSettings = DepthOfFieldModel.Settings.defaultSettings;
+            //DepthOfFieldModel.BasicSettings newBasics = DepthOfFieldModel.BasicSettings.defaultSettings;
+            newSettings.aperture = Mathf.Lerp(5f, 0.05f, lerpT);
+            newSettings.useCameraFov = true;
+            newSettings.focusDistance = 1f;
+            newSettings.kernelSize = DepthOfFieldModel.KernelSize.VeryLarge;
+            PostProfile.depthOfField.settings = newSettings;
         }
 
         //vignetting
@@ -981,6 +1049,18 @@ public class GuiBridge : MonoBehaviour {
             newSettings.color = new Color(68f/255f, 108f / 255f, 255f / 255f);
             newSettings.intensity = Mathf.Lerp(0f, 0.76f, lerpT);
             newSettings.smoothness = 0.169f;
+            newSettings.roundness = 1;
+            PostProfile.vignette.settings = newSettings;
+        }
+        else if (isFoodDeprived)
+        {
+            PostProfile.vignette.enabled = true;
+            float lerpT = survivalTimer.Data.Food.DeprivationSeconds / survivalTimer.DeprivationDurations.FoodDeprivationSurvivalTimeSeconds;
+
+            VignetteModel.Settings newSettings = VignetteModel.Settings.defaultSettings;
+            newSettings.color = new Color(32f / 255f, 32f / 255f, 32f / 255f);
+            newSettings.intensity = Mathf.Lerp(0f, 0.4f, lerpT);
+            newSettings.smoothness = Mathf.Lerp(0f, 0.5f, lerpT);
             newSettings.roundness = 1;
             PostProfile.vignette.settings = newSettings;
         }
