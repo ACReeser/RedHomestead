@@ -65,6 +65,9 @@ public class CustomFPSController : MonoBehaviour
 
     private CharacterController m_CharacterController;
     internal CharacterController CharacterController { get { return m_CharacterController; } }
+
+    internal float SurvivalSpeedMultiplier = 1f;
+
     private CollisionFlags m_CollisionFlags;
     private bool m_PreviouslyGrounded;
     private Vector3 m_OriginalCameraPosition;
@@ -356,6 +359,8 @@ public class CustomFPSController : MonoBehaviour
             StopAllCoroutines();
             StartCoroutine(!m_IsWalking ? m_FovKick.FOVKickUp() : m_FovKick.FOVKickDown());
         }
+
+        speed *= SurvivalSpeedMultiplier;
     }
 
 

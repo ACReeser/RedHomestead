@@ -918,12 +918,15 @@ public class GuiBridge : MonoBehaviour {
         model.enabled = false;
     }
 
+    internal bool ShowingDeprivationUX { get; private set; }
     internal void RefreshDeprivationUX(SurvivalTimer survivalTimer)
     {
         bool isPowerDeprived = survivalTimer.Data.Power.DeprivationSeconds > 0f,
              isOxygenDeprived = survivalTimer.Data.Oxygen.DeprivationSeconds > 0f,
              isFoodDeprived = survivalTimer.Data.Food.DeprivationSeconds > 0f,
              isWaterDeprived = survivalTimer.Data.Water.DeprivationSeconds > 0f;
+
+        ShowingDeprivationUX = isPowerDeprived || isOxygenDeprived || isFoodDeprived || isWaterDeprived;
 
         //sounds
         if (isOxygenDeprived && !PlayerInput.Instance.HeartbeatSource.isPlaying)
@@ -949,6 +952,11 @@ public class GuiBridge : MonoBehaviour {
         {
             PlayerInput.Instance.HeartbeatSource.clip = PlayerInput.Instance.HeartbeatsAndVocals.SlowHeartbeat;
             PlayerInput.Instance.HeartbeatSource.Play();
+        }
+        else if (!ShowingDeprivationUX && PlayerInput.Instance.HeartbeatSource.isPlaying)
+        {
+            PlayerInput.Instance.HeartbeatSource.Stop();
+            PlayerInput.Instance.VocalSource.Stop();
         }
 
         //colorgrading

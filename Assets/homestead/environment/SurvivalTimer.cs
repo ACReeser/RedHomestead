@@ -268,9 +268,43 @@ public class SurvivalTimer : MonoBehaviour {
             }
             else
             {
+                PlayerInput.Instance.FPSController.SurvivalSpeedMultiplier = GetSpeedCoefficient();
                 GuiBridge.Instance.RefreshDeprivationUX(this);
             }
         }
+        else if (GuiBridge.Instance.ShowingDeprivationUX)
+        {
+            GuiBridge.Instance.RefreshDeprivationUX(this);
+        }
+    }
+
+    /// <summary>
+    /// returns a coefficient between 0 and 1
+    /// </summary>
+    /// <returns></returns>
+    private float GetSpeedCoefficient()
+    {
+        float coeff = 1f;
+
+        // -10% to -25%
+        if (Power.Data.DeprivationSeconds > 0f)
+        {
+            coeff -= .1f + Mathf.Lerp(0f, .15f, Power.Data.DeprivationSeconds / DeprivationDurations.PowerDeprivationSurvivalTimeSeconds);
+        }
+
+        // -10% to -80%
+        if (Food.Data.DeprivationSeconds > 0f)
+        {
+            coeff -= .1f + Mathf.Lerp(0f, .7f, Food.Data.DeprivationSeconds / DeprivationDurations.FoodDeprivationSurvivalTimeSeconds);
+        }
+
+        // 0% to -20%
+        if (Water.Data.DeprivationSeconds > 0f)
+        {
+            coeff -= Mathf.Lerp(0f, .2f, Water.Data.DeprivationSeconds / DeprivationDurations.WaterDeprivationSurvivalTimeSeconds);
+        }
+
+        return Mathf.Max(0f, coeff);
     }
 
     private void TryConsume(bool nonSuitSuccess, SingleSurvivalResource resource)
