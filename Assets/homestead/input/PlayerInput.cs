@@ -405,6 +405,11 @@ public class PlayerInput : MonoBehaviour {
         {
             wakeyWakeySignal = WakeSignal.PlayerCancel;
         }
+        else if (Input.GetKeyUp(KeyCode.X))
+        {
+            wakeyWakeySignal = WakeSignal.PlayerCancel;
+            CurrentCraftablePlanner.SetCurrentCraftable(Craftable.Unspecified);
+        }
 
         if (CurrentCraftablePlanner != null)
         {

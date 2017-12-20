@@ -19,7 +19,8 @@ namespace RedHomestead.Crafting
         Toolbox,
         EVAOxygenTank,
         EVABatteries,
-        EVAToolbelt
+        EVAToolbelt,
+        EVAJumpjets
     }
 
     public enum CraftableGroup
@@ -199,6 +200,7 @@ namespace RedHomestead.Crafting
                 case Craftable.EVABatteries:
                 case Craftable.EVAOxygenTank:
                 case Craftable.EVAToolbelt:
+                case Craftable.EVAJumpjets:
                     return true;
                 default:
                     return false;
@@ -215,6 +217,8 @@ namespace RedHomestead.Crafting
                     return EVA.EVAUpgrade.Oxygen;
                 case Craftable.EVAToolbelt:
                     return EVA.EVAUpgrade.Toolbelt;
+                case Craftable.EVAJumpjets:
+                    return EVA.EVAUpgrade.Jetpack;
                 default:
                     return EVA.EVAUpgrade.None;
             }

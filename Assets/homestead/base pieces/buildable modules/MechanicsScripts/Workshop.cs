@@ -181,6 +181,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
 
         if (this.FlexData.CurrentCraftable == Craftable.Unspecified)
         {
+            this.FlexData.Progress = 0f;
             CraftableHolograms[0].parent.gameObject.SetActive(false);
         }
         else
