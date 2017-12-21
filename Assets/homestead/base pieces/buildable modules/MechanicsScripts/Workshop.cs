@@ -121,6 +121,8 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
     private bool CurrentlyViewingDetail = false;
     private Dictionary<Transform, DoorRotationLerpContext> doorRotator = new Dictionary<Transform, DoorRotationLerpContext>();
 
+    public DoorType DoorType { get { return DoorType.Small; } }
+
     private Dictionary<Transform, Equipment> equipmentLockers = new Dictionary<Transform, Equipment>();
     public Dictionary<Transform, Equipment> EquipmentLockers { get { return equipmentLockers; } }
 

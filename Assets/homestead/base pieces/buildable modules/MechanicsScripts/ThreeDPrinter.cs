@@ -34,6 +34,8 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
 
     public ThreeDPrinterFlexData FlexData { get; set; }
 
+    public DoorType DoorType { get { return DoorType.Large; } }
+
     public void ToggleDoor(Transform door)
     {
         //assumes all door transforms start shut

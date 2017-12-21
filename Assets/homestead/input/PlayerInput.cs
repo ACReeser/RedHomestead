@@ -18,7 +18,7 @@ using RedHomestead.Agriculture;
 [Serializable]
 public struct InteractionClips
 {
-    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, EatCrispyFood, DrinkShake, DrinkWater, StartSleep, Repair;
+    public AudioClip Drill, Construction, PlugIn, DoorOpen, DoorClose, DoorSmallOpen, DoorSmallClose, EatCrispyFood, DrinkShake, DrinkWater, StartSleep, Repair;
 }
 [Serializable]
 public struct HeartbeatVocalNoiseClips
@@ -944,7 +944,7 @@ public class PlayerInput : MonoBehaviour {
                         case Airlock.OpenDoorName:
                             if (doInteract)
                             {
-                                PlayInteractionClip(hitInfo.point, Sfx.DoorClose, volumeScale: .4f);
+                                PlayInteractionClip(hitInfo.point, doorM.DoorType == DoorType.Large ? Sfx.DoorClose : Sfx.DoorSmallClose, volumeScale: .4f);
                                 doorM.ToggleDoor(hitInfo.collider.transform);
                             }
                             else
@@ -954,7 +954,7 @@ public class PlayerInput : MonoBehaviour {
                         default:
                             if (doInteract)
                             {
-                                PlayInteractionClip(hitInfo.point, Sfx.DoorOpen, volumeScale:.4f);
+                                PlayInteractionClip(hitInfo.point, doorM.DoorType == DoorType.Large ? Sfx.DoorOpen : Sfx.DoorSmallOpen, volumeScale:.4f);
                                 doorM.ToggleDoor(hitInfo.collider.transform);
                             }
                             else

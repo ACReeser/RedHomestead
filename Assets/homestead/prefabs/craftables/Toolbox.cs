@@ -29,6 +29,8 @@ public class Toolbox : MovableSnappable, IDoorManager, IEquipmentSwappable, IDat
     public Equipment[] LockerEquipment { get { return Data.Equipment; } }
 
     private ToolboxData data;
+
+    public DoorType DoorType { get { return DoorType.Small; } }
     public ToolboxData Data { get { return data; } set { data = value; } }
 
     void Start()

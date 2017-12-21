@@ -5,8 +5,11 @@ using System.Collections.Generic;
 using RedHomestead.Simulation;
 using RedHomestead.Buildings;
 
+public enum DoorType { Large, Small }
+
 public interface IDoorManager
 {
+    DoorType DoorType { get; }
     void ToggleDoor(Transform door);
 }
 
@@ -24,6 +27,8 @@ public class Airlock : GenericBaseModule, IDoorManager {
     public AudioSource Source;
 
     private Animator OuterAnimator, InnerAnimator;
+
+    public DoorType DoorType { get { return DoorType.Large; } }
 
     // Use this for initialization
     protected override void OnStart () {
