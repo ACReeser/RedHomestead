@@ -180,6 +180,19 @@ namespace RedHomestead.Crafting
                 }
             },
             {
+                Craftable.EVAJumpjets, new CraftingData()
+                {
+                    BuildTimeHours = 15,
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(2, Matter.ElectricMotor),
+                        new ResourceVolumeEntry(.5f, Matter.Aluminium),
+                        new ResourceUnitEntry(1, Matter.Piping)
+                    },
+                    Description = "Extra oxygen for the EVA Suit."
+                }
+            },
+            {
                 Craftable.EVAToolbelt, new CraftingData()
                 {
                     BuildTimeHours = 5,
@@ -253,9 +266,10 @@ namespace RedHomestead.Crafting
                 CraftableGroup.SuitUpgrade,
                 new Craftable[]
                 {
+                    Craftable.EVAToolbelt,
                     Craftable.EVAOxygenTank,
                     Craftable.EVABatteries,
-                    Craftable.EVAToolbelt,
+                    Craftable.EVAJumpjets,
                 }
             },
         };
