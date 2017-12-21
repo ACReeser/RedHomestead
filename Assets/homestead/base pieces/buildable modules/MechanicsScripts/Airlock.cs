@@ -74,6 +74,8 @@ public class Airlock : GenericBaseModule, IDoorManager {
         SetPlayerTerrainCollision(true);
         RefreshSealedButtons();
         PlayerInput.Instance.FPSController.ToggleDustFootsteps(false);
+        PlayerInput.Instance.PlayInteractionClip(InnerDoor.position, PlayerInput.Instance.Sfx.DoorOpen, volumeScale: .4f);
+        _ToggleDoor(InnerDoor);
     }
 
     private void SetPlayerTerrainCollision(bool doIgnore)
@@ -97,6 +99,9 @@ public class Airlock : GenericBaseModule, IDoorManager {
             SetPlayerTerrainCollision(false);
             RefreshSealedButtons();
             PlayerInput.Instance.FPSController.ToggleDustFootsteps(true);
+
+            PlayerInput.Instance.PlayInteractionClip(OuterDoor.position, PlayerInput.Instance.Sfx.DoorOpen, volumeScale: .4f);
+            _ToggleDoor(OuterDoor);
         }
     }
 

@@ -113,8 +113,8 @@ namespace RedHomestead.EVA
             };
         }
 
-        public const float OxygenResupplySeconds = 4f;
-        public const float PowerResupplySeconds = 4f;
+        public const float OxygenResupplySeconds = 20f;
+        public const float PowerResupplySeconds = 20f;
 
         public static float OxygenResupplyKilogramsPerUnit = GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.KilogramsOxygenPerHour) * OxygenResupplySeconds / Simulation.Matter.Oxygen.Kilograms();
         public static float PowerResupplyWattsPerSecond = GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour) * PowerResupplySeconds;
