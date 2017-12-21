@@ -391,7 +391,7 @@ public class GuiBridge : MonoBehaviour {
 
     public Canvas GUICanvas;
     public RectTransform ConstructionPanel, ConstructionGroupPanel, ConstructionModulesPanel, PlacingPanel, KilledPanel, FloorplanGroupPanel, FloorplanSubgroupPanel, FloorplanPanel, HelpPanel, ReportPanel, EscapeMenuPanel, Crosshair;
-    public Text ConstructionHeader, EquippedText, PlacingText, TimeText, KilledByReasonText;
+    public Text ConstructionHeader, EquippedText, PlacingText, TimeText, TimeChevronText, KilledByReasonText;
     public Button[] ConstructionGroupButtons;
     public Text[] ConstructionGroupHints, FloorplanGroupHints;
     public RectTransform[] ConstructionRequirements, ConstructionModuleButtons;

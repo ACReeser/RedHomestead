@@ -127,7 +127,7 @@ public class SunOrbit : MonoBehaviour {
         }
 
         string textTime = String.Format("M{0}:{1}", ((int)Math.Truncate(Game.Current.Environment.CurrentHour)).ToString("D2"), ((int)Math.Truncate(Game.Current.Environment.CurrentMinute)).ToString("D2"));
-
+        
         GuiBridge.Instance.TimeText.text = textTime;
         UpdateClocks(textTime);
     }
@@ -194,8 +194,9 @@ public class SunOrbit : MonoBehaviour {
         string arrows = new string('►', SpeedTier - 1);
         foreach(var t in this.Clocks)
         {
-            t.transform.GetChild(0).GetComponent<TextMesh>().text = arrows; 
+            t.transform.GetChild(0).GetComponent<TextMesh>().text = arrows;
         }
+        GuiBridge.Instance.TimeChevronText.text = arrows;
     }
 
     internal void SlowDown()
