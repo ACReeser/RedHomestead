@@ -204,6 +204,7 @@ public class CustomFPSController : MonoBehaviour
 
             currentHitNormal = hitInfo.normal;
             currentHitPosition = hitInfo.point;
+            isCurrentHitTerrain = hitInfo.collider != null && hitInfo.collider.CompareTag("terrain");
 
             moveDirection.x = desiredMove.x * speed;
             moveDirection.z = desiredMove.z * speed;
@@ -427,10 +428,11 @@ public class CustomFPSController : MonoBehaviour
 
     public bool PlaceBootprints = true;
     private float maximumLadderY;
+    private bool isCurrentHitTerrain = false;
 
     private void PlaceBootprint()
     {
-        if (this.PlaceBootprints)
+        if (this.PlaceBootprints && isCurrentHitTerrain)
         {
             lastBootIndex++;
             lastBootIndex %= bootSprites.Length;
