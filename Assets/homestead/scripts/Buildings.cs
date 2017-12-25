@@ -74,6 +74,7 @@ namespace RedHomestead.Buildings
                 case Module.GreenhouseHall:
                     return 4;
                 case Module.Warehouse:
+                case Module.Market:
                     return 6;
                 default:
                     return 5;
@@ -84,7 +85,7 @@ namespace RedHomestead.Buildings
         {
             switch (module)
             {
-                case Module.GroundSolarPanel:
+                //case Module.GroundSolarPanel:
                 case Module.SolarPanelSmall:
                     return false;
                 default:
@@ -167,10 +168,10 @@ namespace RedHomestead.Buildings
                     Requirements = new List<IResourceEntry>()
                     {
                         new ResourceVolumeEntry(2, Matter.IronBeams),
-                        new ResourceVolumeEntry(2, Matter.Canvas)
+                        new ResourceUnitEntry(2, Matter.Canvas)
                     },
                     Description = "A canvas storage area to stash materials.",
-                    Storage = 10
+                    Storage = 36
                 }
             },
             {
@@ -216,6 +217,18 @@ namespace RedHomestead.Buildings
                         new ResourceVolumeEntry(1, Matter.Steel),
                     },
                     Description = "A fluid splitter to split pipelines."
+                }
+            },
+            {
+                Module.Market, new BuildingData() {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceVolumeEntry(2, Matter.IronBeams),
+                        new ResourceUnitEntry(2, Matter.Canvas),
+                        new ResourceUnitEntry(1, Matter.ElectricMotor),
+                    },
+                    Description = "A storage area to sell materials.",
+                    Storage = 12
                 }
             },
             //extraction
@@ -464,7 +477,8 @@ namespace RedHomestead.Buildings
                     Module.SmallGasTank,
                     Module.LargeGasTank,
                     Module.SmallWaterTank,
-                    Module.Warehouse
+                    Module.Warehouse,
+                    Module.Market
                 }
             },
         };
