@@ -228,6 +228,41 @@ public class EconomyManager : MonoBehaviour
         }
 
         CheckOrdersForArrival();
+        CheckMarketsForSellOrders();
+    }
+
+    private void CheckMarketsForSellOrders()
+    {
+        if (Market.GlobalResourceList.CurrentAmount() > 0)
+        {
+            int[] slots = Market.GlobalResourceList.GetNonEmptyMatterSlots();
+            if (slots.Length > 0)
+            {
+                int randomI = UnityEngine.Random.Range(0, slots.Length);
+                Matter consuming = (Matter)((slots[randomI]) - ChemistryConstants.MinMatterOffset);
+                float amount = Market.GlobalResourceList.CurrentAmount(consuming);
+                Market.GlobalResourceList.Consume(consuming, amount, isCrafting:false);
+                int corpI = UnityEngine.Random.Range(0, Corporations.Wholesalers.Count);
+                Vendor buyer = Corporations.Wholesalers[corpI];
+                int buyPrice = Corporations.MinimumBuyPrice;
+                foreach (var stock in buyer.Stock)
+                {
+                    if (stock.Matter == consuming)
+                    {
+                        buyPrice = stock.ListPrice;
+                        break;
+                    }
+                }
+
+                int soldFor = Mathf.CeilToInt(buyPrice * amount);
+                Game.Current.Player.BankAccount += soldFor;
+
+                if (this.OnBankAccountChange != null)
+                    this.OnBankAccountChange();
+
+                GuiBridge.Instance.ShowNews(NewsSource.MarketSold.CloneWithSuffix(String.Format("{0} for ${1}", consuming.ToString(), soldFor)));
+            }
+        }
     }
 
     private void CheckOrdersForArrival()

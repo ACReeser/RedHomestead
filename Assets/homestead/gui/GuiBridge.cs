@@ -75,7 +75,8 @@ public enum MiscIcon {
     HeavyDust,
     DustStorm,
     HammerAndPick,
-    Bed
+    Bed,
+    Money
 }
 
 [Serializable]

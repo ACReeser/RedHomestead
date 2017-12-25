@@ -6,215 +6,271 @@ using System.Collections.Generic;
 using RedHomestead.Buildings;
 using System.Linq;
 
-public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
+public interface IWarehouse
 {
-    public class WarehouseResourceList
+    void AddToGlobalList(ResourceComponent res);
+    void RemoveFromGlobalList(ResourceComponent res);
+}
+
+public class ResourceRow<T>
+    where T: class, IWarehouse
+{
+    protected readonly int ColumnCount = 6;
+    protected readonly int RowCount = 2;
+    protected readonly float ExtremeZCoordinate = 3f;
+    protected readonly ResourceComponent[] stack;
+    protected Dictionary<ResourceComponent, int> IndexMap = new Dictionary<ResourceComponent, int>();
+    protected readonly Vector3 rowCenter;
+    protected readonly T parent;
+
+    public ResourceRow(T parent, Vector3 rowCenter)
     {
-        private readonly List<ResourceComponent>[] lists;
-        private readonly Action<List<ResourceComponent>> onResourcesDepleted;
+        this.parent = parent;
+        this.rowCenter = rowCenter;
+        stack =  new ResourceComponent[ColumnCount * RowCount];
+    }
 
-        public WarehouseResourceList(Action<List<ResourceComponent>> OnResourcesDepleted)
+    public void Capture(ICrateSnapper dad, ResourceComponent res)
+    {
+        if (CanSnap(res))
         {
-            this.onResourcesDepleted = OnResourcesDepleted;
-            this.lists = new List<ResourceComponent>[MatterExtensions.MaxMatter()];
-        }
-
-        public bool Contains(Matter type)
-        {
-            int i = Convert.ToInt32(type);
-            if (lists[i] == null)
-            {
-                return false;
-            }
-            else
-            {
-                return lists[i].Count > 0;
-            }
-        }
-
-        public void Add(ResourceComponent r)
-        {
-            int i = Convert.ToInt32(r.Data.Container.MatterType);
-            if (lists[i] == null)
-            {
-                lists[i] = new List<ResourceComponent>()
-                {
-                    r
-                };
-            }
-            else
-            {
-                lists[i].Add(r);
-            }
-        }
-
-        public void Remove(ResourceComponent r)
-        {
-            int i = Convert.ToInt32(r.Data.Container.MatterType);
-            if (lists[i] == null)
-            {
-                //noop
-            }
-            else
-            {
-                lists[i].Remove(r);
-            }
-        }
-
-        public bool CanConsume(List<IResourceEntry> resources)
-        {
-            UnityEngine.Debug.Log("Checking can consume");
-
-            foreach(IResourceEntry re in resources)
-            {
-                if (!CanConsume(re.Type, re.AmountByVolume))
-                    return false;
-            }
-
-            return true;
-        }
-
-        public bool CanConsume(Matter type, float amount)
-        {
-            List<ResourceComponent> list = lists[Convert.ToInt32(type)];
-            if (list == null)
-            {
-                return false;
-            }
-            else
-            {
-                //validate there is enough matter
-                if (list.Sum(r => r.Data.Container.CurrentAmount) < amount)
-                    return false;
-                else
-                    return true;
-            }
-        }
-
-        public void Consume(List<IResourceEntry> resources)
-        {
-            UnityEngine.Debug.Log("Consuming resources from warehouses");
-
-            //maintain a separate list of depleted containers so we don't mess up the iteration
-            List<ResourceComponent> depleted = new List<ResourceComponent>();
-
-            foreach(IResourceEntry re in resources)
-            {
-                int resourceIndex = 0;
-                float amount = re.AmountByVolume;
-                List<ResourceComponent> list = lists[Convert.ToInt32(re.Type)];
-
-                while (amount > 0 && resourceIndex < list.Count)
-                {
-                    amount -= list[resourceIndex].Data.Container.Pull(amount);
-                    
-                    if (list[resourceIndex].Data.Container.CurrentAmount <= 0f)
-                    {
-                        depleted.Add(list[resourceIndex]);
-                    }
-
-                    if (amount <= 0f)
-                        GuiBridge.Instance.ShowNews(NewsSource.CraftingConsumed.CloneWithSuffix(String.Format("{0} {1}", re.AmountByVolume, re.Type.ToString())));
-
-                    resourceIndex++;
-                }
-            }
-
-            //call the action if there were depleted containers
-            if (depleted.Count > 0)
-                this.onResourcesDepleted(depleted);
-        }
-
-        public void Consume(Matter type, float amount)
-        {
-            Consume(new List<IResourceEntry>()
-            {
-                new ResourceVolumeEntry(amount, type)
-            });
+            res.SnapCrate(dad, this.allocateCrate(res));
+            parent.AddToGlobalList(res);
         }
     }
 
-    private class WarehouseRow
+    private Vector3 allocateCrate(ResourceComponent res)
     {
-        public WarehouseRow(Warehouse parent, Vector3 rowCenter)
+        for (int i = 0; i < stack.Length; i++)
         {
-            this.parent = parent;
-            this.rowCenter = rowCenter;
-        }
-
-        private const int ColumnCount = 6;
-        private const int RowCount = 2;
-        private const float ExtremeZCoordinate = 3f;
-        private ResourceComponent[] stack = new ResourceComponent[ColumnCount * RowCount];
-        private Dictionary<ResourceComponent, int> IndexMap = new Dictionary<ResourceComponent, int>();
-        private Vector3 rowCenter;
-        private readonly Warehouse parent;
-
-        public void Capture(ICrateSnapper dad, ResourceComponent res)
-        {
-            if (CanSnap(res))
+            if (stack[i] == null)
             {
-                res.SnapCrate(dad, this.allocateCrate(res));
-                Warehouse.GlobalResourceList.Add(res);
+                IndexMap[res] = i;
+                stack[i] = res;
+                return GetVectorFromIndex(i);
             }
         }
 
-        private Vector3 allocateCrate(ResourceComponent res)
+        UnityEngine.Debug.LogError("Cannot find a place for crate to snap to in warehouse");
+
+        return Vector3.zero;
+    }
+
+    private Vector3 GetVectorFromIndex(int i)
+    {
+        return this.rowCenter + new Vector3(0,
+            i < ColumnCount ? 0f : 1f,
+            ((i % ColumnCount) * (ExtremeZCoordinate * 2f / ((float)ColumnCount - 1))) - ExtremeZCoordinate
+        );
+    }
+
+    protected bool _Release(ResourceComponent res, out ResourceRow<T> row)
+    {
+        row = this;
+
+        if (IndexMap.ContainsKey(res))
         {
-            for (int i = 0; i < stack.Length; i++)
+            int index = IndexMap[res];
+            IndexMap.Remove(res);
+            parent.RemoveFromGlobalList(res);
+            stack[index] = null;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool CanSnap(ResourceComponent res)
+    {
+        return IndexMap.Keys.Count < stack.Length &&
+            !IndexMap.ContainsKey(res); //don't allow things that are already snapped
+    }
+}
+
+public class ResourceList
+{
+    private readonly List<ResourceComponent>[] MatterIndexedResourceLists;
+    private readonly Action<List<ResourceComponent>> onResourcesDepleted;
+    private float _CurrentAmount;
+
+    public ResourceList(Action<List<ResourceComponent>> OnResourcesDepleted)
+    {
+        this.onResourcesDepleted = OnResourcesDepleted;
+        this.MatterIndexedResourceLists = new List<ResourceComponent>[MatterExtensions.MaxMatter()];
+    }
+
+    public bool Contains(Matter type)
+    {
+        int i = type.Index();
+        if (MatterIndexedResourceLists[i] == null)
+        {
+            return false;
+        }
+        else
+        {
+            return MatterIndexedResourceLists[i].Count > 0;
+        }
+    }
+
+    public void Add(ResourceComponent r)
+    {
+        int i = r.Data.Container.MatterType.Index();
+        _CurrentAmount += r.Data.Container.CurrentAmount;
+
+        if (MatterIndexedResourceLists[i] == null)
+        {
+            MatterIndexedResourceLists[i] = new List<ResourceComponent>()
+                {
+                    r
+                };
+        }
+        else
+        {
+            MatterIndexedResourceLists[i].Add(r);
+        }
+    }
+
+    public void Remove(ResourceComponent r)
+    {
+        _CurrentAmount -= r.Data.Container.CurrentAmount;
+        int i = r.Data.Container.MatterType.Index();
+        if (MatterIndexedResourceLists[i] == null)
+        {
+            //noop
+        }
+        else
+        {
+            MatterIndexedResourceLists[i].Remove(r);
+        }
+    }
+
+    public bool CanConsume(List<IResourceEntry> resources)
+    {
+        UnityEngine.Debug.Log("Checking can consume");
+
+        foreach (IResourceEntry re in resources)
+        {
+            if (!CanConsume(re.Type, re.AmountByVolume))
+                return false;
+        }
+
+        return true;
+    }
+
+    public bool CanConsume(Matter type, float amount)
+    {
+        List<ResourceComponent> list = MatterIndexedResourceLists[Convert.ToInt32(type)];
+        if (list == null)
+        {
+            return false;
+        }
+        else
+        {
+            //validate there is enough matter
+            if (list.Sum(r => r.Data.Container.CurrentAmount) < amount)
+                return false;
+            else
+                return true;
+        }
+    }
+
+    public void Consume(List<IResourceEntry> resources, bool isCrafting = true)
+    {
+        UnityEngine.Debug.Log("Consuming resources from warehouses");
+
+        //maintain a separate list of depleted containers so we don't mess up the iteration
+        List<ResourceComponent> depleted = new List<ResourceComponent>();
+
+        foreach (IResourceEntry re in resources)
+        {
+            int resourceIndex = 0;
+            float amount = re.AmountByVolume;
+            int i = re.Type.Index();
+            List<ResourceComponent> list = MatterIndexedResourceLists[i];
+
+            _CurrentAmount -= re.AmountByVolume;
+
+            while (amount > 0 && resourceIndex < list.Count)
             {
-                if (stack[i] == null) {
-                    IndexMap[res] = i;
-                    stack[i] = res;
-                    return GetVectorFromIndex(i);
+                amount -= list[resourceIndex].Data.Container.Pull(amount);
+
+                if (list[resourceIndex].Data.Container.CurrentAmount <= 0f)
+                {
+                    depleted.Add(list[resourceIndex]);
                 }
+
+                if (isCrafting && amount <= 0f)
+                    GuiBridge.Instance.ShowNews(NewsSource.CraftingConsumed.CloneWithSuffix(String.Format("{0} {1}", re.AmountByVolume, re.Type.ToString())));
+
+                resourceIndex++;
             }
-
-            UnityEngine.Debug.LogError("Cannot find a place for crate to snap to in warehouse");
-
-            return Vector3.zero;
         }
 
-        private Vector3 GetVectorFromIndex(int i)
+        //call the action if there were depleted containers
+        if (depleted.Count > 0)
+            this.onResourcesDepleted(depleted);
+    }
+
+    public void Consume(Matter type, float amount, bool isCrafting = false)
+    {
+        Consume(new List<IResourceEntry>()
         {
-            return this.rowCenter + new Vector3(0,
-                i < ColumnCount ? 0f : 1f,
-                ((i % ColumnCount) * (ExtremeZCoordinate * 2f  / ((float)ColumnCount - 1))) - ExtremeZCoordinate
-            );
+            new ResourceVolumeEntry(amount, type)
+        }, isCrafting);
+    }
+
+    public float CurrentAmount()
+    {
+        return this._CurrentAmount;
+    }
+
+    public float CurrentAmount(Matter type)
+    {
+        int i = type.Index();
+        return this.MatterIndexedResourceLists[i].Sum(x => x.Data.Container.CurrentAmount);
+    }
+
+    public int[] GetNonEmptyMatterSlots()
+    {
+        int max = MatterExtensions.MaxMatter();
+        List<int> slots = new List<int>();
+        for (int i = 0; i < max; i++)
+        {
+            if (MatterIndexedResourceLists[i] != null && MatterIndexedResourceLists[i].Sum(x => x.Data.Container.CurrentAmount) > 0f)
+            {
+                slots.Add(i);
+            }
+        }
+        return slots.ToArray();
+    }
+}
+
+public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber, IWarehouse
+{
+    public class WarehouseRow: ResourceRow<Warehouse>
+    {
+        public WarehouseRow(Warehouse parent, Vector3 rowCenter): base(parent, rowCenter)
+        {
         }
 
         public bool Release(ResourceComponent res, out WarehouseRow row)
         {
-            row = this;
-
-            if (IndexMap.ContainsKey(res))
-            {
-                int index = IndexMap[res];
-                IndexMap.Remove(res);
-                Warehouse.GlobalResourceList.Remove(res);
-                stack[index] = null;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool CanSnap(ResourceComponent res)
-        {
-            return IndexMap.Keys.Count < stack.Length && 
-                !IndexMap.ContainsKey(res); //don't allow things that are already snapped
+            ResourceRow<Warehouse> fromParent = null;
+            bool released = _Release(res, out fromParent);
+            row = fromParent as WarehouseRow;
+            return released;
         }
     }
 
     static Warehouse()
     {
-        GlobalResourceList = new WarehouseResourceList(OnResourcesDepleted);
+        GlobalResourceList = new ResourceList(OnResourcesDepleted);
         Warehouses = new List<Warehouse>();
     }
-    public static readonly WarehouseResourceList GlobalResourceList;
     public static readonly List<Warehouse> Warehouses;
+    public static readonly ResourceList GlobalResourceList;
     public static void OnResourcesDepleted(List<ResourceComponent> resources)
     {
         foreach (ResourceComponent res in resources)
@@ -315,5 +371,15 @@ public class Warehouse : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber
     public override Module GetModuleType()
     {
         return Module.Warehouse;
+    }
+
+    public void AddToGlobalList(ResourceComponent res)
+    {
+        Warehouse.GlobalResourceList.Add(res);
+    }
+
+    public void RemoveFromGlobalList(ResourceComponent res)
+    {
+        Warehouse.GlobalResourceList.Remove(res);
     }
 }

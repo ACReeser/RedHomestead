@@ -106,7 +106,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4293100325300538}
-  - component: {fileID: 114240791490899840}
+  - component: {fileID: 114894747123825572}
   m_Layer: 0
   m_Name: market
   m_TagString: Untagged
@@ -333,7 +333,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1834154040038272}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.1, y: 1.15, z: 0}
+  m_LocalPosition: {x: -1.1, y: 0.89, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4293100325300538}
@@ -346,7 +346,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1080667881662356}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.13, y: 1.13, z: 0}
+  m_LocalPosition: {x: 1.13, y: 0.87, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4293100325300538}
@@ -688,15 +688,32 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 2, z: 16}
   m_Center: {x: 0, y: 0.5, z: 0}
---- !u!114 &114240791490899840
+--- !u!114 &114335285450951612
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1148266039847772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c22fa8c9717f2b4a8fab0a870662446, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 0.5
+  direction: {x: 0, y: -1}
+  animateDiffuse: 1
+  animateEmissive: 0
+  diffuseName: _MainTex
+  emissiveName: _EmissionMap
+--- !u!114 &114894747123825572
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1554361620121014}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35ea026d1f3f6ae49be7fe8216307eeb, type: 3}
+  m_Script: {fileID: 11500000, guid: 85e2dc2f633e09e47badecd5d7507f79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   powerViz:
@@ -732,23 +749,6 @@ MonoBehaviour:
     FaultedPercentage: 0
     IsOn: 0
     F: 
---- !u!114 &114335285450951612
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1148266039847772}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c22fa8c9717f2b4a8fab0a870662446, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 0.5
-  direction: {x: 0, y: -1}
-  animateDiffuse: 1
-  animateEmissive: 0
-  diffuseName: _MainTex
-  emissiveName: _EmissionMap
 --- !u!114 &114935858209215710
 MonoBehaviour:
   m_ObjectHideFlags: 1

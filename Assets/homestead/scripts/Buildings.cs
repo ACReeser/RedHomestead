@@ -34,7 +34,8 @@ namespace RedHomestead.Buildings
         GlassFurnace,
         ThreeDPrinter,
         AirMiner,
-        GroundSolarPanel
+        GroundSolarPanel,
+        Market
     }
 
     /// <summary>

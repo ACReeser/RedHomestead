@@ -44,6 +44,9 @@ public static class Corporations {
 
         return results;
     }
+
+    public const int MinimumBuyPrice = 500;
+
     public static List<Vendor> Wholesalers = new List<Vendor>()
     {
         new Vendor()

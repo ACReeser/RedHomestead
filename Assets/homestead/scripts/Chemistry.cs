@@ -6,6 +6,12 @@ using RedHomestead.Industry;
 
 namespace RedHomestead.Simulation
 {
+    public static class ChemistryConstants
+    {
+        public const int MinMatterIndex = -6;
+        public const int MinMatterOffset = -MinMatterIndex;
+    }
+
     public enum ContainerSize { Custom = -1, Quarter = 1, Full = 4 } //, Quadratic = 16 }
 
     public enum Energy { Electrical, Thermal }
@@ -14,7 +20,7 @@ namespace RedHomestead.Simulation
 
     //todo: resource could be flags to allow quick "is this in requirements", only if 64 or less resources tho
     public enum Matter {
-        Hydrogen = -6, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water,
+        Hydrogen = ChemistryConstants.MinMatterIndex, Oxygen, CarbonMonoxide, CarbonDioxide, Methane, Water,
         Unspecified = 0,
         //ores on 0, ingots on 1, powders on 2
         IronOre = 1,         Iron = 10,      IronPowder = 20,
@@ -185,7 +191,12 @@ namespace RedHomestead.Simulation
                 max = max > v ? max : v;
             }
 
-            return max;
+            return Math.Abs(ChemistryConstants.MinMatterIndex) + max;
+        }
+
+        public static int Index(this Matter matter)
+        {
+            return ChemistryConstants.MinMatterOffset + Convert.ToInt32(matter);
         }
 
         public static float Kilograms(this Matter matter, float? volumeCubicMeter = null)

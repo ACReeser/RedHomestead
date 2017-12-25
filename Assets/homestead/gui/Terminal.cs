@@ -402,9 +402,12 @@ public class Terminal : MonoBehaviour {
         else if (currentProgramPanel == ProgramPanels[(int)TerminalProgram.Colony])
             colony.FillColonyScreen();
         else if (currentProgramPanel == ProgramPanels[(int)TerminalProgram.Finances])
+        {
             finance.Fill();
+            OnBankAccountChange();
+        }
 
-            if (currentProgramPanel != null)
+        if (currentProgramPanel != null)
             currentProgramPanel.gameObject.SetActive(true);
     }
 

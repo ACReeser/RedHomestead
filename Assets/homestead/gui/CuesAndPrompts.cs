@@ -150,6 +150,12 @@ public static class NewsSource
         DurationMilliseconds = 10000,
         Icon = MiscIcon.DustStorm
     };
+    internal static News MarketSold = new News()
+    {
+        Text = "Sold ",
+        DurationMilliseconds = 7500,
+        Icon = MiscIcon.Money
+    };
     internal static News CraftingConsumed = new News()
     {
         Text = "Consumed ",
