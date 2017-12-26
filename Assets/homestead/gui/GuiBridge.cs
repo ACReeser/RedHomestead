@@ -85,14 +85,116 @@ public struct Icons
     public Sprite[] ResourceIcons, CompoundIcons, MiscIcons;
 }
 
-[Serializable]
-public struct NewsUI
+public class NewsUI
 {
-    public RectTransform Panel, ProgressBar;
-    public Text Description;
-    public Image Icon, ProgressFill;
+    private const int CloseDurationMilliseconds = 200;
+    public readonly RectTransform Panel, ProgressBar;
+    private readonly Text Description;
+    private readonly Image Icon, ProgressFill;
+    public News News { get; private set; }
+    public float TimeMilliseconds, DurationMilliseconds, CloseTimeMilliseconds;
+    private float OriginalHeight;
+    public bool IsShowing { get; private set; }
+
+    public NewsUI(Transform panel)
+    {
+        this.Panel = panel.GetComponent<RectTransform>();
+        this.Description = panel.GetChild(0).GetComponent<Text>();
+        this.Icon = panel.GetChild(1).GetComponent<Image>();
+        this.ProgressBar = panel.GetChild(2).GetComponent<RectTransform>();
+        this.ProgressFill = ProgressBar.GetChild(0).GetComponent<Image>();
+        this.Panel.gameObject.SetActive(false);
+        this.ProgressBar.gameObject.SetActive(false);
+        OriginalHeight = this.Panel.sizeDelta.y;
+    }
+
+    public void Fill(News news)
+    {
+        CloseTimeMilliseconds = 0f;
+        TimeMilliseconds = 0f;
+        DurationMilliseconds = news.DurationMilliseconds;
+        News = news;
+        Icon.sprite = GuiBridge.Instance.Icons.MiscIcons[Convert.ToInt32(news.Icon)];
+        Description.text = news.Text;
+        Panel.gameObject.SetActive(true);
+        Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, OriginalHeight);
+        IsShowing = true;
+    }
+
+    public void Stop()
+    {
+    }
+
+    public void Update()
+    {
+        if (TimeMilliseconds > DurationMilliseconds)
+        {
+            Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Lerp(OriginalHeight, 0f, CloseTimeMilliseconds / CloseDurationMilliseconds));
+            CloseTimeMilliseconds += UnityEngine.Time.deltaTime * 1000f;
+
+            if (CloseTimeMilliseconds > CloseDurationMilliseconds)
+            {
+                IsShowing = false;
+                Panel.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            //Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, OriginalHeight);
+            //Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, OriginalHeight);
+            TimeMilliseconds += Time.deltaTime * 1000f;
+        }
+    }
 }
 
+[Serializable]
+public class NewsMenu
+{
+    public RectTransform VerticalPanel;
+
+    private List<NewsUI> pool = new List<NewsUI>();
+    private List<NewsUI> actives = new List<NewsUI>();
+    private List<NewsUI> _toDisable = new List<NewsUI>();
+    //private Queue<NewsUI> queue = new Queue<NewsUI>();
+
+    public void Start()
+    {
+        foreach(Transform child in VerticalPanel)
+        {
+            pool.Add(new NewsUI(child));
+        }
+    }
+
+    public void ShowNews(News news)
+    {
+        var usable = pool[0];
+        pool.Remove(usable);
+        usable.Fill(news);
+        actives.Add(usable);
+        usable.Panel.SetSiblingIndex(VerticalPanel.childCount - 1);
+    }
+
+    public void Update()
+    {
+        foreach(NewsUI ui in actives)
+        {
+            ui.Update();
+            if (!ui.IsShowing)
+            {
+                _toDisable.Add(ui);
+            }
+        }
+        if (_toDisable.Count > 0)
+        {
+            foreach(NewsUI ui in _toDisable)
+            {
+                actives.Remove(ui);
+                pool.Add(ui);
+            }
+            _toDisable.Clear();
+        }
+    }
+}
 
 [Serializable]
 public class RadialMenu
@@ -382,6 +484,7 @@ public struct PrinterUI
     }
 }
 
+
 /// <summary>
 /// Scripting interface for all GUI elements
 /// syncs PlayerInput state to UI
@@ -405,7 +508,7 @@ public class GuiBridge : MonoBehaviour {
     public RedHomestead.Equipment.EquipmentSprites EquipmentSprites;
     public PromptUI Prompts;
     public Icons Icons;
-    public NewsUI News;
+    public NewsMenu News;
     public PostProcessingProfile PostProfile;
     public PrinterUI Printer;
 
@@ -440,7 +543,6 @@ public class GuiBridge : MonoBehaviour {
         TogglePrinter(false);
         //same as ToggleEscapeMenu(false) basically
         this.EscapeMenuPanel.gameObject.SetActive(false);
-        News.Panel.gameObject.SetActive(false);
     }
 
     internal void ToggleAutosave(bool state)
@@ -451,6 +553,7 @@ public class GuiBridge : MonoBehaviour {
     void Start()
     {
         //this.RefreshPlanningUI();
+        News.Start();
 
         if (Game.Current.IsNewGame)
         {
@@ -462,13 +565,13 @@ public class GuiBridge : MonoBehaviour {
         RefreshSprintIcon(false);
     }
 
-    private Queue<News> newsTicker = new Queue<News>();
+    //private Queue<News> newsTicker = new Queue<News>();
     private Coroutine newsCoroutine;
     internal void ShowNews(News news)
     {
         if (news != null)
         {
-            newsTicker.Enqueue(news);
+            News.ShowNews(news);
             if (newsCoroutine == null)
             {
                 newsCoroutine = StartCoroutine(StartShowNews());
@@ -478,27 +581,11 @@ public class GuiBridge : MonoBehaviour {
 
     private IEnumerator StartShowNews()
     {
-        News currentNews = newsTicker.Dequeue();
-        do
+        while (isActiveAndEnabled)
         {
-            print("News: " + currentNews.Text);
-            News.Panel.gameObject.SetActive(true);
-            News.Description.text = currentNews.Text;
-
-            News.Icon.sprite = this.Icons.MiscIcons[(int)currentNews.Icon];
-
-#warning news progressbar unimplemented
-            News.ProgressBar.gameObject.SetActive(false);
-
-            yield return new WaitForSeconds(currentNews.DurationMilliseconds / 1000f);
-
-            News.Panel.gameObject.SetActive(false);
-            if (newsTicker.Count > 0)
-                currentNews = newsTicker.Dequeue();
-            else
-                currentNews = null;
+            News.Update();
+            yield return new WaitForEndOfFrame();
         }
-        while (currentNews != null);
 
         newsCoroutine = null;
     }
@@ -884,6 +971,8 @@ public class GuiBridge : MonoBehaviour {
     {
         ResetDeprivationUX();
         PostProfile.motionBlur.enabled = false;
+        if (newsCoroutine != null)
+            StopCoroutine(newsCoroutine);
     }
 
     internal void TogglePrinter(bool show, ThreeDPrinter printer = null)
