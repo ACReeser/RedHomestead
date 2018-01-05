@@ -130,7 +130,11 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
         Equipment.Sledge,
         Equipment.PowerDrill,
         Equipment.Wrench,
-        Equipment.Blower
+        Equipment.Blower,
+        Equipment.ChemicalSniffer,
+        Equipment.Blueprints,
+        Equipment.Multimeter,
+        Equipment.GPS,
     };
     public Equipment[] LockerEquipment { get { return lockerEquipment; } }
 

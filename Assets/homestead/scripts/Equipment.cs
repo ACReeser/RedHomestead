@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace RedHomestead.Equipment
 {
-    public enum Equipment { Locked = -1, EmptyHand = 0, PowerDrill, Blueprints, ChemicalSniffer, Wheelbarrow, Scanner, Wrench, Sidearm, LMG, Screwdriver, RockDrill, Sledge, Blower, Sampler }
+    public enum Equipment { Locked = -1, EmptyHand = 0, PowerDrill, Blueprints, ChemicalSniffer, Wheelbarrow, Wrench, Sidearm, LMG, Screwdriver, RockDrill, Sledge, Blower, Sampler, GPS, Multimeter }
     public enum Slot { Unequipped = 4, PrimaryTool = 5, SecondaryTool = 3, PrimaryGadget = 1, SecondaryGadget = 0, TertiaryGadget = 2 }
 
     public class Loadout

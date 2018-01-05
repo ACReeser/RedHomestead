@@ -23,7 +23,8 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
     private Dictionary<Transform, Equipment> equipmentLockers = new Dictionary<Transform, Equipment>();
 
     private Equipment[] lockerEquipment = new Equipment[] {
-        Equipment.Sampler
+        Equipment.Sampler,
+        Equipment.GPS
     };
     public Equipment[] LockerEquipment { get { return lockerEquipment; } }
     public Dictionary<Transform, Equipment> EquipmentLockers { get { return equipmentLockers; } }
