@@ -796,7 +796,7 @@ namespace RedHomestead.Persistence
                     PerkProgress = choices.GetPerkProgress(),
                     Loadout = new Equipment.Equipment[]
                     {
-                        Equipment.Equipment.ChemicalSniffer, //secondary gadget
+                        Equipment.Equipment.Multimeter, //secondary gadget //no more ChemicalSniffer
                         Equipment.Equipment.Blueprints, //primary gadget
                         Equipment.Equipment.Locked, //tertiary gadget
                         Equipment.Equipment.Locked, //secondary tool

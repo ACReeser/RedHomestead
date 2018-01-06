@@ -45,7 +45,8 @@ public class Toolbox : MovableSnappable, IDoorManager, IEquipmentSwappable, IDat
                     Equipment.Blower,
                     Equipment.PowerDrill,
                     Equipment.Sledge,
-                    Equipment.RockDrill
+                    Equipment.RockDrill,
+                    Equipment.ChemicalSniffer,
                 }
             };
         }

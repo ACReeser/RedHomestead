@@ -37,7 +37,7 @@ GameObject:
   - component: {fileID: 4581476328149706}
   - component: {fileID: 33240283191774274}
   - component: {fileID: 23857339210091418}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_highlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -72,7 +72,7 @@ GameObject:
   - component: {fileID: 4941776296314884}
   - component: {fileID: 33784091467479354}
   - component: {fileID: 23227294997177040}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_backing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 4709122091631712}
   - component: {fileID: 33194344713294828}
   - component: {fileID: 23512733731680544}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_mask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1539,7 +1539,8 @@ MonoBehaviour:
     ModuleType: 0
     ModuleInstanceID: 
     FaultedPercentage: 0
-    Flex: 
+    IsOn: 0
+    F: 
     MatterHistory:
       _history:
         _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f00000015000000160000001700000018000000190000001a000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -1638,12 +1639,15 @@ MonoBehaviour:
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
   HeatToggle: {fileID: 0}
   WaterToggle: {fileID: 0}
   DisplayText: {fileID: 102086890696199900}
@@ -1651,10 +1655,9 @@ MonoBehaviour:
   waterSprite: {fileID: 0}
   HarvestTriggers:
   - {fileID: 65833377636204682}
+  bulkheads: []
   HandleChangeClip: {fileID: 8300000, guid: 9d6e34029f51262458002bc29b39a063, type: 3}
-  PowerCabinet: {fileID: 33174003317220372}
-  OnMesh: {fileID: 4300022, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
-  OffMesh: {fileID: 4300020, guid: 94163c1b41fe8fb43b77613cc422a6a1, type: 3}
+  powerCabinet: {fileID: 0}
   algaeRenderer: {fileID: 23897913031350236}
   animatedTexture: {fileID: 114340842929587554}
   CratePrefab: {fileID: 434448, guid: 2eadcf53d0112eb4bac2d8edb7fb393f, type: 2}

@@ -37,7 +37,9 @@ public class PlayerInput : MonoBehaviour {
     private const float InteractionRaycastDistance = 10f;
     private const int ChemicalFlowLayerIndex = 9;
     private const int FloorplanLayerIndex = 10;
-    
+    private const int ElectricityLayerIndex = 11;
+    private const int RadarLayerIndex = 12;
+
 #if (DEVELOPMENT_BUILD || UNITY_EDITOR)
     public static bool DoNotDisturb;
 #endif
@@ -2064,6 +2066,14 @@ public class PlayerInput : MonoBehaviour {
                 AlternativeCamera.cullingMask = 1 << ChemicalFlowLayerIndex;
                 AlternativeCamera.enabled = true;
                 ToggleModuleBlueprintMode(true);
+                break;
+            case Equipment.Multimeter:
+                AlternativeCamera.cullingMask = 1 << ElectricityLayerIndex;
+                AlternativeCamera.enabled = true;
+                break;
+            case Equipment.GPS:
+                AlternativeCamera.cullingMask = 1 << RadarLayerIndex;
+                AlternativeCamera.enabled = true;
                 break;
             case Equipment.Screwdriver:
                 this.CommonInteriorEquipmentState();

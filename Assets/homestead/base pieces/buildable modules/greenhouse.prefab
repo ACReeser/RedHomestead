@@ -122,7 +122,7 @@ GameObject:
   - component: {fileID: 4461917778756216}
   - component: {fileID: 33726399649082710}
   - component: {fileID: 23104915642610028}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_highlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -458,7 +458,7 @@ GameObject:
   - component: {fileID: 4477540694261192}
   - component: {fileID: 33914343586170780}
   - component: {fileID: 23641910095962604}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_backing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -766,7 +766,7 @@ GameObject:
   - component: {fileID: 4105649695013556}
   - component: {fileID: 33299507810793544}
   - component: {fileID: 23936315046491454}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_mask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3247,7 +3247,8 @@ MonoBehaviour:
     ModuleType: 0
     ModuleInstanceID: 
     FaultedPercentage: 0
-    Flex: 
+    IsOn: 0
+    F: 
     MatterHistory:
       _history:
         _Buckets: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000140000001500000016000000170000001800000019000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -3346,12 +3347,15 @@ MonoBehaviour:
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
   HeatToggle: {fileID: 4654841557118240}
   WaterToggle: {fileID: 4249364261030066}
   DisplayText: {fileID: 102518271164237658}

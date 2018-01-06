@@ -922,6 +922,7 @@ MonoBehaviour:
     ModuleType: 0
     ModuleInstanceID: 
     FaultedPercentage: 0
+    IsOn: 0
     F: 
     MatterHistory:
       _history:
@@ -1021,12 +1022,15 @@ MonoBehaviour:
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
       - TotalCapacity: 1
         Amount: 0
         MatterType: 0
+        AvgPurity: 0
   HandleChangeClip: {fileID: 8300000, guid: 9d6e34029f51262458002bc29b39a063, type: 3}
   powerCabinet: {fileID: 3332542}
 --- !u!212 &21224282
@@ -1233,7 +1237,7 @@ GameObject:
   - component: {fileID: 4364052663674566}
   - component: {fileID: 33494632744561826}
   - component: {fileID: 23206485031029768}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_mask
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1250,7 +1254,7 @@ GameObject:
   - component: {fileID: 4054186810981368}
   - component: {fileID: 33193140274888704}
   - component: {fileID: 23408175029089594}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_backing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1267,7 +1271,7 @@ GameObject:
   - component: {fileID: 4022093551246292}
   - component: {fileID: 33987145631920470}
   - component: {fileID: 23293890461754870}
-  m_Layer: 9
+  m_Layer: 11
   m_Name: electricityIndicator_highlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
