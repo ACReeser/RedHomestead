@@ -1255,17 +1255,35 @@ public class PlayerInput : MonoBehaviour {
                     IEquipmentSwappable swappable = hitInfo.collider.transform.root.GetComponent<IEquipmentSwappable>();
                     if (swappable != null)
                     {
-                        if (doInteract)
+                        if (swappable.EquipmentLockers[hitInfo.collider.transform].IsGadget())
                         {
-                            swappable.SwapEquipment(hitInfo.collider.transform, Slot.PrimaryTool);
-                        }
-                        else if (Input.GetKeyUp(KeyCode.Q) && Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Toolbelt))
-                        {
-                            swappable.SwapEquipment(hitInfo.collider.transform, Slot.SecondaryTool);
+                            if (doInteract)
+                            {
+                                swappable.SwapEquipment(hitInfo.collider.transform, Slot.PrimaryGadget);
+                            }
+                            else if (Input.GetKeyUp(KeyCode.Q)) // && Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Toolbelt)
+                            {
+                                swappable.SwapEquipment(hitInfo.collider.transform, Slot.SecondaryGadget);
+                            }
+                            else
+                            {
+                                newPrompt = swappable.GetLockerGadgetPrompt(hitInfo.collider.transform);
+                            }
                         }
                         else
                         {
-                            newPrompt = swappable.GetLockerPrompt(hitInfo.collider.transform);
+                            if (doInteract)
+                            {
+                                swappable.SwapEquipment(hitInfo.collider.transform, Slot.PrimaryTool);
+                            }
+                            else if (Input.GetKeyUp(KeyCode.Q) && Game.Current.Player.PackData.HasUpgrade(RedHomestead.EVA.EVAUpgrade.Toolbelt))
+                            {
+                                swappable.SwapEquipment(hitInfo.collider.transform, Slot.SecondaryTool);
+                            }
+                            else
+                            {
+                                newPrompt = swappable.GetLockerToolPrompt(hitInfo.collider.transform);
+                            }
                         }
                     }
                 }

@@ -168,6 +168,20 @@ namespace RedHomestead.Equipment
 
     public static class EquipmentExtensions
     {
+        public static bool IsGadget(this Equipment e)
+        {
+            switch (e)
+            {
+                case Equipment.Multimeter:
+                case Equipment.Blueprints:
+                case Equipment.GPS:
+                case Equipment.ChemicalSniffer:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static void InitializeSwappable(this IEquipmentSwappable swapper)
         {
             for (int i = 0; i < swapper.Lockers.Length; i++)
@@ -220,7 +234,7 @@ namespace RedHomestead.Equipment
                 return String.Format("Swap {0} for {1}", current.ToString(), fromLocker.ToString());
         }
 
-        public static PromptInfo GetLockerPrompt(this IEquipmentSwappable swapper, Transform transform)
+        public static PromptInfo GetLockerToolPrompt(this IEquipmentSwappable swapper, Transform transform)
         {
             Equipment fromLocker = swapper.EquipmentLockers[transform];
 
@@ -231,6 +245,24 @@ namespace RedHomestead.Equipment
                 Prompts.SwapEquipmentHint.SecondaryKey = "Q";
                 Prompts.SwapEquipmentHint.SecondaryDescription = GetLockerSwapDescription(fromLocker, Slot.SecondaryTool);
             }
+
+            if (Prompts.SwapEquipmentHint.Description != null || Prompts.SwapEquipmentHint.SecondaryDescription != null)
+            {
+                return Prompts.SwapEquipmentHint;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static PromptInfo GetLockerGadgetPrompt(this IEquipmentSwappable swapper, Transform transform)
+        {
+            Equipment fromLocker = swapper.EquipmentLockers[transform];
+
+            Prompts.SwapEquipmentHint.Description = GetLockerSwapDescription(fromLocker, Slot.PrimaryGadget);
+            Prompts.SwapEquipmentHint.SecondaryKey = "Q";
+            Prompts.SwapEquipmentHint.SecondaryDescription = GetLockerSwapDescription(fromLocker, Slot.SecondaryGadget);
 
             if (Prompts.SwapEquipmentHint.Description != null || Prompts.SwapEquipmentHint.SecondaryDescription != null)
             {

@@ -7,10 +7,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
+public class BiologyScienceExperiment
+{
+    public float Progress;
+    public Vector3 TargetPosition;
+}
+
+[Serializable]
+public class GeologyScienceExperiment
+{
+    public string DepositID;
+}
+
+[Serializable]
 public class ScienceLabFlexData
 {
-    //public Craftable CurrentCraftable = Craftable.Unspecified;
-    public float Progress;
+    public BiologyScienceExperiment BioExperiment;
+    public GeologyScienceExperiment GeoExperiment;
 }
 
 public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, ScienceLabFlexData>
@@ -54,4 +67,9 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
 
     public override void Tick() { }
 
+    protected override void OnStart()
+    {
+        base.OnStart();
+        this.InitializeSwappable();
+    }
 }
