@@ -6,17 +6,85 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public class BiologyScienceExperiment
+public enum ExperimentType { GeoSample, BioMinilab }
+public enum ExperimentStatus { Available, Accepted, Completed }
+
+public static class ExperimentExtensions
 {
-    public float Progress;
-    public Vector3 TargetPosition;
+    public static string Description(this ExperimentType type)
+    {
+        switch (type)
+        {
+            case ExperimentType.BioMinilab:
+                return "Place a mini-greenhouse\nand wait for it to generate data";
+            default:
+            case ExperimentType.GeoSample:
+                return "Sample the regolith\nin a deposit and return the data";
+        }
+    }
+    public static string Title(this IScienceExperiment experiment)
+    {
+        string result = "";
+        switch (experiment.Experiment)
+        {
+            case ExperimentType.BioMinilab:
+                result = "MINILAB";
+                break;
+            default:
+            case ExperimentType.GeoSample:
+                result = "DEPOSIT SAMPLE";
+                break;
+        }
+
+        return result + " MISSION " + experiment.MissionNumber;
+    }
+
+    public static ExperimentStatus Status(this IScienceExperiment experiment)
+    {
+        if (experiment.Progress < 0)
+        {
+            return ExperimentStatus.Available;
+        }
+        else if (experiment.Progress >= experiment.DurationDays)
+        {
+            return ExperimentStatus.Completed;
+        }
+        else
+        {
+            return ExperimentStatus.Accepted;
+        }
+    }
+}
+
+public interface IScienceExperiment
+{
+    ExperimentType Experiment { get; }
+    float Progress { get; }
+    int Reward { get; }
+    int DurationDays { get; }
+    int MissionNumber { get; }
 }
 
 [Serializable]
-public class GeologyScienceExperiment
+public class BiologyScienceExperiment: IScienceExperiment
+{
+    public float Progress { get; set; }
+    public Vector3 TargetPosition;
+    public int DurationDays {get; set; }
+    public int Reward { get; set; }
+    public int MissionNumber { get; set; }
+    public ExperimentType Experiment { get { return ExperimentType.BioMinilab; } }
+}
+
+[Serializable]
+public class GeologyScienceExperiment : IScienceExperiment
 {
     public string DepositID;
+    public float Progress { get; set; }
+    public int Reward { get; set; }
+    public int DurationDays { get; set; }
+    public int MissionNumber { get; set; }
+    public ExperimentType Experiment { get { return ExperimentType.GeoSample; } }
 }
 
 [Serializable]
