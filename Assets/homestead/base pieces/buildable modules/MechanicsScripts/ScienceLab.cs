@@ -22,21 +22,27 @@ public static class ExperimentExtensions
                 return "Sample the regolith\nin a deposit and return the data";
         }
     }
+
+    public static Sprite Sprite(this ExperimentType type)
+    {
+        return IconAtlas.Instance.ScienceExperimentIcons[Convert.ToInt32(type)];
+    }
+
     public static string Title(this IScienceExperiment experiment)
     {
         string result = "";
         switch (experiment.Experiment)
         {
             case ExperimentType.BioMinilab:
-                result = "MINILAB";
+                result = "Minilab";
                 break;
             default:
             case ExperimentType.GeoSample:
-                result = "DEPOSIT SAMPLE";
+                result = "Deposit Sample";
                 break;
         }
 
-        return result + " MISSION " + experiment.MissionNumber;
+        return result + " Mission " + experiment.MissionNumber;
     }
 
     public static ExperimentStatus Status(this IScienceExperiment experiment)

@@ -14,12 +14,28 @@ public struct SciTerminalDetail
 
     public void FillList(IEnumerable<IScienceExperiment> list)
     {
-
+        int i = 0;
+        foreach(var experiment in list)
+        {
+            if (i >= MissionList.childCount) {
+                var newB = GameObject.Instantiate(MissionList.GetChild(0), MissionList);
+                //newB.GetComponent<Button>().onClick
+            }
+            Transform child = MissionList.GetChild(i);
+            child.gameObject.SetActive(true);
+            child.GetChild(0).GetComponent<Image>().sprite = experiment.Experiment.Sprite();
+            child.GetChild(1).GetComponent<Text>().text = experiment.Title();
+            i++;
+        }
+        for (int j = i; j < MissionList.childCount; j++)
+        {
+            MissionList.GetChild(j).gameObject.SetActive(false);
+        }
     }
 
     public void FillDetail(IScienceExperiment experiment)
     {
-        TitleDescription.text = string.Format("<b>{0}</b>\n<i>{1}</i>", experiment.Title(), experiment.Experiment.Description());
+        TitleDescription.text = string.Format("<b>{0}</b>\n<i>{1}</i>", experiment.Title().ToUpperInvariant(), experiment.Experiment.Description());
         RewardText.text = string.Format("${0} REWARD", experiment.Reward);
         ExperimentStatus status = experiment.Status();
         CancelButton.gameObject.SetActive(status == ExperimentStatus.Accepted);
@@ -52,6 +68,9 @@ public class ScienceTerminal : MonoBehaviour {
 
     public SciTerminalDetail UI;
 
+    internal enum DetailPage { Geology, Biology }
+    private DetailPage CurrentPage = DetailPage.Biology;
+
     internal List<BiologyScienceExperiment> AvailableBiologyMissions = new List<BiologyScienceExperiment>()
     {
         new BiologyScienceExperiment()
@@ -60,6 +79,20 @@ public class ScienceTerminal : MonoBehaviour {
             Progress = -1,
             Reward = 5000,
             DurationDays = 1
+        },
+        new BiologyScienceExperiment()
+        {
+            MissionNumber = 2,
+            Progress = -1,
+            Reward = 12000,
+            DurationDays = 2
+        },
+        new BiologyScienceExperiment()
+        {
+            MissionNumber = 3,
+            Progress = -1,
+            Reward = 17500,
+            DurationDays = 3
         }
     };
     internal List<GeologyScienceExperiment> AvailableGeologyMissions = new List<GeologyScienceExperiment>()
@@ -83,7 +116,7 @@ public class ScienceTerminal : MonoBehaviour {
 		
 	}
 
-    public void HoverGeology(int index)
+    public void ClickOrHover(int index)
     {
         UI.FillDetail(AvailableGeologyMissions[index]);
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 public class IconAtlas : MonoBehaviour {
     public static IconAtlas Instance { get; private set; }
 
-    public Sprite[] ResourceIcons, CompoundIcons, MiscIcons, CraftableIcons;
+    public Sprite[] ResourceIcons, CompoundIcons, MiscIcons, CraftableIcons, ScienceExperimentIcons;
 
     void Awake()
     {
