@@ -9,10 +9,10 @@ using UnityEngine.UI;
 public struct SciTerminalDetail
 {
     public RectTransform CancelButton, AcceptButton, FinishButton, MissionList;
-    public Text DayText, RewardText, TitleDescription;
-    public Image ClockFill;
+    public Text DayText, RewardText, TitleDescription, CurrentPageHeaderText;
+    public Image ClockFill, DetailSprite;
 
-    public void FillList(IEnumerable<IScienceExperiment> list)
+    public void FillList(IEnumerable<IScienceExperiment> list, ScienceTerminal.DetailPage detailPage)
     {
         int i = 0;
         foreach(var experiment in list)
@@ -31,12 +31,15 @@ public struct SciTerminalDetail
         {
             MissionList.GetChild(j).gameObject.SetActive(false);
         }
+
+        CurrentPageHeaderText.text = detailPage.ToString().ToUpperInvariant();
     }
 
     public void FillDetail(IScienceExperiment experiment)
     {
         TitleDescription.text = string.Format("<b>{0}</b>\n<i>{1}</i>", experiment.Title().ToUpperInvariant(), experiment.Experiment.Description());
         RewardText.text = string.Format("${0} REWARD", experiment.Reward);
+        DetailSprite.sprite = experiment.Experiment.Sprite();
         ExperimentStatus status = experiment.Status();
         CancelButton.gameObject.SetActive(status == ExperimentStatus.Accepted);
         AcceptButton.gameObject.SetActive(status == ExperimentStatus.Available);
@@ -64,11 +67,11 @@ public struct SciTerminalDetail
     }
 }
 
-public class ScienceTerminal : MonoBehaviour {
+public class ScienceTerminal : BaseTerminal {
 
     public SciTerminalDetail UI;
 
-    internal enum DetailPage { Geology, Biology }
+    public enum DetailPage { Geology, Biology }
     private DetailPage CurrentPage = DetailPage.Biology;
 
     internal List<BiologyScienceExperiment> AvailableBiologyMissions = new List<BiologyScienceExperiment>()
@@ -107,7 +110,8 @@ public class ScienceTerminal : MonoBehaviour {
     };
 
     // Use this for initialization
-    void Start () {
+    protected override void Start () {
+        base.Start();
         GeologyTabClick();	
 	}
 	
@@ -118,22 +122,27 @@ public class ScienceTerminal : MonoBehaviour {
 
     public void ClickOrHover(int index)
     {
-        UI.FillDetail(AvailableGeologyMissions[index]);
-    }
-
-    public void HoverBiology(int index)
-    {
-        UI.FillDetail(AvailableBiologyMissions[index]);
+        switch (CurrentPage)
+        {
+            case DetailPage.Biology:
+                UI.FillDetail(AvailableBiologyMissions[index]);
+                break;
+            case DetailPage.Geology:
+                UI.FillDetail(AvailableGeologyMissions[index]);
+                break;
+        }
     }
 
     public void GeologyTabClick()
     {
+        CurrentPage = DetailPage.Geology;
         UI.FillDetail(AvailableGeologyMissions.FirstOrDefault());
-        UI.FillList(AvailableGeologyMissions.Cast<IScienceExperiment>());
+        UI.FillList(AvailableGeologyMissions.Cast<IScienceExperiment>(), CurrentPage);
     }
     public void BiologyTabClick()
     {
+        CurrentPage = DetailPage.Biology;
         UI.FillDetail(AvailableBiologyMissions.FirstOrDefault());
-        UI.FillList(AvailableBiologyMissions.Cast<IScienceExperiment>());
+        UI.FillList(AvailableBiologyMissions.Cast<IScienceExperiment>(), CurrentPage);
     }
 }

@@ -1204,9 +1204,11 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (doInteract)
                     {
-                        CurrentTerminal = hitInfo.collider.GetComponent<Terminal>();
+                        CurrentTerminal = hitInfo.collider.GetComponent<ITerminal>();
                         if (CurrentTerminal == null)
-                            CurrentTerminal = hitInfo.collider.transform.parent.GetChild(0).GetChild(0).GetComponent<Terminal>();
+                        {
+                            CurrentTerminal = hitInfo.collider.transform.parent.GetChild(0).GetChild(0).GetComponent<ITerminal>();
+                        }
 
                         BeginTerminal();
                     }
@@ -2329,7 +2331,7 @@ public class PlayerInput : MonoBehaviour {
         ToggleSleep(false);
     }
 
-    private Terminal CurrentTerminal;
+    private ITerminal CurrentTerminal;
     private void BeginTerminal()
     {
         lerpCtx = new PlayerLerpContext()

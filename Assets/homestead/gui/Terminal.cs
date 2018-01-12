@@ -307,7 +307,61 @@ public struct BuyFields
     }
 }
 
-public class Terminal : MonoBehaviour {
+internal interface ITerminal
+{
+    Transform transform { get; }
+    void Toggle(bool state);
+}
+
+public abstract class BaseTerminal : MonoBehaviour, ITerminal
+{
+    private Transform canvasParentRect;
+    private Canvas canvas;
+
+    protected virtual void Start()
+    {
+        canvasParentRect = transform.parent.GetComponent<Transform>();
+        canvasParentRect.localScale = new Vector3(1, 0f, 1f);
+        canvas = GetComponent<Canvas>();
+        canvas.enabled = false;
+    }
+
+    public void Toggle(bool isViewing)
+    {
+        if (openCloseCoroutine != null)
+            StopCoroutine(openCloseCoroutine);
+
+        openCloseCoroutine = StartCoroutine(OpenOrCloseTerminal(isViewing));
+    }
+
+    private Coroutine openCloseCoroutine;
+    private const float openCanvasHeight = 1f;
+    private IEnumerator OpenOrCloseTerminal(bool isViewing)
+    {
+        if (isViewing)
+        {
+            yield return new WaitForSeconds(.5f);
+            canvas.enabled = true;
+        }
+
+        float startHeight = canvasParentRect.localScale.y;
+        float targetHeight = isViewing ? openCanvasHeight : 0f;
+        float time = 0f;
+        float duration = .40f;
+
+        while (canvasParentRect.localScale.y != targetHeight)
+        {
+            canvasParentRect.localScale = new Vector3(1f, Mathfx.Coserp(startHeight, targetHeight, time / duration), 1f);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        if (!isViewing)
+            canvas.enabled = false;
+    }
+}
+
+public class Terminal : BaseTerminal {
     
     public RectTransform[] ProgramPanels, MarketTabs;
     public RectTransform HomePanel;
@@ -317,19 +371,14 @@ public class Terminal : MonoBehaviour {
     public EnRouteFields enroute;
     private RectTransform currentProgramPanel, currentMarketTab, currentBuyTab;
     internal Order CurrentOrder;
-    private Transform canvasParentRect;
-    private Canvas canvas;
-
-	// Use this for initialization
-	void Start ()
+    
+	protected override void Start ()
     {
         HideAll(ProgramPanels);
         HideAll(MarketTabs);
         HideAll(buys.BuyTabs);
-        canvasParentRect = transform.parent.GetComponent<Transform>();
-        canvasParentRect.localScale = new Vector3(1, 0f, 1f);
-        canvas = GetComponent<Canvas>();
-        canvas.enabled = false;
+
+        base.Start();
 
         SetProgram(null);
         SunOrbit.Instance.OnHourChange += OnHourChange;
@@ -543,39 +592,5 @@ public class Terminal : MonoBehaviour {
             LineItemUnits = new ResourceUnitCountDictionary()
         };
         SwitchBuyTab((int)BuyTab.BySupplier);
-    }
-
-    internal void Toggle(bool isViewing)
-    {
-        if (openCloseCoroutine != null)
-            StopCoroutine(openCloseCoroutine);
-
-        openCloseCoroutine = StartCoroutine(OpenOrCloseTerminal(isViewing));
-    }
-
-    private Coroutine openCloseCoroutine;
-    private const float openCanvasHeight = 1f;
-    private IEnumerator OpenOrCloseTerminal(bool isViewing)
-    {
-        if (isViewing)
-        {
-            yield return new WaitForSeconds(.5f);
-            canvas.enabled = true;
-        }
-
-        float startHeight = canvasParentRect.localScale.y;
-        float targetHeight = isViewing ? openCanvasHeight : 0f;
-        float time = 0f;
-        float duration = .40f;
-
-        while (canvasParentRect.localScale.y != targetHeight)
-        {
-            canvasParentRect.localScale = new Vector3(1f, Mathfx.Coserp(startHeight, targetHeight, time / duration), 1f);
-            time += Time.deltaTime;
-            yield return null;
-        }
-
-        if (!isViewing)
-            canvas.enabled = false;
     }
 }
