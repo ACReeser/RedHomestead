@@ -241,6 +241,8 @@ namespace RedHomestead.Persistence
         public CrateData[] Crates;
         public HabitatExtraData[] Habitats;
         public ConstructionData[] ConstructionZones;
+        public int[] CompletedGeologyMissions;
+        public int[] CompletedBiologyMissions;
         //hobbit hole data
         //floorplan data
         //stuff data
