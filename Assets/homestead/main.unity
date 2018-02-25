@@ -3214,6 +3214,123 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 371882470}
   m_Mesh: {fileID: 4300036, guid: 36d8f2bb585880743b39b7d6329d1155, type: 3}
+--- !u!1 &378116159
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 378116160}
+  - component: {fileID: 378116163}
+  - component: {fileID: 378116162}
+  - component: {fileID: 378116161}
+  m_Layer: 0
+  m_Name: New Text
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &378116160
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 378116159}
+  m_LocalRotation: {x: 0.47209013, y: 0.35283303, z: 0.48363298, w: 0.64710045}
+  m_LocalPosition: {x: -0.457, y: -0.64, z: 1.011}
+  m_LocalScale: {x: 0.01, y: 0.01, z: 1}
+  m_Children: []
+  m_Father: {fileID: 772770993}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 164.354, y: -108.483, z: -95.151}
+--- !u!114 &378116161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 378116159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67fd79fa414f1654ba3158066b630ff9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LinesShown: 15
+  LineIncrementIntervalSeconds: 0.6
+--- !u!102 &378116162
+TextMesh:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 378116159}
+  m_Text: "MINERALOGICAL COMPOSITION\r\n\r\nTargets for chemical analyses\r\nby the
+    Alpha Particle X-Ray \r\nSpectrometer (APXS) at the \r\nBuckskin site included
+    tailings \r\nfrom the test drill hole \r\n(sol 1059), the sample \r\nacquisition
+    hole (sol 1064), \r\nand dump piles from emptying \r\nthe Collection and Handling
+    \r\nfor In-Situ Martian Rock \r\nAnalysis tool before (sol 1065) \r\nand after
+    (sol 1091) the \r\ncollected drill powder was \r\nsieved to 150 \u03BCm. The chemical
+    \r\nsimilarity of APXS analyses of \r\nthe presieve and postsieve \r\ndump piles
+    (Table 1) indicates\r\nthat mineralogical fractionation\r\nbetween bulk sample
+    and \r\nCheMin-analyzed sample (<150-\u03BCm \r\npostsieve dump pile) is minimal.\r\n\r\n*******************************\r\nComposition
+    of presieve \r\nand postsieve dump piles \r\n(from APXS) and calculated \r\ncompositions
+    of crystalline \r\nand amorphous materials\r\n******************************\r\n\r\n
+    \      PreS PostS Crystl Amrph\r\n       wt.%  wt.%   wt.%  wt.%\r\nSiO2  74.43
+    73.65  68.20 77.01\r\nTiO2   1.66  1.57   0.12  2.54\r\nAl2O  35.45  5.66  13.91
+    \ 0.04\r\nCr2O3  0.08  0.10   0.00  0.17\r\nFeOT   4.94  5.49   7.27  4.71\r\nMnO
+    \   0.08  0.09   0.00  0.15\r\nMgO    0.72  0.82   0.16  1.26\r\nCaO    2.99  3.05
+    \  5.25  1.54\r\nNa2O   2.01  2.08   2.80  1.58\r\nK2O    0.99  0.96   1.35  0.69\r\nP2O5
+    \  1.29  1.25   0.00  2.09\r\nSO3    4.85  4.80   1.06  7.31\r\nCl     0.28  0.29
+    \  0.00  0.49\r\nTotal 99.77 99.81 100.12 99.60\r\n\r\n------------------------------\r\nAmorphous
+    material composition \r\ncalculated using APXS postsieve \r\ndump pile analysis
+    as bulk \r\ncomposition, 40 wt.% crystalline \r\nmaterial, and 60 wt.% \r\namorphous
+    material."
+  m_OffsetZ: 0
+  m_CharacterSize: 1
+  m_LineSpacing: 1
+  m_Anchor: 0
+  m_Alignment: 0
+  m_TabSize: 4
+  m_FontSize: 74
+  m_FontStyle: 0
+  m_RichText: 1
+  m_Font: {fileID: 12800000, guid: 1c440f56fad56d24aa3a4f695772877e, type: 3}
+  m_Color:
+    serializedVersion: 2
+    rgba: 4278228223
+--- !u!23 &378116163
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 378116159}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_Materials:
+  - {fileID: 2100000, guid: 533bd968696bb914ca53a0037c06bd1c, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
 --- !u!1 &379308879
 GameObject:
   m_ObjectHideFlags: 0
@@ -3825,6 +3942,127 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 478832499}
+--- !u!1 &482091339
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 482091340}
+  - component: {fileID: 482091343}
+  - component: {fileID: 482091342}
+  - component: {fileID: 482091341}
+  m_Layer: 0
+  m_Name: New Text
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &482091340
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 482091339}
+  m_LocalRotation: {x: 0.47209013, y: 0.35283303, z: 0.48363298, w: 0.64710045}
+  m_LocalPosition: {x: -0.457, y: -0.64, z: 1.011}
+  m_LocalScale: {x: 0.01, y: 0.01, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1116670198}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 164.354, y: -108.483, z: -95.151}
+--- !u!114 &482091341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 482091339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67fd79fa414f1654ba3158066b630ff9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  LinesShown: 15
+  LineIncrementIntervalSeconds: 0.6
+--- !u!102 &482091342
+TextMesh:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 482091339}
+  m_Text: "*********************************\r\nLOW TEMPERATURE LIMIT FOR \r\nTERRESTRIAL
+    LIFE\r\n*********************************\r\n(Archaea, Bacteria, Eukarya)\r\nMars
+    is a cold place compared to\r\nEarth, so one of the chief\r\nchallenges for propagation
+    there \r\nis the low temperatures, which \r\npose a variety of challenges to\r\ncellular
+    systems. As temperature\r\ndecreases, the available thermal\r\nenergy (enthalpy)
+    of a system\r\ndecreases, resulting in the \r\nincreased stability and rigidity\r\nof
+    molecules (proteins, DNA, \r\nmembrane lipids), freezing of \r\nwater (making
+    it less available),\r\nlower rates of diffusion, and \r\ndecreased chemical reaction
+    rates\r\n\r\n*********************************\r\nLOW-TEMPERATURE METABOLISM \r\n
+    OF MICROORGANISMS\r\n*********************************\r\n<[-20]>\r\nDNA replication
+    | Incorporation \r\n                |  of 13C-acetate\r\n                |  into
+    DNA\r\n---------------------------------\r\nMicrocosms of permafrost\r\nfrom Alaska,
+    many bacterial\r\nspecies active\r\n\r\n<[-15, -33]>\r\nRespiration | CTC reduction,\r\n
+    \           |  respiration\r\n            |  of 14C-acetate\r\n---------------------------------\r\nFrozen
+    cultures of glacial ice\r\nisolates Paenisporoarcina\r\nsp. and Chryseobacterium\r\n\r\n<[-25]>
+    \r\nRespiration | Mineralization of\r\n            |  14C-acetate to\r\n            |
+    \ 14CO2\r\n---------------------------------\r\nPermafrost microcosms with\r\nPlanococcus
+    halocryophilus\r\n\r\n<[-32]> \r\nAmmonia    | 15N2O production\r\n oxidation
+    | from 15N-ammonia\r\n---------------------------------\r\nFrozen culture of marine\r\nisolate
+    Nitrosomonas\r\ncryotolerans\r\n\r\n<[-15 to -40]>\r\nPhotosynthesis? | Fluorescence
+    \r\n                | of chlorophyll\r\n---------------------------------\r\nThalli
+    of lichen Pleopsidium\r\nchlorophanum collected from \r\nAntarctica\r\n\r\n*********************************\r\nLOW-TEMPERATURE
+    CELL DIVISION \r\n OF MICROORGANISMS\r\n*********************************\r\n!!
+    CELL DIVISION BY TERRESTRIAL \r\nMICROBES HAS NOT BEEN REPORTED\r\nBELOW -18C
+    !!"
+  m_OffsetZ: 0
+  m_CharacterSize: 1
+  m_LineSpacing: 1
+  m_Anchor: 0
+  m_Alignment: 0
+  m_TabSize: 4
+  m_FontSize: 72
+  m_FontStyle: 0
+  m_RichText: 1
+  m_Font: {fileID: 12800000, guid: 1c440f56fad56d24aa3a4f695772877e, type: 3}
+  m_Color:
+    serializedVersion: 2
+    rgba: 4278228223
+--- !u!23 &482091343
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 482091339}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_Materials:
+  - {fileID: 2100000, guid: 533bd968696bb914ca53a0037c06bd1c, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
 --- !u!1 &500250452
 GameObject:
   m_ObjectHideFlags: 0
@@ -9526,6 +9764,10 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.8, y: 0.8, z: 0.8}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!4 &772770993 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 400076, guid: 4ded0113b8175eb469bd2b07b8718e40, type: 3}
+  m_PrefabInternal: {fileID: 778485000}
 --- !u!1001 &778485000
 Prefab:
   m_ObjectHideFlags: 0
@@ -12351,6 +12593,10 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1089525816}
   m_Mesh: {fileID: 4300020, guid: 36d8f2bb585880743b39b7d6329d1155, type: 3}
+--- !u!4 &1116670198 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 400064, guid: 4ded0113b8175eb469bd2b07b8718e40, type: 3}
+  m_PrefabInternal: {fileID: 778485000}
 --- !u!1 &1139407889
 GameObject:
   m_ObjectHideFlags: 0
@@ -18925,7 +19171,7 @@ Prefab:
     - target: {fileID: 224090443757416942, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -15
       objectReference: {fileID: 0}
     - target: {fileID: 224090443757416942, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
@@ -18950,7 +19196,7 @@ Prefab:
     - target: {fileID: 224965345020793472, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -47
       objectReference: {fileID: 0}
     - target: {fileID: 224965345020793472, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
@@ -18975,7 +19221,7 @@ Prefab:
     - target: {fileID: 224212739060878828, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -79
       objectReference: {fileID: 0}
     - target: {fileID: 224212739060878828, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
@@ -19000,7 +19246,7 @@ Prefab:
     - target: {fileID: 224955164004112568, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -111
       objectReference: {fileID: 0}
     - target: {fileID: 224955164004112568, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
@@ -19025,7 +19271,7 @@ Prefab:
     - target: {fileID: 224437558110604608, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -143
       objectReference: {fileID: 0}
     - target: {fileID: 224437558110604608, guid: 8e60c6bab7769fd418e54dc2db560242,
         type: 2}

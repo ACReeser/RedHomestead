@@ -54,6 +54,7 @@ public class PlayerInput : MonoBehaviour {
     /// the FPS input script (usually on the parent transform)
     /// </summary>
     public CustomFPSController FPSController;
+    public Transform[] ScienceExperimentMarkers;
 
     /// <summary>
     /// The prefab for a construction zone
@@ -131,6 +132,10 @@ public class PlayerInput : MonoBehaviour {
         ModulePlan = new Planning<Module>();
         InteractionSource.transform.SetParent(null);
         IsOnFoot = true;
+        foreach(Transform t in this.ScienceExperimentMarkers)
+        {
+            t.gameObject.SetActive(false);
+        }
     }
 
     public void Start()

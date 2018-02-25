@@ -60,4 +60,19 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         base.OnStart();
         this.InitializeSwappable();
     }
+
+    public void AcceptExperiment()
+    {
+
+    }
+
+    public void CancelExperiment()
+    {
+
+    }
+
+    public void CompleteExperiment()
+    {
+
+    }
 }

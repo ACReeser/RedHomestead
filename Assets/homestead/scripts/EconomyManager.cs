@@ -351,6 +351,14 @@ public class EconomyManager : MonoBehaviour
             this.OnBankAccountChange();
     }
 
+    internal void CompleteExperiment(IScienceExperiment experiment)
+    {
+        Game.Current.Player.BankAccount += experiment.Reward;
+
+        if (this.OnBankAccountChange != null)
+            this.OnBankAccountChange();
+    }
+
     internal Transform GetResourceCratePrefab(Matter m)
     {
         if (m.IsPressureVessel())

@@ -68,6 +68,8 @@ public interface IScienceExperiment
     int Reward { get; }
     int DurationDays { get; }
     int MissionNumber { get; }
+    void OnAccept();
+    void OnComplete();
 }
 
 [Serializable]
@@ -105,6 +107,14 @@ public class BiologyScienceExperiment : IScienceExperiment
             DurationDays = _missionNumber + 2;
         }
     }
+
+    public void OnAccept()
+    {
+    }
+
+    public void OnComplete()
+    {
+    }
 }
 
 [Serializable]
@@ -138,6 +148,21 @@ public class GeologyScienceExperiment : IScienceExperiment
         {
             Reward = 5000 + _missionNumber * 2000;
         }
+    }
+
+    public void OnAccept()
+    {
+        int randomI = UnityEngine.Random.Range(0, FlowManager.Instance.DepositMap.Keys.Count);
+        string targetDepositID = FlowManager.Instance.DepositMap.Keys.ElementAt(randomI);
+        this.DepositID = targetDepositID;
+        Deposit target = FlowManager.Instance.DepositMap[targetDepositID];
+        PlayerInput.Instance.ScienceExperimentMarkers[Convert.ToInt32(ExperimentType.GeoSample)].transform.position = target.transform.position;
+        PlayerInput.Instance.ScienceExperimentMarkers[Convert.ToInt32(ExperimentType.GeoSample)].gameObject.SetActive(true);
+    }
+
+    public void OnComplete()
+    {
+        PlayerInput.Instance.ScienceExperimentMarkers[Convert.ToInt32(ExperimentType.GeoSample)].gameObject.SetActive(false);
     }
 }
 
@@ -187,5 +212,10 @@ public static class Science {
         {
             return GeoExperiments.Where(x => !Base.Current.CompletedGeologyMissions.Contains(x.MissionNumber)).ToArray();
         }
+    }
+
+    public static void Complete(this IScienceExperiment experiment)
+    {
+        EconomyManager.Instance.CompleteExperiment(experiment);
     }
 }
