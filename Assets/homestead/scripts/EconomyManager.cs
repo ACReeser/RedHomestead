@@ -351,7 +351,7 @@ public class EconomyManager : MonoBehaviour
             this.OnBankAccountChange();
     }
 
-    internal void CompleteExperiment(IScienceExperiment experiment)
+    internal void ScienceExperimentPayday(IScienceExperiment experiment)
     {
         Game.Current.Player.BankAccount += experiment.Reward;
 

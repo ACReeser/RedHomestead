@@ -40,7 +40,7 @@ public struct SciTerminalDetail
         TitleDescription.text = string.Format("<b>{0}</b>\n<i>{1}</i>", experiment.Title().ToUpperInvariant(), experiment.Experiment.Description());
         RewardText.text = string.Format("${0} REWARD", experiment.Reward);
         DetailSprite.sprite = experiment.Experiment.Sprite();
-        ExperimentStatus status = experiment.Status();
+        ExperimentStatus status = experiment.Status;
         CancelButton.gameObject.SetActive(status == ExperimentStatus.Accepted);
         AcceptButton.gameObject.SetActive(status == ExperimentStatus.Available);
         FinishButton.gameObject.SetActive(status == ExperimentStatus.Completed);
@@ -56,63 +56,56 @@ public struct SciTerminalDetail
                 ClockFill.fillAmount = 1f;
                 break;
         }
-        if (experiment.Progress <= 0f)
-        {
-            DayText.text = experiment.DurationDays + " DAY DURATION";
-        }
-        else
-        {
-            DayText.text = "Day " + experiment.Progress + " of " + experiment.DurationDays;
-        }
+        DayText.text = experiment.ProgressText;
     }
 }
 
 public class ScienceTerminal : BaseTerminal {
-
     public SciTerminalDetail UI;
+
+    private ScienceLab myLab;
 
     public enum DetailPage { Geology, Biology }
     private DetailPage CurrentPage = DetailPage.Biology;
 
-    internal List<BiologyScienceExperiment> AvailableBiologyMissions = new List<BiologyScienceExperiment>()
+    internal BiologyScienceExperiment[] BiologyMissionList;
+    internal GeologyScienceExperiment[] GeologyMissionList;
+
+    protected override void DoBeforeOpenTerminal()
     {
-        new BiologyScienceExperiment()
-        {
-            MissionNumber = 1,
-            Progress = -1,
-            Reward = 5000,
-            DurationDays = 1
-        },
-        new BiologyScienceExperiment()
-        {
-            MissionNumber = 2,
-            Progress = -1,
-            Reward = 12000,
-            DurationDays = 2
-        },
-        new BiologyScienceExperiment()
-        {
-            MissionNumber = 3,
-            Progress = -1,
-            Reward = 17500,
-            DurationDays = 3
-        }
-    };
-    internal List<GeologyScienceExperiment> AvailableGeologyMissions = new List<GeologyScienceExperiment>()
+        BiologyMissionList = Science.GetAvailableBiologyExperiments();
+        ReplaceTemplateWithRunningExperiment(myLab.FlexData.CurrentBioExperiment, BiologyMissionList);
+        GeologyMissionList = Science.GetAvailableGeologyExperiments();
+        ReplaceTemplateWithRunningExperiment(myLab.FlexData.CurrentGeoExperiment, GeologyMissionList);
+        GeologyTabClick();
+    }
+
+    /// <summary>
+    /// We get a list of all missions, but the science lab may have a running experiment
+    /// so we replace the template with the running experiment
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="currentExperiment"></param>
+    /// <param name="missions"></param>
+    private void ReplaceTemplateWithRunningExperiment<T>(T currentExperiment, T[] missions)
     {
-        new GeologyScienceExperiment()
+        if (currentExperiment != null)
         {
-            MissionNumber = 1,
-            Progress = -1,
-            Reward = 10000,
-            DurationDays = 2
+            for (int i = 0; i < missions.Length; i++)
+            {
+                if (missions[i].Equals(currentExperiment))
+                {
+                    missions[i] = currentExperiment;
+                    break;
+                }
+            }
         }
-    };
+    }
 
     // Use this for initialization
     protected override void Start () {
         base.Start();
-        GeologyTabClick();	
+        myLab = this.transform.root.GetComponent<ScienceLab>();
 	}
 	
 	// Update is called once per frame
@@ -120,15 +113,18 @@ public class ScienceTerminal : BaseTerminal {
 		
 	}
 
+    private IScienceExperiment detailedExperiment;
     public void ClickOrHover(int index)
     {
         switch (CurrentPage)
         {
             case DetailPage.Biology:
-                UI.FillDetail(AvailableBiologyMissions[index]);
+                detailedExperiment = BiologyMissionList[index];
+                UI.FillDetail(detailedExperiment);
                 break;
             case DetailPage.Geology:
-                UI.FillDetail(AvailableGeologyMissions[index]);
+                detailedExperiment = GeologyMissionList[index];
+                UI.FillDetail(detailedExperiment);
                 break;
         }
     }
@@ -136,13 +132,31 @@ public class ScienceTerminal : BaseTerminal {
     public void GeologyTabClick()
     {
         CurrentPage = DetailPage.Geology;
-        UI.FillDetail(AvailableGeologyMissions.FirstOrDefault());
-        UI.FillList(AvailableGeologyMissions.Cast<IScienceExperiment>(), CurrentPage);
+        UI.FillDetail(GeologyMissionList.FirstOrDefault());
+        UI.FillList(GeologyMissionList.Cast<IScienceExperiment>(), CurrentPage);
     }
     public void BiologyTabClick()
     {
         CurrentPage = DetailPage.Biology;
-        UI.FillDetail(AvailableBiologyMissions.FirstOrDefault());
-        UI.FillList(AvailableBiologyMissions.Cast<IScienceExperiment>(), CurrentPage);
+        UI.FillDetail(BiologyMissionList.FirstOrDefault());
+        UI.FillList(BiologyMissionList.Cast<IScienceExperiment>(), CurrentPage);
+    }
+    
+    public void AcceptExperiment()
+    {
+        myLab.AcceptExperiment(detailedExperiment);
+        UI.FillDetail(detailedExperiment);
+    }
+
+    public void CancelExperiment()
+    {
+        myLab.CancelExperiment(detailedExperiment);
+        UI.FillDetail(detailedExperiment);
+    }
+
+    public void CompleteExperiment()
+    {
+        myLab.CompleteExperiment(detailedExperiment);
+        UI.FillDetail(detailedExperiment);
     }
 }

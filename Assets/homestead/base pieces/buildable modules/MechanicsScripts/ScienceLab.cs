@@ -61,18 +61,43 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         this.InitializeSwappable();
     }
 
-    public void AcceptExperiment()
+    public void AcceptExperiment(IScienceExperiment experiment)
     {
-
+        switch (experiment.Experiment)
+        {
+            case ExperimentType.BioMinilab:
+                FlexData.CurrentBioExperiment = experiment as BiologyScienceExperiment;
+                break;
+            case ExperimentType.GeoSample:
+                FlexData.CurrentGeoExperiment = experiment as GeologyScienceExperiment;
+                break;
+        }
+        experiment.OnAccept();
     }
 
-    public void CancelExperiment()
+    public void CancelExperiment(IScienceExperiment experiment)
     {
-
+        NullOutExperimentSlot(experiment);
+        experiment.OnCancel();
     }
 
-    public void CompleteExperiment()
+    private void NullOutExperimentSlot(IScienceExperiment experiment)
     {
+        switch (experiment.Experiment)
+        {
+            case ExperimentType.BioMinilab:
+                FlexData.CurrentBioExperiment = null;
+                break;
+            case ExperimentType.GeoSample:
+                FlexData.CurrentGeoExperiment = null;
+                break;
+        }
+    }
 
+    public void CompleteExperiment(IScienceExperiment experiment)
+    {
+        Science.Complete(experiment);
+        NullOutExperimentSlot(experiment);
+        experiment.OnComplete();
     }
 }

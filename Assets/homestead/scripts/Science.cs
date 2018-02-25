@@ -37,27 +37,11 @@ public static class ExperimentExtensions
                 break;
             default:
             case ExperimentType.GeoSample:
-                result = "Deposit Sample";
+                result = "Sample";
                 break;
         }
 
         return result + " Mission " + experiment.MissionNumber;
-    }
-
-    public static ExperimentStatus Status(this IScienceExperiment experiment)
-    {
-        if (experiment.Progress < 0)
-        {
-            return ExperimentStatus.Available;
-        }
-        else if (experiment.Progress >= experiment.DurationDays)
-        {
-            return ExperimentStatus.Completed;
-        }
-        else
-        {
-            return ExperimentStatus.Accepted;
-        }
     }
 }
 
@@ -69,22 +53,47 @@ public interface IScienceExperiment
     int DurationDays { get; }
     int MissionNumber { get; }
     void OnAccept();
+    void OnCancel();
     void OnComplete();
+    ExperimentStatus Status { get; }
+    string ProgressText { get; }
+}
+
+public abstract class BaseScienceExperiment
+{
+    public abstract int MissionNumber { get; set; }
+    public abstract ExperimentType Experiment { get; }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is BaseScienceExperiment)
+        {
+            var other = obj as BaseScienceExperiment;
+            return this.MissionNumber == other.MissionNumber && this.Experiment == other.Experiment;
+        }
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 }
 
 [Serializable]
-public class BiologyScienceExperiment : IScienceExperiment
+public class BiologyScienceExperiment : BaseScienceExperiment, IScienceExperiment
 {
     public float Progress { get; set; }
     public Vector3 TargetPosition;
     public int DurationDays { get; set; }
     public int Reward { get; set; }
-    public int MissionNumber { get; set; }
-    public ExperimentType Experiment { get { return ExperimentType.BioMinilab; } }
+    public override int MissionNumber { get; set; }
+    public override ExperimentType Experiment { get { return ExperimentType.BioMinilab; } }
 
     public BiologyScienceExperiment() { }
     public BiologyScienceExperiment(int _missionNumber)
     {
+        Progress = -1f;
         MissionNumber = _missionNumber;
         if (_missionNumber < 3)
         {
@@ -108,29 +117,69 @@ public class BiologyScienceExperiment : IScienceExperiment
         }
     }
 
+    public ExperimentStatus Status
+    {
+        get
+        {
+            if (Progress < 0)
+            {
+                return ExperimentStatus.Available;
+            }
+            else if (Progress >= DurationDays)
+            {
+                return ExperimentStatus.Completed;
+            }
+            else
+            {
+                return ExperimentStatus.Accepted;
+            }
+        }
+    }
+
+    public string ProgressText
+    {
+        get
+        {
+            if (Progress <= 0f)
+            {
+                return DurationDays + " DAY DURATION";
+            }
+            else
+            {
+                return "Day " + Progress + " of " + DurationDays;
+            }
+        }
+    }
+
     public void OnAccept()
     {
+        Progress = 0f;
     }
 
     public void OnComplete()
     {
     }
+
+    public void OnCancel()
+    {
+    }
 }
 
 [Serializable]
-public class GeologyScienceExperiment : IScienceExperiment
+public class GeologyScienceExperiment : BaseScienceExperiment, IScienceExperiment
 {
     public string DepositID;
     public float Progress { get; set; }
     public int Reward { get; set; }
     public int DurationDays { get; set; }
-    public int MissionNumber { get; set; }
-    public ExperimentType Experiment { get { return ExperimentType.GeoSample; } }
+    public override int MissionNumber { get; set; }
+    public override ExperimentType Experiment { get { return ExperimentType.GeoSample; } }
 
     public GeologyScienceExperiment() { }
 
     public GeologyScienceExperiment(int _missionNumber)
     {
+        Progress = -1f;
         MissionNumber = _missionNumber;
         if (_missionNumber < 4)
         {
@@ -148,10 +197,12 @@ public class GeologyScienceExperiment : IScienceExperiment
         {
             Reward = 5000 + _missionNumber * 2000;
         }
+        DurationDays = 1;
     }
 
     public void OnAccept()
     {
+        Progress = 0f;
         int randomI = UnityEngine.Random.Range(0, FlowManager.Instance.DepositMap.Keys.Count);
         string targetDepositID = FlowManager.Instance.DepositMap.Keys.ElementAt(randomI);
         this.DepositID = targetDepositID;
@@ -163,6 +214,48 @@ public class GeologyScienceExperiment : IScienceExperiment
     public void OnComplete()
     {
         PlayerInput.Instance.ScienceExperimentMarkers[Convert.ToInt32(ExperimentType.GeoSample)].gameObject.SetActive(false);
+    }
+
+    public void OnCancel()
+    {
+        PlayerInput.Instance.ScienceExperimentMarkers[Convert.ToInt32(ExperimentType.GeoSample)].gameObject.SetActive(false);
+    }
+
+    public ExperimentStatus Status
+    {
+        get
+        {
+            if (Progress < 0)
+            {
+                return ExperimentStatus.Available;
+            }
+            else if (Progress >= DurationDays)
+            {
+                return ExperimentStatus.Completed;
+            }
+            else
+            {
+                return ExperimentStatus.Accepted;
+            }
+        }
+    }
+
+    public string ProgressText
+    {
+        get
+        {
+            if (Progress <= 0f)
+            {
+                if (DurationDays > 1)
+                    return DurationDays + " SAMPLES";
+                else
+                    return DurationDays + " SAMPLE";
+            }
+            else
+            {
+                return "SAMPLE " + Progress + " of " + DurationDays;
+            }
+        }
     }
 }
 
@@ -216,6 +309,27 @@ public static class Science {
 
     public static void Complete(this IScienceExperiment experiment)
     {
-        EconomyManager.Instance.CompleteExperiment(experiment);
+        switch (experiment.Experiment)
+        {
+            case ExperimentType.BioMinilab:
+                Base.Current.CompletedBiologyMissions = getNewCompletedScienceMissionArray(Base.Current.CompletedBiologyMissions, experiment);
+                break;
+            case ExperimentType.GeoSample:
+                Base.Current.CompletedGeologyMissions = getNewCompletedScienceMissionArray(Base.Current.CompletedGeologyMissions, experiment);
+                break;
+        }
+        EconomyManager.Instance.ScienceExperimentPayday(experiment);
+    }
+
+    private static int[] getNewCompletedScienceMissionArray(int[] previouslyCompletedMissions, IScienceExperiment experiment)
+    {
+        if (previouslyCompletedMissions == null)
+            return new int[1] { experiment.MissionNumber };
+        else
+        {
+            var list = previouslyCompletedMissions.ToList();
+            list.Add(experiment.MissionNumber);
+            return list.ToArray();
+        }
     }
 }

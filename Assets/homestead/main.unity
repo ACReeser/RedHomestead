@@ -2075,7 +2075,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9a502c023c7549546bff18a8cf6cc33c, type: 3}
-    m_FontSize: 12
+    m_FontSize: 11
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -2646,11 +2646,6 @@ Prefab:
 Transform:
   m_PrefabParentObject: {fileID: 400000, guid: 9af17b52f557c8441828689e41cf2cbf, type: 2}
   m_PrefabInternal: {fileID: 281108735}
---- !u!4 &281512591 stripped
-Transform:
-  m_PrefabParentObject: {fileID: 4891845873201132, guid: b06eafb021fa9b340ab8e8cc5134d0ff,
-    type: 2}
-  m_PrefabInternal: {fileID: 713139737}
 --- !u!1 &298551581
 GameObject:
   m_ObjectHideFlags: 0
@@ -3658,7 +3653,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9a502c023c7549546bff18a8cf6cc33c, type: 3}
-    m_FontSize: 12
+    m_FontSize: 11
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -5778,7 +5773,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 691334166}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2005438648}
+        m_MethodName: CancelExperiment
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &691334166
@@ -5959,7 +5965,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9a502c023c7549546bff18a8cf6cc33c, type: 3}
-    m_FontSize: 12
+    m_FontSize: 11
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -9293,6 +9299,11 @@ ParticleSystemRenderer:
   m_Mesh1: {fileID: 0}
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
+--- !u!4 &724470594 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998,
+    type: 2}
+  m_PrefabInternal: {fileID: 1544923739}
 --- !u!1 &731042324
 GameObject:
   m_ObjectHideFlags: 0
@@ -11190,7 +11201,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9a502c023c7549546bff18a8cf6cc33c, type: 3}
-    m_FontSize: 12
+    m_FontSize: 11
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -12862,7 +12873,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1151412248}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2005438648}
+        m_MethodName: CompleteExperiment
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1151412248
@@ -20130,36 +20152,36 @@ Transform:
   m_Father: {fileID: 1046807079}
   m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 21.904001, z: 0}
---- !u!1001 &1544923739
+--- !u!1001 &1543335339
 Prefab:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    m_TransformParent: {fileID: 281512591}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 744.703
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 1.69
+      value: 1.7831432
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 989.57874
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_LocalRotation.w
@@ -20167,7 +20189,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_RootOrder
-      value: 2
+      value: 37
       objectReference: {fileID: 0}
     - target: {fileID: 1826943444071618, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_Layer
@@ -20184,6 +20206,114 @@ Prefab:
     - target: {fileID: 1627444240517520, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
       propertyPath: m_Layer
       value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1826943444071618, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_Name
+      value: BiologyExperimentSite
+      objectReference: {fileID: 0}
+    - target: {fileID: 102754131937295426, guid: fb5f974692e56f248b9fc918df00f998,
+        type: 2}
+      propertyPath: m_Text
+      value: 'Biology Experiment
+
+        Site'
+      objectReference: {fileID: 0}
+    - target: {fileID: 1826943444071618, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+  m_IsPrefabParent: 0
+--- !u!4 &1543335340 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998,
+    type: 2}
+  m_PrefabInternal: {fileID: 1543335339}
+--- !u!1001 &1544923739
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 741.6416
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 1.7831432
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 989.57874
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4258976789204734, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_RootOrder
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 1826943444071618, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1576118362871764, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1901649515478902, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 1627444240517520, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_Layer
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 102754131937295426, guid: fb5f974692e56f248b9fc918df00f998,
+        type: 2}
+      propertyPath: m_Text
+      value: Geology Sample Site
+      objectReference: {fileID: 0}
+    - target: {fileID: 102754131937295426, guid: fb5f974692e56f248b9fc918df00f998,
+        type: 2}
+      propertyPath: m_FontSize
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4052476419886916, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0.311
+      objectReference: {fileID: 0}
+    - target: {fileID: 4244385304009390, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0.311
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086008640250042, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -0.08499999
+      objectReference: {fileID: 0}
+    - target: {fileID: 1826943444071618, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_Name
+      value: GeologyExperimentSite
+      objectReference: {fileID: 0}
+    - target: {fileID: 1826943444071618, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: fb5f974692e56f248b9fc918df00f998, type: 2}
@@ -22009,6 +22139,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114863354273779362, guid: ff90c8e223c4c07458825b83fe3443fa,
+        type: 2}
+      propertyPath: ScienceExperimentMarkers.Array.size
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4132442841540374, guid: ff90c8e223c4c07458825b83fe3443fa, type: 2}
       propertyPath: m_LocalPosition.x
       value: 715.372
@@ -22090,6 +22225,16 @@ Prefab:
       propertyPath: m_CullingMask.m_Bits
       value: 4294959561
       objectReference: {fileID: 0}
+    - target: {fileID: 114863354273779362, guid: ff90c8e223c4c07458825b83fe3443fa,
+        type: 2}
+      propertyPath: ScienceExperimentMarkers.Array.data[0]
+      value: 
+      objectReference: {fileID: 724470594}
+    - target: {fileID: 114863354273779362, guid: ff90c8e223c4c07458825b83fe3443fa,
+        type: 2}
+      propertyPath: ScienceExperimentMarkers.Array.data[1]
+      value: 
+      objectReference: {fileID: 1543335340}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ff90c8e223c4c07458825b83fe3443fa, type: 2}
   m_IsPrefabParent: 0
@@ -22172,7 +22317,7 @@ MonoBehaviour:
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 9a502c023c7549546bff18a8cf6cc33c, type: 3}
-    m_FontSize: 12
+    m_FontSize: 11
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 1
@@ -22371,7 +22516,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1882816588}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2005438648}
+        m_MethodName: AcceptExperiment
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &1882816588
@@ -23460,7 +23616,7 @@ GameObject:
   - component: {fileID: 2024614570}
   - component: {fileID: 2024614569}
   - component: {fileID: 2024614568}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: sample_gun
   m_TagString: locker
   m_Icon: {fileID: 0}

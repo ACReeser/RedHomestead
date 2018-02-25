@@ -340,6 +340,7 @@ public abstract class BaseTerminal : MonoBehaviour, ITerminal
     {
         if (isViewing)
         {
+            DoBeforeOpenTerminal();
             yield return new WaitForSeconds(.5f);
             canvas.enabled = true;
         }
@@ -358,6 +359,10 @@ public abstract class BaseTerminal : MonoBehaviour, ITerminal
 
         if (!isViewing)
             canvas.enabled = false;
+    }
+
+    protected virtual void DoBeforeOpenTerminal()
+    {
     }
 }
 
