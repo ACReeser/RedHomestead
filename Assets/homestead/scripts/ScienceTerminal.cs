@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-public struct SciTerminalDetail
+public class SciTerminalDetail
 {
-    public RectTransform CancelButton, AcceptButton, FinishButton, MissionList;
+    public RectTransform CancelButton, AcceptButton, FinishButton, MissionList, FinishedPanel;
     public Text DayText, RewardText, TitleDescription, CurrentPageHeaderText;
     public Image ClockFill, DetailSprite;
 
@@ -19,12 +19,15 @@ public struct SciTerminalDetail
         {
             if (i >= MissionList.childCount) {
                 var newB = GameObject.Instantiate(MissionList.GetChild(0), MissionList);
-                //newB.GetComponent<Button>().onClick
+                var _this = this;
+                newB.GetComponent<Button>().onClick.AddListener(() => { _this.FillDetail(experiment); });
             }
             Transform child = MissionList.GetChild(i);
             child.gameObject.SetActive(true);
             child.GetChild(0).GetComponent<Image>().sprite = experiment.Experiment.Sprite();
             child.GetChild(1).GetComponent<Text>().text = experiment.Title();
+            child.GetChild(2).gameObject.SetActive(experiment.Status == ExperimentStatus.Completed);
+            child.GetChild(3).gameObject.SetActive(experiment.Status == ExperimentStatus.Accepted || experiment.Status == ExperimentStatus.ReadyForCompletion);
             i++;
         }
         for (int j = i; j < MissionList.childCount; j++)
@@ -43,7 +46,8 @@ public struct SciTerminalDetail
         ExperimentStatus status = experiment.Status;
         CancelButton.gameObject.SetActive(status == ExperimentStatus.Accepted);
         AcceptButton.gameObject.SetActive(status == ExperimentStatus.Available);
-        FinishButton.gameObject.SetActive(status == ExperimentStatus.Completed);
+        FinishButton.gameObject.SetActive(status == ExperimentStatus.ReadyForCompletion);
+        FinishedPanel.gameObject.SetActive(status == ExperimentStatus.Completed);
         switch (status)
         {
             case ExperimentStatus.Accepted:
@@ -52,6 +56,7 @@ public struct SciTerminalDetail
             case ExperimentStatus.Available:
                 ClockFill.fillAmount = 0f;
                 break;
+            case ExperimentStatus.ReadyForCompletion:
             case ExperimentStatus.Completed:
                 ClockFill.fillAmount = 1f;
                 break;
@@ -73,11 +78,16 @@ public class ScienceTerminal : BaseTerminal {
 
     protected override void DoBeforeOpenTerminal()
     {
+        RefreshMissionLists();
+        GeologyTabClick();
+    }
+
+    private void RefreshMissionLists()
+    {
         BiologyMissionList = Science.GetAvailableBiologyExperiments();
         ReplaceTemplateWithRunningExperiment(myLab.FlexData.CurrentBioExperiment, BiologyMissionList);
         GeologyMissionList = Science.GetAvailableGeologyExperiments();
         ReplaceTemplateWithRunningExperiment(myLab.FlexData.CurrentGeoExperiment, GeologyMissionList);
-        GeologyTabClick();
     }
 
     /// <summary>
@@ -132,31 +142,49 @@ public class ScienceTerminal : BaseTerminal {
     public void GeologyTabClick()
     {
         CurrentPage = DetailPage.Geology;
-        UI.FillDetail(GeologyMissionList.FirstOrDefault());
-        UI.FillList(GeologyMissionList.Cast<IScienceExperiment>(), CurrentPage);
+        RefreshView();
     }
     public void BiologyTabClick()
     {
         CurrentPage = DetailPage.Biology;
-        UI.FillDetail(BiologyMissionList.FirstOrDefault());
-        UI.FillList(BiologyMissionList.Cast<IScienceExperiment>(), CurrentPage);
+        RefreshView();
+    }
+    public void RefreshView()
+    {
+        switch (CurrentPage)
+        {
+            case DetailPage.Biology:
+                UI.FillList(BiologyMissionList.Cast<IScienceExperiment>(), CurrentPage);
+                UI.FillDetail(BiologyMissionList.FirstOrDefault());
+                break;
+            case DetailPage.Geology:
+                UI.FillList(GeologyMissionList.Cast<IScienceExperiment>(), CurrentPage);
+                UI.FillDetail(GeologyMissionList.FirstOrDefault());
+                break;
+        }
     }
     
     public void AcceptExperiment()
     {
         myLab.AcceptExperiment(detailedExperiment);
+        RefreshMissionLists();
+        RefreshView();
         UI.FillDetail(detailedExperiment);
     }
 
     public void CancelExperiment()
     {
         myLab.CancelExperiment(detailedExperiment);
+        RefreshMissionLists();
+        RefreshView();
         UI.FillDetail(detailedExperiment);
     }
 
     public void CompleteExperiment()
     {
         myLab.CompleteExperiment(detailedExperiment);
+        RefreshMissionLists();
+        RefreshView();
         UI.FillDetail(detailedExperiment);
     }
 }

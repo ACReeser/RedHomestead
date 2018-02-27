@@ -21,6 +21,8 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
 
     public Transform[] Tools { get { return ToolsInLockers; } }
     public Transform[] Lockers { get { return lockers; } }
+
+    internal static List<ScienceLab> ActiveLabs = new List<ScienceLab>();
     private Dictionary<Transform, Equipment> equipmentLockers = new Dictionary<Transform, Equipment>();
 
     private Equipment[] lockerEquipment = new Equipment[] {
@@ -59,6 +61,12 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
     {
         base.OnStart();
         this.InitializeSwappable();
+        ScienceLab.ActiveLabs.Add(this);
+    }
+
+    public void OnDestroy()
+    {
+        ScienceLab.ActiveLabs.Remove(this);
     }
 
     public void AcceptExperiment(IScienceExperiment experiment)
@@ -99,5 +107,13 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         Science.Complete(experiment);
         NullOutExperimentSlot(experiment);
         experiment.OnComplete();
+    }
+
+    internal void OnGeologySampleTaken(Deposit lastDeposit)
+    {
+        if (FlexData.CurrentGeoExperiment != null && FlexData.CurrentGeoExperiment.DepositID == lastDeposit.Data.DepositInstanceID)
+        {
+            FlexData.CurrentGeoExperiment.Progress = 1f;
+        }
     }
 }

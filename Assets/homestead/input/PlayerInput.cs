@@ -1038,7 +1038,32 @@ public class PlayerInput : MonoBehaviour {
 
                     if (lastDeposit != null)
                     {
-                        if (Loadout.Equipped == Equipment.RockDrill && lastDeposit.HasCrate)
+                        if (Loadout.Equipped == Equipment.Sampler)
+                        {
+                            if (Input.GetMouseButtonDown(0))
+                            {
+                                bool foundLab = false;
+                                foreach(var lab in ScienceLab.ActiveLabs)
+                                {
+                                    if (lab.FlexData.CurrentGeoExperiment != null && lab.FlexData.CurrentGeoExperiment.DepositID == lastDeposit.Data.DepositInstanceID)
+                                    {
+                                        foundLab = true;
+                                        lab.OnGeologySampleTaken(lastDeposit);
+                                        break;
+                                    }
+                                }
+                                if (foundLab)
+                                {
+                                    GuiBridge.Instance.ShowNews(NewsSource.SampleTaken);
+                                }
+                            }
+                            else
+                            {
+                                newPrompt = Prompts.DepositSampleHint;
+                                newPrompt.Progress = lastDeposit.Data.Extractable.UtilizationPercentage;
+                            }
+                        }
+                        else if (Loadout.Equipped == Equipment.RockDrill && lastDeposit.HasCrate)
                         {
                             if (Input.GetMouseButtonDown(0))
                             {

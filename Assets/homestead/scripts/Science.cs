@@ -6,7 +6,7 @@ using System.Linq;
 using UnityEngine;
 
 public enum ExperimentType { GeoSample, BioMinilab }
-public enum ExperimentStatus { Available, Accepted, Completed }
+public enum ExperimentStatus { Available, Accepted, ReadyForCompletion, Completed }
 
 public static class ExperimentExtensions
 {
@@ -127,7 +127,7 @@ public class BiologyScienceExperiment : BaseScienceExperiment, IScienceExperimen
             }
             else if (Progress >= DurationDays)
             {
-                return ExperimentStatus.Completed;
+                return ExperimentStatus.ReadyForCompletion;
             }
             else
             {
@@ -229,9 +229,13 @@ public class GeologyScienceExperiment : BaseScienceExperiment, IScienceExperimen
             {
                 return ExperimentStatus.Available;
             }
-            else if (Progress >= DurationDays)
+            else if (Progress >= 2f)
             {
                 return ExperimentStatus.Completed;
+            }
+            else if (Progress >= DurationDays)
+            {
+                return ExperimentStatus.ReadyForCompletion;
             }
             else
             {
@@ -250,6 +254,10 @@ public class GeologyScienceExperiment : BaseScienceExperiment, IScienceExperimen
                     return DurationDays + " SAMPLES";
                 else
                     return DurationDays + " SAMPLE";
+            }
+            else if (Progress >= 2f)
+            {
+                return "";
             }
             else
             {
@@ -303,7 +311,14 @@ public static class Science {
             return GeoExperiments.ToArray();
         else
         {
-            return GeoExperiments.Where(x => !Base.Current.CompletedGeologyMissions.Contains(x.MissionNumber)).ToArray();
+            GeoExperiments.ForEach((geo) =>
+            {
+                if (Base.Current.CompletedGeologyMissions.Contains(geo.MissionNumber))
+                {
+                    geo.Progress = 2f;
+                }
+            });
+            return GeoExperiments.ToArray(); //.Where(x => !Base.Current.CompletedGeologyMissions.Contains(x.MissionNumber)).ToArray();
         }
     }
 

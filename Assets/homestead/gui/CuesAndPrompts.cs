@@ -192,6 +192,12 @@ public static class NewsSource
         DurationMilliseconds = 3000,
         Icon = MiscIcon.Information
     };
+    internal static News SampleTaken = new News()
+    {
+        Text = "Sample Taken",
+        DurationMilliseconds = 2500,
+        Icon = MiscIcon.HammerAndPick
+    };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {
@@ -580,6 +586,11 @@ public static class Prompts {
     {
         Description = "Deposit",
         UsesProgress  = true
+    };
+    internal static PromptInfo DepositSampleHint = new PromptInfo()
+    {
+        Description = "Sample Deposit",
+        Key = "LMB"
     };
     internal static PromptInfo RepairHint = new PromptInfo()
     {
