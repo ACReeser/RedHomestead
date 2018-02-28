@@ -257,6 +257,7 @@ namespace RedHomestead.Persistence
         public FacingData[] PumpData;
         public MobileSolarPanelData[] MobileSolarPanelData;
         public ToolboxData[] ToolboxData;
+        public MinilabData[] MinilabData;
         public DepositData[] Deposits;
         public CargoLanderData[] CargoLanders;
         public LandingZoneData[] LandingZones;
@@ -522,6 +523,9 @@ namespace RedHomestead.Persistence
 
             _DestroyCurrent<Toolbox>();
             _InstantiateMany<Toolbox, ToolboxData>(ToolboxData, ModuleBridge.Instance.ToolboxPrefab);
+
+            _DestroyCurrent<Minilab>();
+            _InstantiateMany<Minilab, MinilabData>(MinilabData, ModuleBridge.Instance.MinilabPrefab);
         }
 
         private void DeserializeCrates()
@@ -588,6 +592,7 @@ namespace RedHomestead.Persistence
             this._MarshalManyFromScene<MobileSolarPanel, MobileSolarPanelData>((panel) => this.MobileSolarPanelData = panel);
             this._MarshalManyFromScene<Pump, FacingData>((pump) => this.PumpData = pump);
             this._MarshalManyFromScene<Toolbox, ToolboxData>((box) => this.ToolboxData = box);
+            this._MarshalManyFromScene<Minilab, MinilabData>((lab) => this.MinilabData = lab);
             this._MarshalManyFromScene<Deposit, DepositData>((dep) => this.Deposits = dep);
             this._MarshalManyFromScene<CargoLander, CargoLanderData>((lander) => this.CargoLanders = lander);
             this._MarshalManyFromScene<LandingZone, LandingZoneData>((lz) => this.LandingZones = lz);

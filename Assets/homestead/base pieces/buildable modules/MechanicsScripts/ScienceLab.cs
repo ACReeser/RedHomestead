@@ -1,6 +1,7 @@
 ﻿using RedHomestead.Buildings;
 using RedHomestead.Equipment;
 using RedHomestead.Persistence;
+using RedHomestead.Simulation;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,11 +15,12 @@ public class ScienceLabFlexData
     public GeologyScienceExperiment CurrentGeoExperiment;
 }
 
-public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, ScienceLabFlexData>
+public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, ScienceLabFlexData>, ICrateSnapper
 {
     public ScienceLabFlexData FlexData { get; set; }
     public Transform[] ToolsInLockers, lockers;
-
+    public Transform MinilabPrefab, MinilabSnap;
+    private Transform CurrentMinilab;
     public Transform[] Tools { get { return ToolsInLockers; } }
     public Transform[] Lockers { get { return lockers; } }
 
@@ -75,6 +77,10 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         {
             case ExperimentType.BioMinilab:
                 FlexData.CurrentBioExperiment = experiment as BiologyScienceExperiment;
+                if (CurrentMinilab == null)
+                {
+                    CreateMinilab();
+                }
                 break;
             case ExperimentType.GeoSample:
                 FlexData.CurrentGeoExperiment = experiment as GeologyScienceExperiment;
@@ -83,17 +89,29 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         experiment.OnAccept();
     }
 
+    private void CreateMinilab()
+    {
+        CurrentMinilab = GameObject.Instantiate(MinilabPrefab);
+        CurrentMinilab.rotation = MinilabSnap.rotation;
+        CurrentMinilab.position = MinilabSnap.position;
+        CurrentMinilab.GetComponent<Minilab>().Assign(this);
+    }
+
     public void CancelExperiment(IScienceExperiment experiment)
     {
-        NullOutExperimentSlot(experiment);
+        CleanupExperiments(experiment);
         experiment.OnCancel();
     }
 
-    private void NullOutExperimentSlot(IScienceExperiment experiment)
+    private void CleanupExperiments(IScienceExperiment experiment)
     {
         switch (experiment.Experiment)
         {
             case ExperimentType.BioMinilab:
+                if (CurrentMinilab != null)
+                {
+                    GameObject.Destroy(CurrentMinilab.gameObject);
+                }
                 FlexData.CurrentBioExperiment = null;
                 break;
             case ExperimentType.GeoSample:
@@ -105,7 +123,7 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
     public void CompleteExperiment(IScienceExperiment experiment)
     {
         Science.Complete(experiment);
-        NullOutExperimentSlot(experiment);
+        CleanupExperiments(experiment);
         experiment.OnComplete();
     }
 
@@ -116,4 +134,15 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
             FlexData.CurrentGeoExperiment.Progress = 1f;
         }
     }
+
+    public void DetachCrate(IMovableSnappable detaching)
+    {
+
+    }
+
+    internal void Adopt(Minilab minilab)
+    {
+        this.CurrentMinilab = minilab.transform;
+    }
+
 }

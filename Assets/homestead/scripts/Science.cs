@@ -98,7 +98,7 @@ public class BiologyScienceExperiment : BaseScienceExperiment, IScienceExperimen
         if (_missionNumber < 3)
         {
             Reward = 9000 + _missionNumber * 1000;
-            DurationDays = _missionNumber + 1;
+            DurationDays = _missionNumber;
         }
         else if (_missionNumber < 7)
         {

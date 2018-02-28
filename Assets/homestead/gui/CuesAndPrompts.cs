@@ -198,6 +198,12 @@ public static class NewsSource
         DurationMilliseconds = 2500,
         Icon = MiscIcon.HammerAndPick
     };
+    internal static News MinilabDone = new News()
+    {
+        Text = "Biology Experiment Ready",
+        DurationMilliseconds = 2500,
+        Icon = MiscIcon.Harvest
+    };
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {

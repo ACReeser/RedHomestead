@@ -47,6 +47,8 @@ public abstract class MovableSnappable : MonoBehaviour, IMovableSnappable {
     void Awake()
     {
         movableRigidbody = GetComponent<Rigidbody>();
+        if (movableRigidbody == null)
+            movableRigidbody = transform.GetChild(0).GetComponent<Rigidbody>();
     }
 
     public void SnapCrate(ICrateSnapper snapParent, Vector3 snapPosition, Rigidbody jointRigid = null, Quaternion? globalRotation = null)
