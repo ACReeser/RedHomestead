@@ -144,9 +144,13 @@ public class BiologyScienceExperiment : BaseScienceExperiment, IScienceExperimen
             {
                 return DurationDays + " DAY DURATION";
             }
+            else if (Progress >= DurationDays)
+            {
+                return DurationDays + (DurationDays < 2 ? "DAY" : " DAYS");
+            }
             else
             {
-                return "Day " + Progress + " of " + DurationDays;
+                return String.Format("Day {0:0.##} of {1}", Progress, DurationDays);
             }
         }
     }

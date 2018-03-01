@@ -202,8 +202,15 @@ public static class NewsSource
     {
         Text = "Biology Experiment Ready",
         DurationMilliseconds = 2500,
-        Icon = MiscIcon.Harvest
+        Icon = MiscIcon.Molecule
     };
+    internal static News MinilabNotOutside = new News()
+    {
+        Text = "Biology Experiment Blocked from Sun!",
+        DurationMilliseconds = 5000,
+        Icon = MiscIcon.Information
+    };
+    
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {

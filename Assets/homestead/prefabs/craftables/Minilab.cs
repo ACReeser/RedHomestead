@@ -54,7 +54,20 @@ public class Minilab : MovableSnappable, IDataContainer<MinilabData>
 
     private void Instance_OnHourChange(int sol, float hour)
     {
+        bool acceptable = true;
+        //every other hour do an "is outside" check
+        if (Data.HoursAlive % 2 == 1)
+        {
+            acceptable = CheckIfOutside();
+            if (!acceptable)
+            {
+                GuiBridge.Instance.ShowNews(NewsSource.MinilabNotOutside);
+                SunOrbit.Instance.ResetToNormalTime();
+            }
+        }
+
         Data.HoursAlive++;
+
         if (Dad == null)
         {
             UnityEngine.Debug.LogWarning("No science lab dad to update experiment!");
@@ -67,6 +80,16 @@ public class Minilab : MovableSnappable, IDataContainer<MinilabData>
         {
             GuiBridge.Instance.ShowNews(NewsSource.MinilabDone);
         }
+    }
+
+    private bool CheckIfOutside()
+    {
+        if (Physics.Raycast(new Ray(this.transform.position + Vector3.up, transform.TransformDirection(Vector3.up)), 10f, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public override string GetText()
@@ -93,5 +116,11 @@ public class Minilab : MovableSnappable, IDataContainer<MinilabData>
         }
         Data.ScienceLabID = dad.Data.ModuleInstanceID;
         Data.HoursRequired = dad.FlexData.CurrentBioExperiment.DurationDays * SunOrbit.MartianHoursPerDay;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(this.transform.TransformPoint(Vector3.up * 8f), 8f);
     }
 }
