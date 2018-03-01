@@ -102,6 +102,7 @@ namespace RedHomestead.Buildings
                 case Module.Airlock:
                 case Module.GreenhouseHall:
                 case Module.HallwayNode:
+                case Module.ScienceLab:
                     return true;
                 default:
                     return false;
@@ -413,6 +414,17 @@ namespace RedHomestead.Buildings
                     },
                     Description = "An air pump that mines carbon dioxide."
                 }
+            },
+            {
+                Module.ScienceLab, new BuildingData() {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(2, Matter.CopperWire),
+                        new ResourceUnitEntry(3, Matter.IronSheeting),
+                        new ResourceUnitEntry(1, Matter.PressureCanvas),
+                    },
+                    Description = "A laboratory to conduct experiments."
+                }
             }
         };
         
@@ -439,7 +451,8 @@ namespace RedHomestead.Buildings
                 {
                     Module.EVAStation,
                     Module.RoverStation,
-                    Module.WeatherStation
+                    Module.WeatherStation,
+                    Module.ScienceLab
                 }
             },
             {
