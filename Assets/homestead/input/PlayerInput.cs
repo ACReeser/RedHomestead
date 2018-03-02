@@ -2147,7 +2147,7 @@ public class PlayerInput : MonoBehaviour {
         {
             snappable.UnsnapCrate();
         }
-
+#warning carried object drag changed and replaced with constant
         carriedObject = rigid;
         carriedObject.useGravity = false;
         //carriedObject.isKinematic = true;
@@ -2155,6 +2155,8 @@ public class PlayerInput : MonoBehaviour {
         carriedObject.mass = 0f;
         carriedObject.velocity = Vector3.zero;
         carriedObject.transform.SetParent(this.transform);
+        rigid.drag = 10f;
+        rigid.angularDrag = 200f;
         snappable.OnPickedUp();
     }
 
@@ -2162,6 +2164,8 @@ public class PlayerInput : MonoBehaviour {
     {
         if (carriedObject != null)
         {
+            carriedObject.drag = 0f;
+            carriedObject.angularDrag = .0f;
             //carriedObject.isKinematic = false;
             carriedObject.transform.SetParent(null);
             carriedObject.useGravity = true;
