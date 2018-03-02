@@ -204,6 +204,12 @@ public static class NewsSource
         DurationMilliseconds = 2500,
         Icon = MiscIcon.Molecule
     };
+    internal static News MinilabNotDocked = new News()
+    {
+        Text = "Biology Not Returned",
+        DurationMilliseconds = 2500,
+        Icon = MiscIcon.Molecule
+    };
     internal static News MinilabNotOutside = new News()
     {
         Text = "Biology Experiment Blocked from Sun!",

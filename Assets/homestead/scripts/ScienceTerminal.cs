@@ -182,9 +182,11 @@ public class ScienceTerminal : BaseTerminal {
 
     public void CompleteExperiment()
     {
-        myLab.CompleteExperiment(detailedExperiment);
-        RefreshMissionLists();
-        RefreshView();
-        UI.FillDetail(detailedExperiment);
+        if(myLab.CompleteExperiment(detailedExperiment))
+        {
+            RefreshMissionLists();
+            RefreshView();
+            UI.FillDetail(detailedExperiment);
+        }
     }
 }

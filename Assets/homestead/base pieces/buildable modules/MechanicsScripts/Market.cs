@@ -65,8 +65,7 @@ public class Market : ResourcelessGameplay, ICrateSnapper, ITriggerSubscriber, I
     {
         Markets.Remove(this);
     }
-
-
+    
     public void OnChildTriggerEnter(TriggerForwarder child, Collider other, IMovableSnappable res)
     {
         MarketRow whichRow = GetRow(child.name);

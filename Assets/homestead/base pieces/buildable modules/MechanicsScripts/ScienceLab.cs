@@ -15,12 +15,14 @@ public class ScienceLabFlexData
     public GeologyScienceExperiment CurrentGeoExperiment;
 }
 
-public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, ScienceLabFlexData>, ICrateSnapper
+public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFlexDataContainer<ResourcelessModuleData, ScienceLabFlexData>, ICrateSnapper, ITriggerSubscriber
 {
     public ScienceLabFlexData FlexData { get; set; }
     public Transform[] ToolsInLockers, lockers;
     public Transform MinilabPrefab, MinilabSnap;
     private Transform CurrentMinilab;
+    private bool MinilabDocked { get; set; }
+
     public Transform[] Tools { get { return ToolsInLockers; } }
     public Transform[] Lockers { get { return lockers; } }
 
@@ -120,11 +122,19 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         }
     }
 
-    public void CompleteExperiment(IScienceExperiment experiment)
+    public bool CompleteExperiment(IScienceExperiment experiment)
     {
+        if (experiment.Experiment == ExperimentType.BioMinilab && !this.MinilabDocked)
+        {
+            GuiBridge.Instance.ShowNews(NewsSource.MinilabNotDocked);
+            return false;
+        }
+
         Science.Complete(experiment);
         CleanupExperiments(experiment);
         experiment.OnComplete();
+
+        return true;
     }
 
     internal void OnGeologySampleTaken(Deposit lastDeposit)
@@ -135,9 +145,18 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         }
     }
 
+    private Coroutine detachTimer = null;
+
+    private IEnumerator Timer()
+    {
+        yield return new WaitForSeconds(2f);
+        detachTimer = null;
+    }
     public void DetachCrate(IMovableSnappable detaching)
     {
-
+        detachTimer = StartCoroutine(Timer());
+        if (detaching.transform == CurrentMinilab)
+            MinilabDocked = false;
     }
 
     internal void Adopt(Minilab minilab)
@@ -145,4 +164,12 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         this.CurrentMinilab = minilab.transform;
     }
 
+    public void OnChildTriggerEnter(TriggerForwarder child, Collider c, IMovableSnappable res)
+    {
+        if (c.transform == CurrentMinilab && detachTimer == null)
+        {
+            MinilabDocked = true;
+            res.SnapCrate(this, MinilabSnap.position);
+        }
+    }
 }
