@@ -736,6 +736,7 @@ namespace RedHomestead.Electricity
                 Data.InstalledBatteryWatts += (mod as IBattery).EnergyContainer.TotalCapacity;
             }
             mod.PowerGridInstanceID = this.PowerGridInstanceID;
+            Mode = GridMode.Unknown;
         }
 
         internal void Remove(IPowerable mod)

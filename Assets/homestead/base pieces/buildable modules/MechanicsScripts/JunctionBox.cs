@@ -3,8 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using RedHomestead.Buildings;
 using UnityEngine;
+using RedHomestead.Electricity;
 
-public class JunctionBox : ResourcelessGameplay {
+public class JunctionBox : ResourcelessGameplay, IPowerConsumer
+{
+    public bool IsOn { get; set; }
+
     public override float WattsConsumed
     {
         get
@@ -19,6 +23,10 @@ public class JunctionBox : ResourcelessGameplay {
     }
 
     public override void OnAdjacentChanged()
+    {
+    }
+
+    public void OnEmergencyShutdown()
     {
     }
 
