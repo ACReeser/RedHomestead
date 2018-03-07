@@ -36,7 +36,8 @@ namespace RedHomestead.Buildings
         AirMiner,
         GroundSolarPanel,
         Market,
-        ScienceLab
+        ScienceLab,
+        UtilityPole
     }
 
     /// <summary>
@@ -63,6 +64,7 @@ namespace RedHomestead.Buildings
             switch (module)
             {
                 case Module.JunctionBox:
+                case Module.UtilityPole:
                     return 1;
                 case Module.Flywheel:
                 case Module.Splitter:
@@ -123,6 +125,17 @@ namespace RedHomestead.Buildings
                         new ResourceUnitEntry(1, Matter.CopperWire)
                     },
                     Description = "A small box to split powerlines."
+                }
+            },
+            {
+                Module.UtilityPole, new BuildingData()
+                {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceUnitEntry(2, Matter.CopperWire),
+                        new ResourceUnitEntry(1, Matter.IronSheeting),
+                    },
+                    Description = "A pole to carry powerlines and produce light."
                 }
             },
             {
@@ -461,7 +474,8 @@ namespace RedHomestead.Buildings
                 {
                     Module.GroundSolarPanel,
                     Module.SolarPanelSmall,
-                    Module.JunctionBox
+                    Module.JunctionBox,
+                    Module.UtilityPole
                 }
             },
             {
