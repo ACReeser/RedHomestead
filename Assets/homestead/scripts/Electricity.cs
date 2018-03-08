@@ -574,7 +574,7 @@ namespace RedHomestead.Electricity
             Data.SurplusWatts = Data.CurrentCapacityWatts - Data.LoadWatts;
             Data.DeficitWatts = Data.LoadWatts - Data.CurrentCapacityWatts;
 
-            if ((Data.CurrentCapacityWatts + Data.CurrentBatteryWatts == 0f) && Data.LoadWatts > 0f)
+            if ((Data.CurrentCapacityWatts + Data.CurrentBatteryWatts == 0f) && (Data.LoadWatts > 0f || Consumers.Count > 0))
             {
                 newGridMode = GridMode.Blackout;
 
