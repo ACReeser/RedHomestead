@@ -125,9 +125,4 @@ public class RoverStation : Converter, IPowerConsumer
         this.AttachedRover = rover;
         this.SyncStatusSprites();
     }
-
-    public void RefreshVisualsAfterPowerToggle()
-    {
-
-    }
 }

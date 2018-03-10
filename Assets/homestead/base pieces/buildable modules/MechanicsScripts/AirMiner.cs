@@ -78,9 +78,4 @@ public class AirMiner : Converter, IPowerConsumerToggleable
         base.OnStart();
         this.RefreshPowerSwitch();
     }
-
-    public void RefreshVisualsAfterPowerToggle()
-    {
-
-    }
 }

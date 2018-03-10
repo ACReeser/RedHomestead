@@ -358,9 +358,4 @@ public class Furnace : Converter, ITriggerSubscriber, ICrateSnapper, IPowerConsu
         furnaceHeatingFormula.AddSink(s, Matter.Hydrogen);
         furnaceHeatingFormula.AddSink(s, Matter.Water);
     }
-
-    public void RefreshVisualsAfterPowerToggle()
-    {
-
-    }
 }

@@ -156,9 +156,4 @@ public class Electrolyzer : Converter, IPowerConsumerToggleable, IPowerConsumer
     public void OnEmergencyShutdown()
     {
     }
-
-    public void RefreshVisualsAfterPowerToggle()
-    {
-
-    }
 }

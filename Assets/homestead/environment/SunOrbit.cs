@@ -10,7 +10,7 @@ public delegate void HandleSolChange(int sol);
 public delegate void DawnDuskHandler(bool isStart);
 
 public class SunOrbit : MonoBehaviour {
-    public Material Skybox;
+    public Material Skybox, DuststormDay, DuststormNight;
     public Light GlobalLight;
 
     public Transform DuskAndDawnOnlyParent, StarsParent;

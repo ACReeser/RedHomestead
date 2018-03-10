@@ -152,9 +152,4 @@ public class OreExtractor : Converter, ICrateSnapper, ITriggerSubscriber, IPower
     {
         attachedDeposit = FlowManager.Instance.DepositMap[depositInstanceID];
     }
-
-    public void RefreshVisualsAfterPowerToggle()
-    {
-
-    }
 }

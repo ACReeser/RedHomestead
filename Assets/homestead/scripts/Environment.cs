@@ -147,13 +147,28 @@ namespace RedHomestead.Environment
         {
             isDawnOrDusk = isStart;
             RefreshDustParticleSystems();
+            if (!isStart)
+                RefreshDarkOrLightDustStormParticles(false);
         }
-
         private void _OnDawn(bool isStart)
         {
             isDawnOrDusk = isStart;
             RefreshDustParticleSystems();
+            if (isStart)
+                RefreshDarkOrLightDustStormParticles(true);
         }
+        private void RefreshDarkOrLightDustStormParticles(bool isSunUp)
+        {
+            foreach (Transform t in DuskAndDawnOnlyParent)
+            {
+                var ps = t.GetComponent<ParticleSystemRenderer>();
+                if (ps != null)
+                {
+                    ps.material = isSunUp ? SunOrbit.Instance.DuststormDay : SunOrbit.Instance.DuststormNight;
+                }
+            }
+        }
+
 
         private void FastForward(int gameSol)
         {
@@ -186,6 +201,8 @@ namespace RedHomestead.Environment
                 AnnounceForecast();
 
             AddIncrementalDust();
+
+            RenderSettings.fogColor = Color.Lerp(FogColor, Color.black, hour < 6 || hour > 16 ? 1f : 0f);
         }
 
         private void AddIncrementalDust()
@@ -229,6 +246,13 @@ namespace RedHomestead.Environment
                     emission.rateOverTime = dustStormRateOverTime;
                     emission.enabled = currentlyShowingDustStormParticles;
 
+                    //var newMain = ps.main;
+                    //newMain.startColor = new ParticleSystem.MinMaxGradient()
+                    //{
+                    //    colorMin = new Color( 77f / 256f, 58f / 256f, 40f / 256f, 1f),
+                    //    colorMax = new Color(116f / 256f, 38f / 256f,  0f, 1f),
+                    //};
+
                     if (emission.enabled && !ps.isPlaying)
                         ps.Play();
                     else if (!emission.enabled && ps.isPlaying)
@@ -244,9 +268,9 @@ namespace RedHomestead.Environment
             {
                 StopFollowCoroutine();
             }
-
             RenderSettings.fog = today.Coverage == DustCoverage.Stormy;
         }
+        private static Color FogColor = new Color(111f/255f, 37f/255f, 0f/255f, 1f);
 
         private void StopFollowCoroutine()
         {

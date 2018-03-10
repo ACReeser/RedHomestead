@@ -198,7 +198,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
     }
 
 
-    public void RefreshVisualsAfterPowerToggle()
+    public override void RefreshVisualsAfterPowerToggle()
     {
         RefreshOnOffTerminal();
     }
