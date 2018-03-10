@@ -18,7 +18,7 @@ public class ThreeDPrinterFlexData
 
 public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrateSnapper, IPowerConsumerToggleable, IFlexDataContainer<MultipleResourceModuleData, ThreeDPrinterFlexData>, IVariablePowerConsumer
 {
-    public Transform printArm, printHead, printArmHarness, laserAnchor, laserMidpoint;
+    public Transform printArm, printHead, printArmHarness, laserAnchor, laserMidpoint, isOnTerminal, isOffTerminal;
     public LineRenderer laser;
 
     private DoorRotationLerpContext lerp;
@@ -50,6 +50,7 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
         base.OnStart();
         this.RefreshPowerSwitch();
         this.RefreshVisualization();
+        RefreshOnOffTerminal();
         resetPosition = printArm.localPosition;
 
         if (FlexData != null && FlexData.Printing != Matter.Unspecified)
@@ -194,6 +195,18 @@ public class ThreeDPrinter : Converter, IDoorManager, ITriggerSubscriber, ICrate
             printArmHarness.localPosition = new Vector3(0f, 0f, printArm.localPosition.z);
             yield return null;
         }
+    }
+
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+        RefreshOnOffTerminal();
+    }
+
+    private void RefreshOnOffTerminal()
+    {
+        this.isOnTerminal.gameObject.SetActive(this.HasPower && this.IsOn);
+        this.isOffTerminal.gameObject.SetActive(!this.HasPower || !this.IsOn);
     }
 
     private void UpdateLaser()

@@ -37,4 +37,9 @@ public class JunctionBox : ResourcelessGameplay, IPowerConsumer
     public override void Tick()
     {
     }
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+
+    }
 }

@@ -48,4 +48,9 @@ public class WeatherStation : ResourcelessGameplay, IPowerConsumer
     {
         AllWeatherStations.Remove(this);
     }
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+
+    }
 }

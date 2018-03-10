@@ -108,4 +108,9 @@ public class EVAStation : Converter, IPowerConsumer
     {
         this.SyncStatusSprites();
     }
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+
+    }
 }

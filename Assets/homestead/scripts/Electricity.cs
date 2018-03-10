@@ -59,6 +59,7 @@ namespace RedHomestead.Electricity
         void OnPowerChanged();
         bool IsOn { get; set; }
         void OnEmergencyShutdown();
+        void RefreshVisualsAfterPowerToggle();
 #warning todo: add a priority field for shutdown
     }
 
@@ -163,6 +164,8 @@ namespace RedHomestead.Electricity
                 (c as IVariablePowerConsumer).RefreshVisualization();
             else if (c.PowerViz.PowerActive != null)
                 c.PowerViz.PowerActive.gameObject.SetActive((!(c.FaultedPercentage > 0f)) && c.IsOn);
+
+            c.RefreshVisualsAfterPowerToggle();
         }
 
         public static void RefreshVisualization(this IPowerSupply s)

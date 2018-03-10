@@ -73,4 +73,9 @@ public class UtilityPole : ResourcelessGameplay, IPowerConsumer
     {
         RefreshLights();
     }
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+
+    }
 }

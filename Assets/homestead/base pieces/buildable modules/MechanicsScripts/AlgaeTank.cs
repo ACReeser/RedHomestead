@@ -215,5 +215,10 @@ public class AlgaeTank : FarmConverter, IPowerConsumerToggleable, ITriggerSubscr
     {
         animatedTexture.speed = HasPower && IsOn ? .2f : 0.01f;
     }
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+
+    }
 }
 

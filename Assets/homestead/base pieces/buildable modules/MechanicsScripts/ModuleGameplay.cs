@@ -305,6 +305,8 @@ public abstract class Converter : MultipleResourceModuleGameplay
 
     public abstract void ClearSinks();
     public virtual void OnSinkConnected(ISink s) { }
+
+    public virtual void RefreshVisualsAfterPowerToggle() { }
 }
 
 public interface IPowerConsumerToggleable: IPowerConsumer

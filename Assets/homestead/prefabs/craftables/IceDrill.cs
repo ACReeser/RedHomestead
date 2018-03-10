@@ -180,4 +180,9 @@ public class IceDrill : MovableSnappable, IPowerConsumer, ICrateSnapper, ITrigge
             }
         }
     }
+
+    public void RefreshVisualsAfterPowerToggle()
+    {
+
+    }
 }
