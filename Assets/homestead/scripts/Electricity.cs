@@ -248,14 +248,15 @@ namespace RedHomestead.Electricity
                 module.PowerCabinet.mesh = module.IsOn ? ModuleBridge.Instance.CabinetOn : ModuleBridge.Instance.CabinetOff;
                 module.PowerCabinet.transform.GetChild(0).name = module.IsOn ? "on" : "off";
 
-                var gameplay = (module as ModuleGameplay);
-                if (gameplay != null && gameplay.SoundSource != null)
-                {
-                    if (module.IsOn)
-                        gameplay.SoundSource.Play();
-                    else
-                        gameplay.SoundSource.Stop();
-                }
+            }
+
+            var gameplay = (module as ModuleGameplay);
+            if (gameplay != null && gameplay.SoundSource != null)
+            {
+                if (module.IsOn)
+                    gameplay.SoundSource.Play();
+                else
+                    gameplay.SoundSource.Stop();
             }
         }
 
