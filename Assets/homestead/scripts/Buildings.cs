@@ -122,7 +122,7 @@ namespace RedHomestead.Buildings
                 {
                     Requirements = new List<IResourceEntry>()
                     {
-                        new ResourceUnitEntry(1, Matter.CopperWire)
+                        //new ResourceUnitEntry(1, Matter.CopperWire)
                     },
                     Description = "A small box to split powerlines."
                 }

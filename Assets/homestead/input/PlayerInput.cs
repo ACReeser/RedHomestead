@@ -2061,7 +2061,8 @@ public class PlayerInput : MonoBehaviour {
 
         zone.Initialize(ModulePlan.Type, depositID);
 
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
+        if ((zone.RequiredResourceMask.Length == 0) ||
+            (Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt)))
             zone.Complete();
 
         ModulePlan.Reset();
