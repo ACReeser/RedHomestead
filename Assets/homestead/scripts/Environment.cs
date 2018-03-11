@@ -258,6 +258,13 @@ namespace RedHomestead.Environment
                     else if (!emission.enabled && ps.isPlaying)
                         ps.Stop();
                 }
+                var audio = t.GetComponent<AudioSource>();
+                audio.volume = today.Coverage.SFXVolume();
+
+                if (playerInHabitat)
+                    audio.volume /= 2f;
+
+                audio.enabled = audio.volume > 0f;
             }
 
             if (currentlyShowingDustStormParticles)
@@ -329,6 +336,21 @@ namespace RedHomestead.Environment
                     return NewsSource.WeatherHeavyDust;
                 case DustCoverage.Stormy:
                     return NewsSource.WeatherDustStorm;
+            }
+        }
+
+        public static float SFXVolume(this DustCoverage coverage)
+        {
+            switch (coverage)
+            {
+                default:
+                    return 0f;
+                case DustCoverage.Light:
+                    return 0f;
+                case DustCoverage.Heavy:
+                    return .4f;
+                case DustCoverage.Stormy:
+                    return 1f;
             }
         }
 
