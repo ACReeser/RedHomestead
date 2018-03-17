@@ -42,6 +42,9 @@ public static class PrefabCacheUtils
                     }
                 }
             }
+            Light l = child.GetComponent<Light>();
+            if (l != null)
+                l.enabled = false;
 
             RecurseDisableColliderSetTranslucentRenderer(child, translucent);
         }
