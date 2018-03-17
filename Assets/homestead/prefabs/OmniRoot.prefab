@@ -10377,6 +10377,7 @@ GameObject:
   - component: {fileID: 4998225439870934}
   - component: {fileID: 198742487095101156}
   - component: {fileID: 199768635490705810}
+  - component: {fileID: 82695698488910658}
   m_Layer: 0
   m_Name: DustStorm
   m_TagString: Untagged
@@ -15163,6 +15164,86 @@ Transform:
   m_Father: {fileID: 4279386068834262}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &82695698488910658
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1704785666277204}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: fa8d2293c686b50409c9694f7be2c63f, type: 3}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!82 &82964575380446542
 AudioSource:
   m_ObjectHideFlags: 1
@@ -21141,6 +21222,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: fc9d70ceb3ca6314a9476973cf167060, type: 3}
     - {fileID: 21300000, guid: 75d6f040e9832fa45bf7745fe64be4ab, type: 3}
     - {fileID: 21300000, guid: e7057b30c20b3144cacee5a51143f5a7, type: 3}
+    - {fileID: 21300000, guid: 2988865b1d1777f4aad2a0426d4f86cf, type: 3}
     DetailHeader: {fileID: 114816475956855474}
     DetailDescription: {fileID: 114259082052051328}
     DetailPower: {fileID: 114510220427169614}
@@ -39408,6 +39490,7 @@ MonoBehaviour:
   - {fileID: 4293100325300538, guid: 093589bf02b54d94f801d2bfa23331bb, type: 2}
   - {fileID: 4298707976289524, guid: 8b022ba7d9f060f4ebfb7d5c70e6be32, type: 2}
   - {fileID: 4851159643989642, guid: 0d8e0c15e19d9184c9e17b15bee55a1c, type: 2}
+  - {fileID: 4633771610604408, guid: a8f373a145814554a9476fa4812a960f, type: 2}
   ConstructionZonePrefab: {fileID: 484780, guid: 321c08093368d234292c4d1189edd6be,
     type: 2}
   IceDrillPrefab: {fileID: 4321635143723982, guid: 6072916b82be3cf4584a871854d46d69,

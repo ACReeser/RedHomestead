@@ -25,6 +25,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     public Color youngColor, oldColor;
     public Vector3 youngScale, oldScale;
     public Transform defaultSnap;
+    public int GreenhouseScale = 1;
 
     private const float _harvestUnits = .25f;
     private const float _biomassPerTick = .25f / 5f / SunOrbit.GameSecondsPerGameDay;
@@ -38,7 +39,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
         get
         {
-            return _biomassPerTick;
+            return _biomassPerTick * GreenhouseScale;
         }
     }
 
@@ -46,7 +47,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
         get
         {
-            return _harvestUnits;
+            return _harvestUnits * GreenhouseScale;
         }
     }
     
@@ -56,7 +57,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
         get
         {
-            return _oxygenAtFullBiomassPerTick * Get(RedHomestead.Simulation.Matter.Biomass).CurrentAmount;
+            return _oxygenAtFullBiomassPerTick * GreenhouseScale * Get(RedHomestead.Simulation.Matter.Biomass).CurrentAmount;
         }
     }
 
@@ -64,7 +65,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
         get
         {
-            return _waterPerTick;
+            return _waterPerTick * GreenhouseScale;
         }
     }
 
@@ -72,7 +73,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
     {
         get
         {
-            return IsOn ? _heaterWatts : 0f;
+            return IsOn ? _heaterWatts * GreenhouseScale : 0f;
         }
     }
 
@@ -83,7 +84,7 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
 
     public override Module GetModuleType()
     {
-        return Module.GreenhouseHall;
+        return GreenhouseScale == 1 ? Module.GreenhouseHall : Module.LargeGreenhouse;
     }
 
     public override void OnEmergencyShutdown()
@@ -107,8 +108,15 @@ public class Greenhouse : FarmConverter, IHabitatModule, ITriggerSubscriber, ICr
         }
         else
         {
-
-            ResourceComponent res = BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position, null, ContainerSize.Quarter).GetComponent<ResourceComponent>();
+            ContainerSize size;
+            if (GreenhouseScale == 1)
+            {
+                size = ContainerSize.Quarter;
+            } else
+            {
+                size = ContainerSize.Full;
+            }
+            ResourceComponent res = BounceLander.CreateCratelike(Matter.Produce, harvestAmountUnits, defaultSnap.position, null, size).GetComponent<ResourceComponent>();
             res.SnapCrate(this, defaultSnap.position);
             outputs[0] = res;
         }

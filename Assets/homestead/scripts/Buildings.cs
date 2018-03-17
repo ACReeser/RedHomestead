@@ -37,7 +37,8 @@ namespace RedHomestead.Buildings
         GroundSolarPanel,
         Market,
         ScienceLab,
-        UtilityPole
+        UtilityPole,
+        LargeGreenhouse
     }
 
     /// <summary>
@@ -103,6 +104,7 @@ namespace RedHomestead.Buildings
                 case Module.Workshop:
                 case Module.Airlock:
                 case Module.GreenhouseHall:
+                case Module.LargeGreenhouse:
                 case Module.HallwayNode:
                 case Module.ScienceLab:
                     return true;
@@ -348,6 +350,24 @@ namespace RedHomestead.Buildings
                 }
             },
             {
+                Module.LargeGreenhouse, new BuildingData() {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceVolumeEntry(2, Matter.IronBeams),
+                        new ResourceVolumeEntry(1, Matter.Glass),
+                        new ResourceUnitEntry(1, Matter.Biomass),
+                    },
+                    Description = "A large greenhouse for growing crops.",
+                    PowerSteady = -8,
+                    IO = new Dictionary<Matter, float>()
+                    {
+                        { Matter.Water, -4f },
+                        { Matter.Biomass, 4f },
+                        { Matter.Oxygen, 2f }
+                    }
+                }
+            },
+            {
                 Module.Workshop, new BuildingData() {
                     Requirements = new List<IResourceEntry>()
                     {
@@ -455,7 +475,8 @@ namespace RedHomestead.Buildings
                     Module.Airlock,
                     Module.HallwayNode,
                     Module.Workshop,
-                    Module.GreenhouseHall
+                    Module.GreenhouseHall,
+                    Module.LargeGreenhouse
                 }
             },
             {
