@@ -66,4 +66,31 @@ public class PowerCube : MovableSnappable, IDataContainer<PowerCubeData>, IBatte
             FlowManager.Instance.PowerGrids.Detach(this);
         }
     }
+
+    public void Hide()
+    {
+        this.ShowHide(false);
+    }
+
+    public void Show()
+    {
+        this.ShowHide(true);
+    }
+
+    private void ShowHide(bool state)
+    {
+        this._powerViz.PowerActive.gameObject.SetActive(state);
+        this._powerViz.PowerBacking.gameObject.SetActive(state);
+        this._powerViz.PowerMask.gameObject.SetActive(state);
+
+        int socketCount = 1;
+        for (int i = this.transform.childCount - 1; i > -1; i--)
+        {
+            if (socketCount > 4)
+                break;
+
+            this.transform.GetChild(i).gameObject.SetActive(state);
+            socketCount++;
+        }
+    }
 }

@@ -38,7 +38,8 @@ namespace RedHomestead.Buildings
         Market,
         ScienceLab,
         UtilityPole,
-        LargeGreenhouse
+        LargeGreenhouse,
+        BatteryStation
     }
 
     /// <summary>
