@@ -180,6 +180,18 @@ namespace RedHomestead.Buildings
                     EnergyStorage = 10
                 }
             },
+            {
+                Module.BatteryStation, new BuildingData()
+                {
+                    Requirements = new List<IResourceEntry>()
+                    {
+                        new ResourceVolumeEntry(1, Matter.IronSheeting),
+                        new ResourceVolumeEntry(1, Matter.CopperWire)
+                    },
+                    Description = "A dock for charging batteries.",
+                    EnergyStorage = 5
+                }
+            },
             //storage
             { 
                 Module.Warehouse, new BuildingData() {
@@ -497,7 +509,8 @@ namespace RedHomestead.Buildings
                     Module.GroundSolarPanel,
                     Module.SolarPanelSmall,
                     Module.JunctionBox,
-                    Module.UtilityPole
+                    Module.UtilityPole,
+                    Module.BatteryStation
                 }
             },
             {
