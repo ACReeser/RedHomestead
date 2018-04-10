@@ -460,6 +460,7 @@ public class MainMenu : MonoBehaviour {
 
     public void StartQuickstart()
     {
+        NewGameChoices.ChosenLocation = new BaseLocation();
         PersistentDataManager.StartNewGame(NewGameChoices);
 #warning todo: make sure quickstart at quickstart equipment/training
         this.NewGameChoices.LoadQuickstart();
