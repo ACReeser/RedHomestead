@@ -1705,7 +1705,7 @@ public class PlayerInput : MonoBehaviour {
         if (doInteract)
         {
             //pipe script is on parent object
-            Pipe pipeScript = hitInfo.collider.transform.parent.GetComponent<Pipe>();
+            Pipeline pipeScript = hitInfo.collider.transform.parent.GetComponent<Pipeline>();
             ModuleGameplay from = pipeScript.Data.From;
             ModuleGameplay to = pipeScript.Data.To;
 
@@ -2230,7 +2230,7 @@ public class PlayerInput : MonoBehaviour {
         ModuleGameplay g1 = selectedGasValve.transform.root.GetComponent<ModuleGameplay>(), g2 = collider.transform.root.GetComponent<ModuleGameplay>();
         if (g1 != null && g2 != null)
         {
-            newPipeTransform.GetComponent<Pipe>().AssignConnections(selectedCompound, g1, g2, selectedGasValve.transform, collider.transform);
+            newPipeTransform.GetComponent<Pipeline>().AssignConnections(selectedCompound, g1, g2, selectedGasValve.transform, collider.transform);
 
             selectedCompound = Matter.Unspecified;
             selectedGasValve = null;
