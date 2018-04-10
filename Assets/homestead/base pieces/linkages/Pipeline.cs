@@ -60,8 +60,8 @@ public class Pipeline : MonoBehaviour, IDataContainer<PipelineData>
         Beta.ElbowUp.rotation = higherT.rotation * Quaternion.Euler(-90f, 0f, -90f);
 
         float valveYDistanceDelta = higherT.position.y - lowerT.position.y;
-        if (valveYDistanceDelta < MinElbowOverZ)
-            valveYDistanceDelta = MinElbowOverZ;
+        //if (valveYDistanceDelta < MinElbowOverZ)
+        //    valveYDistanceDelta = MinElbowOverZ;
 
         Alpha.ElbowOver.localPosition = new Vector3(0.448f, 0f, MinElbowOverZ + valveYDistanceDelta);
         //for now, beta (higher) is at the minimum
