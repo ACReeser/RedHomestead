@@ -2290,12 +2290,34 @@ public class PlayerInput : MonoBehaviour {
 
     public void KillPlayer(string reason)
     {
+        FPSController.enabled = false;
+        this.enabled = false;
+        StartCoroutine(AfterKillPlayer(reason));
+    }
+
+    private IEnumerator AfterKillPlayer(string reason)
+    {
+        FPSController.CharacterController.enabled = false;
+        var rigid = Camera.main.gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
+        var collider = Camera.main.gameObject.AddComponent(typeof(CapsuleCollider)) as CapsuleCollider;
+        collider.radius = .5f;
+        collider.height = 1.5f;
+        rigid.AddRelativeForce(Vector3.right * .5f, ForceMode.Impulse);
+        Camera.main.transform.SetParent(null);
+        for (float i = 0; i < 5f;)
+        {
+            yield return null;
+            i += Time.deltaTime;
+            if (i > 2f)
+            {
+                rigid.angularDrag += .15f;
+                rigid.drag += .15f;
+            }
+        }
         GuiBridge.Instance.ShowKillMenu(reason);
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         Time.timeScale = 0f;
-        FPSController.enabled = false;
-        this.enabled = false;
     }
 
     #region sleep mechanic
