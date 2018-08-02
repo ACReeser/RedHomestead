@@ -216,7 +216,13 @@ public static class NewsSource
         DurationMilliseconds = 5000,
         Icon = MiscIcon.Information
     };
-    
+    internal static News ScoringEvent = new News()
+    {
+        Text = "",
+        DurationMilliseconds = 3000,
+        Icon = MiscIcon.PlanetFlag
+    };
+
 
     public static News GetFailureNews(IRepairable victim, Gremlin.FailureType failType)
     {

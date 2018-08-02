@@ -219,7 +219,7 @@ public class ConstructionZone : MonoBehaviour, IDataContainer<ConstructionData> 
             GuiBridge.Instance.HideConstruction();
         }
 
-        Game.Current.Score.ModulesBuilt++;
+        Game.Current.Score.AddScoringEvent(RedHomestead.Scoring.ScoreType.Build, GuiBridge.Instance);
 
         //copy the requirements by adding them to a dictionary
         Dictionary<Matter, float> matterToVolumeMap = Construction.BuildData[Data.ModuleTypeUnderConstruction].Requirements.ToDictionary(x => x.Type, y => y.AmountByVolume);

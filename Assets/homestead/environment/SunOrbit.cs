@@ -138,6 +138,7 @@ public class SunOrbit : MonoBehaviour {
         Game.Current.Environment.CurrentHour = 0;
         Game.Current.Environment.CurrentMinute = 40 - Game.Current.Environment.CurrentMinute;
         dawnMilestone = duskMilestone = dawnEnded = duskEnded = false;
+        Game.Current.Score.AddScoringEvent(RedHomestead.Scoring.ScoreType.Survivor, GuiBridge.Instance);
 
 
         if (OnSolChange != null)

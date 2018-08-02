@@ -9,6 +9,7 @@ using RedHomestead.Interiors;
 using RedHomestead.Persistence;
 using UnityEngine.PostProcessing;
 using RedHomestead.Crafting;
+using RedHomestead.Scoring;
 
 [Serializable]
 public struct ReportIORow
@@ -76,7 +77,8 @@ public enum MiscIcon {
     DustStorm,
     HammerAndPick,
     Bed,
-    Money
+    Money,
+    PlanetFlag
 }
 
 [Serializable]
@@ -1166,5 +1168,10 @@ public class GuiBridge : MonoBehaviour {
         {
             PostProfile.vignette.enabled = false;
         }
+    }
+
+    internal void ShowScoringEvent(ScoringReward result)
+    {
+        this.ShowNews(NewsSource.ScoringEvent.Clone(result.Title+"\n+"+result.Score));
     }
 }
