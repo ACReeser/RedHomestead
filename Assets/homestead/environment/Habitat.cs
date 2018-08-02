@@ -55,6 +55,7 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     public Transform[] bulkheads;
     public Transform[] Bulkheads { get { return bulkheads; } }
+    public Transform HeatingBlanket;
 
     public bool IsHeatOn { get { return this.HabitatData.IsHeatOn; } set { HabitatData.IsHeatOn = value; RecalcPowerRequirements(); } }
     public bool IsOxygenOn { get { return HabitatData.IsOxygenOn; } set { HabitatData.IsOxygenOn = value; RecalcPowerRequirements(); } }
