@@ -792,6 +792,12 @@ public class GuiBridge : MonoBehaviour {
         UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
+    public void Continue()
+    {
+        KilledPanel.transform.gameObject.SetActive(false);
+        PlayerInput.Instance.ResetAfterKillPlayer();
+    }
+
     private void RefreshBarWarningCriticalText(Text textElement, int hoursLeftHint)
     {
         textElement.enabled = hoursLeftHint < 3;

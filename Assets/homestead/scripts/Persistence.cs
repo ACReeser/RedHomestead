@@ -81,6 +81,7 @@ namespace RedHomestead.Persistence
         public Equipment.Equipment[] Loadout;
         public BackerFinancing Financing;
         internal int WeeklyIncomeSeed;
+        public int SolStart = 1;
 
         public PlayerData() { }
         public PlayerData(bool generateSeeds)
@@ -231,6 +232,15 @@ namespace RedHomestead.Persistence
     }
 
     [Serializable]
+    public class GraveData
+    {
+        public string PlayerName;
+        public int StartSol;
+        public int DeathSol;
+        public string DeathReason;
+    }
+
+    [Serializable]
     public class Base: ISerializationCallbackReceiver {
         public static Base Current;
 
@@ -243,6 +253,7 @@ namespace RedHomestead.Persistence
         public ConstructionData[] ConstructionZones;
         public int[] CompletedGeologyMissions;
         public int[] CompletedBiologyMissions;
+        public GraveData[] Graves;
         //hobbit hole data
         //floorplan data
         //stuff data

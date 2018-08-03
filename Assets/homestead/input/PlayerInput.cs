@@ -2290,20 +2290,13 @@ public class PlayerInput : MonoBehaviour {
 
     public void KillPlayer(string reason)
     {
-        FPSController.enabled = false;
         this.enabled = false;
         StartCoroutine(AfterKillPlayer(reason));
     }
 
     private IEnumerator AfterKillPlayer(string reason)
     {
-        FPSController.CharacterController.enabled = false;
-        var rigid = Camera.main.gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
-        var collider = Camera.main.gameObject.AddComponent(typeof(CapsuleCollider)) as CapsuleCollider;
-        collider.radius = .5f;
-        collider.height = 1.5f;
-        rigid.AddRelativeForce(Vector3.right * .5f, ForceMode.Impulse);
-        Camera.main.transform.SetParent(null);
+        var rigid = togglePlayerWhileKill(true);
         for (float i = 0; i < 5f;)
         {
             yield return null;
@@ -2315,9 +2308,50 @@ public class PlayerInput : MonoBehaviour {
             }
         }
         GuiBridge.Instance.ShowKillMenu(reason);
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-        Time.timeScale = 0f;
+        togglePlayerAfterKill(true);
+    }
+    private Rigidbody togglePlayerWhileKill(bool killt)
+    {
+        SurvivalTimer.Instance.enabled = !killt;
+        FPSController.enabled = !killt;
+        this.enabled = !killt;
+        FPSController.CharacterController.enabled = !killt;
+        if (killt)
+        {
+            var rigid = Camera.main.gameObject.AddComponent(typeof(Rigidbody)) as Rigidbody;
+            var collider = Camera.main.gameObject.AddComponent(typeof(CapsuleCollider)) as CapsuleCollider;
+            collider.radius = .5f;
+            collider.height = 1.5f;
+            rigid.AddRelativeForce(Vector3.right * .5f, ForceMode.Impulse);
+            Camera.main.transform.SetParent(null);
+            return rigid;
+        }
+        else
+        {
+            Component.Destroy(Camera.main.gameObject.GetComponent<Rigidbody>());
+            Component.Destroy(Camera.main.gameObject.GetComponent<CapsuleCollider>());
+            Camera.main.transform.SetParent(FPSController.transform);
+            Camera.main.transform.localPosition = new Vector3(0, 0.8f, 0f);
+            Camera.main.transform.localRotation = Quaternion.identity;
+            return null;
+        }
+    }
+    private void togglePlayerAfterKill(bool killt)
+    {
+        Cursor.visible = !killt;
+        Cursor.lockState = killt ? CursorLockMode.None : CursorLockMode.Confined;
+        Time.timeScale = killt ? 0f : 1f;
+    }
+
+    public void ResetAfterKillPlayer()
+    {
+        SurvivalTimer.Instance.Oxygen.ResetToMaximum();
+        SurvivalTimer.Instance.Water.ResetToMaximum();
+        SurvivalTimer.Instance.Food.ResetToMaximum();
+        SurvivalTimer.Instance.Power.ResetToMaximum();
+        togglePlayerWhileKill(false);
+        togglePlayerAfterKill(false);
+        FPSController.transform.position = Graveyard.Instance.GetGlobalLastGraveStareAtLocation();
     }
 
     #region sleep mechanic

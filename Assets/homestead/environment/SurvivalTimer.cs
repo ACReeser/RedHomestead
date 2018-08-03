@@ -118,6 +118,7 @@ public class SingleSurvivalResource : SurvivalResource
 
 public enum Temperature { Cold, Temperate, Hot }
 public delegate void PlayerInHabitatHandler(bool isInHabitat);
+public delegate void PlayerDeathHandler(GraveData newGrave);
 
 public class DeprivationDurations
 {
@@ -162,6 +163,7 @@ public class SurvivalTimer : MonoBehaviour {
         }
     }
     public event PlayerInHabitatHandler OnPlayerInHabitatChange;
+    public event PlayerDeathHandler OnPlayerDeath;
 
     public Habitat CurrentHabitat { get; private set; }
     public static bool SkipConsume { get; internal set; }
@@ -337,8 +339,33 @@ public class SurvivalTimer : MonoBehaviour {
     private void KillPlayer(string reason)
     {
         GuiBridge.Instance.ResetDeprivationUX();
+        var newGrave = new GraveData()
+        {
+            PlayerName = Game.Current.Player.Name,
+            DeathReason = reason,
+            StartSol = Game.Current.Player.SolStart,
+            DeathSol = Game.Current.Environment.CurrentSol
+        };
+
+        var newGraves = new GraveData[1]
+        {
+            newGrave
+        };
+        if (Base.Current.Graves == null)
+        {
+            Base.Current.Graves = newGraves;
+        }
+        else
+        {
+            Base.Current.Graves = Base.Current.Graves.Concat(newGraves).ToArray();
+        }
+
+        if (this.OnPlayerDeath != null)
+        {
+            this.OnPlayerDeath(newGrave);
+        }
+
         PlayerInput.Instance.KillPlayer(reason);
-        this.enabled = false;
     }
 
     private bool skipEnterHabitatPackRefill = false;
