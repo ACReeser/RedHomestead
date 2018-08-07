@@ -18,11 +18,12 @@ public class SunOrbit : MonoBehaviour {
     internal const float MartianHoursPerDay = 24.7f;
     internal const float MartianMinutesPerDay = (24 * 60) + 40;
     internal const float MartianSecondsPerDay = MartianMinutesPerDay * 60;
-    internal const float GameMinutesPerGameDay = 20;
-    internal const float GameSecondsPerGameDay = GameMinutesPerGameDay * 60;
+    internal const float GameMinutesPerGameDay = 24f + (3/10);
+    internal const float GameSecondsPerGameDay = 1480; //GameMinutesPerGameDay * 60
 
     internal const float MartianSecondsPerGameSecond = MartianSecondsPerDay / GameSecondsPerGameDay;
-    internal const float GameSecondsPerMartianMinute = GameSecondsPerGameDay / MartianSecondsPerDay * 60;
+    internal const float GameSecondsPerMartianMinute = 1f; // GameSecondsPerGameDay / MartianSecondsPerDay * 60;
+    internal const float GameSecondsPerMartianHour = 60f;
 
     private const int MaximumSpeedTiers = 6;
     private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;

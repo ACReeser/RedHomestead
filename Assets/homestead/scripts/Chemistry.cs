@@ -914,5 +914,21 @@ namespace RedHomestead.Simulation
 
         //Serializable
         public Energy EnergyType;
+        /// <summary>
+        /// assumes that Amount is in Watt-Hours
+        /// </summary>
+        public float CurrentWatts { get { return Amount * SunOrbit.GameSecondsPerMartianHour; } }
+        /// <summary>
+        /// assumes that Amount is in Watt-Hours
+        /// </summary>
+        public float TotalCapacityWatts { get { return TotalCapacity * SunOrbit.GameSecondsPerMartianHour; } }
+        internal float PushWatts(float rechargeWatts)
+        {
+            return this.Push(rechargeWatts / SunOrbit.GameSecondsPerMartianHour) * SunOrbit.GameSecondsPerMartianHour;
+        }
+        internal float PullWatts(float drainWatts)
+        {
+            return this.Pull(drainWatts / SunOrbit.GameSecondsPerMartianHour) * SunOrbit.GameSecondsPerMartianHour;
+        }
     }
 }
