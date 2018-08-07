@@ -7,8 +7,14 @@ using System.Linq;
 
 public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHomestead.Electricity.IPowerSupply
 {
-    public const float WattHoursGeneratedPerDay = _WattsGenerated * SunOrbit.GameSecondsPerGameDay;
-    public const float _WattsGenerated = 130;
+    /// <summary>
+    /// 3,211 wh == 3.2 kWh
+    /// </summary>
+    public const float WattHoursGeneratedPerDay = _WattsGenerated * SunOrbit.MartianHoursPerDay;
+    /// <summary>
+    /// should actually be 120-157
+    /// </summary>
+    public const float _WattsGenerated = 200;
 
     public MeshFilter powerBacking { get; set; }
     public Transform powerMask { get; set; }

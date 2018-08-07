@@ -235,6 +235,7 @@ public struct SurvivalBarsUI
     public SurvivalBar Water;
     public SurvivalBar Power;
     public SurvivalBar Oxygen;
+    public SurvivalBar BodyHeat;
     public SurvivalBar RoverPower;
     public SurvivalBar RoverOxygen;
     public SurvivalBar HabitatPower;
@@ -535,6 +536,7 @@ public class GuiBridge : MonoBehaviour {
         SurvivalBars.Power.Initialize();
         SurvivalBars.Water.Initialize();
         SurvivalBars.Food.Initialize();
+        SurvivalBars.BodyHeat.Initialize();
         SurvivalBars.RoverOxygen.Initialize();
         SurvivalBars.RoverPower.Initialize();
         SurvivalBars.HabitatOxygen.Initialize();
@@ -831,6 +833,12 @@ public class GuiBridge : MonoBehaviour {
     {
         this.SurvivalBars.Power.Bar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.SurvivalBars.Power.Hours, hoursLeftHint);
+    }
+    internal void RefreshBodyHeatBar(float percentage, int hoursLeftHint)
+    {
+        this.SurvivalBars.BodyHeat.Bar.transform.parent.gameObject.SetActive(percentage < 1f);
+        this.SurvivalBars.BodyHeat.Bar.fillAmount = percentage;
+        this.RefreshBarWarningCriticalText(this.SurvivalBars.BodyHeat.Hours, hoursLeftHint);
     }
     internal void RefreshRoverOxygenBar(float percentage, int hoursLeftHint)
     {

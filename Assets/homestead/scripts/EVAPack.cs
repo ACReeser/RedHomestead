@@ -42,6 +42,7 @@ namespace RedHomestead.EVA
     {
         public PackResourceData Oxygen;
         public PackResourceData Power;
+        public PackResourceData BodyHeat;
         public PackResourceData Water;
         public PackResourceData Food;
         public string CurrentHabitatModuleInstanceID;
@@ -90,16 +91,18 @@ namespace RedHomestead.EVA
         public static class Constants
         {
             public const float KilogramsOxygenPerHour = 0.0972f;
-            public const float BasePackOxygenKilograms = KilogramsOxygenPerHour * 4f;
-            public const float UpgradedPackOxygenKilograms = KilogramsOxygenPerHour * 8f;
+            public const float BasePackOxygenKilograms = KilogramsOxygenPerHour * 5f;
+            public const float UpgradedPackOxygenKilograms = KilogramsOxygenPerHour * 10f;
 
             public const float CaloriesPerDay = 2400;
             public const float WaterPerDayKilograms = 3f;
-            public const float SuitHeatingWattsPerHour = 1000f;
+            public const float SuitHeatingWattsPerHour = 100f;
             public const float SuitHeatingWattsPerSecond = SuitHeatingWattsPerHour / 60f / 60f;
 
-            public const float BasePackPowerWatts = SuitHeatingWattsPerHour * 6f;
-            public const float UpgradedPackPowerWatts = SuitHeatingWattsPerHour * 10f;
+            public const float HumanHeatNormalCelsius = 37;
+            public const float HumanHeatUnconsciousCelsius = 27;
+            public const float BasePackPowerWatts = SuitHeatingWattsPerHour * 8f;
+            public const float UpgradedPackPowerWatts = SuitHeatingWattsPerHour * 12f;
         }
 
         public static PackData GetDefaultPackData()
@@ -109,7 +112,8 @@ namespace RedHomestead.EVA
                 Oxygen = new PackResourceData(Constants.BasePackOxygenKilograms, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.KilogramsOxygenPerHour)),
                 Water = new PackResourceData(Constants.WaterPerDayKilograms / 2, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.WaterPerDayKilograms)),
                 Food = new PackResourceData(Constants.CaloriesPerDay, GetConsumptionPerSecond(ConsumptionPeriod.Daily, Constants.CaloriesPerDay)),
-                Power = new PackResourceData(Constants.BasePackPowerWatts, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour))
+                Power = new PackResourceData(Constants.BasePackPowerWatts, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour)),
+                BodyHeat = new PackResourceData(Constants.BasePackPowerWatts, GetConsumptionPerSecond(ConsumptionPeriod.Hourly, Constants.SuitHeatingWattsPerHour)),
             };
         }
 

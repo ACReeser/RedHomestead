@@ -15,14 +15,36 @@ public class SunOrbit : MonoBehaviour {
 
     public Transform DuskAndDawnOnlyParent, StarsParent;
 
+    /// <summary>
+    /// 24.7h
+    /// </summary>
     internal const float MartianHoursPerDay = 24.7f;
+    /// <summary>
+    /// 1,480min
+    /// </summary>
     internal const float MartianMinutesPerDay = (24 * 60) + 40;
+    /// <summary>
+    /// 88,800s
+    /// </summary>
     internal const float MartianSecondsPerDay = MartianMinutesPerDay * 60;
-    internal const float GameMinutesPerGameDay = 20;
-    internal const float GameSecondsPerGameDay = GameMinutesPerGameDay * 60;
+    /// <summary>
+    /// 20.666666 game min
+    /// </summary>
+    internal const float GameMinutesPerGameDay = 24f + (3/10);
+    /// <summary>
+    /// 1,480 game s
+    /// </summary>
+    internal const float GameSecondsPerGameDay = 1480; // GameMinutesPerGameDay * 60;
 
+    /// <summary>
+    /// 60 mars s / 1 game s
+    /// </summary>
     internal const float MartianSecondsPerGameSecond = MartianSecondsPerDay / GameSecondsPerGameDay;
-    internal const float GameSecondsPerMartianMinute = GameSecondsPerGameDay / MartianSecondsPerDay * 60;
+    /// <summary>
+    /// 1 game s / 1 mars min
+    /// </summary>
+    internal const float GameSecondsPerMartianMinute = 1f; //GameSecondsPerGameDay / MartianSecondsPerDay * 60;
+    internal const float GameSecondsPerMartianHour   = 60f;
 
     private const int MaximumSpeedTiers = 6;
     private const float MaximumTimeScale = 1f * 2f * 2f * 2f * 2f * 2f;

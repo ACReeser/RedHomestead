@@ -23,6 +23,10 @@ public abstract class SolarPanel : ResourcelessGameplay, IVariablePowerSupply, I
     public const float SouthPoleAnnualMaximumInsolationPerMeter2 = 300f;
     public const float SouthPoleAnnualAverageInsolationPerMeter2 = 90f;
     public const int Meter2PerModule = 16;
+
+    /// <summary>
+    /// 729w
+    /// </summary>
     public const float MaximumWattsPerModule = EquatorAnnualAverageInsolationPerMeter2 * Meter2PerModule * HeliotropicEfficiency;
 
     internal static List<SolarPanel> AllPanels = new List<SolarPanel>();

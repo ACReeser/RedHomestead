@@ -11,7 +11,7 @@ namespace RedHomestead.Equipment
 
     public class Loadout
     {
-        private Equipment[] OutdoorGadgets = new Equipment[] { Equipment.Blueprints, Equipment.ChemicalSniffer, Equipment.Locked };
+        private Equipment[] StashedOutdoorGadgets = new Equipment[3];
         private Equipment[] IndoorGadgets = new Equipment[] {
             //Equipment.Screwdriver,
             //Equipment.Wheelbarrow,
@@ -69,15 +69,19 @@ namespace RedHomestead.Equipment
         {
             if (SurvivalTimer.Instance.IsInHabitat)
             {
+                StashedOutdoorGadgets[0] = _loadout[Slot.PrimaryGadget];
+                StashedOutdoorGadgets[1] = _loadout[Slot.SecondaryGadget];
+                StashedOutdoorGadgets[2] = _loadout[Slot.TertiaryGadget];
+
                 _loadout[Slot.PrimaryGadget] = IndoorGadgets[0];
                 _loadout[Slot.SecondaryGadget] = IndoorGadgets[1];
                 _loadout[Slot.TertiaryGadget] = IndoorGadgets[2];
             }
             else
             {
-                _loadout[Slot.PrimaryGadget] = OutdoorGadgets[0];
-                _loadout[Slot.SecondaryGadget] = OutdoorGadgets[1];
-                _loadout[Slot.TertiaryGadget] = OutdoorGadgets[2];
+                _loadout[Slot.PrimaryGadget] = StashedOutdoorGadgets[0];
+                _loadout[Slot.SecondaryGadget] = StashedOutdoorGadgets[1];
+                _loadout[Slot.TertiaryGadget] = StashedOutdoorGadgets[2];
             }
 
             GuiBridge.Instance.BuildRadialMenu(this);
@@ -90,7 +94,7 @@ namespace RedHomestead.Equipment
 
         internal void UpgradeToBigToolbelt()
         {
-            this.OutdoorGadgets[2] = Equipment.EmptyHand;
+            this.StashedOutdoorGadgets[2] = Equipment.EmptyHand;
             this._loadout[Slot.SecondaryTool] = Equipment.EmptyHand;
             this._loadout[Slot.TertiaryGadget] = Equipment.EmptyHand;
         }

@@ -25,6 +25,7 @@ public class FlowManager : MonoBehaviour
     [HideInInspector]
     public Dictionary<string, Deposit> DepositMap = new Dictionary<string, Deposit>();
 
+    private System.Diagnostics.Stopwatch powerAndIndustryStopwatch = new System.Diagnostics.Stopwatch();
     void Awake() {
         Instance = this;
         StartCoroutine(PowerAndIndustryUpdate());
@@ -34,13 +35,16 @@ public class FlowManager : MonoBehaviour
     {
         while (isActiveAndEnabled)
         {
+            powerAndIndustryStopwatch.Reset();
+            powerAndIndustryStopwatch.Start();
             PowerGrids.Tick();
             IndustryUpdate();
 
             if (OnFlowTick != null)
                 OnFlowTick();
+            powerAndIndustryStopwatch.Stop();
 
-            yield return new WaitForSeconds(TickPeriodSeconds);
+            yield return new WaitForSeconds(TickPeriodSeconds - (float)powerAndIndustryStopwatch.Elapsed.TotalSeconds);
         }
     }
 

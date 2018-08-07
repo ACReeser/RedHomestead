@@ -138,6 +138,7 @@ public class SurvivalTimer : MonoBehaviour {
     public SingleSurvivalResource Food = new SingleSurvivalResource();
 
     public SingleSurvivalResource Power = new SingleSurvivalResource();
+    public SingleSurvivalResource BodyHeat = new SingleSurvivalResource();
 
     internal SingleSurvivalResource RoverOxygen, HabitatOxygen;
     internal SingleSurvivalResource RoverPower, HabitatPower;
@@ -195,6 +196,8 @@ public class SurvivalTimer : MonoBehaviour {
         Water.UpdateUI = GuiBridge.Instance.RefreshWaterBar;
         Food.UpdateUI = GuiBridge.Instance.RefreshFoodBar;
         Power.UpdateUI = GuiBridge.Instance.RefreshPowerBar;
+        BodyHeat.UpdateUI = GuiBridge.Instance.RefreshBodyHeatBar;
+
         SunOrbit.Instance.OnHourChange += OnHourChange;
         OnHourChange(Game.Current.Environment.CurrentSol, Game.Current.Environment.CurrentHour);
 
@@ -247,6 +250,8 @@ public class SurvivalTimer : MonoBehaviour {
 
         TryConsume(nonSuitOxygenSuccess, Oxygen);
         TryConsume(nonSuitPowerSuccess, Power);
+        if (Data.Power.DeprivationSeconds > 0f)
+            TryConsume(nonSuitPowerSuccess, BodyHeat);
         TryConsume(false, Water);
         TryConsume(false, Food);
 

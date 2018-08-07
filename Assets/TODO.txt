@@ -435,6 +435,8 @@ Total assembly weighs 38 kg
 
 Solar Panels:
 284 W insolation maximum, 1.8 kWh maximum
+190 W insolation average at equator
+
 triple junction ga-arsenide: 1.3 m2, generating 140w peak for 4h, or 2.1 MJ (.58 kWh) a day
 1m2 is 76.93% of 1.3m2
 triple junction ga-arsenide: 1 m2, generating 108w peak for 4h, or 1.6155 MJ (.446 kWh) a day
@@ -462,3 +464,89 @@ players aren't interested in combat, it really means that this game isn't built 
 players are interested in seeing npc colonists wander around, and having much more detailed survival mechanics/gameplay
 early/midgame quests and voice-comm backstory are both in line with existing features and gives a lot of oomph
 exploration as a feature lacks a lot of agency if encounter sites are lifeless
+
+
+200 sqft
+50-60 btu's sqft in minnesota
+double
+100 btu per sqft
+20,000 btu
+
+or
+20 watts per sqft
+2,000 watts
+
+
+10w generator
+10wh battery
+=
+1h filled
+each second
+bat.amt += 10 / 60 / 60
+
+Mars temperature averages -53°C with variation from -128°C during polar night to +27°C on equator during
+midday at closest point in orbit to Sun.
+https://en.wikipedia.org/wiki/Climate_of_Mars
+-78 average low
+0 average high
+
+78.54 m2 hab footprint
+261.8 m3 hab air volume 
+157.08 m2 hab hemisphere surface area
+
+k = .04 fiberglass thermal conductivity
+https://ttu-ir.tdl.org/ttu-ir/bitstream/handle/2346/67538/ICES_2016_120.pdf?sequence=1&isAllowed=y
+k = .012-.017 hab canvas thermal conductivity
+
+https://www.quora.com/What-is-the-convective-heat-transfer-coefficient-at-Mars-surface
+3.4-9.2
+https://www.reddit.com/r/Colonizemars/comments/732jgq/heat_transfer_on_mars/
+We have data on the thermal conductivity of the Martian regolith, It's around 0.11 W/mK 
+
+1cm hab canvas
+overall heat transfer coefficient W/m2 K of 4-9
+heat transfer W: 28440
+10cm hab canvas
+1.43, 10157
+8cm fiberglass
+0.69, 4903
+
+https://en.wikipedia.org/wiki/List_of_thermal_conductivities
+Polyethylene High Density	0.42[4] - 0.51[4]	298[4]		
+Polymer, High-Density	0.33[79] - 0.52[79]	296[79]	10−16[79] - 102[79]	
+Polymer, Low-density	0.04[79] - 0.16[5] - 0.25[5] - 0.33[79]
+
+Convection heat loss: .15 W/m2K w/no wind, 1 W/m2K with 4 m/s wind, and 2 W/m2K with 16 m/s wind. 
+I think somewhere around 1 W/m2K is a reasonable estimate for normal conditions on Mars.
+
+
+Heat requirements
+space to shell: 190 W/m2, so 19,830W
+shell to atmosphere: 1 W/m2, so -157W
+shell to space: 100 w/m2 day and 300 W/m2 night
+15.7kW day to 47.1kW night
+http://newmars.com/forums/viewtopic.php?id=7099&p=2
+footprint to surface: 75/m2 * 78= -5.85kW constant
+
+air density 1.225 kg/m3 * 262 m3 = 320kg of air
+specific heat capacity of air 1.006 kJ/kgC = 320.95
+temperature differential of 0 to 20C = 6419 kJ to heat up to 20degC
+1kJ heater = 1.75hours
+30kW heating = 3.56 mins
+
+air has 65,632 kJ of energy at 20degC
+-15.7 kW radiation out during day
+ -5.85kW convection all the time
++19.8 kW insolation during day
+=
+-1.75 kW deficit during day
+
+-47.1 kW radiation out during night w/o foil
+-23.6 kW radiation out during night w/ foil
+
+-53kW to -30kW during night
+-108,000 kJ every hour
+6 5kW heaters
+360 kWh to run heater through night
+
+

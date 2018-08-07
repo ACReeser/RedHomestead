@@ -70,8 +70,11 @@ namespace RedHomestead.Electricity
 
     public static class ElectricityConstants
     {
-        public const float WattHoursPerBatteryBlock = RadioisotopeThermoelectricGenerator.WattHoursGeneratedPerDay / 10f / 2f;
-        public const float WattsPerBlock = SolarPanel.MaximumWattsPerModule / 10f;
+        public const float WattHoursPerBatteryBlock = WattsPerBlock*12;
+        /// <summary>
+        /// 100f
+        /// </summary>
+        public const float WattsPerBlock = 100f;
         public static Vector3 _BackingScale = new Vector3(1.2f, 1.2f, 0f);
     }
 
@@ -573,7 +576,7 @@ namespace RedHomestead.Electricity
 
             Data.CurrentCapacityWatts = Producers.Sum(x => x.FaultedPercentage > 0f ? 0f : x.WattsGenerated);
             Data.LoadWatts = Consumers.Sum(x => !x.IsOn && x.FaultedPercentage > 0f ? 0f : x.WattsConsumed);
-            Data.CurrentBatteryWatts =  Batteries.Sum(x => x.FaultedPercentage > 0f ? 0f : x.EnergyContainer.CurrentAmount);
+            Data.CurrentBatteryWatts =  Batteries.Sum(x => x.FaultedPercentage > 0f ? 0f : x.EnergyContainer.CurrentWatts);
 
             Data.SurplusWatts = Data.CurrentCapacityWatts - Data.LoadWatts;
             Data.DeficitWatts = Data.LoadWatts - Data.CurrentCapacityWatts;
@@ -669,7 +672,7 @@ namespace RedHomestead.Electricity
                     }
                     else
                     {
-                        recharged = batt.EnergyContainer.Push(recharged);
+                        recharged = batt.EnergyContainer.PushWatts(recharged);
                         batt.RefreshVisualization();
 
                         if (recharged <= 0)
@@ -688,7 +691,7 @@ namespace RedHomestead.Electricity
                     }
                     else
                     {
-                        drained -= batt.EnergyContainer.Pull(drained);
+                        drained -= batt.EnergyContainer.PullWatts(drained);
                         batt.RefreshVisualization();
 
                         if (drained <= 0)
@@ -737,7 +740,7 @@ namespace RedHomestead.Electricity
             if (mod is IBattery)
             {
                 Batteries.Add(mod as IBattery);
-                Data.InstalledBatteryWatts += (mod as IBattery).EnergyContainer.TotalCapacity;
+                Data.InstalledBatteryWatts += (mod as IBattery).EnergyContainer.TotalCapacityWatts;
             }
             mod.PowerGridInstanceID = this.PowerGridInstanceID;
             Mode = GridMode.Unknown;

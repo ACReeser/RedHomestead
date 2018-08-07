@@ -81,7 +81,7 @@ namespace RedHomestead.Persistence
         public Equipment.Equipment[] Loadout;
         public BackerFinancing Financing;
         internal int WeeklyIncomeSeed;
-        public int SolStart = 1;
+        public int SolStart;
 
         public PlayerData() { }
         public PlayerData(bool generateSeeds)
@@ -214,20 +214,36 @@ namespace RedHomestead.Persistence
             {
                 return 0;
             }
-            else if (CurrentHour < 12)
-            {
-                x = CurrentHour - 6;
-            }
-            else if (CurrentHour < 18)
-            {
-                x = CurrentHour - 6;
-            }
-            else
+            else if (CurrentHour >= 18)
             {
                 return 0;
             }
+            //[11 to 13)
+            else if (CurrentHour >= 11 && CurrentHour < 13)
+            {
+                return 1;
+            }
+            //6 and 17
+            else if (CurrentHour == 6 || CurrentHour == 17)
+            {
+                x = 0.5f;
+            }
+            //[7-11) and [13 to 17)
+            else
+            {
+                x = CurrentHour - 6;
+                //1 at 7
+                //2 at 8
+                //3 at 9
+                //4 at 10
 
-            return Mathf.Sin(Mathf.Lerp(0, Mathf.PI, x / 12));
+                //7 at 13
+                //8 at 14
+                //9 at 15
+                //10 at 16
+            }
+
+            return Mathf.Sin(Mathf.Lerp(0, Mathf.PI, x / 11));
         }
     }
 
