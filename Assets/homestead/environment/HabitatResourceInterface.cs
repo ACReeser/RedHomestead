@@ -30,8 +30,8 @@ public class HabitatResourceInterface : HabitatReadout
         DisplayOut.text = string.Format("{0}: {1}\n{2}/{3}kg",
             HeaderText,
             container.UtilizationPercentageString(),
-            container.CurrentAmount,
-            container.TotalCapacity
+            container.CurrentAmount * container.MatterType.Kilograms(),
+            container.TotalCapacity * container.MatterType.Kilograms()
             //container.LastTickRateOfChange == 0 ? " " : container.LastTickRateOfChange > 0 ? "+" : "-",
             //container.LastTickRateOfChange,
             //"g/s" //todo: make human readable with large/small quants and scales

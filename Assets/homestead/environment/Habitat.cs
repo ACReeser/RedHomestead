@@ -16,6 +16,8 @@ public class HabitatExtraData : RedHomesteadData
     public string Name;
     public HabitatType Type;
     public EnergyContainer EnergyContainer;
+    public EnergyContainer HeatContainer;
+
     /// <summary>
     /// ONLY HABITAT.CS IS ALLOWED TO ACCCESS THIS
     /// </summary>
@@ -233,21 +235,25 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
             EnergyContainer = new EnergyContainer()
             {
                 TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 5f
+            },
+            HeatContainer = new EnergyContainer()
+            {
+                EnergyType = Energy.Thermal
             }
         };
 
         return new ResourceContainerDictionary()
         {
-            { Matter.Water, new ResourceContainer(10f)
+            { Matter.Water, new ResourceContainer(2f)
                 {
                     MatterType = Matter.Water,
-                    TotalCapacity = 20f
+                    TotalCapacity = 5f
                 }
             },
-            { Matter.Oxygen, new ResourceContainer(10f)
+            { Matter.Oxygen, new ResourceContainer(3f)
             {
                 MatterType = Matter.Oxygen,
-                TotalCapacity = 10f
+                TotalCapacity = 3f
             }},
             { Matter.Biomass, new ResourceContainer(0f)
             {
