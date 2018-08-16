@@ -188,6 +188,10 @@ namespace RedHomestead.Persistence
         /// Normalized: 0 is no dust, 1 is full dust storm
         /// </summary>
         public float DustIntensity = 0f;
+        /// <summary>
+        /// degrees in celsius
+        /// </summary>
+        public int Degrees = 0;
 
         public float HoursSinceSol0
         {

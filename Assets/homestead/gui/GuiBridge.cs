@@ -486,6 +486,12 @@ public struct PrinterUI
     }
 }
 
+[Serializable]
+public class TemperatureUI
+{
+    public Text WorldTemperatureText;
+    public Text HabitatTemperatureText;
+}
 
 /// <summary>
 /// Scripting interface for all GUI elements
@@ -513,6 +519,7 @@ public class GuiBridge : MonoBehaviour {
     public NewsMenu News;
     public PostProcessingProfile PostProfile;
     public PrinterUI Printer;
+    public TemperatureUI Temperature;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -837,16 +844,19 @@ public class GuiBridge : MonoBehaviour {
         this.SurvivalBars.RoverOxygen.Bar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.SurvivalBars.RoverOxygen.Hours, hoursLeftHint);
     }
+
     internal void RefreshRoverPowerBar(float percentage, int hoursLeftHint)
     {
         this.SurvivalBars.RoverPower.Bar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.SurvivalBars.RoverPower.Hours, hoursLeftHint);
     }
+
     internal void RefreshHabitatOxygenBar(float percentage, int hoursLeftHint)
     {
         this.SurvivalBars.HabitatOxygen.Bar.fillAmount = percentage;
         this.RefreshBarWarningCriticalText(this.SurvivalBars.HabitatOxygen.Hours, hoursLeftHint);
     }
+
     internal void RefreshHabitatPowerBar(float percentage, int hoursLeftHint)
     {
         this.SurvivalBars.HabitatPower.Bar.fillAmount = percentage;
@@ -855,8 +865,8 @@ public class GuiBridge : MonoBehaviour {
 
     internal void RefreshTemperatureGauges()
     {
-        this.HotImage.enabled = SurvivalTimer.Instance.ExternalTemperature == Temperature.Hot;
-        this.ColdImage.enabled = SurvivalTimer.Instance.ExternalTemperature == Temperature.Cold;
+        this.HotImage.enabled = SurvivalTimer.Instance.ExternalTemperature == global::Temperature.Hot;
+        this.ColdImage.enabled = SurvivalTimer.Instance.ExternalTemperature == global::Temperature.Cold;
     }
 
     public FloorplanGroup selectedFloorplanGroup = FloorplanGroup.Undecided;

@@ -30,6 +30,11 @@ public class SunOrbit : MonoBehaviour {
     private const float NoonShadowIntensity = .4f;
     private const float MidnightSolarIntensity = -.4f;
 
+    private const int MidnightTempCelsius = -77;
+    private const int NoonTempCelsius = 1;
+    private const int OutdoorsTempRangeCelsius = -MidnightTempCelsius + NoonTempCelsius;
+    private const int OutdoorsTempRangeHalvedCelsius = OutdoorsTempRangeCelsius / 2;
+
     internal bool RunTilMorning { get; private set; }
 
     internal event HandleHourChange OnHourChange;
@@ -93,6 +98,9 @@ public class SunOrbit : MonoBehaviour {
         GlobalLight.transform.localRotation = Quaternion.Euler(-90 + (360 * percentOfDay), 0, 0);
         StarsParent.transform.localRotation = GlobalLight.transform.localRotation;
 
+        Game.Current.Environment.Degrees = GetTemperature(percentOfDay);
+        GuiBridge.Instance.Temperature.WorldTemperatureText.text = Game.Current.Environment.Degrees.ToString() + "°";
+
         if (Game.Current.Environment.CurrentHour > 12f)
         {
             GlobalLight.intensity = Mathf.Max(0f, Mathfx.Hermite(1, MidnightSolarIntensity, (percentOfDay - .5f) * 2));
@@ -131,6 +139,16 @@ public class SunOrbit : MonoBehaviour {
         
         GuiBridge.Instance.TimeText.text = textTime;
         UpdateClocks(textTime);
+    }
+
+    /// <summary>
+    /// gets temp in celsius
+    /// </summary>
+    /// <param name="percentOfDay">normalized number for part of day</param>
+    /// <returns></returns>
+    private int GetTemperature(float percentOfDay)
+    {
+        return Mathf.RoundToInt(-OutdoorsTempRangeHalvedCelsius * Mathf.Cos(percentOfDay * 2 * Mathf.PI) - OutdoorsTempRangeHalvedCelsius + 1);
     }
 
     private void NewDay()
