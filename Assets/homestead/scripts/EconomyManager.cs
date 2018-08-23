@@ -78,6 +78,9 @@ public class EconomyManager : MonoBehaviour
     {
         SunOrbit.Instance.OnHourChange -= OnHourChange;
         SunOrbit.Instance.OnSolChange -= OnSolChange;
+        PrefabCache<RedHomestead.Buildings.Module>.Cache.Clear();
+        PrefabCache<RedHomestead.Interiors.Floorplan>.Cache.Clear();
+        PrefabCache<RedHomestead.Interiors.Stuff>.Cache.Clear();
     }
 
     /// <summary>

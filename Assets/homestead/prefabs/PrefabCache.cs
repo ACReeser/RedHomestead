@@ -119,6 +119,11 @@ public class PrefabCache<T> where T : IConvertible {
         Enum myEnum = Enum.Parse(typeof(T), key.ToString()) as Enum;
         return Convert.ToInt32(myEnum);
     }
+
+    public void Clear()
+    {
+        VisualizationTransformCache.Clear();
+    }
 }
 
 public class Planning<T> where T : IConvertible
