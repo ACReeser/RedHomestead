@@ -12,6 +12,7 @@ namespace RedHomestead.Simulation
         public const int MinMatterOffset = -MinMatterIndex;
         public const float SpecificHeatAirJoulesPerGramPerCelsius = 1.012f;
         public const float SpecificHeatLiquidWaterJoulesPerGramPerCelsius = 4.1813f;
+        public const int CToKelvin = 273;
     }
 
     public enum ContainerSize { Custom = -1, Quarter = 1, Full = 4 } //, Quadratic = 16 }

@@ -131,6 +131,7 @@ public class ScienceLab : ResourcelessHabitatGameplay, IEquipmentSwappable, IFle
         }
 
         Science.Complete(experiment);
+        Game.Current.Score.AddScoringEvent(RedHomestead.Scoring.ScoreType.Science, GuiBridge.Instance);
         CleanupExperiments(experiment);
         experiment.OnComplete();
 

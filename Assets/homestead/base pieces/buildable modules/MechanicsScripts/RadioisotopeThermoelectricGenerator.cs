@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using RedHomestead.Buildings;
 using UnityEngine;
 using System.Linq;
+using RedHomestead.Electricity;
 
 public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHomestead.Electricity.IPowerSupply
 {
@@ -44,5 +45,9 @@ public class RadioisotopeThermoelectricGenerator : ResourcelessGameplay, RedHome
 
     public override void Tick()
     {
+    }
+
+    protected override void OnStart() {
+        this.RefreshVisualization();
     }
 }

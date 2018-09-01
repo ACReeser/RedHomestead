@@ -342,13 +342,13 @@ public class Gremlin : MonoBehaviour {
 
         if (repairable.FaultedPercentage <= 0f)
             FinishRepair(repairable);
-
-        Game.Current.Score.RepairsEffected++;
     }
 
     internal void FinishRepair(IRepairable repaired)
     {
         repaired.FaultedPercentage = 0f;
+        Game.Current.Score.AddScoringEvent(RedHomestead.Scoring.ScoreType.Repair, GuiBridge.Instance);
+
         Gremlind fixing = gremlindMap[repaired];
         gremlindMap.Remove(repaired);
         fixing.Effect.SetParent(null);

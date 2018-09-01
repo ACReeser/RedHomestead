@@ -210,6 +210,7 @@ public class Workshop : ResourcelessHabitatGameplay, IDoorManager, IEquipmentSwa
                 SpawnCraftable(this.FlexData.CurrentCraftable);
                 this.FlexData.CurrentCraftable = Craftable.Unspecified;
                 CraftableProgress = 0f;
+                Game.Current.Score.AddScoringEvent(RedHomestead.Scoring.ScoreType.Craft, GuiBridge.Instance);
                 SunOrbit.Instance.ResetToNormalTime();
                 PlayerInput.Instance.wakeyWakeySignal = PlayerInput.WakeSignal.PlayerCancel;
             }

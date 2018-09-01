@@ -4,6 +4,7 @@ using System;
 using RedHomestead.Economy;
 using RedHomestead.Persistence;
 using RedHomestead.Environment;
+using RedHomestead.Simulation;
 
 public delegate void HandleHourChange(int sol, float hour);
 public delegate void HandleSolChange(int sol);
@@ -30,7 +31,8 @@ public class SunOrbit : MonoBehaviour {
     private const float NoonShadowIntensity = .4f;
     private const float MidnightSolarIntensity = -.4f;
 
-    private const int MidnightTempCelsius = -77;
+    public const int MidnightTempCelsius = -77;
+    public const int MidnightTempKelvin = MidnightTempCelsius + ChemistryConstants.CToKelvin;
     private const int NoonTempCelsius = 1;
     private const int OutdoorsTempRangeCelsius = -MidnightTempCelsius + NoonTempCelsius;
     private const int OutdoorsTempRangeHalvedCelsius = OutdoorsTempRangeCelsius / 2;

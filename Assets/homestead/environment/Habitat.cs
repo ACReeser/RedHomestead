@@ -16,6 +16,9 @@ public class HabitatExtraData : RedHomesteadData
     public string Name;
     public HabitatType Type;
     public EnergyContainer EnergyContainer;
+    /// <summary>
+    /// °Kelvin
+    /// </summary>
     public EnergyContainer HeatContainer;
 
     /// <summary>
@@ -42,9 +45,19 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 {
     private const float WaterPullPerTick = 1f;
     private const float OxygenPullPerTick = 1f;
-    private const float MaximumPowerRequirements = ElectricityConstants.WattsPerBlock * 4f;
+    private const float MaximumPowerRequirements = ElectricityConstants.WattsPerBlock * 10f;
     private const float OxygenLeakPerTickUnits = 1f / 500f;
 
+    private const int TargetHabitatTemperatureCelsius = 20;
+    private const int TargetHabitatTemperatureKelvin = TargetHabitatTemperatureCelsius + ChemistryConstants.CToKelvin;
+    /// <summary>
+    /// the maximum power blocks the heater can consume
+    /// </summary>
+    private const int MaximumHeaterPowerConsumptionBlocks = 9;
+    /// <summary>
+    /// for each of these intervals, the heater must use 1 power block
+    /// </summary>
+    private const float PowerConsumptionBlockIntervalCelsius = (-SunOrbit.MidnightTempCelsius + TargetHabitatTemperatureCelsius) / MaximumHeaterPowerConsumptionBlocks;
     private float _CurrentPowerRequirements = MaximumPowerRequirements;
 
     internal ResourceChangeHandler OnResourceChange;
@@ -64,10 +77,45 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
     private void RecalcPowerRequirements()
     {
-        this._CurrentPowerRequirements = ((HabitatData.IsHeatOn ? 2f : 0) + (HabitatData.IsOxygenOn ? 2f : 0)) * ElectricityConstants.WattsPerBlock;
+        this._CurrentPowerRequirements = ((HabitatData.IsHeatOn ? GetHeaterWatts() : 0) + (HabitatData.IsOxygenOn ? ElectricityConstants.WattsPerBlock : 0));
         this.OnPowerChanged();
 
         (this as IPowerConsumer).RefreshVisualization();
+    }
+
+    public float GetHeaterWatts()
+    {
+        int habCelsius = Mathf.FloorToInt(HabitatData.HeatContainer.CurrentAmount - ChemistryConstants.CToKelvin);
+        //negative celsius from environment
+        float heatDeficit = 0f;
+        //positive celsius from sun
+        float heatInput = Game.Current.Environment.SolarIntensity() - Game.Current.Environment.DustIntensity;
+
+        int tempDiff = Mathf.Abs(Game.Current.Environment.Degrees - habCelsius);
+        if (habCelsius < Game.Current.Environment.Degrees)
+        {
+            //environment is contributing heat
+            heatInput += tempDiff / PowerConsumptionBlockIntervalCelsius;
+        }
+        else if (habCelsius > Game.Current.Environment.Degrees)
+        {
+            //environment is leeching heat
+            heatDeficit -= tempDiff / PowerConsumptionBlockIntervalCelsius;
+        }
+        else //habCelsius == Game.Current.Environment.Degrees
+        {
+            //equilibrium
+            heatDeficit = 0;
+        }
+
+        if (heatInput + heatDeficit > 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return Mathf.Max(0, Mathf.Min(9, -(heatDeficit + heatInput))) * ElectricityConstants.WattsPerBlock;
+        }
     }
 
     new public bool IsOn { get { return this.HasPower; } set { } }
@@ -114,6 +162,13 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
     {
         base.OnStart();
         FlowManager.Instance.PowerGrids.Add(this);
+        SunOrbit.Instance.OnHourChange += Sun_OnHourChange;
+        this.RecalcPowerRequirements();
+    }
+
+    private void Sun_OnHourChange(int sol, float hour)
+    {
+        this.RecalcPowerRequirements();
     }
 
     public override void ClearSinks()
@@ -150,6 +205,13 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
 
         FlowWithExternal(Matter.Water, WaterSinks, WaterPullPerTick);
         FlowWithExternal(Matter.Oxygen, OxygenSinks, OxygenPullPerTick);
+
+        if (HabitatData.IsHeatOn && (HabitatData.EnergyContainer.CurrentAmount < TargetHabitatTemperatureKelvin))
+            HabitatData.EnergyContainer.Push(1f);
+        else if (HabitatData.EnergyContainer.CurrentAmount > SunOrbit.MidnightTempKelvin)
+            HabitatData.EnergyContainer.Pull(1f);
+
+        GuiBridge.Instance.Temperature.HabitatTemperatureText.text = Mathf.RoundToInt(this.HabitatData.HeatContainer.CurrentAmount - ChemistryConstants.CToKelvin).ToString()+ "°";
     }
 
     private void FlowWithExternal(Matter compound, List<ISink> externals, float pullPerTick)
@@ -236,9 +298,10 @@ public class Habitat : Converter, IVariablePowerConsumer, IBattery, IHabitatModu
             {
                 TotalCapacity = ElectricityConstants.WattHoursPerBatteryBlock * 5f
             },
-            HeatContainer = new EnergyContainer()
+            HeatContainer = new EnergyContainer(ChemistryConstants.CToKelvin + 20)
             {
-                EnergyType = Energy.Thermal
+                EnergyType = Energy.Thermal,
+                TotalCapacity = ChemistryConstants.CToKelvin + 30
             }
         };
 
