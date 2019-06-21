@@ -275,6 +275,25 @@ namespace RedHomestead.Electricity
             consumer.RefreshPowerSwitch();
             consumer.RefreshVisualization();
         }
+
+        public static string DisplayText(this PowerGrid.GridMode mode)
+        {
+            switch (mode)
+            {
+                case PowerGrid.GridMode.Unknown:
+                    return "---";
+                case PowerGrid.GridMode.Brownout:
+                    return "BROWNOUT!";
+                case PowerGrid.GridMode.Blackout:
+                    return "BLACKOUT!";
+                case PowerGrid.GridMode.BatteryRecharge:
+                    return "Charging Batteries";
+                case PowerGrid.GridMode.BatteryDrain:
+                    return "Discharging Batteries";
+                default:
+                    return "Nominal";
+            }
+        }
     }
 
     public class PowerGrids
@@ -285,6 +304,13 @@ namespace RedHomestead.Electricity
 
         public delegate void PowerTickEventHandler();
         public event PowerTickEventHandler OnPowerTick;
+
+        internal PowerGrid this[string powerGridInstanceID]{
+            get
+            {
+                return grids[powerGridInstanceID];
+            }
+        }
 
         internal void Add(Habitat h)
         {
@@ -802,6 +828,22 @@ namespace RedHomestead.Electricity
             Batteries.Clear();
             Producers.Clear();
             VariableProducers.Clear();
+        }
+
+        internal string BatteryPowerDuration()
+        {
+            if (Data.CurrentBatteryWatts <= 0f)
+            {
+                return "0";
+            }
+            else if (Data.LoadWatts <= 0f)
+            {
+                return "Infinite";
+            }
+            else
+            {
+                return (Data.CurrentBatteryWatts / Data.LoadWatts).ToString();
+            }
         }
     }
 }

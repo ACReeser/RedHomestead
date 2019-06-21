@@ -759,7 +759,11 @@ public class PlayerInput : MonoBehaviour {
     {
         if (Input.GetKeyUp(KeyCode.Escape))
         {
-            if (reportMenuOpen)
+            if (GuiBridge.Instance.PowerGrid.IsOpen)
+            {
+                GuiBridge.Instance.PowerGrid.Toggle();
+            }
+            else if (reportMenuOpen)
             {
                 ToggleReport(null);
             }
@@ -806,6 +810,12 @@ public class PlayerInput : MonoBehaviour {
         if (IsInVehicle && Input.GetKeyUp(KeyCode.C))
         {
             DrivingRoverInput.ChangeCameraMount();
+        }
+
+        if (Input.GetKeyUp(KeyCode.P) && SurvivalTimer.Instance.CurrentHabitat != null && SurvivalTimer.Instance.CurrentHabitat.PowerGridInstanceID != null)
+        {
+            GuiBridge.Instance.PowerGrid.Render(FlowManager.Instance.PowerGrids[SurvivalTimer.Instance.CurrentHabitat.PowerGridInstanceID]);
+            GuiBridge.Instance.PowerGrid.Toggle();
         }
 
         RaycastHit hitInfo;
@@ -1586,7 +1596,7 @@ public class PlayerInput : MonoBehaviour {
             StopDrilling();
         }
 
-        if (!doInteract && Input.GetKeyUp(KeyCode.P))
+        if (!doInteract && Input.GetKeyUp(KeyCode.N))
         {
             PlacePostIt();
         }

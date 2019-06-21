@@ -520,6 +520,7 @@ public class GuiBridge : MonoBehaviour {
     public PostProcessingProfile PostProfile;
     public PrinterUI Printer;
     public TemperatureUI Temperature;
+    public PowerGridScreen PowerGrid;
 
     internal Text[] ConstructionRequirementsText;
 
@@ -550,6 +551,7 @@ public class GuiBridge : MonoBehaviour {
         ToggleRadialMenu(false);
         ToggleAutosave(false);
         TogglePrinter(false);
+        PowerGrid.Toggle(false);
         //same as ToggleEscapeMenu(false) basically
         this.EscapeMenuPanel.gameObject.SetActive(false);
     }
