@@ -13,7 +13,7 @@ public class EconomyManager : MonoBehaviour
     public delegate void EconomyHandler();
 
     private const int AbundantMatterDepositNumberMultiplier = 2;
-    private const int AbundanceMapPixelSize = 128;
+    private const int AbundanceMapPixelSize = 256;
     public static EconomyManager Instance;
 
     public event EconomyHandler OnBankAccountChange;
@@ -96,7 +96,7 @@ public class EconomyManager : MonoBehaviour
         int numDeposits = defaultDepositsByMatterType.Sum();
         //xScale and yScale turn our 128 bit abundance map pixel locations into real-world positions
         float xScale = terrain.terrainData.size.x / AbundanceMapPixelSize;
-        float yScale = terrain.terrainData.size.y / AbundanceMapPixelSize;
+        float zScale = terrain.terrainData.size.z / AbundanceMapPixelSize;
 
         //this array is indexed by AbundantMatter, and each value is the number of deposits of that type we will make
         int[] numberDepositsByMatterType = new int[numDepositTypes];
@@ -142,12 +142,12 @@ public class EconomyManager : MonoBehaviour
                 Vector3 worldspaceLocation = new Vector3(
                     UnityEngine.Random.Range(x * xScale, (x + 1) * xScale), //by getting a random float in the same "sector" for x
                     terrain.terrainData.size.y,
-                    UnityEngine.Random.Range(y * yScale, (y + 1) * yScale) //and z
+                    UnityEngine.Random.Range(y * zScale, (y + 1) * zScale) //and z
                 ) + terrain.transform.position; //and make these positions relative to the terrain itself
 
                 //then set the Y altitude by sampling the height at that location
                 //http://answers.unity3d.com/questions/18397/get-height-of-terrain-in-script.html
-                worldspaceLocation.y = terrain.SampleHeight(worldspaceLocation);
+                worldspaceLocation.y = terrain.SampleHeight(worldspaceLocation) + terrain.transform.position.y;
 
                 //notice we are not using raycasts! hooray because those are expensive
                 //RaycastHit hitInfo;
