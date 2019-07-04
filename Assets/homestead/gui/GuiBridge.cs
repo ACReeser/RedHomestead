@@ -522,6 +522,8 @@ public class GuiBridge : MonoBehaviour {
     public TemperatureUI Temperature;
     public PowerGridScreen PowerGrid;
 
+    public RadioUI Radio;
+
     internal Text[] ConstructionRequirementsText;
 
     internal bool RadialMenuOpen = false;
@@ -552,6 +554,7 @@ public class GuiBridge : MonoBehaviour {
         ToggleAutosave(false);
         TogglePrinter(false);
         PowerGrid.Toggle(false);
+        Radio.Group.alpha = 0;
         //same as ToggleEscapeMenu(false) basically
         this.EscapeMenuPanel.gameObject.SetActive(false);
     }
@@ -1192,4 +1195,11 @@ public class GuiBridge : MonoBehaviour {
     {
         this.ShowNews(NewsSource.ScoringEvent.Clone(result.Title+"\n+"+result.Score));
     }
+}
+
+[Serializable]
+public class RadioUI
+{
+    public Text AgentName;
+    public CanvasGroup Group;
 }
