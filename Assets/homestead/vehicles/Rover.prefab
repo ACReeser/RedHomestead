@@ -584,6 +584,7 @@ GameObject:
   - component: {fileID: 65845140908256178}
   - component: {fileID: 114228748612770612}
   - component: {fileID: 114278988890196852}
+  - component: {fileID: 208263925275368400}
   m_Layer: 8
   m_Name: Rover
   m_TagString: rover
@@ -4653,6 +4654,21 @@ WheelCollider:
     m_AsymptoteValue: 0.75
     m_Stiffness: 1
   m_Enabled: 1
+--- !u!208 &208263925275368400
+NavMeshObstacle:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1512136384055624}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 2.04, y: 2.57, z: 3.27}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 1.5, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!212 &212028206826532906
 SpriteRenderer:
   m_ObjectHideFlags: 1
