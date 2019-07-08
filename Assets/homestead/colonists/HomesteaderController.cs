@@ -50,6 +50,10 @@ public class HomesteaderController : MonoBehaviour
         anim.SetBool("Moving", shouldMove);
         anim.SetFloat("VelocityX", velocity.x);
         anim.SetFloat("VelocityY", velocity.y);
+        if (shouldMove)
+            anim.speed = Mathf.Max(0.5f, velocity.magnitude / agent.speed);
+        else
+            anim.speed = 1;
 
         //GetComponent<LookAt>().lookAtTargetPosition = agent.steeringTarget + transform.forward;
     }
